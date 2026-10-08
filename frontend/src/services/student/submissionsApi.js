@@ -68,3 +68,14 @@ export const submitProject = async (submissionData) => {
         throw error;
     }
 };
+
+export const fetchSubmissionEvaluations = async (submissionId) => {
+    try {
+        if (!submissionId) return [];
+        const { data } = await apiClient.get(`/evaluations/submission/${submissionId}`);
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error('Failed to fetch submission evaluations:', error);
+        return [];
+    }
+};

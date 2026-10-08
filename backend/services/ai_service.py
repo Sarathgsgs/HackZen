@@ -2,6 +2,7 @@ from google import genai
 from typing import List, Dict, Any, Optional
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from bson import ObjectId
 from core.config import settings
 from database import get_ai_embeddings_collection, get_hackathon_collection
 
@@ -17,23 +18,31 @@ if settings.GEMINI_API_KEY:
 class AICoMentorService:
     def __init__(self):
         self.client = client
-        self.model_name = "gemini-2.0-flash"
+        self.model_name = "gemini-3.8-flash"
         self.executor = ThreadPoolExecutor(max_workers=5)
 
+    def _friendly_ai_error(self, raw_error: Exception) -> str:
+        raw_text = str(raw_error).lower()
+        status_code = getattr(raw_error, "status_code", None) or getattr(raw_error, "code", None)
+
+        if status_code == 503 or "503" in raw_text or "unavailable" in raw_text or "high demand" in raw_text:
+            return "AI service is temporarily busy. Please try again in a moment."
+        return "I encountered a temporary issue. Please try again in a moment."
+
     async def generate_response(
-        self, query: str, context: List[str], hackathon_id: str
+        self, query: str, context: List[str], hackathon_id: Optional[str]
     ) -> Dict[str, Any]:
-        """Generate AI response using RAG approach"""
+        """Generate AI response using the configured Gemini model."""
         if not self.client:
             return {
                 "response": "AI Co-Mentor is currently unavailable. Please try again later."
             }
 
         try:
-            # Retrieve relevant context from vector store
-            relevant_docs = await self._retrieve_relevant_documents(query, hackathon_id)
+            relevant_docs = []
+            if hackathon_id:
+                relevant_docs = await self._retrieve_relevant_documents(query, hackathon_id)
 
-            # Build prompt
             system_prompt = """You are an AI Co-Mentor for a hackathon platform. Your role is to guide students through their hackathon journey.
             
             Context about this hackathon:
@@ -51,11 +60,11 @@ class AICoMentorService:
             
             User query: {}""".format(
                 await self._get_hackathon_context(hackathon_id),
-                "\n".join(relevant_docs[:3]),  # Use top 3 most relevant documents
+                "\n".join(relevant_docs[:3]),
                 query,
             )
 
-            # Generate response using thread pool to avoid blocking
+            print(f"Calling Gemini model={self.model_name} with prompt length={len(system_prompt)}")
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 self.executor,
@@ -63,17 +72,19 @@ class AICoMentorService:
                     model=self.model_name, contents=system_prompt
                 ),
             )
+            text = getattr(response, "text", None) or "I could not generate a response right now."
+            print(f"Gemini response received, length={len(text)}")
 
             return {
-                "response": response.text,
+                "response": text,
                 "sources": relevant_docs[:3],
                 "model_used": self.model_name,
             }
 
         except Exception as e:
-            return {
-                "response": f"I encountered an error: {str(e)}. Please try again or contact support."
-            }
+            user_message = self._friendly_ai_error(e)
+            print(f"Gemini error in AI service: {e}")
+            return {"response": user_message}
 
     async def _retrieve_relevant_documents(
         self, query: str, hackathon_id: str
@@ -94,10 +105,20 @@ class AICoMentorService:
 
         return [doc.get("content", "") for doc in docs]
 
-    async def _get_hackathon_context(self, hackathon_id: str) -> str:
-        """Get basic hackathon context"""
+    async def _get_hackathon_context(self, hackathon_id: Optional[str]) -> str:
+        """Get basic hackathon context."""
+        if not hackathon_id:
+            return "General hackathon guidance"
+
         hackathon_collection = get_hackathon_collection()
-        hackathon = await hackathon_collection.find_one({"hackathon_id": hackathon_id})
+        hackathon = None
+        try:
+            hackathon = await hackathon_collection.find_one({"_id": ObjectId(hackathon_id)})
+        except Exception:
+            hackathon = None
+
+        if not hackathon:
+            hackathon = await hackathon_collection.find_one({"hackathonId": hackathon_id})
 
         if not hackathon:
             return "General hackathon guidance"

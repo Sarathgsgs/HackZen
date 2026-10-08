@@ -36,8 +36,14 @@ const StudentCertificate = () => {
     return (
       <div className="mx-auto max-w-5xl pb-10">
         <div className="glass rounded-[2rem] border border-dashed border-white/10 bg-white/5 p-10 text-center">
-          <h2 className="text-2xl font-bold text-white">No certificates found</h2>
+          <h2 className="text-2xl font-bold text-white">No certificates available</h2>
           <p className="mt-3 text-gray-400">Your authenticated account does not currently have any certificate records to display.</p>
+          <button
+            onClick={() => navigate('/student/certificates/verify')}
+            className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200"
+          >
+            Verify certificate
+          </button>
         </div>
       </div>
     );
@@ -45,6 +51,16 @@ const StudentCertificate = () => {
 
   const primaryCertificate = certificates[0];
   const issuedDate = primaryCertificate?.issuedAt ? new Date(primaryCertificate.issuedAt).toLocaleDateString() : 'Not available';
+  const primaryCertificateId = primaryCertificate?._id || primaryCertificate?.id || '';
+
+  const handleVerifyNavigation = () => {
+    if (primaryCertificateId) {
+      navigate('/student/certificates/verify', { state: { certificateId: primaryCertificateId } });
+      return;
+    }
+
+    navigate('/student/certificates/verify');
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 pb-10 animate-in fade-in duration-500">
@@ -53,7 +69,7 @@ const StudentCertificate = () => {
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-violet-300">Award</p>
           <h1 className="mt-2 text-3xl font-bold text-white">Certificate</h1>
         </div>
-        <button onClick={() => navigate('/student/certificates/verify')} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200">
+        <button onClick={handleVerifyNavigation} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200">
           Verify certificate
         </button>
       </div>

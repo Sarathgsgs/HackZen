@@ -59,9 +59,17 @@ const StudentTeamWorkspace = () => {
       setLoading(true);
       try {
         const myTeams = await getMyTeams();
-        const selectedTeam = myTeams.find((item) => String(item.id || item._id) === String(teamId)) || myTeams[0];
+        const selectedTeam = myTeams.find((item) => String(item.id || item._id) === String(teamId));
 
         if (!selectedTeam) {
+          if (teamId) {
+            setTeam(null);
+            setMembers([]);
+            setTasks([]);
+            setFiles([]);
+            setMessages([]);
+            setActivity([]);
+          }
           setLoading(false);
           return;
         }
@@ -179,12 +187,26 @@ const StudentTeamWorkspace = () => {
   const teamName = currentTeam.teamName || currentTeam.name || 'Team Workspace';
   const hackathonName = currentTeam.hackathonName || currentTeam.hackathon || 'Hackathon';
   const statusText = `${progress.status || 'Active'} - ${progress.label || 'Ideation'}`;
+  const selectedTeamId = team?.id || team?._id || teamId;
 
   if (loading) {
     return (
       <div className="min-h-[420px] rounded-[24px] border border-[#e4dff1] bg-[#f7f4fb] p-8 text-center shadow-[0_12px_30px_rgba(76,59,183,0.04)]">
         <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-violet-200 border-t-violet-500" />
         <p className="mt-4 text-sm font-medium text-slate-500">Loading workspace…</p>
+      </div>
+    );
+  }
+
+  if (!team && teamId) {
+    return (
+      <div className="mx-auto max-w-3xl rounded-[24px] border border-[#e4dff1] bg-[#f7f4fb] p-10 text-center shadow-[0_12px_30px_rgba(76,59,183,0.04)]">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#efe7ff] text-2xl text-[#4d3bb5]">!</div>
+        <h2 className="text-3xl font-bold text-[#1d1a2a]">This team is no longer available</h2>
+        <p className="mt-3 text-base text-slate-500">The selected workspace may have been removed or you may no longer have access to it.</p>
+        <button onClick={() => navigate('/student/teams')} className="mt-6 rounded-xl bg-[#4d3bb5] px-5 py-3 text-sm font-semibold text-white">
+          Back to My Teams
+        </button>
       </div>
     );
   }
@@ -217,7 +239,7 @@ const StudentTeamWorkspace = () => {
                 <div className="mb-4 text-3xl">📄</div>
                 <h3 className="text-base font-bold text-[#1f1a2d]">{file.name}</h3>
                 <p className="mt-2 text-sm text-slate-500">{file.type || 'FILE'} • {file.size || 'Unknown size'}</p>
-                <button onClick={() => navigate('/student/files')} className="mt-4 rounded-xl bg-[#f3eefc] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#4d3bb5]">
+                <button onClick={() => navigate(`/student/files?teamId=${selectedTeamId || teamId}`)} className="mt-4 rounded-xl bg-[#f3eefc] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#4d3bb5]">
                   Open
                 </button>
               </div>
@@ -296,7 +318,7 @@ const StudentTeamWorkspace = () => {
               <div className="rounded-[22px] border border-[#e6dff4] bg-white p-6 shadow-[0_10px_30px_rgba(76,59,183,0.04)]">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 className="text-[28px] font-bold leading-none text-[#1d1a2a]">Problem Statement</h2>
-                  <button onClick={() => navigate('/student/project-info')} className="rounded-lg border border-[#e7def7] bg-[#f8f3ff] p-2 text-[#5b44c9] transition hover:bg-[#f1eaff]">
+                  <button onClick={() => navigate(`/student/project-info?teamId=${teamId || currentTeam.id}`)} className="rounded-lg border border-[#e7def7] bg-[#f8f3ff] p-2 text-[#5b44c9] transition hover:bg-[#f1eaff]">
                     ✎
                   </button>
                 </div>
@@ -421,6 +443,23 @@ const StudentTeamWorkspace = () => {
         </div>
 
         <h1 className="mb-6 text-[38px] font-bold leading-none tracking-[-0.05em] text-[#1d1a2a] md:text-[52px]">{teamName} Workspace</h1>
+
+        <div className="mb-6 flex flex-wrap gap-3">
+          {[
+            { label: 'Project Information', path: '/student/project-info' },
+            { label: 'Project Submission', path: '/student/submission' },
+            { label: 'Submission Status', path: '/student/submission-status' },
+            { label: 'Feedback', path: '/student/feedback' }
+          ].map(({ label, path }) => (
+            <button
+              key={label}
+              onClick={() => navigate(`${path}${selectedTeamId ? `?teamId=${selectedTeamId}` : ''}`)}
+              className="rounded-xl border border-[#d8d0ed] bg-white px-4 py-2 text-sm font-semibold text-[#4d3bb5] shadow-[0_8px_20px_rgba(77,59,181,0.04)] transition hover:bg-[#f4f0ff]"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         <div className="overflow-hidden rounded-[22px] border border-[#e6dff4] bg-[#f8f5fc] shadow-[0_10px_28px_rgba(76,59,183,0.04)]">
           <div className="flex flex-wrap gap-6 border-b border-[#e6dff4] bg-[#f8f5fc] px-5 pt-4 sm:px-6">

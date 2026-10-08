@@ -1,12 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../api/api';
 
 const StudentCertificateVerification = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [code, setCode] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [certificateCount, setCertificateCount] = useState(null);
+
+  useEffect(() => {
+    const routeCertificateId = location.state?.certificateId;
+
+    if (routeCertificateId) {
+      setCode(routeCertificateId);
+      setCertificateCount(1);
+      setResult(null);
+      return;
+    }
+
+    const loadMyCertificateId = async () => {
+      try {
+        const { data } = await apiClient.get('/certificates/me');
+        const certs = Array.isArray(data) ? data : [];
+        setCertificateCount(certs.length);
+
+        if (certs.length > 0) {
+          const realCertificateId = certs[0]._id || certs[0].id || '';
+          setCode((previousCode) => previousCode || realCertificateId);
+        }
+      } catch (error) {
+        console.error('Failed to load student certificates:', error);
+        setCertificateCount(0);
+      }
+    };
+
+    loadMyCertificateId();
+  }, [location.state]);
 
   const verify = async () => {
     const normalized = code.trim();
@@ -30,12 +61,22 @@ const StudentCertificateVerification = () => {
       });
     } catch (error) {
       console.error('Certificate verification failed:', error);
+      const detail = error?.response?.data?.detail || error?.response?.data?.message || 'This certificate ID could not be verified against the backend.';
       setResult({
         success: false,
-        message: 'This certificate ID could not be verified against the backend.',
+        message: detail.includes('not found') || detail.includes('invalid')
+          ? 'No certificate found for this ID.'
+          : 'This certificate ID could not be verified against the backend.',
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      verify();
     }
   };
 
@@ -52,11 +93,18 @@ const StudentCertificateVerification = () => {
       </div>
 
       <div className="glass rounded-[2rem] border border-white/10 p-6 md:p-8">
+        {certificateCount === 0 && (
+          <div className="mb-5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-200">
+            No certificates available for this account.
+          </div>
+        )}
+
         <div className="space-y-4">
           <label className="text-xs font-bold uppercase tracking-[0.25em] text-gray-400">Certificate ID</label>
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Paste certificate ID"
             className="w-full rounded-xl border border-white/10 bg-navy-950/60 px-4 py-4 text-lg font-semibold text-white placeholder:text-gray-500 focus:border-violet-500/50 focus:outline-none"
           />

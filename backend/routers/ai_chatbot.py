@@ -18,30 +18,35 @@ def get_ai_logs_collection():
 @router.post("/chat")
 async def chat_with_ai_co_mentor(
     query: str = Body(..., embed=True),
-    hackathon_id: str = Body(..., embed=True),
+    hackathon_id: Optional[str] = Body(None, embed=True),
     current_user: dict = Depends(with_auth),
 ):
-    # Check if hackathon exists
-    hackathons_collection = get_db()["hackathons"]
-    hackathon = await hackathons_collection.find_one({"_id": ObjectId(hackathon_id)})
-    if not hackathon:
-        hackathon = await hackathons_collection.find_one({"hackathonId": hackathon_id})
+    print(f"AI chat request from user={current_user.get('_id') or current_user.get('id')} query={query[:120]}")
 
-    if not hackathon:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Hackathon not found"
-        )
+    resolved_hackathon_id = hackathon_id
+    if resolved_hackathon_id and not ObjectId.is_valid(resolved_hackathon_id):
+        resolved_hackathon_id = None
 
-    # Generate AI response
-    response_data = await ai_service.generate_response(query, [], hackathon_id)
+    if resolved_hackathon_id:
+        hackathons_collection = get_db()["hackathons"]
+        try:
+            hackathon = await hackathons_collection.find_one({"_id": ObjectId(resolved_hackathon_id)})
+            if not hackathon:
+                hackathon = await hackathons_collection.find_one({"hackathonId": resolved_hackathon_id})
+
+            if not hackathon:
+                resolved_hackathon_id = None
+        except Exception:
+            resolved_hackathon_id = None
+
+    response_data = await ai_service.generate_response(query, [], resolved_hackathon_id)
     response_text = response_data.get(
         "response", "I'm sorry, I couldn't generate a response."
     )
 
-    # Store log as per finalized schema
     log_data = {
-        "userId": str(current_user["_id"]),
-        "hackathonId": hackathon_id,
+        "userId": str(current_user.get("_id") or current_user.get("id") or current_user.get("sub")),
+        "hackathonId": resolved_hackathon_id or "general",
         "query": query,
         "response": response_text,
         "timestamp": datetime.utcnow(),

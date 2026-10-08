@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getMyTeams } from '../../api/teamApi';
 import { fetchSubmissions } from '../../services/student/submissionsApi';
 
 const StudentFileSharing = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const teamQuery = searchParams.get('teamId') ? `?teamId=${searchParams.get('teamId')}` : '';
 
   useEffect(() => {
     const loadFiles = async () => {
       setLoading(true);
       try {
         const teams = await getMyTeams();
-        const activeTeam = teams?.[0] || null;
+        const requestedTeamId = searchParams.get('teamId');
+        const activeTeam = requestedTeamId
+          ? teams.find((team) => String(team.id || team._id) === String(requestedTeamId)) || teams[0] || null
+          : teams[0] || null;
+
         if (!activeTeam) {
           setFiles([]);
           return;
@@ -40,7 +46,7 @@ const StudentFileSharing = () => {
     };
 
     loadFiles();
-  }, []);
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -66,7 +72,7 @@ const StudentFileSharing = () => {
         <div className="glass rounded-[2rem] border border-dashed border-white/10 bg-white/5 p-10 text-center">
           <h3 className="text-2xl font-bold text-white">No shared files available</h3>
           <p className="mt-3 text-gray-400">No backend file records are available for your current team yet.</p>
-          <button onClick={() => navigate('/student/materials')} className="mt-6 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-gray-200">
+          <button onClick={() => navigate(`/student/materials${teamQuery}`)} className="mt-6 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-gray-200">
             View team materials
           </button>
         </div>

@@ -36,6 +36,15 @@ async def create_submission(
 
     collection = get_submission_collection()
 
+    existing_submission = await collection.find_one(
+        {"teamId": sub_data.teamId, "stageId": sub_data.stageId}
+    )
+    if existing_submission:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A submission already exists for this team and stage. Existing submission must be updated through the status workflow instead of creating a duplicate version.",
+        )
+
     # Get current version for this team/stage
     current_version = await collection.count_documents(
         {"teamId": sub_data.teamId, "stageId": sub_data.stageId}

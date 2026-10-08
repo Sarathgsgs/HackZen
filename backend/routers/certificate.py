@@ -25,6 +25,7 @@ async def issue_certificate(
 ):
 
     collection = get_certificates_collection()
+    db = get_db()
 
     # Check if already issued
     existing = await collection.find_one(
@@ -33,6 +34,37 @@ async def issue_certificate(
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Certificate already issued"
+        )
+
+    team = await db["teams"].find_one({"_id": ObjectId(team_id)})
+    if not team:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Team not found for certificate issuance.",
+        )
+
+    if str(team.get("hackathonId", "")) != str(hackathon_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Team does not belong to the requested hackathon.",
+        )
+
+    hackathon = await db["hackathons"].find_one({"_id": ObjectId(hackathon_id)})
+    if hackathon and str(hackathon.get("status", "")).lower() not in {
+        "results announced",
+        "completed",
+    }:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Certificates can only be issued after the hackathon results are announced or completed.",
+        )
+
+    submission = await db["submissions"].find_one({"teamId": team_id})
+    evaluations = await db["evaluations"].find_one({"teamId": team_id})
+    if not submission or not evaluations:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Certificate issuance requires a valid submission and evaluation result for the team.",
         )
 
     cert_data = {
