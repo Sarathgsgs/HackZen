@@ -965,11 +965,11 @@ const DashboardLayout = () => {
                     </div>
                     
                     {/* Right side (Theme, Notifications, Admin Dropdown) - Gemini Chat style spacing */}
-                    <div className="flex items-center gap-2 sm:gap-4 relative" ref={dropdownRef}>
+                    <div className="flex items-center gap-1.5 sm:gap-3 relative shrink-0" ref={dropdownRef}>
                         
                         {/* Theme Toggle */}
                         <div className="relative flex items-center justify-center">
-                            <ThemeToggle />
+                            <ThemeToggle variant="button" />
                         </div>
 
                         {/* Help Guide for Organizer */}
@@ -977,7 +977,7 @@ const DashboardLayout = () => {
                             <div className="relative flex items-center justify-center">
                                 <button
                                     onClick={() => navigate('/organizer/settings')}
-                                    className="relative w-9 h-9 flex items-center justify-center text-slate-600 dark:text-gray-300 hover:text-[#7C65F6] hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-full transition-colors cursor-pointer"
+                                    className="relative w-9 h-9 flex items-center justify-center text-slate-600 dark:text-gray-300 hover:text-[#7C65F6] hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-purple-200 dark:hover:border-purple-500/20"
                                     title="Help & Guides"
                                     aria-label="Help"
                                 >
@@ -992,7 +992,7 @@ const DashboardLayout = () => {
                         <div className="relative flex items-center justify-center">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className="relative w-9 h-9 flex items-center justify-center text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors"
+                                className="relative w-9 h-9 flex items-center justify-center text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors border border-transparent hover:border-slate-200 dark:hover:border-white/10"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                                 {unreadCount > 0 && (
@@ -1007,7 +1007,7 @@ const DashboardLayout = () => {
                         <div className="relative flex items-center justify-center">
                             <button
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                                className={`flex items-center justify-center gap-2 p-1 pr-3 rounded-full transition-colors border cursor-pointer ${
+                                className={`flex items-center justify-center gap-1.5 sm:gap-2 p-1 pr-1.5 sm:pr-3 rounded-xl sm:rounded-full transition-colors border cursor-pointer ${
                                     isOrganizer 
                                         ? 'bg-purple-50/50 dark:bg-purple-950/20 hover:bg-purple-100/50 border-purple-200 dark:border-purple-500/20' 
                                         : 'bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border-slate-200 dark:border-white/10'

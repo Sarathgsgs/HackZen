@@ -107,9 +107,10 @@ const Navbar = () => {
 
     return (
         <nav className={`fixed ${isMaintenanceMode ? 'top-8 sm:top-9' : 'top-0'} z-50 w-full border-b border-slate-200 dark:border-gray-800 bg-white/95 dark:bg-navy-900/90 backdrop-blur-md transition-all duration-300 shadow-sm`}>
-            <div className="container flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 mx-auto">
+            <div className="container flex items-center justify-between px-3.5 sm:px-6 py-2.5 sm:py-3.5 mx-auto">
                 <Link to="/" className="flex items-center gap-2 group shrink-0" onClick={() => setMobileMenuOpen(false)}>
-                    <Logo size="md" />
+                    <Logo size="sm" className="sm:hidden" />
+                    <Logo size="md" className="hidden sm:flex" />
                 </Link>
 
                 {/* Desktop Navigation Links */}
@@ -137,22 +138,28 @@ const Navbar = () => {
                     )}
                 </div>
 
-                {/* Mobile Controls: Theme Toggle & Animated Hamburger Toggle */}
-                <div className="flex items-center gap-2.5 md:hidden">
-                    <ThemeToggle />
+                {/* Mobile Controls: Sign In, Theme Toggle & Animated Hamburger Toggle */}
+                <div className="flex items-center gap-1.5 sm:gap-2.5 md:hidden shrink-0">
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors whitespace-nowrap"
+                    >
+                        Sign In
+                    </button>
+                    <ThemeToggle variant="button" />
                     <button
                         type="button"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="p-2 rounded-xl text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors focus:outline-none"
+                        className="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 transition-colors focus:outline-none"
                         aria-label="Toggle navigation menu"
                         aria-expanded={mobileMenuOpen}
                     >
                         {mobileMenuOpen ? (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         ) : (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         )}

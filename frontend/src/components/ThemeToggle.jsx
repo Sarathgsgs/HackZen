@@ -11,9 +11,9 @@ const ThemeToggle = ({ className = '', showLabel = false, variant = 'switch' }) 
             <button
                 type="button"
                 onClick={toggleTheme}
-                className={`relative inline-flex items-center gap-2 p-2 rounded-xl border transition-all duration-300 focus:outline-none shadow-sm ${
+                className={`relative inline-flex items-center justify-center w-9 h-9 shrink-0 rounded-xl border transition-all duration-300 focus:outline-none shadow-sm cursor-pointer ${
                     isLight
-                        ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                        ? 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                         : 'bg-navy-800/80 hover:bg-navy-800 text-amber-300 border-white/10'
                 } ${className}`}
                 title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}

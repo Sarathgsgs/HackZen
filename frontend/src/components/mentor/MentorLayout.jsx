@@ -283,7 +283,7 @@ export default function MentorLayout() {
         </div>
 
         {/* Right: Search, Notifications, Theme Toggle, Profile, Hamburger Menu */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Search input (interactive) */}
           <div className="relative hidden md:block w-48 lg:w-60">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -371,7 +371,7 @@ export default function MentorLayout() {
           </div>
 
           {/* Theme Toggle */}
-          <ThemeToggle />
+          <ThemeToggle variant="button" />
 
           {/* User Profile Dropdown */}
           <div className="relative" ref={profileRef}>

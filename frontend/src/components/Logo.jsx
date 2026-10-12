@@ -5,15 +5,15 @@ const Logo = ({ size = 'md', className = '', showSubtext = false }) => {
     const { platformName } = usePlatformSettings();
 
     const textSizes = {
-        sm: 'text-xl',
-        md: 'text-2xl',
-        lg: 'text-3xl',
+        sm: 'text-lg sm:text-xl',
+        md: 'text-xl sm:text-2xl',
+        lg: 'text-2xl sm:text-3xl',
     };
 
     const iconSizes = {
-        sm: 'w-7 h-7',
-        md: 'w-8 h-8',
-        lg: 'w-10 h-10',
+        sm: 'w-6 h-6 sm:w-7 sm:h-7',
+        md: 'w-7 h-7 sm:w-8 sm:h-8',
+        lg: 'w-8 h-8 sm:w-10 sm:h-10',
     };
 
     // Format custom or default platform name
@@ -41,7 +41,7 @@ const Logo = ({ size = 'md', className = '', showSubtext = false }) => {
     };
 
     return (
-        <div className={`flex items-center gap-2.5 select-none ${className}`}>
+        <div className={`flex items-center gap-2 sm:gap-2.5 select-none shrink-0 ${className}`}>
             {/* Rocket Wing Emblem */}
             <div className="relative flex items-center justify-center shrink-0">
                 <svg className={`${iconSizes[size] || iconSizes.md} text-[#2563eb] transform -rotate-12 transition-transform duration-300 group-hover:scale-110`} fill="currentColor" viewBox="0 0 24 24">
