@@ -319,7 +319,7 @@ export default function MentorLayout() {
 
             {/* Notification Popover */}
             {notificationDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-navy-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-in fade-in-50 duration-150">
+              <div className="fixed sm:absolute inset-x-3 sm:inset-x-auto sm:right-0 top-16 sm:top-full mt-2 w-auto sm:w-96 max-w-sm mx-auto sm:mx-0 bg-white dark:bg-navy-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-in fade-in-50 duration-150">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/10 bg-[#FAFAFD] dark:bg-navy-950/40">
                   <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                     Notifications ({unreadCount})
@@ -619,7 +619,7 @@ export default function MentorLayout() {
       {/* ================================================== */}
       {/* MAIN CONTENT OUTLET (Full-Width) */}
       {/* ================================================== */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8">
         <Outlet />
       </main>
     </div>

@@ -600,32 +600,32 @@ const MyTeams = () => {
                 {/* Secure Tactical Environment */}
                 <div className="flex-1 glass border border-white/5 rounded-3xl overflow-hidden flex flex-col shadow-2xl relative bg-black/10 group/env">
                     {/* Header Protocol */}
-                    <div className="px-10 py-8 border-b border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-navy-950/40 relative z-20">
-                        <div className="flex items-center gap-8">
-                            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${currentTeam.gradient || 'from-purple-600 to-blue-700'} flex items-center justify-center text-white text-3xl font-bold shadow-2xl relative overflow-hidden group-hover/env:scale-105 transition-transform duration-700`}>
+                    <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 bg-navy-950/40 relative z-20">
+                        <div className="flex items-center gap-4 sm:gap-8">
+                            <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${currentTeam.gradient || 'from-purple-600 to-blue-700'} flex items-center justify-center text-white text-xl sm:text-3xl font-bold shadow-2xl relative overflow-hidden group-hover/env:scale-105 transition-transform duration-700 shrink-0`}>
                                 <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
                                 <span className="relative z-10 ">{currentTeam.name.charAt(0)}</span>
                             </div>
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-bold text-white leading-none">{currentTeam.name}</h2>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-3">
+                            <div className="space-y-1.5 sm:space-y-2">
+                                <h2 className="text-xl sm:text-3xl font-bold text-white leading-none">{currentTeam.name}</h2>
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                                    <div className="flex items-center gap-2 sm:gap-3">
                                         <span className={`w-2.5 h-2.5 rounded-full ${currentTeam.isOnline ? 'bg-emerald-500 animate-pulse shadow-[0_0_12px_#10b981]' : 'bg-gray-700'}`}></span>
-                                        <span className="text-xs text-gray-500 font-semibold text-gray-400">{currentTeam.isOnline ? 'Real-time Link established' : 'Node Dormant'}</span>
+                                        <span className="text-xs text-gray-400 font-semibold">{currentTeam.isOnline ? 'Real-time Link established' : 'Node Dormant'}</span>
                                     </div>
-                                    <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
-                                    <span className="text-xs text-indigo-400 font-bold tracking-[0.3em] uppercase ">Sector: {currentTeam.domain || 'Tactical'}</span>
+                                    <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/10"></div>
+                                    <span className="text-xs text-indigo-400 font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase">Sector: {currentTeam.domain || 'Tactical'}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Navigation Matrix */}
-                        <div className="flex p-2 bg-black/20 rounded-2xl border border-white/5 shadow-inner backdrop-blur-3xl overflow-x-auto max-w-full custom-scrollbar">
+                        <div className="flex p-1.5 sm:p-2 bg-black/20 rounded-2xl border border-white/5 shadow-inner backdrop-blur-3xl overflow-x-auto max-w-full custom-scrollbar">
                             {['Chat', 'Tasks', 'Files', 'Activity'].map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`px-10 py-3 rounded-full text-xs font-bold uppercase tracking-[0.3em] transition-all  whitespace-nowrap ${activeTab === tab ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/30 translate-y-[-1px]' : 'text-gray-600 hover:text-white hover:bg-white/5'}`}
+                                    className={`px-4 sm:px-8 py-2 sm:py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] transition-all whitespace-nowrap ${activeTab === tab ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/30 translate-y-[-1px]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                                 >
                                     {tab}
                                 </button>
@@ -634,7 +634,7 @@ const MyTeams = () => {
                     </div>
 
                     {/* Content Matrix */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-12 bg-navy-900/10">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5 sm:p-6 lg:p-12 bg-navy-900/10">
                         {activeTab === 'Chat' && (
                             <TeamChat team={currentTeam} />
                         )}

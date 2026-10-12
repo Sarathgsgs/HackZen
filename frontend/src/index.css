@@ -71,10 +71,20 @@ html.dark, [data-theme="dark"], .dark {
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+    overflow-x: hidden;
+  }
+
   body {
     @apply font-sans antialiased transition-colors duration-300;
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    overflow-x: hidden;
+    max-width: 100vw;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html.dark body {
@@ -90,6 +100,14 @@ html.dark, [data-theme="dark"], .dark {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Mobile-Friendly Table & Responsive Wrappers */
+.responsive-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 /* Global Dropdown Visibility Fix */

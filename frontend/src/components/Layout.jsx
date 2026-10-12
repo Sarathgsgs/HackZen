@@ -858,8 +858,8 @@ const DashboardLayout = () => {
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col h-full relative overflow-hidden">
                 {/* --- MAIN CONTENT HEADER --- */}
-                <header className="h-16 bg-[#ffffff] dark:bg-navy-900/80 backdrop-blur-md border-b border-[#e2e8f0] dark:border-white/10 flex items-center justify-between px-6 shrink-0 z-10 transition-colors overflow-visible">
-                    <div className="flex items-center gap-3">
+                <header className="h-16 bg-[#ffffff] dark:bg-navy-900/80 backdrop-blur-md border-b border-[#e2e8f0] dark:border-white/10 flex items-center justify-between px-3.5 sm:px-6 shrink-0 z-10 transition-colors overflow-visible">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         <button
                             onClick={() => setSidebarOpen(true)}
                             className="p-2 text-[#64748b] dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-[#f1f5f9] dark:hover:bg-white/10 rounded-full lg:hidden transition-colors"
@@ -965,7 +965,7 @@ const DashboardLayout = () => {
                     </div>
                     
                     {/* Right side (Theme, Notifications, Admin Dropdown) - Gemini Chat style spacing */}
-                    <div className="flex items-center gap-4 sm:gap-5 relative" ref={dropdownRef}>
+                    <div className="flex items-center gap-2 sm:gap-4 relative" ref={dropdownRef}>
                         
                         {/* Theme Toggle */}
                         <div className="relative flex items-center justify-center">
@@ -1054,7 +1054,7 @@ const DashboardLayout = () => {
 
                         {/* Notification Dropdown Panel */}
                         {showNotifications && (
-                            <div className="absolute right-12 top-full mt-2 w-80 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl py-2 animate-in fade-in slide-in-from-top-2 duration-200 transform origin-top-right z-50">
+                            <div className="fixed sm:absolute inset-x-3 sm:inset-x-auto sm:right-0 top-16 sm:top-full mt-2 w-auto sm:w-80 max-w-sm mx-auto sm:mx-0 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl py-2 animate-in fade-in slide-in-from-top-2 duration-200 transform origin-top-right z-50">
                                 <div className="px-4 py-3 border-b border-slate-200 dark:border-white/10 flex justify-between items-center">
                                     <h3 className="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Notifications ({unreadCount})</h3>
                                     {unreadCount > 0 && (
@@ -1106,7 +1106,7 @@ const DashboardLayout = () => {
                 </header>
 
                 {/* Main Content from child routes */}
-                <main ref={mainRef} className="flex-1 overflow-y-auto p-6 lg:p-10 scrollbar-hide">
+                <main ref={mainRef} className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-10 scrollbar-hide">
                     <Outlet />
                 </main>
             </div>

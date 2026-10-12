@@ -94,7 +94,7 @@ const Login = () => {
     return (
         <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-navy-900 transition-colors duration-300">
             {/* LEFT HERO / ARTWORK PANEL */}
-            <div className="lg:w-1/2 relative flex flex-col justify-between p-8 sm:p-12 lg:p-16 bg-[#EEF0FD] dark:bg-navy-950 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-8 sm:p-12 lg:p-16 bg-[#EEF0FD] dark:bg-navy-950 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 overflow-hidden">
                 {/* Brand Logo */}
                 <div className="relative z-10">
                     <Link to="/" className="inline-block">
@@ -135,10 +135,17 @@ const Login = () => {
             </div>
 
             {/* RIGHT FORM PANEL */}
-            <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 bg-white dark:bg-navy-900">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-5 sm:p-10 lg:p-16 bg-white dark:bg-navy-900 min-h-screen lg:min-h-0">
                 <div className="w-full max-w-[420px] mx-auto py-6">
+                    {/* Mobile Brand Logo Header */}
+                    <div className="lg:hidden mb-6 flex justify-center">
+                        <Link to="/" className="inline-block">
+                            <Logo size="md" showSubtext={true} />
+                        </Link>
+                    </div>
+
                     {/* Header */}
-                    <div className="mb-8">
+                    <div className="mb-6 sm:mb-8 text-center sm:text-left">
                         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
                             Welcome Back
                         </h1>

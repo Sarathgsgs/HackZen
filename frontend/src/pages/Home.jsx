@@ -94,9 +94,11 @@ const HackathonCard = ({ id, domain, title, date, participants, venue }) => {
 const Navbar = () => {
     const navigate = useNavigate();
     const { isMaintenanceMode, isPublicRegistrationAllowed } = usePlatformSettings();
+    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
     const handleScroll = (e, targetId) => {
         e.preventDefault();
+        setMobileMenuOpen(false);
         const element = document.getElementById(targetId);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -104,18 +106,22 @@ const Navbar = () => {
     };
 
     return (
-        <nav className={`fixed ${isMaintenanceMode ? 'top-8 sm:top-9' : 'top-0'} z-50 w-full border-b border-slate-200 dark:border-gray-800 bg-white/90 dark:bg-navy-900/80 backdrop-blur-md transition-all duration-300 shadow-sm`}>
-            <div className="container flex items-center justify-between px-6 py-4 mx-auto">
-                <Link to="/" className="flex items-center gap-2 group">
+        <nav className={`fixed ${isMaintenanceMode ? 'top-8 sm:top-9' : 'top-0'} z-50 w-full border-b border-slate-200 dark:border-gray-800 bg-white/95 dark:bg-navy-900/90 backdrop-blur-md transition-all duration-300 shadow-sm`}>
+            <div className="container flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 mx-auto">
+                <Link to="/" className="flex items-center gap-2 group shrink-0" onClick={() => setMobileMenuOpen(false)}>
                     <Logo size="md" />
                 </Link>
+
+                {/* Desktop Navigation Links */}
                 <div className="items-center hidden gap-8 md:flex">
                     <a href="#hackathons" onClick={(e) => handleScroll(e, 'hackathons')} className="text-slate-700 hover:text-purple-600 dark:text-gray-300 dark:hover:text-white transition font-medium">Hackathons</a>
                     <a href="#how-it-works" onClick={(e) => handleScroll(e, 'how-it-works')} className="text-slate-700 hover:text-purple-600 dark:text-gray-300 dark:hover:text-white transition font-medium">How It Works</a>
                     <a href="#features" onClick={(e) => handleScroll(e, 'features')} className="text-slate-700 hover:text-purple-600 dark:text-gray-300 dark:hover:text-white transition font-medium">Features</a>
                     <a href="#roles" onClick={(e) => handleScroll(e, 'roles')} className="text-slate-700 hover:text-purple-600 dark:text-gray-300 dark:hover:text-white transition font-medium">Roles</a>
                 </div>
-                <div className="flex items-center gap-4">
+
+                {/* Desktop Action Buttons */}
+                <div className="hidden md:flex items-center gap-4">
                     <ThemeToggle />
                     <button onClick={() => navigate('/login')} className="text-slate-700 hover:text-purple-600 dark:text-gray-300 dark:hover:text-white transition font-medium text-sm">
                         Sign In
@@ -130,7 +136,73 @@ const Navbar = () => {
                         </Button>
                     )}
                 </div>
+
+                {/* Mobile Controls: Theme Toggle & Animated Hamburger Toggle */}
+                <div className="flex items-center gap-2.5 md:hidden">
+                    <ThemeToggle />
+                    <button
+                        type="button"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="p-2 rounded-xl text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors focus:outline-none"
+                        aria-label="Toggle navigation menu"
+                        aria-expanded={mobileMenuOpen}
+                    >
+                        {mobileMenuOpen ? (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        ) : (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        )}
+                    </button>
+                </div>
             </div>
+
+            {/* Mobile Sheet / Drawer Menu */}
+            {mobileMenuOpen && (
+                <div className="md:hidden border-t border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-navy-950/95 backdrop-blur-xl px-5 py-6 shadow-2xl animate-in slide-in-from-top-4 duration-200">
+                    <div className="flex flex-col space-y-4">
+                        <div className="flex flex-col space-y-2 pb-4 border-b border-slate-100 dark:border-white/10 font-semibold text-base">
+                            <a href="#hackathons" onClick={(e) => handleScroll(e, 'hackathons')} className="px-3 py-2 rounded-lg text-slate-800 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-white/5 transition flex items-center justify-between">
+                                <span>Hackathons</span>
+                                <span className="text-xs text-purple-600 dark:text-purple-400 font-bold">Browse →</span>
+                            </a>
+                            <a href="#how-it-works" onClick={(e) => handleScroll(e, 'how-it-works')} className="px-3 py-2 rounded-lg text-slate-800 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-white/5 transition flex items-center justify-between">
+                                <span>How It Works</span>
+                                <span className="text-xs text-slate-400">4 Steps</span>
+                            </a>
+                            <a href="#features" onClick={(e) => handleScroll(e, 'features')} className="px-3 py-2 rounded-lg text-slate-800 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-white/5 transition">Features</a>
+                            <a href="#roles" onClick={(e) => handleScroll(e, 'roles')} className="px-3 py-2 rounded-lg text-slate-800 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-white/5 transition">Roles</a>
+                        </div>
+
+                        <div className="flex flex-col gap-3 pt-1">
+                            {isPublicRegistrationAllowed ? (
+                                <button
+                                    onClick={() => { setMobileMenuOpen(false); navigate('/get-started'); }}
+                                    className="w-full py-3 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-md shadow-purple-500/20 text-center transition"
+                                >
+                                    Get Started Free →
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
+                                    className="w-full py-3 px-4 rounded-xl font-bold text-white bg-purple-600 hover:purple-700 text-center transition"
+                                >
+                                    Account Login →
+                                </button>
+                            )}
+                            <button
+                                onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
+                                className="w-full py-3 px-4 rounded-xl font-bold text-slate-700 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-center transition border border-slate-200 dark:border-white/10"
+                            >
+                                Sign In
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 };
@@ -139,29 +211,31 @@ const Hero = () => {
     const navigate = useNavigate();
     const { platformName, isPublicRegistrationAllowed, isMaintenanceMode } = usePlatformSettings();
     return (
-        <section className={`px-6 ${isMaintenanceMode ? 'pt-40' : 'pt-32'} pb-20`}>
-            <div className="container mx-auto text-center">
-                <p className="mb-4 text-purple-600 dark:text-purple-400 font-semibold tracking-wide uppercase text-sm">The Ultimate Hackathon Platform</p>
-                <h1 className="mb-6 text-5xl font-extrabold md:text-6xl text-slate-900 dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:to-gray-400 dark:bg-clip-text">
+        <section className={`px-4 sm:px-6 ${isMaintenanceMode ? 'pt-36 sm:pt-40' : 'pt-28 sm:pt-36'} pb-14 sm:pb-20`}>
+            <div className="container mx-auto text-center max-w-4xl">
+                <p className="mb-3 sm:mb-4 text-purple-600 dark:text-purple-400 font-bold tracking-wide uppercase text-xs sm:text-sm">
+                    The Ultimate Hackathon Platform
+                </p>
+                <h1 className="mb-4 sm:mb-6 text-3xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:to-gray-400 dark:bg-clip-text leading-[1.15] tracking-tight">
                     Build. Compete. Innovate.
                 </h1>
-                <p className="max-w-3xl mx-auto mb-6 text-xl font-medium text-slate-700 dark:text-gray-300">
+                <p className="max-w-2xl mx-auto mb-4 text-lg sm:text-xl font-semibold text-slate-800 dark:text-gray-200">
                     The Platform To Launch and Join Hackathons
                 </p>
-                <p className="max-w-2xl mx-auto mb-8 text-slate-600 dark:text-gray-400">
-                    A unified platform powered by <span className="font-semibold text-purple-500">{platformName || 'ProEduvate'}</span> where students, mentors, and organizers collaborate to turn innovative projects into reality.
+                <p className="max-w-xl mx-auto mb-8 text-sm sm:text-base text-slate-600 dark:text-gray-400 leading-relaxed">
+                    A unified platform powered by <span className="font-bold text-purple-500">{platformName || 'ProEduvate'}</span> where students, mentors, and organizers collaborate to turn innovative projects into reality.
                 </p>
-                <div className="flex flex-wrap justify-center gap-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-xs sm:max-w-none mx-auto">
                     {isPublicRegistrationAllowed ? (
-                        <Button variant="primary" onClick={() => navigate('/get-started')}>
+                        <Button variant="primary" className="w-full sm:w-auto text-center justify-center" onClick={() => navigate('/get-started')}>
                             Get Started <span>→</span>
                         </Button>
                     ) : (
-                        <Button variant="primary" onClick={() => navigate('/login')}>
+                        <Button variant="primary" className="w-full sm:w-auto text-center justify-center" onClick={() => navigate('/login')}>
                             Sign In to Platform <span>→</span>
                         </Button>
                     )}
-                    <Button variant="secondary" onClick={() => navigate('/get-started')}>
+                    <Button variant="secondary" className="w-full sm:w-auto text-center justify-center" onClick={() => navigate('/get-started')}>
                         Explore Hackathons
                     </Button>
                 </div>
@@ -191,13 +265,13 @@ const HackathonsSection = () => {
     }, []);
 
     return (
-        <section id="hackathons" className="py-20 px-6 relative">
+        <section id="hackathons" className="py-12 sm:py-20 px-4 sm:px-6 relative">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                <div className="text-center mb-10 sm:mb-16">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 sm:mb-4">
                         Upcoming <span className="gradient-text">Hackathons</span>
                     </h2>
-                    <p className="text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-base sm:text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
                         Join exciting hackathons and showcase your skills to the world
                     </p>
                 </div>
@@ -206,7 +280,7 @@ const HackathonsSection = () => {
                         <div className="w-12 h-12 border-4 border-purple-500 rounded-full border-t-transparent animate-spin"></div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                         {hackathons.map((hackathon, index) => (
                             <HackathonCard key={index} {...hackathon} />
                         ))}
@@ -228,26 +302,26 @@ const HowItWorksSection = () => {
         { icon: '🏆', title: 'Submit & Win', description: 'Submit your project, get evaluated by expert judges, and win amazing prizes.' },
     ];
     return (
-        <section id="how-it-works" className="py-20 px-6 relative">
+        <section id="how-it-works" className="py-12 sm:py-20 px-4 sm:px-6 relative">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                <div className="text-center mb-10 sm:mb-16">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 sm:mb-4">
                         How It <span className="gradient-text">Works</span>
                     </h2>
-                    <p className="text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-base sm:text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
                         Four simple steps to transform your ideas into reality
                     </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                     {steps.map((step, index) => (
                         <div key={index} className="relative">
                             <Card hover={false} className="text-center h-full">
-                                <div className="text-6xl mb-4">{step.icon}</div>
-                                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-xl glow-purple shadow-lg shadow-purple-500/30">
+                                <div className="text-5xl sm:text-6xl mb-4">{step.icon}</div>
+                                <div className="absolute -top-3 -left-2 sm:-top-4 sm:-left-4 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-base sm:text-xl glow-purple shadow-lg shadow-purple-500/30">
                                     {index + 1}
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{step.title}</h3>
-                                <p className="text-slate-600 dark:text-gray-400">{step.description}</p>
+                                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3">{step.title}</h3>
+                                <p className="text-sm sm:text-base text-slate-600 dark:text-gray-400">{step.description}</p>
                             </Card>
                         </div>
                     ))}
@@ -269,17 +343,17 @@ const FeaturesSection = () => {
         { icon: '⏱️', title: 'Timeline Control', description: 'Manage hackathon phases, deadlines, and milestones with precision.' },
     ];
     return (
-        <section id="features" className="py-20 px-6 relative">
+        <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 relative">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                <div className="text-center mb-10 sm:mb-16">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 sm:mb-4">
                         Premium <span className="gradient-text">Features</span>
                     </h2>
-                    <p className="text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-base sm:text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
                         Everything you need to run successful hackathons, all in one place
                     </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     {features.map((feature, index) => (
                         <FeatureCard key={index} {...feature} />
                     ))}
@@ -308,25 +382,25 @@ const RolesSection = () => {
         },
     ];
     return (
-        <section id="roles" className="py-20 px-6 relative">
+        <section id="roles" className="py-12 sm:py-20 px-4 sm:px-6 relative">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                <div className="text-center mb-10 sm:mb-16">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 sm:mb-4">
                         Built for <span className="gradient-text">Everyone</span>
                     </h2>
-                    <p className="text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-base sm:text-xl text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
                         Tailored experiences for organizers, mentors, and students
                     </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                     {roles.map((role, index) => (
                         <Card key={index}>
-                            <div className="text-6xl mb-4 text-center">{role.icon}</div>
-                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 text-center">{role.title}</h3>
-                            <p className="text-slate-600 dark:text-gray-400 mb-6 text-center">{role.description}</p>
+                            <div className="text-5xl sm:text-6xl mb-4 text-center">{role.icon}</div>
+                            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3 text-center">{role.title}</h3>
+                            <p className="text-sm sm:text-base text-slate-600 dark:text-gray-400 mb-6 text-center">{role.description}</p>
                             <div className="space-y-2 mb-6">
                                 {role.features.map((feature, idx) => (
-                                    <div key={idx} className="flex items-center text-slate-700 dark:text-gray-300">
+                                    <div key={idx} className="flex items-center text-xs sm:text-sm text-slate-700 dark:text-gray-300">
                                         <span className="mr-2 text-purple-600 dark:text-purple-400 font-bold">✓</span>
                                         <span>{feature}</span>
                                     </div>
@@ -346,19 +420,19 @@ const RolesSection = () => {
 const CTASection = () => {
     const navigate = useNavigate();
     return (
-        <section className="px-6 py-20 bg-purple-50/60 dark:bg-navy-900/50 border border-purple-100 dark:border-white/5 rounded-3xl max-w-7xl mx-auto mb-16 shadow-sm">
+        <section className="px-4 sm:px-6 py-12 sm:py-20 bg-purple-50/60 dark:bg-navy-900/50 border border-purple-100 dark:border-white/5 rounded-2xl sm:rounded-3xl max-w-7xl mx-4 sm:mx-auto mb-16 shadow-sm">
             <div className="container mx-auto text-center">
-                <h2 className="mb-4 text-4xl font-bold text-slate-900 dark:text-white md:text-5xl">
+                <h2 className="mb-4 text-2xl sm:text-4xl font-bold text-slate-900 dark:text-white md:text-5xl leading-tight">
                     Ready to Transform<br />Your Hackathon Experience?
                 </h2>
-                <p className="max-w-2xl mx-auto mb-8 text-slate-600 dark:text-gray-400">
+                <p className="max-w-2xl mx-auto mb-8 text-sm sm:text-base text-slate-600 dark:text-gray-400">
                     Join thousands of students, mentors, and organizers in the world's leading hackathon platform.
                 </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                    <Button variant="primary" onClick={() => navigate('/get-started')}>
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 max-w-xs sm:max-w-none mx-auto">
+                    <Button variant="primary" className="w-full sm:w-auto text-center justify-center" onClick={() => navigate('/get-started')}>
                         Get Started Now <span>→</span>
                     </Button>
-                    <Button variant="secondary" onClick={() => navigate('/get-started')}>Schedule Demo</Button>
+                    <Button variant="secondary" className="w-full sm:w-auto text-center justify-center" onClick={() => navigate('/get-started')}>Schedule Demo</Button>
                 </div>
             </div>
         </section>

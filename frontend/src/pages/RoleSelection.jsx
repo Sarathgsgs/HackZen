@@ -103,37 +103,39 @@ const RoleSelection = () => {
         <div className="min-h-screen w-full bg-[#FAFBFD] dark:bg-navy-950 py-10 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center transition-colors duration-300">
             <div className="w-full max-w-5xl">
                 {/* TOP PROGRESS STEPPER */}
-                <div className="w-full max-w-2xl mx-auto bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-slate-800 rounded-full py-2.5 px-6 sm:px-8 mb-10 shadow-sm">
+                <div className="w-full max-w-2xl mx-auto bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-slate-800 rounded-full py-2 px-3 sm:px-8 mb-8 sm:mb-10 shadow-sm">
                     <div className="flex items-center justify-between text-xs sm:text-sm font-medium">
                         {/* Step 1: Account Creation */}
-                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-indigo-600 dark:text-indigo-400 shrink-0">
                             <span className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold">
                                 ✓
                             </span>
-                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Account Creation</span>
+                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 hidden sm:inline">Account Creation</span>
+                            <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 sm:hidden">Account</span>
                         </div>
-                        <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-3 sm:mx-4" />
+                        <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-1.5 sm:mx-4" />
 
                         {/* Step 2: Role Selection (Active) */}
-                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-indigo-600 dark:text-indigo-400 shrink-0">
                             <span className="w-5 h-5 rounded-full bg-[#4338ca] text-white flex items-center justify-center text-[11px] font-bold shadow-sm">
                                 2
                             </span>
-                            <span className="text-xs font-bold text-[#4338ca] dark:text-indigo-400">Role Selection</span>
+                            <span className="text-xs font-bold text-[#4338ca] dark:text-indigo-400 hidden sm:inline">Role Selection</span>
+                            <span className="text-[11px] font-bold text-[#4338ca] dark:text-indigo-400 sm:hidden">Role</span>
                         </div>
-                        <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-3 sm:mx-4" />
+                        <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-1.5 sm:mx-4" />
 
                         {/* Step 3: Profile Setup */}
-                        <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-slate-400 dark:text-slate-500 shrink-0">
                             <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-[11px] font-medium">
                                 3
                             </span>
                             <span className="text-xs font-medium hidden sm:inline">Profile Setup</span>
                         </div>
-                        <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-3 sm:mx-4" />
+                        <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-1.5 sm:mx-4" />
 
                         {/* Step 4: Dashboard */}
-                        <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-slate-400 dark:text-slate-500 shrink-0">
                             <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-[11px] font-medium">
                                 4
                             </span>
