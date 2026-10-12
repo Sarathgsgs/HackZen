@@ -51,6 +51,18 @@ async def seed_complete_platform():
             "permissions": ["ALL"],
         },
         {
+            "_id": ObjectId("6a70bdf6490176a6fc89421f"),
+            "name": "Hari Raajan (Admin)",
+            "email": "gharirajan@gmail.com",
+            "password": pwd_admin,
+            "role": "ADMIN",
+            "is_active": True,
+            "isVerified": True,
+            "status": "Active",
+            "createdAt": now - timedelta(days=60),
+            "permissions": ["ALL"],
+        },
+        {
             "_id": ObjectId("65e010000000000000000001"),
             "name": "Super Admin",
             "email": "admin@proeduvate.com",

@@ -81,6 +81,23 @@ async def seed_user_credentials():
             "color": "purple",
             "initials": "HR",
         },
+        {
+            "name": "Hari Raajan",
+            "email": "gharirajan@gmail.com",
+            "password": "hari5426",
+            "role": "admin",
+            "department": "Platform Administration & System Governance",
+            "college": "ProEduvate Central Authority",
+            "organization": "ProEduvate",
+            "phone": "+91 98765 99999",
+            "is_active": True,
+            "status": "Active",
+            "isVerified": True,
+            "emailVerified": True,
+            "orgVerified": True,
+            "color": "purple",
+            "initials": "HR",
+        },
     ]
 
     print("=== SEEDING REQUESTED CREDENTIALS ===")

@@ -126,8 +126,11 @@ async def login(credentials: LoginRequest, request: Request):
             detail=f"Invalid email or password. {attempts_left} attempt(s) remaining before security lockout.",
         )
 
-    # Clear failed login attempts on successful password
-    await db["login_attempts"].delete_many({"email": clean_email})
+    # Clear failed login attempts on successful password (including aliases)
+    emails_to_clear = [clean_email]
+    if clean_email in ["gharirajan@gmail.com", "ghariraajan@gmail.com"]:
+        emails_to_clear = ["gharirajan@gmail.com", "ghariraajan@gmail.com"]
+    await db["login_attempts"].delete_many({"email": {"$in": emails_to_clear}})
 
     # Normalize role to lowercase so seeded uppercase values work
     user_role = str(user.get("role", "")).lower()

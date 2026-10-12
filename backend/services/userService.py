@@ -67,6 +67,19 @@ class UserService:
             user = await users_collection.find_one(
                 {"email": {"$regex": f"^{re.escape(email.strip())}$", "$options": "i"}}
             )
+        # Fallback for common admin email spelling variations (e.g., single 'a' vs double 'aa')
+        if not user:
+            email_aliases = {
+                "gharirajan@gmail.com": "ghariraajan@gmail.com",
+                "ghariraajan@gmail.com": "gharirajan@gmail.com",
+            }
+            if clean_email in email_aliases:
+                alt_email = email_aliases[clean_email]
+                user = await users_collection.find_one({"email": alt_email})
+                if not user:
+                    user = await users_collection.find_one(
+                        {"email": {"$regex": f"^{re.escape(alt_email)}$", "$options": "i"}}
+                    )
         if not user:
             return None
 
