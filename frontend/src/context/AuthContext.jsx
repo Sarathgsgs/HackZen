@@ -38,22 +38,24 @@ export const AuthProvider = ({ children }) => {
 
             if (storedToken && storedUserRaw) {
                 const parsedUser = JSON.parse(storedUserRaw);
-                const role = storedRole || parsedUser.role;
+                // Strict role integrity: user profile object is the source of truth
+                const canonicalRole = (parsedUser.role || storedRole || 'student').toLowerCase();
+                parsedUser.role = canonicalRole;
 
-                // Sync both storages
+                // Sync both storages with canonical role
                 sessionStorage.setItem('token', storedToken);
                 sessionStorage.setItem('user', JSON.stringify(parsedUser));
-                sessionStorage.setItem('userRole', role);
+                sessionStorage.setItem('userRole', canonicalRole);
                 sessionStorage.setItem('isLoggedIn', 'true');
 
                 localStorage.setItem('token', storedToken);
                 localStorage.setItem('user', JSON.stringify(parsedUser));
-                localStorage.setItem('userRole', role);
+                localStorage.setItem('userRole', canonicalRole);
                 localStorage.setItem('isLoggedIn', 'true');
 
                 setToken(storedToken);
                 setUser(parsedUser);
-                setUserRole(role);
+                setUserRole(canonicalRole);
                 setIsAuthenticated(true);
                 setAuthToken(storedToken);
             } else {
@@ -116,16 +118,31 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logoutUser = () => {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
-        sessionStorage.removeItem('userRole');
-        sessionStorage.removeItem('isLoggedIn');
+        // Complete purge of all session and local storage
+        sessionStorage.clear();
 
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('rememberedEmail');
+
+        // Clear role-based temporary caches
+        try {
+            Object.keys(localStorage).forEach((key) => {
+                if (
+                    key.startsWith('mentor_') ||
+                    key.startsWith('student_') ||
+                    key.startsWith('organizer_') ||
+                    key.startsWith('admin_') ||
+                    key.startsWith('temp_')
+                ) {
+                    localStorage.removeItem(key);
+                }
+            });
+        } catch (err) {
+            console.error('Error clearing local cache on logout:', err);
+        }
 
         setToken(null);
         setUser(null);

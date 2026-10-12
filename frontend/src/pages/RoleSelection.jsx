@@ -11,8 +11,26 @@ const RoleSelection = () => {
     const searchParams = new URLSearchParams(location.search);
     const initialRole = searchParams.get('role') || location.state?.role || sessionStorage.getItem('temp_selected_role') || 'student';
 
-    const [selectedRole, setSelectedRole] = useState(initialRole);
+    const [selectedRole, setSelectedRole] = useState(initialRole === 'admin' ? 'student' : initialRole);
     const [openFaq, setOpenFaq] = useState(null);
+
+    // If an authenticated user lands on /get-started, redirect them to their authentic dashboard
+    useEffect(() => {
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        const userStr = sessionStorage.getItem('user') || localStorage.getItem('user');
+        if (token && userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                const role = (user.role || 'student').toLowerCase();
+                const targetPath = role === 'admin' || role === 'superadmin' ? '/admin/dashboard' :
+                                   role === 'organizer' ? '/organizer/dashboard' :
+                                   role === 'mentor' ? '/mentor/dashboard' : '/student/dashboard';
+                navigate(targetPath, { replace: true });
+            } catch {
+                // Invalid JSON, proceed
+            }
+        }
+    }, [navigate]);
 
     const toggleFaq = (index) => {
         setOpenFaq(openFaq === index ? null : index);
@@ -50,53 +68,14 @@ const RoleSelection = () => {
             ),
             title: 'Organizer',
             description: 'Create and manage hackathons.'
-        },
-        {
-            id: 'admin',
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-            ),
-            title: 'Admin',
-            description: 'Manage and govern the platform.'
         }
     ];
 
     const handleContinue = () => {
-        if (!selectedRole) return;
+        if (!selectedRole || selectedRole === 'admin') return;
 
         sessionStorage.setItem('temp_selected_role', selectedRole);
-
-        // Check if user is already logged in (post-signup step)
-        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-        const userStr = sessionStorage.getItem('user') || localStorage.getItem('user');
-
-        if (token && userStr) {
-            try {
-                const user = JSON.parse(userStr);
-                user.role = selectedRole;
-                sessionStorage.setItem('userRole', selectedRole);
-                localStorage.setItem('userRole', selectedRole);
-                sessionStorage.setItem('user', JSON.stringify(user));
-                localStorage.setItem('user', JSON.stringify(user));
-                window.dispatchEvent(new Event('user-update'));
-
-                const targetPath = selectedRole === 'admin' ? '/admin/dashboard' : 
-                                   selectedRole === 'organizer' ? '/organizer/dashboard' : 
-                                   selectedRole === 'mentor' ? '/mentor/dashboard' : '/student/dashboard';
-                navigate(targetPath, { replace: true });
-                return;
-            } catch (err) {
-                console.error('Failed to update session role:', err);
-            }
-        }
-
-        if (selectedRole === 'admin') {
-            navigate('/login?role=admin');
-        } else {
-            navigate(`/signup?role=${selectedRole}`, { state: { role: selectedRole } });
-        }
+        navigate(`/signup?role=${selectedRole}`, { state: { role: selectedRole } });
     };
 
     return (
@@ -154,8 +133,8 @@ const RoleSelection = () => {
                     </p>
                 </div>
 
-                {/* 4 ROLE CARDS */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {/* 3 ROLE CARDS */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
                     {roles.map((role) => {
                         const isSelected = selectedRole === role.id;
                         return (
@@ -193,8 +172,8 @@ const RoleSelection = () => {
                     })}
                 </div>
 
-                {/* CONTINUE BUTTON */}
-                <div className="flex justify-center mb-10">
+                {/* CONTINUE BUTTON & ADMIN NOTICE */}
+                <div className="flex flex-col items-center justify-center mb-10 gap-3">
                     <button
                         type="button"
                         onClick={handleContinue}
@@ -202,6 +181,12 @@ const RoleSelection = () => {
                     >
                         Continue
                     </button>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        <span>Are you a platform administrator?</span>
+                        <Link to="/login?role=admin" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                            Sign in to Admin Console →
+                        </Link>
+                    </div>
                 </div>
 
                 {/* BOTTOM 2 CARDS: ROLE INFO & FAQ */}

@@ -84,13 +84,12 @@ export const getMe = async () => {
 
 export const logout = () => {
     // Clear all authentication and profile data
+    sessionStorage.clear();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('rememberedEmail');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
-    sessionStorage.removeItem('isLoggedIn');
-    sessionStorage.removeItem('userRole');
     setAuthToken(null);
     
     // Clear any cached profile data

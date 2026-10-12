@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
 import { useMentor } from '../../context/MentorContext';
+import { useAuth } from '../../context/AuthContext';
 import ScheduleSessionModal from './ScheduleSessionModal';
 import AcceptRequestModal from './AcceptRequestModal';
 import HelpSupportModal from './HelpSupportModal';
@@ -29,6 +30,7 @@ import ToastContainer from './ToastContainer';
 export default function MentorLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logoutUser } = useAuth();
   const { openHelpModal, globalSearch, setGlobalSearch } = useMentor();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -136,9 +138,8 @@ export default function MentorLayout() {
   };
 
   const handleLogout = () => {
-    sessionStorage.clear();
-    localStorage.removeItem('token');
-    navigate('/');
+    logoutUser();
+    navigate('/login', { replace: true });
   };
 
   // Drawer Navigation Items (Top group)

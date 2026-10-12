@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import Logo from './Logo';
+import { useAuth } from '../context/AuthContext';
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from '../services/admin/dashboardApi';
 
 // --- Time Formatter for Real-Time & Timezone-Aware Display ---
@@ -138,6 +139,7 @@ const globalSearchItems = [
 const DashboardLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { logoutUser } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -415,8 +417,8 @@ const DashboardLayout = () => {
     };
 
     const handleLogout = () => {
-        sessionStorage.clear();
-        navigate('/');
+        logoutUser();
+        navigate('/login', { replace: true });
     };
 
     const currentRole = isAdmin ? roleConfig.admin : (isOrganizer ? roleConfig.organizer : (isMentor ? roleConfig.mentor : roleConfig.student));
