@@ -21,7 +21,6 @@ from schemas.userSchema import (
     ResetPasswordRequest,
 )
 from services.userService import UserService
-from services.oauth_service import authorization_url, get_profile, validate_state
 
 router = APIRouter()
 
@@ -342,32 +341,3 @@ async def reset_password(request_data: ResetPasswordRequest):
         "success": True,
         "message": "Password has been successfully reset. You can now log in with your new password.",
     }
-
-
-@router.get("/oauth/{provider}/start", include_in_schema=False)
-async def oauth_start(provider: str):
-    frontend_origin = (settings.FRONTEND_URL or "http://localhost:5173").rstrip("/")
-    return RedirectResponse(authorization_url(provider, frontend_origin))
-
-
-@router.get("/oauth/{provider}/callback", include_in_schema=False)
-async def oauth_callback(provider: str, code: str = "", state: str = "", error: str = ""):
-    origin = validate_state(state)
-    if error:
-        payload = {"type": "proeduvate-oauth-error", "message": "Sign-in was cancelled or denied by the provider."}
-    else:
-        try:
-            profile = await get_profile(provider, code)
-            user = await UserService.find_or_create_oauth_user(provider=provider, provider_id=profile["id"], email=profile["email"], name=profile["name"])
-            result = _token_response(user)
-            payload = {"type": "proeduvate-oauth-success", "token": result.token, "user": result.user.model_dump(by_alias=True, mode="json")}
-        except HTTPException as exc:
-            payload = {"type": "proeduvate-oauth-error", "message": str(exc.detail)}
-        except Exception:
-            payload = {"type": "proeduvate-oauth-error", "message": "Unable to complete social sign-in. Please try again."}
-    message = json.dumps(payload).replace("<", "\\u003c")
-    safe_origin = html.escape(origin, quote=True)
-    return HTMLResponse(f"""<!doctype html><title>Signing in…</title><script>
-      if (window.opener) window.opener.postMessage({message}, '{safe_origin}');
-      window.close();
-    </script><p>You can close this window.</p>""")

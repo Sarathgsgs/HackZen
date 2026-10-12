@@ -25,6 +25,18 @@ GITHUB_USER_URL = "https://api.github.com/user"
 GITHUB_EMAILS_URL = "https://api.github.com/user/emails"
 
 
+def get_backend_base_url() -> str:
+    url = (settings.BACKEND_URL or settings.OAUTH_REDIRECT_BASE_URL or "http://localhost:8000").rstrip("/")
+    if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
+        if settings.OAUTH_REDIRECT_BASE_URL and not (settings.OAUTH_REDIRECT_BASE_URL.startswith("http://localhost") or settings.OAUTH_REDIRECT_BASE_URL.startswith("http://127.0.0.1")):
+            url = settings.OAUTH_REDIRECT_BASE_URL.rstrip("/")
+    return url
+
+
+def get_frontend_base_url() -> str:
+    return (settings.FRONTEND_URL or "http://localhost:5173").rstrip("/")
+
+
 @router.get("/oauth/google")
 async def login_google():
     """Initiate Google OAuth 2.0 flow."""
@@ -34,7 +46,7 @@ async def login_google():
             detail="Google Client ID is not configured on the server.",
         )
 
-    redirect_uri = f"{settings.BACKEND_URL}/api/auth/oauth/google/callback"
+    redirect_uri = f"{get_backend_base_url()}/api/auth/oauth/google/callback"
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
         "redirect_uri": redirect_uri,
@@ -50,14 +62,14 @@ async def login_google():
 @router.get("/oauth/google/callback")
 async def google_callback(code: str = None, error: str = None, request: Request = None):
     """Google OAuth 2.0 callback handler."""
-    frontend_callback = f"{settings.FRONTEND_URL}/oauth/callback"
+    frontend_callback = f"{get_frontend_base_url()}/oauth/callback"
 
     if error or not code:
         err_msg = error or "Authorization code not received from Google."
         logger.error(f"[OAuth Google] Error: {err_msg}")
         return RedirectResponse(url=f"{frontend_callback}?error={quote(err_msg)}")
 
-    redirect_uri = f"{settings.BACKEND_URL}/api/auth/oauth/google/callback"
+    redirect_uri = f"{get_backend_base_url()}/api/auth/oauth/google/callback"
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
@@ -161,7 +173,7 @@ async def login_github():
             detail="GitHub Client ID is not configured on the server.",
         )
 
-    redirect_uri = f"{settings.BACKEND_URL}/api/auth/oauth/github/callback"
+    redirect_uri = f"{get_backend_base_url()}/api/auth/oauth/github/callback"
     params = {
         "client_id": settings.GITHUB_CLIENT_ID,
         "redirect_uri": redirect_uri,
@@ -174,14 +186,14 @@ async def login_github():
 @router.get("/oauth/github/callback")
 async def github_callback(code: str = None, error: str = None, request: Request = None):
     """GitHub OAuth callback handler."""
-    frontend_callback = f"{settings.FRONTEND_URL}/oauth/callback"
+    frontend_callback = f"{get_frontend_base_url()}/oauth/callback"
 
     if error or not code:
         err_msg = error or "Authorization code not received from GitHub."
         logger.error(f"[OAuth GitHub] Error: {err_msg}")
         return RedirectResponse(url=f"{frontend_callback}?error={quote(err_msg)}")
 
-    redirect_uri = f"{settings.BACKEND_URL}/api/auth/oauth/github/callback"
+    redirect_uri = f"{get_backend_base_url()}/api/auth/oauth/github/callback"
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
