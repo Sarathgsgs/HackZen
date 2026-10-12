@@ -448,11 +448,11 @@ const AdminAnalytics = () => {
                 </div>
                 
                 {/* Export Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
                     <button 
                         disabled={isExporting !== null}
                         onClick={() => handleExport('PDF')} 
-                        className={`px-4 py-2 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold transition-all shadow-md shadow-[#7C65F6]/20 flex items-center gap-1.5 active:scale-95 cursor-pointer ${isExporting === 'PDF' ? 'opacity-70 cursor-wait' : ''}`}
+                        className={`justify-center px-4 py-2 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold transition-all shadow-md shadow-[#7C65F6]/20 flex items-center gap-1.5 active:scale-95 cursor-pointer ${isExporting === 'PDF' ? 'opacity-70 cursor-wait' : ''}`}
                     >
                         {isExporting === 'PDF' ? (
                             <>
@@ -471,7 +471,7 @@ const AdminAnalytics = () => {
                     <button 
                         disabled={isExporting !== null}
                         onClick={() => handleExport('Excel')} 
-                        className={`px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300/80 dark:border-emerald-500/30 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer ${isExporting === 'Excel' ? 'opacity-70 cursor-wait' : ''}`}
+                        className={`justify-center px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300/80 dark:border-emerald-500/30 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer ${isExporting === 'Excel' ? 'opacity-70 cursor-wait' : ''}`}
                     >
                         {isExporting === 'Excel' ? (
                             <>
@@ -490,14 +490,14 @@ const AdminAnalytics = () => {
                     <button 
                         disabled={isExporting !== null}
                         onClick={() => handleExport('CSV')} 
-                        className="px-4 py-2 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        className="justify-center px-4 py-2 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
                     >
                         <FileTextIcon className="w-3.5 h-3.5 text-slate-500 dark:text-gray-400" /> <span>Export CSV</span>
                     </button>
                     <button 
                         disabled={isExporting !== null}
                         onClick={() => window.print()} 
-                        className="px-4 py-2 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        className="justify-center px-4 py-2 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
                     >
                         <PrinterIcon className="w-3.5 h-3.5 text-slate-500 dark:text-gray-400" /> <span>Print Report</span>
                     </button>
@@ -505,8 +505,8 @@ const AdminAnalytics = () => {
             </div>
 
             {/* 2. ADVANCED TOP FILTER CONTROLS BAR */}
-            <div className="p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-                <div className="flex flex-wrap items-center gap-3">
+            <div className="p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                     <div className="flex items-center gap-1.5">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-gray-400">Date Range:</span>
                         <div className="relative inline-flex items-center">
@@ -578,7 +578,7 @@ const AdminAnalytics = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-auto">
                     <button onClick={expandAll} className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all active:scale-95 cursor-pointer">
                         Expand All
                     </button>
@@ -892,8 +892,8 @@ const AdminAnalytics = () => {
                         <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">Highest Registered & Most Active Hackathons</h3>
                     </div>
                     {topHackathonsData && topHackathonsData.length > 0 ? (
-                        <div className="overflow-x-auto p-2">
-                            <table className="w-full text-left border-collapse">
+                        <div className="overflow-x-auto p-2 scrollbar-hide">
+                            <table className="w-full text-left border-collapse min-w-[520px]">
                                 <thead>
                                     <tr className="border-b border-slate-200 dark:border-white/10 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-gray-400">
                                         <th className="px-4 py-2.5">Rank / Hackathon</th>
@@ -1056,8 +1056,8 @@ const AdminAnalytics = () => {
                         <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">Top Mentors Leaderboard</h3>
                     </div>
                     {topMentorsData && topMentorsData.length > 0 ? (
-                        <div className="overflow-x-auto p-2">
-                            <table className="w-full text-left border-collapse">
+                        <div className="overflow-x-auto p-2 scrollbar-hide">
+                            <table className="w-full text-left border-collapse min-w-[520px]">
                                 <thead>
                                     <tr className="border-b border-slate-200 dark:border-white/10 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-gray-400">
                                         <th className="px-4 py-2.5">Rank / Mentor</th>

@@ -524,7 +524,7 @@ const Disputes = () => {
             <div className="flex flex-col lg:flex-row gap-6 min-h-[560px] lg:h-[750px]">
                 
                 {/* LEFT PANE: Dispute Case Directory List */}
-                <div className="w-full lg:w-1/3 flex flex-col rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden p-0">
+                <div className="w-full lg:w-1/3 flex flex-col rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden p-0 h-[360px] sm:h-[480px] lg:h-auto">
                     <div className="p-3.5 border-b border-slate-200 dark:border-white/10 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-gray-400 flex items-center justify-between">
                         <span>Dispute Cases ({filteredDisputes.length})</span>
                         <span className="text-[10px] font-normal text-slate-400">Click to inspect</span>

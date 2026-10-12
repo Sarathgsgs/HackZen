@@ -536,7 +536,7 @@ const Settings = () => {
             )}
 
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                         Platform Settings & Control Center
@@ -545,11 +545,11 @@ const Settings = () => {
                         Super Admin Workspace. Configure platform policies, RBAC access, security parameters, and audit trails.
                     </p>
                 </div>
-                <div className="flex items-center gap-3 self-start md:self-auto">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button 
                         onClick={handleSaveChanges}
                         disabled={isSaving}
-                        className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold transition-all shadow-md shadow-[#7C65F6]/20 active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                        className="w-full sm:w-auto justify-center px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold transition-all shadow-md shadow-[#7C65F6]/20 active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                     >
                         <CheckIcon className="w-3.5 h-3.5 text-white" />
                         <span>{isSaving ? 'Saving Changes...' : 'Save Configuration'}</span>
@@ -565,7 +565,7 @@ const Settings = () => {
                     <div className="p-3 border-b border-slate-200 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02]">
                         <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-gray-400">Settings Domains</span>
                     </div>
-                    <nav className="p-1.5 space-y-0.5">
+                    <nav className="p-1.5 flex flex-row lg:flex-col overflow-x-auto scrollbar-hide gap-1 lg:gap-0 lg:space-y-0.5">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
@@ -573,7 +573,7 @@ const Settings = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                                    className={`w-auto lg:w-full shrink-0 whitespace-nowrap flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                                         isActive 
                                             ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/40 font-extrabold shadow-sm' 
                                             : 'text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white border border-transparent'
@@ -791,7 +791,7 @@ const Settings = () => {
 
                             {/* Active Sessions */}
                             <div>
-                                <div className="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-white/10 pb-2">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3 border-b border-slate-200 dark:border-white/10 pb-2">
                                     <div>
                                         <h3 className={`text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white font-extrabold`}>
                                             Active Administrator Sessions
@@ -800,14 +800,14 @@ const Settings = () => {
                                     </div>
                                     <button 
                                         onClick={handleRevokeAllOtherSessions}
-                                        className="px-3 py-1.5 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 rounded-xl text-xs font-bold transition-all shadow-sm"
+                                        className="w-full sm:w-auto text-center px-3 py-1.5 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 rounded-xl text-xs font-bold transition-all shadow-sm"
                                     >
                                         Sign Out All Other Sessions
                                     </button>
                                 </div>
 
-                                <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
-                                    <table className="w-full text-left text-xs">
+                                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10 scrollbar-hide">
+                                    <table className="w-full text-left text-xs min-w-[580px]">
                                         <thead className="bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/10 text-[10px] uppercase font-bold text-slate-500 dark:text-gray-400">
                                             <tr>
                                                 <th className="p-3">Device / Browser</th>
@@ -853,7 +853,7 @@ const Settings = () => {
                     {/* ========================================================= */}
                     {activeTab === 'Admins' && (
                         <div className="space-y-6 animate-in fade-in duration-300">
-                            <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 dark:border-white/10 pb-3">
                                 <div>
                                     <h3 className={`text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white font-extrabold`}>
                                         Role-Based Access Control (RBAC)
@@ -864,14 +864,14 @@ const Settings = () => {
                                 </div>
                                 <button 
                                     onClick={() => setIsAddAdminOpen(true)}
-                                    className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                                    className="w-full sm:w-auto justify-center px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
                                 >
                                     <span>+ Add Administrator</span>
                                 </button>
                             </div>
 
-                            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
-                                <table className="w-full text-left text-xs">
+                            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10 scrollbar-hide">
+                                <table className="w-full text-left text-xs min-w-[620px]">
                                     <thead className="bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/10 text-[10px] uppercase font-bold text-slate-500 dark:text-gray-400">
                                         <tr>
                                             <th className="p-3.5">Administrator</th>
@@ -1279,8 +1279,8 @@ const Settings = () => {
                                     <h3 className={`text-xs font-black uppercase tracking-wider mb-3 text-slate-900 dark:text-white font-extrabold`}>
                                         Recent Notification Dispatches & Alerts ({notificationHistory.length})
                                     </h3>
-                                    <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
-                                        <table className="w-full text-left text-xs">
+                                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10 scrollbar-hide">
+                                        <table className="w-full text-left text-xs min-w-[540px]">
                                             <thead className="bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/10 text-[10px] uppercase font-bold text-slate-500 dark:text-gray-400">
                                                 <tr>
                                                     <th className="p-3">Title & Message</th>
@@ -1603,8 +1603,8 @@ const Settings = () => {
                                 </div>
                             </div>
 
-                            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
-                                <table className="w-full text-left text-xs">
+                            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10 scrollbar-hide">
+                                <table className="w-full text-left text-xs min-w-[620px]">
                                     <thead className="bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/10 text-[10px] uppercase font-bold text-slate-500 dark:text-gray-400">
                                         <tr>
                                             <th className="p-3">Timestamp</th>

@@ -381,7 +381,7 @@ const AdminDashboard = () => {
                 </button>
                 <button 
                     onClick={() => setIsAnnouncementOpen(true)} 
-                    className="px-3.5 py-1.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-md shadow-[#7C65F6]/20 cursor-pointer active:scale-95 ml-auto"
+                    className="px-3.5 py-1.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-md shadow-[#7C65F6]/20 cursor-pointer active:scale-95 shrink-0 md:ml-auto"
                 >
                     <MegaphoneIcon className="w-3.5 h-3.5 text-white" /> Broadcast Announcement
                 </button>
@@ -865,7 +865,7 @@ const AdminDashboard = () => {
                     </h2>
                     
                     {/* Activity Filters */}
-                    <div className="flex items-center gap-1 text-[10px] font-bold overflow-x-auto">
+                    <div className="flex items-center gap-1 text-[10px] font-bold overflow-x-auto scrollbar-hide py-1">
                         {['ALL', 'USERS', 'HACKATHONS', 'TEAMS', 'SUBMISSIONS', 'CERTIFICATES'].map(f => (
                             <button 
                                 key={f} 

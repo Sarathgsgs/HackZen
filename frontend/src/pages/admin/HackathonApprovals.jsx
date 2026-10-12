@@ -430,7 +430,7 @@ const HackathonApprovals = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 {/* LEFT COLUMN: Hackathon Directory & Queue (4 Cols) */}
-                <div className="lg:col-span-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-[680px]">
+                <div className="lg:col-span-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-[360px] sm:h-[480px] lg:h-[680px]">
                     
                     {/* Status Filter Tabs */}
                     <div className="p-3 border-b border-slate-100 dark:border-white/5 flex gap-1.5 shrink-0 bg-slate-50/50 dark:bg-white/[0.02] overflow-x-auto scrollbar-hide">
@@ -526,7 +526,7 @@ const HackathonApprovals = () => {
                 </div>
 
                 {/* RIGHT PANE: Detail Investigation Workspace (8 Cols) */}
-                <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col relative h-[680px]">
+                <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col relative min-h-[500px] lg:h-[680px]">
                     {selectedHackathon ? (
                         <>
                             {/* Selected Hackathon Top Bar */}
@@ -562,7 +562,7 @@ const HackathonApprovals = () => {
                             </div>
 
                             {/* Sub-tab Navigation */}
-                            <div className="flex border-b border-slate-100 dark:border-white/5 px-4 pt-1.5 gap-3 shrink-0 bg-white dark:bg-navy-900">
+                            <div className="flex border-b border-slate-100 dark:border-white/5 px-4 pt-1.5 gap-3 shrink-0 bg-white dark:bg-navy-900 overflow-x-auto scrollbar-hide">
                                 {[
                                     { id: 'proposal', label: '1. Proposal Details', icon: <RocketIcon className="w-3.5 h-3.5" /> },
                                     { id: 'stats', label: '2. Organizer & Event Stats', icon: <UsersIcon className="w-3.5 h-3.5" /> },
@@ -1048,12 +1048,12 @@ const HackathonApprovals = () => {
                             </div>
 
                             {/* Bottom Action Bar */}
-                            <div className="p-4 bg-white dark:bg-navy-900 border-t border-slate-100 dark:border-white/5 flex flex-wrap justify-between items-center gap-3 shrink-0">
+                            <div className="p-4 bg-white dark:bg-navy-900 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                                 <div className="text-xs font-bold text-slate-500 dark:text-gray-400">
                                     Status: <span className="font-extrabold text-slate-900 dark:text-white uppercase">{selectedHackathon.status}</span>
                                 </div>
                                 
-                                <div className="flex items-center gap-2 flex-wrap">
+                                <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-2">
                                     {(selectedHackathon.status === 'Pending' || selectedHackathon.status === 'Needs Revision') && (
                                         <>
                                             <button 

@@ -666,7 +666,7 @@ const UsersManagement = () => {
                     </div>
 
                     {/* Right Filter Inputs */}
-                    <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
                         <div className="relative flex-1 md:w-64">
                             <svg className="w-3.5 h-3.5 absolute left-3.5 top-3 text-slate-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             <input 
@@ -769,9 +769,9 @@ const UsersManagement = () => {
 
             {/* Bulk Action Header Bar */}
             {selectedUserIds.length > 0 && (
-                <div className="p-3.5 bg-violet-50 border border-violet-300/80 text-violet-700 rounded-2xl flex items-center justify-between text-xs font-bold animate-in fade-in shadow-sm">
+                <div className="p-3.5 bg-violet-50 border border-violet-300/80 text-violet-700 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs font-bold animate-in fade-in shadow-sm">
                     <span>{selectedUserIds.length} Users Selected for Bulk Governance</span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <button onClick={() => handleBulkAction('activate')} className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300/80 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Activate</button>
                         <button onClick={() => handleBulkAction('suspend')} className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300/80 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Suspend</button>
                         <button onClick={() => setBulkRoleConfig({ isOpen: true, targetRole: 'STUDENT' })} className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300/80 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Change Role</button>
@@ -915,7 +915,7 @@ const UsersManagement = () => {
                 </div>
 
                 {/* RIGHT PANE: Detailed User Profile Workspace (40% Width, Sticky & 2-Tab Two-Page Inspector) */}
-                <div className="w-full lg:w-[40%] rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col sticky top-4 max-h-[calc(100vh-5rem)] overflow-y-auto custom-scrollbar">
+                <div className="w-full lg:w-[40%] rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col lg:sticky lg:top-4 max-h-none lg:max-h-[calc(100vh-5rem)] overflow-y-auto custom-scrollbar">
                     {selectedUser ? (
                         <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                             

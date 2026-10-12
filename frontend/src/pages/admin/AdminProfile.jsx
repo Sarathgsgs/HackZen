@@ -235,17 +235,17 @@ const AdminProfile = () => {
                         </div>
 
                         {/* Action Bar */}
-                        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-start lg:justify-end pb-1 relative z-20">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto justify-start lg:justify-end pb-1 relative z-20">
                             <button 
                                 onClick={() => setShowEditProfile(true)}
-                                className="px-4 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl font-bold text-xs shadow-md shadow-[#7C65F6]/20 transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                                className="w-full sm:w-auto justify-center px-4 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl font-bold text-xs shadow-md shadow-[#7C65F6]/20 transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
                             >
                                 <EditIcon className="w-3.5 h-3.5 text-white" />
                                 <span>Edit Account Info</span>
                             </button>
                             <button 
                                 onClick={() => setShowPermissionMatrix(true)}
-                                className="px-4 py-2.5 bg-white hover:bg-slate-50 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-slate-200 dark:border-white/10 shadow-xs active:scale-95 cursor-pointer"
+                                className="w-full sm:w-auto justify-center px-4 py-2.5 bg-white hover:bg-slate-50 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-slate-200 dark:border-white/10 shadow-xs active:scale-95 cursor-pointer"
                             >
                                 <ShieldIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-300" />
                                 <span>View Permission Matrix</span>
@@ -373,21 +373,21 @@ const AdminProfile = () => {
                 <div className="lg:col-span-8 space-y-8">
                     
                     {/* SECURITY CENTER (MOST IMPORTANT) */}
-                    <div className="rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-8 space-y-6 relative overflow-hidden">
-                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
+                    <div className="rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-4 sm:p-8 space-y-6 relative overflow-hidden">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4 gap-4">
                             <div className="flex items-center gap-3">
-                                <span className="p-2.5 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center">
+                                <span className="p-2.5 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center shrink-0">
                                     <LockIcon className="w-5 h-5" />
                                 </span>
                                 <div>
-                                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Security Center</h2>
+                                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Security Center</h2>
                                     <p className="text-xs text-slate-500 dark:text-gray-400">Account hardening, multi-factor verification, and vulnerability score</p>
                                 </div>
                             </div>
 
                             {/* Security Score Badge */}
-                            <div className="text-right">
-                                <div className="flex items-center gap-2">
+                            <div className="text-left sm:text-right w-full sm:w-auto">
+                                <div className="flex items-center sm:justify-end gap-2">
                                     <span className="text-xs font-extrabold uppercase text-slate-500 dark:text-gray-400">Security Score:</span>
                                     <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">{security.securityScore || 90}%</span>
                                 </div>
@@ -466,21 +466,21 @@ const AdminProfile = () => {
                     </div>
 
                     {/* ACTIVE SESSIONS & DEVICE MANAGEMENT */}
-                    <div className="rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-8 space-y-6">
-                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
+                    <div className="rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-4 sm:p-8 space-y-6">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4 gap-3">
                             <div className="flex items-center gap-3">
-                                <span className="p-2.5 rounded-2xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20 flex items-center justify-center">
+                                <span className="p-2.5 rounded-2xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20 flex items-center justify-center shrink-0">
                                     <ClockIcon className="w-5 h-5" />
                                 </span>
                                 <div>
-                                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Active Device Sessions</h2>
+                                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Active Device Sessions</h2>
                                     <p className="text-xs text-slate-500 dark:text-gray-400">Manage signed-in browsers, locations, and revoke unauthorized access</p>
                                 </div>
                             </div>
 
                             <button 
                                 onClick={handleSignOutAllOther}
-                                className="px-4 py-2 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-2xl text-xs font-bold transition-all border border-rose-200 dark:border-rose-500/20 shadow-xs"
+                                className="w-full sm:w-auto text-center px-4 py-2 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-2xl text-xs font-bold transition-all border border-rose-200 dark:border-rose-500/20 shadow-xs"
                             >
                                 Sign Out Other Sessions
                             </button>
@@ -518,16 +518,14 @@ const AdminProfile = () => {
                     </div>
 
                     {/* SECURITY & LOGIN ACTIVITY TIMELINE */}
-                    <div className="rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-8 space-y-6">
-                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
-                            <div className="flex items-center gap-3">
-                                <span className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-500 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center">
-                                    <FileTextIcon className="w-5 h-5" />
-                                </span>
-                                <div>
-                                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Security & Login History</h2>
-                                    <p className="text-xs text-slate-500 dark:text-gray-400">Timestamped audit trail of authentication events and device handshakes</p>
-                                </div>
+                    <div className="rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-4 sm:p-8 space-y-6">
+                        <div className="flex items-center gap-3 border-b border-slate-200 dark:border-white/5 pb-4">
+                            <span className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-500 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center shrink-0">
+                                <FileTextIcon className="w-5 h-5" />
+                            </span>
+                            <div>
+                                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Security & Login History</h2>
+                                <p className="text-xs text-slate-500 dark:text-gray-400">Timestamped audit trail of authentication events and device handshakes</p>
                             </div>
                         </div>
 
@@ -720,10 +718,10 @@ const AdminProfile = () => {
             {/* 1. PERMISSION MATRIX MODAL */}
             {showPermissionMatrix && (
                 <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-4xl w-full p-8 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-4xl w-full p-4 sm:p-8 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-4">
                             <div>
-                                <h2 className="text-xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Role Access & Permission Matrix</h2>
+                                <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Role Access & Permission Matrix</h2>
                                 <p className="text-xs text-slate-500 dark:text-gray-400">Comparative access permissions across platform administration tiers</p>
                             </div>
                             <button 
@@ -739,8 +737,8 @@ const AdminProfile = () => {
                         </div>
 
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse text-xs">
+                        <div className="overflow-x-auto scrollbar-hide">
+                            <table className="w-full text-left border-collapse text-xs min-w-[560px]">
                                 <thead>
                                     <tr className="border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-gray-400 uppercase font-black">
                                         <th className="p-3">Module</th>
@@ -784,7 +782,7 @@ const AdminProfile = () => {
             {/* 2. CHANGE PASSWORD MODAL */}
             {showChangePassword && (
                 <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-                    <form onSubmit={handleChangePasswordSubmit} className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-3xl max-w-md w-full p-8 space-y-5 shadow-2xl">
+                    <form onSubmit={handleChangePasswordSubmit} className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-3xl max-w-md w-full p-5 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Change Admin Password</h2>
                         <div className="space-y-3 text-xs font-bold">
                             <div>
@@ -826,7 +824,7 @@ const AdminProfile = () => {
             {/* 3. EDIT ADMIN PROFILE MODAL */}
             {showEditProfile && (
                 <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-lg w-full p-8 space-y-5 shadow-2xl">
+                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-lg w-full p-5 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
                             <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Edit Admin Account Info</h2>
                             <button 
@@ -890,7 +888,7 @@ const AdminProfile = () => {
             {/* 4. SECURITY IDENTITY RE-VERIFICATION MODAL */}
             {showVerificationModal && (
                 <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-navy-900 border border-rose-500/30 rounded-2xl max-w-md w-full p-8 space-y-5 shadow-2xl">
+                    <div className="bg-white dark:bg-navy-900 border border-rose-500/30 rounded-2xl max-w-md w-full p-5 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <div className="text-center space-y-2">
                             <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 flex items-center justify-center text-rose-600 dark:text-rose-400 mx-auto">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

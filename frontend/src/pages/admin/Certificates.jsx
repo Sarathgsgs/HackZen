@@ -1281,7 +1281,7 @@ const Certificates = () => {
             <div className="flex flex-col lg:flex-row gap-6 min-h-[640px]">
                 
                 {/* LEFT PANE: Certificate Directory & Queue */}
-                <div className="w-full lg:w-1/2 flex flex-col bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden h-[700px]">
+                <div className="w-full lg:w-1/2 flex flex-col bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden h-[360px] sm:h-[480px] lg:h-[700px]">
                     
                     {/* Status Tabs */}
                     <div className="p-2 border-b border-slate-200 dark:border-white/5 flex gap-1 shrink-0 bg-slate-50/70 dark:bg-white/[0.02] overflow-x-auto scrollbar-hide">
@@ -1772,7 +1772,7 @@ const Certificates = () => {
                 </div>
 
                 {/* RIGHT PANE: Certificate Inspector & Live Visual Render */}
-                <div className="w-full lg:w-1/2 bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm flex flex-col overflow-hidden relative h-[700px]">
+                <div className="w-full lg:w-1/2 bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm flex flex-col overflow-hidden relative min-h-[500px] lg:h-[700px]">
                     {selectedCert ? (
                         <>
                             {/* Selected Header */}
@@ -1791,7 +1791,7 @@ const Certificates = () => {
                             </div>
 
                             {/* Sub-tab Navigation */}
-                            <div className="flex border-b border-slate-200/80 dark:border-white/10 px-5 pt-3 gap-4 shrink-0 bg-white dark:bg-transparent">
+                            <div className="flex border-b border-slate-200/80 dark:border-white/10 px-5 pt-3 gap-4 shrink-0 bg-white dark:bg-transparent overflow-x-auto scrollbar-hide">
                                 {[
                                     { id: 'checklist', label: '1. Document & Checklist', icon: <FileTextIcon className="w-3.5 h-3.5" /> },
                                     { id: 'delivery', label: '2. Delivery & Tracking', icon: <ZapIcon className="w-3.5 h-3.5" /> },

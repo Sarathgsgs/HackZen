@@ -369,7 +369,7 @@ const OrganizerApprovals = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 {/* LEFT PANE: Application Directory (4 cols) */}
-                <div className="lg:col-span-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-[680px]">
+                <div className="lg:col-span-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-[360px] sm:h-[480px] lg:h-[680px]">
                     
                     {/* Status Filter Tabs */}
                     <div className="p-3 border-b border-slate-100 dark:border-white/5 flex gap-1.5 shrink-0 bg-slate-50/50 dark:bg-white/[0.02] overflow-x-auto scrollbar-hide">
@@ -464,7 +464,7 @@ const OrganizerApprovals = () => {
                 </div>
 
                 {/* RIGHT PANE: Detail Investigation Workspace (8 cols) */}
-                <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col relative h-[680px]">
+                <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col relative min-h-[500px] lg:h-[680px]">
                     {selectedApp ? (
                         <>
                             {/* Selected Organizer Profile Top Bar */}
@@ -501,7 +501,7 @@ const OrganizerApprovals = () => {
                             </div>
 
                             {/* Sub-tab Navigation */}
-                            <div className="flex border-b border-slate-100 dark:border-white/5 px-4 pt-1.5 gap-3 shrink-0 bg-white dark:bg-navy-900">
+                            <div className="flex border-b border-slate-100 dark:border-white/5 px-4 pt-1.5 gap-3 shrink-0 bg-white dark:bg-navy-900 overflow-x-auto scrollbar-hide">
                                 {[
                                     { id: 'registration', label: '1. Registration Details', icon: <UsersIcon className="w-3.5 h-3.5" /> },
                                     { id: 'history', label: '2. Platform History', icon: <RocketIcon className="w-3.5 h-3.5" /> },
@@ -913,12 +913,12 @@ const OrganizerApprovals = () => {
                             </div>
 
                             {/* Bottom Action Bar */}
-                            <div className="p-4 bg-white dark:bg-navy-900 border-t border-slate-100 dark:border-white/5 flex flex-wrap justify-between items-center gap-3 shrink-0">
+                            <div className="p-4 bg-white dark:bg-navy-900 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                                 <div className="text-xs font-bold text-slate-500 dark:text-gray-400">
                                     Status: <span className="font-extrabold text-slate-900 dark:text-white uppercase">{selectedApp.status}</span>
                                 </div>
                                 
-                                <div className="flex items-center gap-2 flex-wrap">
+                                <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-2">
                                     {(selectedApp.status === 'Pending' || selectedApp.status === 'Needs Changes') && (
                                         <>
                                             <button 
@@ -1003,7 +1003,7 @@ const OrganizerApprovals = () => {
                 subtitle="Select the specific fields the applicant must update or furnish."
             >
                 <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         {[
                             { key: 'organization', label: 'Organization / Institution Name' },
                             { key: 'orgType', label: 'Institution Type Classification' },

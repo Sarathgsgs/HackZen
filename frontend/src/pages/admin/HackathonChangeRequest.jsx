@@ -161,17 +161,17 @@ const HackathonChangeRequest = () => {
                         <span>Submitted on {requestData.submittedOn}</span>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
                     <button 
                         onClick={handleViewSubmission} 
-                        className="px-5 py-2.5 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
+                        className="w-full sm:w-auto justify-center px-5 py-2.5 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
                     >
                         <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         <span>View Submission</span>
                     </button>
                     <button 
                         onClick={handleOpenMessageModal} 
-                        className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold shadow-md shadow-[#7C65F6]/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                        className="w-full sm:w-auto justify-center px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold shadow-md shadow-[#7C65F6]/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
                     >
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                         <span>Message Organizer</span>
@@ -231,7 +231,7 @@ const HackathonChangeRequest = () => {
                             <button 
                                 onClick={handleReminder}
                                 disabled={actionLoading === 'reminder' || requestData.status !== 'Changes Requested'}
-                                className="disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-400 text-xs font-bold rounded-xl border border-amber-300 dark:border-amber-500/30 transition-all cursor-pointer shadow-sm active:scale-95"
+                                className="w-full sm:w-auto justify-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-400 text-xs font-bold rounded-xl border border-amber-300 dark:border-amber-500/30 transition-all cursor-pointer shadow-sm active:scale-95"
                             >
                                 {actionLoading === 'reminder' ? 'Sending...' : (
                                     <>
@@ -333,14 +333,14 @@ const HackathonChangeRequest = () => {
             {/* Submission Details Modal */}
             {showSubmissionModal && submissionData && (
                 <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                        <div className="p-6 border-b border-slate-200 dark:border-white/10 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-navy-900/95 backdrop-blur-md z-10">
-                            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">{submissionData.title}</h2>
+                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl custom-scrollbar">
+                        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-white/10 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-navy-900/95 backdrop-blur-md z-10">
+                            <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">{submissionData.title}</h2>
                             <button onClick={() => setShowSubmissionModal(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-lg cursor-pointer">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
-                        <div className="p-6 space-y-5 text-xs">
+                        <div className="p-4 sm:p-6 space-y-5 text-xs">
                             <div className="flex items-center gap-3">
                                 {submissionData.organizerAvatar && (
                                     <img src={submissionData.organizerAvatar} alt="" className="w-10 h-10 rounded-xl border border-slate-200 dark:border-white/10" />
@@ -358,7 +358,7 @@ const HackathonChangeRequest = () => {
 
                             <div>
                                 <h3 className="font-extrabold text-slate-900 dark:text-white mb-2 uppercase tracking-wider text-[11px]">Event Details</h3>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div className="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3">
                                         <p className="text-[10px] text-slate-500 dark:text-gray-400 font-extrabold uppercase mb-0.5">Start Date</p>
                                         <p className="text-slate-900 dark:text-white font-bold">{submissionData.details?.startDate}</p>
@@ -400,7 +400,7 @@ const HackathonChangeRequest = () => {
             {/* Message Organizer Modal */}
             {showMessageModal && (
                 <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-xl w-full shadow-2xl p-6 space-y-4">
+                    <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl max-w-xl w-full shadow-2xl p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
                             <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Message {requestData.organizerName}</h2>
                             <button onClick={() => setShowMessageModal(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg cursor-pointer">

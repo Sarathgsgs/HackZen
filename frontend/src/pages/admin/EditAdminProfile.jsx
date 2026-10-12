@@ -80,11 +80,11 @@ const EditAdminProfile = () => {
                     <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">Define your administrative presence and operational credentials.</p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button
                         type="button"
                         onClick={() => navigate(-1)}
-                        className="px-5 py-2.5 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-200 rounded-xl font-bold text-xs transition-all border border-slate-200 dark:border-white/10 shadow-sm active:scale-95 cursor-pointer"
+                        className="flex-1 sm:flex-initial justify-center px-5 py-2.5 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-200 rounded-xl font-bold text-xs transition-all border border-slate-200 dark:border-white/10 shadow-sm active:scale-95 cursor-pointer text-center"
                     >
                         Cancel
                     </button>
@@ -92,7 +92,7 @@ const EditAdminProfile = () => {
                         type="button"
                         onClick={handleSave}
                         disabled={saving}
-                        className={`px-6 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold shadow-md shadow-[#7C65F6]/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`flex-1 sm:flex-initial justify-center px-6 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold shadow-md shadow-[#7C65F6]/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         {saving ? (
                             <>

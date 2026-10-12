@@ -544,7 +544,7 @@ const Submissions = () => {
             <div className="flex flex-col lg:flex-row gap-6 min-h-[640px]">
                 
                 {/* LEFT PANE: Submission Directory */}
-                <div className="w-full lg:w-1/3 flex flex-col bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden h-[700px]">
+                <div className="w-full lg:w-1/3 flex flex-col bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden h-[360px] sm:h-[480px] lg:h-[700px]">
                     
                     {/* Status Tabs */}
                     <div className="p-3 border-b border-slate-200/80 dark:border-white/5 flex gap-1.5 shrink-0 bg-slate-50/70 dark:bg-navy-950/30 overflow-x-auto scrollbar-hide">
@@ -578,12 +578,12 @@ const Submissions = () => {
 
                     {/* Bulk Actions Header Bar */}
                     {selectedSubIds.length > 0 && (
-                        <div className="p-3 bg-indigo-50 dark:bg-indigo-500/10 border-b border-indigo-200 dark:border-indigo-500/20 text-indigo-900 dark:text-indigo-200 flex items-center justify-between text-xs font-bold animate-in fade-in shrink-0">
+                        <div className="p-3 bg-indigo-50 dark:bg-indigo-500/10 border-b border-indigo-200 dark:border-indigo-500/20 text-indigo-900 dark:text-indigo-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs font-bold animate-in fade-in shrink-0">
                             <span className="flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                                 {selectedSubIds.length} Selected
                             </span>
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                                 <button onClick={() => handleBulkAction('Approved')} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-500/30 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Approve</button>
                                 <button onClick={() => handleBulkAction('Changes Requested')} className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 dark:text-amber-300 border border-amber-300/80 dark:border-amber-500/30 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Changes</button>
                                 <button 
@@ -678,7 +678,7 @@ const Submissions = () => {
                 </div>
 
                 {/* RIGHT PANE: Governance & Investigation Workspace */}
-                <div className="w-full lg:w-2/3 bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm flex flex-col overflow-hidden relative h-[700px]">
+                <div className="w-full lg:w-2/3 bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm flex flex-col overflow-hidden relative min-h-[500px] lg:h-[700px]">
                     {selectedSub ? (
                         <>
                             {/* Selected Header */}
@@ -745,7 +745,7 @@ const Submissions = () => {
                             </div>
 
                             {/* Sub-tab Navigation */}
-                            <div className="flex border-b border-slate-200/80 dark:border-white/10 px-4 pt-1.5 gap-4 shrink-0 bg-white dark:bg-transparent">
+                            <div className="flex border-b border-slate-200/80 dark:border-white/10 px-4 pt-1.5 gap-4 shrink-0 bg-white dark:bg-transparent overflow-x-auto scrollbar-hide">
                                 {[
                                     { id: 'details', label: '1. Submission Details', icon: <FileTextIcon className="w-3.5 h-3.5" /> },
                                     { id: 'team-judges', label: '2. Team, Repo & Judges', icon: <UsersIcon className="w-3.5 h-3.5" /> },
@@ -1140,12 +1140,12 @@ const Submissions = () => {
                             </div>
 
                             {/* Context-Aware Bottom Action Bar */}
-                            <div className="p-4 sm:p-5 bg-white dark:bg-navy-900 border-t border-slate-200/80 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-lg">
+                            <div className="p-4 sm:p-5 bg-white dark:bg-navy-900 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0 shadow-lg">
                                 <div className="text-[11px] font-bold text-slate-500 dark:text-gray-400">
                                     Current Status: <strong className="text-slate-900 dark:text-white uppercase">{selectedSub.status}</strong>
                                 </div>
 
-                                <div className="flex items-center gap-2.5 flex-wrap">
+                                <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-2">
                                     {(selectedSub.status === 'Pending Review' || selectedSub.status === 'Changes Requested') && (
                                         <>
                                             <button 
