@@ -376,6 +376,33 @@ const DashboardLayout = () => {
     const isOrganizer = currentPath.startsWith('/organizer');
     const isMentor = currentPath.startsWith('/mentor');
 
+    // Admin Navigation Layout Preference: 'navbar' (Figma Spec) vs 'sidebar' (Classic)
+    const [adminNavLayout, setAdminNavLayout] = useState(() => {
+        return localStorage.getItem('admin_nav_layout') || 'navbar';
+    });
+
+    React.useEffect(() => {
+        const handleLayoutChange = () => {
+            const current = localStorage.getItem('admin_nav_layout') || 'navbar';
+            setAdminNavLayout(current);
+        };
+        window.addEventListener('admin-nav-layout-change', handleLayoutChange);
+        window.addEventListener('storage', handleLayoutChange);
+        return () => {
+            window.removeEventListener('admin-nav-layout-change', handleLayoutChange);
+            window.removeEventListener('storage', handleLayoutChange);
+        };
+    }, []);
+
+    const toggleNavLayout = () => {
+        const next = adminNavLayout === 'navbar' ? 'sidebar' : 'navbar';
+        localStorage.setItem('admin_nav_layout', next);
+        setAdminNavLayout(next);
+        window.dispatchEvent(new Event('admin-nav-layout-change'));
+    };
+
+    const isTopNavbarMode = isAdmin && adminNavLayout === 'navbar';
+
     // Role Config
     const roleConfig = {
         student: {
@@ -634,7 +661,7 @@ const DashboardLayout = () => {
             <div 
                 className={`${isAdmin ? 'bg-white' : 'bg-[#f9f9f9]'} dark:bg-navy-900 border-r border-[#e2e8f0] dark:border-white/10 flex flex-col shrink-0 transition-all duration-300 ease-in-out ${
                     isSidebarExpanded ? 'w-64' : 'w-[72px]'
-                } ${sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-40' : '-translate-x-full lg:translate-x-0 fixed lg:relative h-full z-20'}`}
+                } ${isTopNavbarMode ? (sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-40 lg:hidden' : 'hidden') : (sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-40' : '-translate-x-full lg:translate-x-0 fixed lg:relative h-full z-20')}`}
             >
 
                 {/* Sidebar Top Header */}
@@ -861,16 +888,25 @@ const DashboardLayout = () => {
             <div className="flex-1 flex flex-col h-full relative overflow-hidden">
                 {/* --- MAIN CONTENT HEADER --- */}
                 <header className="h-16 bg-[#ffffff] dark:bg-navy-900/80 backdrop-blur-md border-b border-[#e2e8f0] dark:border-white/10 flex items-center justify-between px-3.5 sm:px-6 shrink-0 z-10 transition-colors overflow-visible">
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        {/* Mobile Drawer Trigger (when on small screens or when sidebar mode is active) */}
                         <button
                             onClick={() => setSidebarOpen(true)}
                             className="p-2 text-[#64748b] dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-[#f1f5f9] dark:hover:bg-white/10 rounded-full lg:hidden transition-colors"
+                            aria-label="Toggle Navigation Drawer"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                         </button>
 
+                        {/* Top Navbar Brand Logo (displayed when in Top Navbar mode) */}
+                        {isTopNavbarMode && (
+                            <Link to="/admin/dashboard" className="flex items-center gap-2 select-none shrink-0 pr-1 sm:pr-3">
+                                <Logo size="sm" showSubtext={false} />
+                            </Link>
+                        )}
+
                         {/* Search Bar Container with Live Omnibox Dropdown */}
-                        <div className="relative hidden md:block w-96" ref={searchRef}>
+                        <div className={`relative hidden ${isTopNavbarMode ? 'xl:block w-48 2xl:w-64' : 'md:block w-80 xl:w-96'}`} ref={searchRef}>
                             <div className="relative flex items-center">
                                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                     <svg className={`w-4 h-4 text-slate-400 dark:text-gray-400 ${isAdmin ? 'group-focus-within:text-indigo-600' : 'group-focus-within:text-[#0ea5e9]'} transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -888,7 +924,7 @@ const DashboardLayout = () => {
                                         if (globalSearchQuery.trim().length > 0) setIsSearchOpen(true);
                                     }}
                                     onKeyDown={handleSearchKeyDown}
-                                    placeholder={isOrganizer ? "Search..." : (isAdmin ? "SEARCH USERS, HACKATHONS, SUBMISSIONS..." : "SEARCH...")}
+                                    placeholder={isOrganizer ? "Search..." : (isAdmin ? "Search..." : "SEARCH...")}
                                     className={`w-full pl-9 pr-9 py-2 bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none transition-all shadow-sm ${isOrganizer ? 'focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20' : isAdmin ? 'focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20' : 'focus:border-[#0ea5e9] focus:ring-2 focus:ring-sky-500/20'}`}
                                 />
                                 {globalSearchQuery && (
@@ -965,10 +1001,66 @@ const DashboardLayout = () => {
                         </div>
 
                     </div>
+
+                    {/* Center: In Top Navbar Mode, render horizontal navigation links as in Figma reference */}
+                    {isTopNavbarMode && (
+                        <nav className="hidden lg:flex items-center h-full gap-0.5 xl:gap-1.5 overflow-x-auto scrollbar-hide px-2">
+                            {adminNav.map((item) => {
+                                const isActive = location.pathname === item.path || (item.path !== '/admin/dashboard' && location.pathname.startsWith(item.path));
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        to={item.path}
+                                        className={`h-full flex items-center px-2.5 xl:px-3 text-xs xl:text-[13px] font-semibold transition-all whitespace-nowrap border-b-2 ${
+                                            isActive
+                                                ? 'text-[#7C65F6] dark:text-purple-400 font-bold border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20'
+                                                : 'text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white border-transparent hover:border-slate-300 dark:hover:border-white/20'
+                                        }`}
+                                    >
+                                        <span>{item.name}</span>
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+                    )}
                     
-                    {/* Right side (Theme, Notifications, Admin Dropdown) - Gemini Chat style spacing */}
+                    {/* Right side (Layout Switcher, Theme, Notifications, Admin Dropdown) - Gemini Chat style spacing */}
                     <div className="flex items-center gap-1.5 sm:gap-3 relative shrink-0" ref={dropdownRef}>
                         
+                        {/* Quick Layout Switcher Button for Admin */}
+                        {isAdmin && (
+                            <div className="relative flex items-center justify-center group/layoutToggle">
+                                <button
+                                    onClick={toggleNavLayout}
+                                    className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all border cursor-pointer ${
+                                        isTopNavbarMode 
+                                            ? 'bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] border-purple-200 dark:border-purple-500/30 hover:bg-purple-100/80 shadow-xs' 
+                                            : 'bg-slate-50 dark:bg-navy-800/80 text-slate-600 dark:text-gray-300 border-slate-200 dark:border-white/10 hover:bg-slate-100'
+                                    }`}
+                                    title={isTopNavbarMode ? "Undo / Switch to Classic Sidebar Layout" : "Switch to Top Navbar Layout (Figma Spec)"}
+                                    aria-label="Toggle Navigation Layout"
+                                >
+                                    {isTopNavbarMode ? (
+                                        // Sidebar Glyph (Revoke to Sidebar)
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth="2" />
+                                            <path strokeWidth="2" strokeLinecap="round" d="M9 3v18" />
+                                        </svg>
+                                    ) : (
+                                        // Top Navbar Glyph
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth="2" />
+                                            <path strokeWidth="2" strokeLinecap="round" d="M3 9h18" />
+                                        </svg>
+                                    )}
+                                </button>
+                                {/* Tooltip */}
+                                <span className="absolute right-0 top-full mt-2 px-3 py-1 text-[11px] font-bold !text-white bg-[#1A1F2C] backdrop-blur-sm rounded-lg shadow-xl border border-neutral-800/20 pointer-events-none opacity-0 group-hover/layoutToggle:opacity-100 transition-all duration-200 whitespace-nowrap z-[9999]">
+                                    {isTopNavbarMode ? "↩ Revoke / Switch to Sidebar" : "Switch to Top Navbar (Figma Spec)"}
+                                </span>
+                            </div>
+                        )}
+
                         {/* Theme Toggle */}
                         <div className="relative flex items-center justify-center">
                             <ThemeToggle variant="button" />
