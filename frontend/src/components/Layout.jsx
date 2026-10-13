@@ -394,13 +394,6 @@ const DashboardLayout = () => {
         };
     }, []);
 
-    const toggleNavLayout = () => {
-        const next = adminNavLayout === 'navbar' ? 'sidebar' : 'navbar';
-        localStorage.setItem('admin_nav_layout', next);
-        setAdminNavLayout(next);
-        window.dispatchEvent(new Event('admin-nav-layout-change'));
-    };
-
     const isTopNavbarMode = isAdmin && adminNavLayout === 'navbar';
 
     // Role Config
@@ -1024,43 +1017,9 @@ const DashboardLayout = () => {
                         </nav>
                     )}
                     
-                    {/* Right side (Layout Switcher, Theme, Notifications, Admin Dropdown) - Gemini Chat style spacing */}
+                    {/* Right side (Theme, Notifications, Admin Dropdown) - Gemini Chat style spacing */}
                     <div className="flex items-center gap-1.5 sm:gap-3 relative shrink-0" ref={dropdownRef}>
                         
-                        {/* Quick Layout Switcher Button for Admin */}
-                        {isAdmin && (
-                            <div className="relative flex items-center justify-center group/layoutToggle">
-                                <button
-                                    onClick={toggleNavLayout}
-                                    className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all border cursor-pointer ${
-                                        isTopNavbarMode 
-                                            ? 'bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] border-purple-200 dark:border-purple-500/30 hover:bg-purple-100/80 shadow-xs' 
-                                            : 'bg-slate-50 dark:bg-navy-800/80 text-slate-600 dark:text-gray-300 border-slate-200 dark:border-white/10 hover:bg-slate-100'
-                                    }`}
-                                    title={isTopNavbarMode ? "Undo / Switch to Classic Sidebar Layout" : "Switch to Top Navbar Layout (Figma Spec)"}
-                                    aria-label="Toggle Navigation Layout"
-                                >
-                                    {isTopNavbarMode ? (
-                                        // Sidebar Glyph (Revoke to Sidebar)
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth="2" />
-                                            <path strokeWidth="2" strokeLinecap="round" d="M9 3v18" />
-                                        </svg>
-                                    ) : (
-                                        // Top Navbar Glyph
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth="2" />
-                                            <path strokeWidth="2" strokeLinecap="round" d="M3 9h18" />
-                                        </svg>
-                                    )}
-                                </button>
-                                {/* Tooltip */}
-                                <span className="absolute right-0 top-full mt-2 px-3 py-1 text-[11px] font-bold !text-white bg-[#1A1F2C] backdrop-blur-sm rounded-lg shadow-xl border border-neutral-800/20 pointer-events-none opacity-0 group-hover/layoutToggle:opacity-100 transition-all duration-200 whitespace-nowrap z-[9999]">
-                                    {isTopNavbarMode ? "↩ Revoke / Switch to Sidebar" : "Switch to Top Navbar (Figma Spec)"}
-                                </span>
-                            </div>
-                        )}
-
                         {/* Theme Toggle */}
                         <div className="relative flex items-center justify-center">
                             <ThemeToggle variant="button" />
