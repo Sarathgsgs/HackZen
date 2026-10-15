@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     # MongoDB
     MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-    DB_NAME: str = os.getenv("DB_NAME", "hackzen")
+    DB_NAME: str = os.getenv("DB_NAME", "hackathon_db")
 
     # File Uploads
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "uploads")

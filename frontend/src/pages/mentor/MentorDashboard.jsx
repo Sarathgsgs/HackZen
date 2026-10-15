@@ -53,139 +53,9 @@ export default function MentorDashboard() {
         setDashboardData(dashRes.value);
       }
 
-      // Teams
-      if (teamsRes.status === 'fulfilled' && teamsRes.value?.activeTeams?.length) {
-        setTeams(teamsRes.value.activeTeams);
-      } else if (dashRes.status === 'fulfilled' && dashRes.value?.teams?.length) {
-        setTeams(dashRes.value.teams.map((t) => ({
-          id: t.id,
-          name: t.team || t.teamName || 'Team Alpha',
-          hackathon: t.hackathon || 'AI Innovation Hackathon',
-          members: t.members || 4,
-          progress: t.progress ?? 72,
-          status: t.progress >= 75 ? 'On Track' : t.progress < 40 ? 'Needs Attention' : 'On Track',
-          lastActivity: '2 hours ago',
-          avatars: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80']
-        })));
-      } else {
-        // High fidelity ProEduvate seed teams
-        setTeams([
-          {
-            id: 'team-alpha',
-            name: 'Team Alpha',
-            hackathon: 'AI Innovation Hackathon',
-            members: 4,
-            progress: 72,
-            status: 'On Track',
-            lastActivity: '2 hours ago',
-            avatars: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80']
-          },
-          {
-            id: 'team-nova',
-            name: 'Team Nova',
-            hackathon: 'HealthTech Global 2025',
-            members: 3,
-            progress: 45,
-            status: 'Needs Attention',
-            lastActivity: '4 hours ago',
-            avatars: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&auto=format&fit=crop&q=80']
-          },
-          {
-            id: 'team-phoenix',
-            name: 'Team Phoenix',
-            hackathon: 'NextGen FinTech Challenge',
-            members: 5,
-            progress: 90,
-            status: 'On Track',
-            lastActivity: '1 day ago',
-            avatars: ['https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&auto=format&fit=crop&q=80']
-          },
-          {
-            id: 'team-delta',
-            name: 'Team Delta',
-            hackathon: 'EcoTrack Climate Summit',
-            members: 4,
-            progress: 100,
-            status: 'Completed',
-            lastActivity: '3 days ago',
-            avatars: ['https://images.unsplash.com/photo-1517841905240-472988babdf9?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=60&auto=format&fit=crop&q=80']
-          }
-        ]);
-      }
-
-      // Mentorship requests
-      if (reqsRes.status === 'fulfilled' && reqsRes.value?.length) {
-        setRequests(reqsRes.value);
-      } else {
-        setRequests([
-          {
-            id: 'req-1',
-            teamName: 'Team Nova',
-            message: 'Looking for guidance with our AI recommendation model.',
-            track: 'Artificial Intelligence',
-            domain: 'Artificial Intelligence',
-            requestedDate: 'Today',
-            createdAt: new Date().toISOString(),
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-            teamSize: 3,
-          },
-          {
-            id: 'req-2',
-            teamName: 'Team EcoPulse',
-            message: 'Need assistance setting up IoT data ingestion pipelines with cloud functions.',
-            track: 'Climate & IoT',
-            domain: 'Climate & IoT',
-            requestedDate: 'Yesterday',
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-            teamSize: 4,
-          },
-        ]);
-      }
-
-      // Meetings / Sessions
-      if (meetingsRes.status === 'fulfilled' && meetingsRes.value?.length) {
-        setMeetings(meetingsRes.value);
-      } else {
-        // Check stored local sessions
-        const stored = JSON.parse(localStorage.getItem('proeduvate_mentor_sessions') || '[]');
-        if (stored.length) {
-          setMeetings(stored);
-        } else {
-          setMeetings([
-            {
-              id: 'sess-1',
-              dateLabel: 'Today',
-              timeLabel: '10:30 AM',
-              teamName: 'Team Alpha',
-              topic: 'Project Architecture Review',
-              type: 'Architecture Review',
-              meetingType: 'Google Meet',
-              link: 'https://meet.google.com/pro-alpha-rev',
-            },
-            {
-              id: 'sess-2',
-              dateLabel: 'Tomorrow',
-              timeLabel: '2:00 PM',
-              teamName: 'Team Nova',
-              topic: 'AI Model Discussion',
-              type: 'Technical Advisory',
-              meetingType: 'Zoom Meeting',
-              link: 'https://zoom.us/j/982341234',
-            },
-            {
-              id: 'sess-3',
-              dateLabel: 'Oct 28',
-              timeLabel: '4:30 PM',
-              teamName: 'Team Phoenix',
-              topic: 'Final Pitch Deck Rehearsal',
-              type: 'Pitch Prep',
-              meetingType: 'Google Meet',
-              link: 'https://meet.google.com/pro-phx-pitch',
-            },
-          ]);
-        }
-      }
+      setTeams(teamsRes.status === 'fulfilled' ? (teamsRes.value?.activeTeams || []) : []);
+      setRequests(reqsRes.status === 'fulfilled' ? (reqsRes.value || []) : []);
+      setMeetings(meetingsRes.status === 'fulfilled' ? (meetingsRes.value || []) : []);
     } catch (e) {
       console.error('Error loading mentor dashboard:', e);
     } finally {
@@ -205,12 +75,13 @@ export default function MentorDashboard() {
   const handleQuickDecline = async (requestId, teamName) => {
     try {
       await updateMentorshipRequestStatus(requestId, 'reject');
+      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+      addToast('Request Declined', `Declined mentorship request from ${teamName}.`, 'info');
+      triggerRefresh();
     } catch (e) {
-      console.warn('Decline status warning:', e);
+      console.error('Mentorship request update failed:', e);
+      addToast('Unable to decline request', 'The database did not save this change.', 'error');
     }
-    setRequests((prev) => prev.filter((r) => r.id !== requestId));
-    addToast('Request Declined', `Declined mentorship request from ${teamName}.`, 'info');
-    triggerRefresh();
   };
 
   // 4 Top Summary Stats

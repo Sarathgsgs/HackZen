@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createTeam } from '../../services/mentor/createTeamApi';
 import { fetchAllHackathons } from '../../api/hackathonApi';
+import { getUIDataset, saveUIDataset } from '../../services/uiDataApi';
 
 const CreateTeam = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [draftLoaded, setDraftLoaded] = useState(false);
 
     // Form State
-    const [formData, setFormData] = useState(() => {
-        const saved = sessionStorage.getItem('create_team_draft');
-        return saved ? JSON.parse(saved) : {
+    const [formData, setFormData] = useState({
             hackathon: '',
             teamName: '',
             problemDefinition: '',
@@ -21,7 +21,6 @@ const CreateTeam = () => {
             teamSize: 4,
             roles: [],
             visibility: 'Public'
-        };
     });
 
     const [errors, setErrors] = useState({});
@@ -44,10 +43,19 @@ const CreateTeam = () => {
         loadHackathons();
     }, []);
 
-    // Persistence
+    // Load and persist the draft in MongoDB so it survives a new session/device.
     useEffect(() => {
-        sessionStorage.setItem('create_team_draft', JSON.stringify(formData));
-    }, [formData]);
+        getUIDataset('student-team-create-draft', formData).then((saved) => {
+            if (saved) setFormData(saved);
+            setDraftLoaded(true);
+        }).catch((error) => {
+            console.error('Could not load team draft:', error);
+            setDraftLoaded(true);
+        });
+    }, []);
+    useEffect(() => {
+        if (draftLoaded) saveUIDataset('student-team-create-draft', formData).catch((error) => console.error('Could not save team draft:', error));
+    }, [formData, draftLoaded]);
 
     // Mock Options
     const domains = ['Artificial Intelligence', 'Sustainability', 'Cybersecurity', 'FinTech', 'Healthcare', 'EdTech'];
@@ -91,7 +99,7 @@ const CreateTeam = () => {
                 domain: formData.domain,
                 description: formData.description,
             });
-            sessionStorage.removeItem('create_team_draft');
+            await saveUIDataset('student-team-create-draft', null);
             navigate('/mentor/teams');
         } catch (error) {
             console.error("Failed to create team:", error);

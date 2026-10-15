@@ -10,9 +10,10 @@ export const fetchAssignedTeams = async () => {
         const { data: teams } = await apiClient.get('/teams/mentor-teams');
 
         const activeTeams = teams.map(team => ({
-            id: team._id,
+            id: String(team._id || team.id),
             name: team.teamName,
-            hackathon: team.hackathonId || 'Active Hackathon',
+            // hackathonId is a database reference, not a human-readable event name.
+            hackathon: team.hackathonName || team.hackathonTitle || team.hackathon || team.hackathonId || 'Active Hackathon',
             domain: team.domain || 'Technology',
             status: team.status || 'Active',
             progress: team.progress || 0,

@@ -30,69 +30,7 @@ export default function AssignedTeams() {
       try {
         setLoading(true);
         const data = await fetchAssignedTeams();
-        if (data?.activeTeams?.length) {
-          setTeams(data.activeTeams);
-        } else {
-          // Seed teams matching ProEduvate design
-          setTeams([
-            {
-              id: 'team-alpha',
-              name: 'Team Alpha',
-              hackathon: 'AI Innovation Hackathon',
-              domain: 'Artificial Intelligence',
-              members: 4,
-              progress: 72,
-              status: 'On Track',
-              lastActivity: '2 hours ago',
-              avatars: [
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80',
-                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80',
-              ],
-            },
-            {
-              id: 'team-nova',
-              name: 'Team Nova',
-              hackathon: 'HealthTech Global 2025',
-              domain: 'Healthcare Tech',
-              members: 3,
-              progress: 45,
-              status: 'Needs Attention',
-              lastActivity: '4 hours ago',
-              avatars: [
-                'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&auto=format&fit=crop&q=80',
-                'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&auto=format&fit=crop&q=80',
-              ],
-            },
-            {
-              id: 'team-phoenix',
-              name: 'Team Phoenix',
-              hackathon: 'NextGen FinTech Challenge',
-              domain: 'FinTech',
-              members: 5,
-              progress: 90,
-              status: 'On Track',
-              lastActivity: '1 day ago',
-              avatars: [
-                'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=60&auto=format&fit=crop&q=80',
-                'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&auto=format&fit=crop&q=80',
-              ],
-            },
-            {
-              id: 'team-delta',
-              name: 'Team Delta',
-              hackathon: 'EcoTrack Climate Summit',
-              domain: 'Climate & IoT',
-              members: 4,
-              progress: 100,
-              status: 'Completed',
-              lastActivity: '3 days ago',
-              avatars: [
-                'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=60&auto=format&fit=crop&q=80',
-                'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=60&auto=format&fit=crop&q=80',
-              ],
-            },
-          ]);
-        }
+        setTeams(data?.activeTeams || []);
       } catch (err) {
         console.error('Failed to load teams:', err);
       } finally {

@@ -46,10 +46,10 @@ export default function TeamDetails() {
 
   // Rubric Scores
   const [rubricScores, setRubricScores] = useState({
-    innovation: 8,
-    feasibility: 7,
-    execution: 8,
-    presentation: 9,
+    innovation: 0,
+    feasibility: 0,
+    execution: 0,
+    presentation: 0,
   });
 
   // Load team data
@@ -62,69 +62,8 @@ export default function TeamDetails() {
         setTeam(data.data);
       }
     } catch (err) {
-      // Fallback data for seamless UI presentation
-      setTeam({
-        id: teamId || 'team-alpha',
-        name: teamId === 'team-nova' ? 'Team Nova' : teamId === 'team-phoenix' ? 'Team Phoenix' : 'Team Alpha',
-        hackathon: 'AI Innovation Hackathon 2025',
-        status: 'On Track',
-        domain: 'Artificial Intelligence & Machine Learning',
-        description:
-          'Developing a multimodal AI assistant that helps neurodivergent students synthesize complex academic lectures into interactive mind-maps and digestible audio flashcards in real-time.',
-        progress: 72,
-        goals: [
-          { id: 1, title: 'Define project scope & architecture', done: true, due: 'Day 1' },
-          { id: 2, title: 'Train speech-to-text fine-tuned model', done: true, due: 'Day 2' },
-          { id: 3, title: 'Build interactive mind-map canvas UI', done: true, due: 'Day 3' },
-          { id: 4, title: 'Integrate real-time WebSocket audio pipeline', done: false, due: 'Day 4' },
-          { id: 5, title: 'Conduct user testing with 10 students', done: false, due: 'Day 5' },
-        ],
-        technologies: ['React 19', 'FastAPI', 'PyTorch', 'WebSockets', 'Tailwind CSS', 'Docker', 'MongoDB'],
-        challenges: [
-          'Minimizing streaming latency during concurrent live audio transcription.',
-          'Ensuring responsive SVG rendering for large hierarchical mind-map nodes.',
-        ],
-        recentActivity: [
-          { text: 'Pushed commit: Implement audio chunk streaming to backend', time: '1 hour ago' },
-          { text: 'Completed milestone: Frontend node layout engine', time: '3 hours ago' },
-          { text: 'Team lead updated Sprint 2 progress to 72%', time: 'Yesterday' },
-        ],
-        members: [
-          {
-            id: 1,
-            name: 'Alex Rivera',
-            role: 'Team Lead & ML Engineer',
-            email: 'alex@stanford.edu',
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 2,
-            name: 'Marcus Chen',
-            role: 'Full Stack Developer',
-            email: 'marcus@berkeley.edu',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 3,
-            name: 'Priya Sharma',
-            role: 'UI/UX & Product Designer',
-            email: 'priya@mit.edu',
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 4,
-            name: 'David Kim',
-            role: 'Backend & Cloud Ops',
-            email: 'david@cmu.edu',
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-          },
-        ],
-        links: {
-          github: 'https://github.com/proeduvate-hackathons/team-alpha-ai-maps',
-          demo: 'https://team-alpha-demo.proeduvate.com',
-          deck: 'https://pitch.com/p/team-alpha-presentation',
-        },
-      });
+      console.error('Could not load assigned team:', err);
+      setTeam(null);
     } finally {
       setLoading(false);
     }
@@ -137,52 +76,44 @@ export default function TeamDetails() {
   // Load meetings
   useEffect(() => {
     getMentorMeetings(true)
-      .then((records) => {
-        if (records?.length) {
-          setMeetings(records.filter((m) => m.teamId === teamId));
-        } else {
-          setMeetings([
-            {
-              id: 'm1',
-              title: 'Project Architecture Review',
-              startTime: new Date().toISOString(),
-              location: 'Google Meet',
-              meetingLink: 'https://meet.google.com/pro-alpha-rev',
-            },
-          ]);
-        }
-      })
-      .catch(() => {
-        setMeetings([
-          {
-            id: 'm1',
-            title: 'Project Architecture Review',
-            startTime: new Date().toISOString(),
-            location: 'Google Meet',
-            meetingLink: 'https://meet.google.com/pro-alpha-rev',
-          },
-        ]);
+      .then((records) => setMeetings((records || []).filter((meeting) => String(meeting.teamId) === String(teamId))))
+      .catch((error) => {
+        console.error('Could not load team sessions:', error);
+        setMeetings([]);
       });
   }, [teamId]);
 
-  // Load existing saved feedback draft
+  // Feedback drafts and submissions are loaded and saved through the MongoDB API.
   useEffect(() => {
-    const draft = localStorage.getItem(`mentor_feedback_draft_${teamId}`);
-    if (draft) {
-      setFeedbackText(draft);
-      setSavedDraft(draft);
-    }
+    apiClient.get(`/mentor/feedback/team/${teamId}`).then(({ data }) => {
+      const draft = data?.draft;
+      if (draft) {
+        const text = draft.guidance || draft.content || '';
+        setFeedbackText(text);
+        setSavedDraft(text);
+        setRubricScores((current) => ({ ...current, ...(draft.criteriaRatings || {}) }));
+      }
+    }).catch((error) => console.error('Could not load saved feedback:', error));
   }, [teamId]);
 
-  const handleSaveFeedback = () => {
+  const handleSaveFeedback = async () => {
     if (!feedbackText.trim()) return;
     setSavingFeedback(true);
-    localStorage.setItem(`mentor_feedback_draft_${teamId}`, feedbackText);
-    setSavedDraft(feedbackText);
-    setTimeout(() => {
+    try {
+      await apiClient.post('/mentor/feedback', {
+        teamId,
+        status: 'draft',
+        guidance: feedbackText,
+        criteriaRatings: rubricScores,
+      });
+      setSavedDraft(feedbackText);
+      addToast('Feedback Draft Saved', 'Your draft was saved to the database.', 'success');
+    } catch (error) {
+      console.error('Feedback draft save failed:', error);
+      addToast('Could not save draft', 'The database did not save your feedback.', 'error');
+    } finally {
       setSavingFeedback(false);
-      addToast('Feedback Draft Saved', 'Your notes have been saved to your local draft.', 'success');
-    }, 400);
+    }
   };
 
   const handleSendFeedback = async () => {
@@ -192,35 +123,19 @@ export default function TeamDetails() {
     }
     setSavingFeedback(true);
     try {
-      // Attempt backend post
-      try {
-        await apiClient.post('/mentor/feedback', {
-          teamId,
-          feedback: feedbackText,
-          scores: rubricScores,
-        });
-      } catch (apiErr) {
-        console.warn('Feedback submission local storage fallback:', apiErr);
-      }
-
-      // Store in sent feedbacks
-      const sentHistory = JSON.parse(localStorage.getItem(`mentor_feedback_sent_${teamId}`) || '[]');
-      const newEntry = {
-        id: Date.now(),
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        text: feedbackText,
-        scores: { ...rubricScores },
-      };
-      localStorage.setItem(`mentor_feedback_sent_${teamId}`, JSON.stringify([newEntry, ...sentHistory]));
-
-      localStorage.removeItem(`mentor_feedback_draft_${teamId}`);
+      await apiClient.post('/mentor/feedback', {
+        teamId,
+        status: 'submitted',
+        guidance: feedbackText,
+        criteriaRatings: rubricScores,
+      });
       setSavedDraft('');
       setFeedbackText('');
-      addToast('Feedback Sent!', `Your feedback was successfully shared with ${team?.name}.`, 'success');
+      addToast('Feedback Sent!', `Your feedback was shared with ${team?.name}.`, 'success');
       triggerRefresh();
-    } catch (err) {
-      console.error(err);
-      addToast('Error', 'Unable to send feedback. Please try again.', 'error');
+    } catch (error) {
+      console.error('Feedback submission failed:', error);
+      addToast('Unable to send feedback', 'The database did not accept this feedback. Check the required ratings and try again.', 'error');
     } finally {
       setSavingFeedback(false);
     }

@@ -38,65 +38,10 @@ export default function MentorResources() {
     setLoading(true);
     try {
       const data = await fetchMaterials();
-      if (data && data.length) {
-        setResources(data);
-      } else {
-        // High quality seed resources
-        setResources([
-          {
-            id: 'res-1',
-            title: 'Multimodal AI Streaming Boilerplate (FastAPI + React 19)',
-            category: 'Architecture & Boilerplates',
-            team: 'All Mentored Teams',
-            format: 'ZIP / Code',
-            size: '4.8 MB',
-            updatedAt: '2 days ago',
-            url: 'https://github.com/proeduvate-templates/ai-stream-starter',
-          },
-          {
-            id: 'res-2',
-            title: 'Winning Hackathon Pitch Deck & Demo Checklist',
-            category: 'Pitch Decks',
-            team: 'All Mentored Teams',
-            format: 'PDF',
-            size: '1.2 MB',
-            updatedAt: 'Oct 23, 2025',
-            url: '#',
-          },
-          {
-            id: 'res-3',
-            title: 'Vector Search Benchmark & Embedding Guidelines',
-            category: 'Guidelines',
-            team: 'Team Alpha',
-            format: 'DOCX',
-            size: '850 KB',
-            updatedAt: 'Yesterday',
-            url: '#',
-          },
-          {
-            id: 'res-4',
-            title: 'HIPAA & Health Data Compliance Whitepaper',
-            category: 'Guidelines',
-            team: 'Team Nova',
-            format: 'PDF',
-            size: '2.1 MB',
-            updatedAt: 'Oct 20, 2025',
-            url: '#',
-          },
-          {
-            id: 'res-5',
-            title: 'Synthetic Medical Dataset Generator Script',
-            category: 'Datasets & APIs',
-            team: 'Team Nova',
-            format: 'PY',
-            size: '340 KB',
-            updatedAt: 'Oct 19, 2025',
-            url: '#',
-          },
-        ]);
-      }
+      setResources(data || []);
     } catch (e) {
-      console.warn('Fallback resources:', e);
+      console.error('Could not load resources:', e);
+      setResources([]);
     } finally {
       setLoading(false);
     }

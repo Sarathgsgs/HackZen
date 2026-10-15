@@ -17,7 +17,10 @@ import {
   ChevronDown,
   Menu,
   X,
-  ArrowRight
+  ArrowRight,
+  CheckSquare,
+  ClipboardCheck,
+  Sparkles
 } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
 import { useMentor } from '../../context/MentorContext';
@@ -39,13 +42,28 @@ export default function MentorLayout() {
 
   const profileRef = useRef(null);
   const notifRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const closeButtonRef = useRef(null);
 
   // Close drawer and dropdowns on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDrawerOpen(false);
     setProfileDropdownOpen(false);
     setNotificationDropdownOpen(false);
   }, [location.pathname]);
+
+  // Prevent background scrolling when drawer is open and manage initial focus
+  useEffect(() => {
+    if (drawerOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      closeButtonRef.current?.focus();
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [drawerOpen]);
 
   // Click outside to close dropdowns and Escape key to close drawer/dropdowns
   useEffect(() => {
@@ -59,7 +77,10 @@ export default function MentorLayout() {
     };
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setDrawerOpen(false);
+        if (drawerOpen) {
+          setDrawerOpen(false);
+          menuButtonRef.current?.focus();
+        }
         setProfileDropdownOpen(false);
         setNotificationDropdownOpen(false);
       }
@@ -70,7 +91,7 @@ export default function MentorLayout() {
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [drawerOpen]);
 
   // Reactive user profile state
   const [user, setUser] = useState(() => {
@@ -142,33 +163,62 @@ export default function MentorLayout() {
     navigate('/login', { replace: true });
   };
 
-  // Drawer Navigation Items (Top group)
+  // Drawer Navigation Items (Core Mentor Navigation)
   const drawerNavItems = [
     { name: 'Dashboard', path: '/mentor/dashboard', icon: LayoutDashboard },
     { name: 'Hackathons', path: '/mentor/hackathons', icon: Trophy },
-    { name: 'Teams', path: '/mentor/teams', icon: Users },
-    { name: 'Requests', path: '/mentor/requests', icon: Inbox, badge: 3 },
-    { name: 'Sessions', path: '/mentor/sessions', icon: Calendar },
-    { name: 'Messages', path: '/mentor/messages', icon: MessageSquare },
+    { name: 'My Teams', path: '/mentor/teams', icon: Users },
+    { name: 'Mentorship Requests', path: '/mentor/requests', icon: Inbox, badge: unreadCount || 3 },
+    { name: 'Team Chat', path: '/mentor/messages', icon: MessageSquare },
+    { name: 'Meetings / Schedule Sessions', path: '/mentor/sessions', icon: Calendar },
+    { name: 'Feedback Management', path: '/mentor/feedback', icon: CheckSquare },
+    { name: 'Submissions / Review Teams', path: '/mentor/reviews', icon: ClipboardCheck },
     { name: 'Resources', path: '/mentor/resources', icon: BookOpen },
+    { name: 'AI Assistant', path: '/mentor/ai-co-mentor', icon: Sparkles },
   ];
 
-  // Drawer Navigation Items (Bottom group)
+  // Drawer Secondary Navigation Items (Account & Settings)
   const drawerSecondaryNavItems = [
-    { name: 'Profile', path: '/mentor/profile', icon: User },
+    { name: 'Mentor Profile', path: '/mentor/profile', icon: User },
     { name: 'Settings', path: '/mentor/settings', icon: Settings },
   ];
 
   // Active status helper
   const isItemActive = (path) => {
+    const current = location.pathname;
     if (path === '/mentor/dashboard') {
       return (
-        location.pathname === '/mentor' ||
-        location.pathname === '/mentor/' ||
-        location.pathname === '/mentor/dashboard'
+        current === '/mentor' ||
+        current === '/mentor/' ||
+        current === '/mentor/dashboard'
       );
     }
-    return location.pathname === path || (path !== '/mentor/dashboard' && location.pathname.startsWith(`${path}/`));
+    if (path === '/mentor/requests') {
+      return (
+        current === '/mentor/requests' ||
+        current.startsWith('/mentor/requests/') ||
+        current === '/mentor/mentorship-requests' ||
+        current.startsWith('/mentor/mentorship-requests/')
+      );
+    }
+    if (path === '/mentor/resources') {
+      return (
+        current === '/mentor/resources' ||
+        current.startsWith('/mentor/resources/') ||
+        current === '/mentor/materials' ||
+        current.startsWith('/mentor/materials/')
+      );
+    }
+    if (path === '/mentor/teams') {
+      return (
+        current === '/mentor/teams' ||
+        current.startsWith('/mentor/teams/') ||
+        current === '/mentor/assigned-teams' ||
+        current === '/mentor/discover-teams' ||
+        current === '/mentor/create-team'
+      );
+    }
+    return current === path || current.startsWith(`${path}/`);
   };
 
   // Dynamic header titles based on pathname
@@ -232,6 +282,18 @@ export default function MentorLayout() {
       return {
         title: 'Team Evaluations & Feedback',
         subtitle: 'Comprehensive rubric scoring and structured team feedback.',
+      };
+    }
+    if (p.includes('/mentor/reviews')) {
+      return {
+        title: 'Submissions / Review Teams',
+        subtitle: 'Review milestone progress, inspect submissions, and provide evaluation scores.',
+      };
+    }
+    if (p.includes('/mentor/ai-co-mentor')) {
+      return {
+        title: 'AI Assistant',
+        subtitle: 'Intelligent co-mentor guidance, architecture review, and feedback suggestions.',
       };
     }
     return {
@@ -453,8 +515,11 @@ export default function MentorLayout() {
 
           {/* ☰ HAMBURGER MENU BUTTON */}
           <button
-            onClick={() => setDrawerOpen(true)}
-            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-navy-950 hover:bg-[#F2EEFD] hover:border-[#5B45D9]/40 hover:text-[#5B45D9] dark:hover:bg-purple-950/30 dark:hover:text-purple-300 text-slate-700 dark:text-slate-200 transition-all shadow-xs flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#5B45D9]/20"
+            ref={menuButtonRef}
+            onClick={() => setDrawerOpen((prev) => !prev)}
+            aria-expanded={drawerOpen}
+            aria-controls="mentor-sidebar-drawer"
+            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-navy-950 hover:bg-[#F2EEFD] hover:border-[#5B45D9]/40 hover:text-[#5B45D9] dark:hover:bg-purple-950/30 dark:hover:text-purple-300 text-slate-700 dark:text-slate-200 transition-all shadow-xs flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#5B45D9]/20 focus-visible:ring-2 focus-visible:ring-[#5B45D9]"
             aria-label="Open Navigation Menu"
             title="Open Navigation Menu"
           >
@@ -470,40 +535,66 @@ export default function MentorLayout() {
       {/* Backdrop */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"
           onClick={() => setDrawerOpen(false)}
           aria-hidden="true"
         />
       )}
 
       {/* Slide-out Drawer Menu */}
-      <div
-        className={`fixed inset-y-0 right-0 z-50 w-72 sm:w-80 bg-white dark:bg-[#111625] border-l border-slate-200/80 dark:border-white/10 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
-          drawerOpen ? 'translate-x-0' : 'translate-x-full'
+      <aside
+        id="mentor-sidebar-drawer"
+        className={`fixed inset-y-0 right-0 z-50 w-72 sm:w-80 md:w-84 max-w-[85vw] bg-white dark:bg-[#111625] border-l border-slate-200/80 dark:border-white/10 shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+          drawerOpen ? 'translate-x-0 opacity-100 visible' : 'translate-x-full opacity-0 invisible pointer-events-none'
         }`}
         role="dialog"
         aria-modal="true"
-        aria-label="Navigation Drawer"
+        aria-hidden={!drawerOpen}
+        aria-label="Mentor Navigation Sidebar"
       >
         {/* Drawer Header */}
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-[#FAFAFD] dark:bg-navy-950/40">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              Navigation
-            </span>
-          </div>
-          <button
+        <div className="px-5 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-[#FAFAFD] dark:bg-navy-950/40 shrink-0">
+          <Link
+            to="/mentor/dashboard"
             onClick={() => setDrawerOpen(false)}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-white/10 transition-colors"
-            aria-label="Close Navigation"
+            className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B45D9] rounded-lg"
+            aria-label="HackZen Mentor Workspace"
+          >
+            <img
+              src="/proeduvate-dark-text.png"
+              alt="HackZen"
+              className="h-7 w-auto object-contain dark:hidden transition-transform group-hover:scale-105"
+            />
+            <img
+              src="/proeduvatee-removebg-preview.png"
+              alt="HackZen"
+              className="h-7 w-auto object-contain hidden dark:block transition-transform group-hover:scale-105"
+            />
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200/50 dark:border-purple-500/20">
+              Mentor Workspace
+            </span>
+          </Link>
+          <button
+            ref={closeButtonRef}
+            onClick={() => {
+              setDrawerOpen(false);
+              menuButtonRef.current?.focus();
+            }}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B45D9]"
+            aria-label="Close navigation sidebar"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Drawer Navigation Links */}
-        <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-1">
-          {/* Top Group: Core Mentorship Features */}
+        <nav
+          className="flex-1 overflow-y-auto px-3.5 py-4 space-y-1 min-h-0"
+          aria-label="Mentor Navigation Links"
+        >
+          <div className="px-3.5 pb-2 text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+            Workspace Navigation
+          </div>
           {drawerNavItems.map((item) => {
             const Icon = item.icon;
             const active = isItemActive(item.path);
@@ -513,7 +604,8 @@ export default function MentorLayout() {
                 key={item.name}
                 to={item.path}
                 onClick={() => setDrawerOpen(false)}
-                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                aria-current={active ? 'page' : undefined}
+                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B45D9] ${
                   active
                     ? 'bg-[#F2EEFD] text-[#5B45D9] font-bold dark:bg-[#5B45D9]/20 dark:text-purple-300 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'
@@ -529,19 +621,22 @@ export default function MentorLayout() {
                   />
                   <span className="truncate">{item.name}</span>
                 </div>
-                {item.badge && (
+                {item.badge ? (
                   <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#5B45D9] text-white dark:bg-purple-600">
                     {item.badge}
                   </span>
-                )}
+                ) : null}
               </NavLink>
             );
           })}
 
-          {/* Divider between Resources and Profile/Settings */}
+          {/* Divider between Workspace and Account */}
           <div className="my-2.5 border-t border-slate-100 dark:border-white/10" />
 
-          {/* Bottom Group: Profile & Settings */}
+          {/* Secondary Account Group */}
+          <div className="px-3.5 pb-2 text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+            Account & Settings
+          </div>
           {drawerSecondaryNavItems.map((item) => {
             const Icon = item.icon;
             const active = isItemActive(item.path);
@@ -551,7 +646,8 @@ export default function MentorLayout() {
                 key={item.name}
                 to={item.path}
                 onClick={() => setDrawerOpen(false)}
-                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                aria-current={active ? 'page' : undefined}
+                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B45D9] ${
                   active
                     ? 'bg-[#F2EEFD] text-[#5B45D9] font-bold dark:bg-[#5B45D9]/20 dark:text-purple-300 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'
@@ -570,16 +666,17 @@ export default function MentorLayout() {
               </NavLink>
             );
           })}
-        </div>
+        </nav>
 
         {/* Drawer Footer (User Card & Help) */}
-        <div className="p-3.5 border-t border-slate-100 dark:border-white/10 space-y-2 bg-[#FAFAFD]/60 dark:bg-navy-950/40">
+        <div className="p-3.5 border-t border-slate-100 dark:border-white/10 space-y-2 bg-[#FAFAFD]/60 dark:bg-navy-950/40 shrink-0 mt-auto">
           <button
             onClick={() => {
               setDrawerOpen(false);
               openHelpModal();
             }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B45D9]"
+            aria-label="Open Help & FAQs"
           >
             <HelpCircle className="w-4 h-4 text-slate-400" />
             <span>Help & FAQs</span>
@@ -589,17 +686,26 @@ export default function MentorLayout() {
             <Link
               to="/mentor/profile"
               onClick={() => setDrawerOpen(false)}
-              className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-90"
+              className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B45D9] rounded-lg p-0.5"
+              aria-label="View Mentor Profile"
             >
-              <div className="w-8 h-8 rounded-full bg-[#5B45D9] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs shadow-purple-500/20">
-                {initials}
-              </div>
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user?.name || 'Mentor'}
+                  className="w-8 h-8 rounded-full object-cover shrink-0 shadow-xs border border-purple-200/50 dark:border-purple-500/20"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-[#5B45D9] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs shadow-purple-500/20">
+                  {initials}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                  {user?.name || 'Dr. Sarah Mitchell'}
+                  {user?.name || user?.fullName || 'Dr. Sarah Mitchell'}
                 </p>
                 <p className="text-[10px] font-semibold text-[#5B45D9] dark:text-purple-300">
-                  Mentor
+                  {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Mentor'}
                 </p>
               </div>
             </Link>
@@ -608,14 +714,15 @@ export default function MentorLayout() {
                 setDrawerOpen(false);
                 handleLogout();
               }}
-              title="Log Out"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors ml-1"
+              title="Sign Out"
+              aria-label="Sign Out"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors ml-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* ================================================== */}
       {/* MAIN CONTENT OUTLET (Full-Width) */}

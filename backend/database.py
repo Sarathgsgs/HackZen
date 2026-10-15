@@ -57,6 +57,7 @@ class MongoDB:
 
         await cls.db.users.create_index([("email", pymongo.ASCENDING)], unique=True)
         await cls.db.users.create_index([("role", pymongo.ASCENDING)])
+        await cls.db.ui_data.create_index([("userId", pymongo.ASCENDING), ("key", pymongo.ASCENDING)], unique=True)
 
         # Profile collections
         await cls.db.students.create_index([("userId", pymongo.ASCENDING)], unique=True)

@@ -69,12 +69,22 @@ html.dark, [data-theme="dark"], .dark {
   --color-input-border: #4b5563;
   --color-input-placeholder: #64748b;
 }
-
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;
     overflow-x: hidden;
+  }
+
+  html,
+  body,
+  #root,
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
 
   body {
@@ -88,7 +98,7 @@ html.dark, [data-theme="dark"], .dark {
   }
 
   html.dark body {
-    @apply selection:bg-cyan-500/30 selection:text-cyan-200;
+    @apply selection:bg-purple-500/30 selection:text-purple-200;
   }
 
   html.light body {

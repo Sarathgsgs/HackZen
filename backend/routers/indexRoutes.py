@@ -24,6 +24,7 @@ from routers import (
     oauth,
     mentor_dashboard,
     mentor_settings,
+    ui_data,
 )
 
 router = APIRouter()
@@ -48,7 +49,6 @@ router.include_router(evaluation.router, prefix="/evaluations", tags=["Evaluatio
 # Mentor Routers
 router.include_router(mentor_dashboard.router, prefix="/mentor", tags=["Mentor Dashboard"])
 router.include_router(mentor_settings.router, prefix="/mentor", tags=["Mentor Settings"])
-
 # Admin Backend Routers
 router.include_router(admin_users.router)
 router.include_router(admin_approvals.router)
@@ -57,3 +57,5 @@ router.include_router(admin_disputes.router)
 router.include_router(admin_organizers.router)
 router.include_router(admin_analytics.router)
 router.include_router(admin_settings.router)
+
+router.include_router(ui_data.router, prefix="/ui-data", tags=["UI Data"])

@@ -21,6 +21,15 @@ class OrganizerBroadcastRequest(BaseModel):
     urgency: Optional[str] = "normal"
 
 
+@router.get("/public-stats")
+async def get_public_stats():
+    db = get_db()
+    users = await db.users.count_documents({})
+    hackathons = await db.hackathons.count_documents({"status": {"$in": ["live", "published", "active"]}})
+    mentors = await db.users.count_documents({"role": "mentor"})
+    return {"totalUsers": users, "activeHackathons": hackathons, "mentors": mentors}
+
+
 # Schema models for Quick Actions
 class ApprovalRequest(BaseModel):
     role: str

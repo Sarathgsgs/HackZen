@@ -1,67 +1,73 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  User,
-  Mail,
-  Building,
-  Award,
   Calendar,
-  Star,
-  Edit3,
-  ExternalLink,
-  CheckCircle2,
-  Users,
   Clock,
-  Sparkles
+  CheckCircle2,
+  MapPin,
+  ExternalLink,
+  Edit3,
+  ChevronRight,
+  User,
+  Sparkles,
+  Mail
 } from 'lucide-react';
 import { fetchMentorProfile } from '../../services/mentor/profileApi';
-
-const LinkedInIcon = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-  </svg>
-);
-
-const GitHubIcon = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-  </svg>
-);
+import { useMentor } from '../../context/MentorContext';
 
 export default function MentorProfile() {
   const navigate = useNavigate();
+  const { openScheduleModal, addToast } = useMentor();
 
   const [user, setUser] = useState({
-    name: 'Dr. Sarah Mitchell',
-    role: 'Expert Hackathon Mentor',
-    institution: 'Stanford AI Lab / Google Research',
-    bio: 'Senior Machine Learning researcher & system architect with 10+ years of experience guiding hackathon teams through production LLM integration, distributed systems, and pitch delivery.',
-    email: 'mentor@proeduvate.com',
-    phoneNumber: '+1 (555) 234-5678',
-    stats: {
-      teams: 12,
-      rating: '4.9/5',
-      sessions: 38,
-      completedMentorships: 27,
-    },
-    competencies: [
-      'Deep Learning & Multimodal LLMs',
-      'Distributed Systems & Cloud Scaling',
-      'AI Ethics, Privacy & Safety',
-      'Product Architecture & Pitch Coaching',
-      'Vector Search & RAG Optimization',
+    name: 'Sara',
+    fullName: 'Sarah Chen',
+    role: 'Lead Product Designer',
+    institution: 'Designify Studio',
+    location: 'San Francisco, CA (PST)',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=240&auto=format&fit=crop&q=80',
+    bio: 'With over 6 years of experience in user experience and product design, Sarah specializes in building intuitive interfaces for complex B2B platforms. She is passionate about mentoring teams to bridge the gap between design and development, ensuring a seamless user journey from concept to launch.',
+    email: 'sarah.chen@designify.studio',
+    availabilityStatus: 'Current Team Mentor',
+    availableSlots: [
+      { date: 'Oct 24, Tue', time: '10:00 - 12:00 PST' },
+      { date: 'Oct 26, Thu', time: '09:00 - 11:00 PST' }
+    ],
+    mentorshipActiveSince: 'Mentorship Active since Oct 2023',
+    skills: ['UX/UI', 'Product Strategy', 'User Research', 'Figma', 'Prototyping'],
+    technicalStrengths: [
+      'Design Systems',
+      'User-Centered Design',
+      'Responsive Web Apps'
+    ],
+    mentorshipStyle: [
+      'Collaborative',
+      'Hands-on',
+      'Design Thinking'
+    ],
+    experiences: [
+      {
+        id: 1,
+        title: 'Product Design Lead - Global Design Hackathon 2023',
+        meta: 'Oct 2023 • Remote',
+        description: 'Mentored design tracks for 12 teams, focusing on accessibility and user flow optimization.',
+        dotColor: 'bg-[#5B45D9]'
+      },
+      {
+        id: 2,
+        title: 'Senior Designer - Innovation Challenge 2022',
+        meta: '2022 • San Francisco',
+        description: 'Led workshops on rapid prototyping and design-to-dev handoff for early-stage startups.',
+        dotColor: 'bg-slate-300 dark:bg-slate-600'
+      }
     ],
     social: {
-      linkedin: 'https://linkedin.com/in/sarahmitchell',
-      github: 'https://github.com/sarahmitchell-ai',
-      website: 'https://mitchell-lab.stanford.edu',
-    },
-    recentActions: [
-      { id: 1, type: 'Review', title: 'Team Alpha Architecture Review', detail: 'Technical milestone approved', time: '2 hours ago' },
-      { id: 2, type: 'Session', title: 'Consultation with Team Nova', detail: 'Concluded 1:1 consultation', time: '4 hours ago' },
-      { id: 3, type: 'Feedback', title: 'Sprint 2 Milestone Feedback', detail: 'Scored 8.5/10 rubric review', time: 'Yesterday' },
-    ],
+      linkedin: 'https://linkedin.com/in/sarahchen-design',
+      github: 'https://github.com/sarahchen'
+    }
   });
+
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     fetchMentorProfile()
@@ -70,11 +76,22 @@ export default function MentorProfile() {
           setUser((prev) => ({
             ...prev,
             ...data,
-            name: data.name || prev.name,
+            name: data.name ? (data.name.includes(' ') ? data.name.split(' ')[0] : data.name) : prev.name,
+            fullName: data.name || prev.fullName,
+            role: data.role || prev.role,
             institution: data.companyName || data.institution || prev.institution,
-            competencies: Array.isArray(data.expertiseDomains) && data.expertiseDomains.length
+            bio: data.bio && data.bio.trim() ? data.bio : prev.bio,
+            skills: Array.isArray(data.expertiseDomains) && data.expertiseDomains.length
               ? data.expertiseDomains
-              : prev.competencies,
+              : Array.isArray(data.expertise) && data.expertise.length
+                ? data.expertise
+                : prev.skills,
+            availabilityStatus: data.availability || prev.availabilityStatus,
+            social: {
+              ...prev.social,
+              linkedin: data.links?.linkedin || data.linkedinUrl || prev.social.linkedin,
+              github: data.links?.github || data.githubUrl || prev.social.github,
+            }
           }));
         }
       })
@@ -83,7 +100,7 @@ export default function MentorProfile() {
       });
   }, []);
 
-  const initials = user.name
+  const initials = (user.fullName || user.name || 'SC')
     .split(' ')
     .filter(Boolean)
     .map((n) => n[0])
@@ -91,36 +108,62 @@ export default function MentorProfile() {
     .slice(0, 2)
     .toUpperCase();
 
+  const handleRequestMentor = () => {
+    if (typeof openScheduleModal === 'function') {
+      openScheduleModal({ mentorName: user.fullName || user.name, role: user.role });
+    }
+    if (typeof addToast === 'function') {
+      addToast(
+        'Mentorship Requested',
+        `Your request has been routed to ${user.fullName || user.name}.`,
+        'success'
+      );
+    }
+  };
+
+  const handleViewLinkedIn = () => {
+    const url = user.social?.linkedin || user.linkedinUrl;
+    if (url && url.startsWith('http')) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      if (typeof addToast === 'function') {
+        addToast(
+          'LinkedIn Profile',
+          'Opening verified LinkedIn directory...',
+          'info'
+        );
+      }
+      window.open(`https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(user.fullName || user.name)}`, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
-      {/* Profile Banner & Header Card */}
-      <div className="bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
-        {/* Top Decorative Lavender Banner */}
-        <div className="h-28 bg-gradient-to-r from-[#5B45D9]/15 via-[#6C4CE8]/10 to-blue-500/10 dark:from-purple-950/40 dark:to-navy-950" />
+    <div className="max-w-6xl mx-auto space-y-5 pb-12 animate-in fade-in duration-300 font-sans">
+      {/* Top Header & Breadcrumb */}
+      <div>
+        {/* Breadcrumb matching Reference Image 1 */}
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-2">
+          <Link to="/mentor/hackathons" className="hover:text-[#5B45D9] transition-colors">
+            Hackathons
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          <Link to="/mentor/teams" className="hover:text-[#5B45D9] transition-colors">
+            Mentor Discovery
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          <span className="font-semibold text-slate-800 dark:text-slate-200">
+            {user.fullName || user.name}
+          </span>
+        </div>
 
-        <div className="px-6 sm:px-8 pb-7 -mt-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-            <div className="w-24 h-24 rounded-2xl bg-[#5B45D9] text-white flex items-center justify-center font-extrabold text-2xl ring-4 ring-white dark:ring-[#111625] shadow-md">
-              {initials}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {user.name}
-                </h1>
-                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200">
-                  Verified Mentor
-                </span>
-              </div>
-              <p className="text-xs text-[#5B45D9] dark:text-purple-300 font-semibold mt-0.5">
-                {user.role} · <span className="text-slate-500 dark:text-slate-400 font-normal">{user.institution}</span>
-              </p>
-            </div>
-          </div>
-
+        {/* Page Title & Edit Shortcut */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Mentor Profile
+          </h1>
           <Link
             to="/mentor/profile/edit"
-            className="px-4 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs shadow-purple-500/20 transition-all flex items-center gap-1.5 self-start sm:self-auto"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111625] text-slate-700 dark:text-slate-200 hover:border-[#5B45D9] hover:text-[#5B45D9] dark:hover:text-purple-300 text-xs font-semibold shadow-2xs transition-all"
           >
             <Edit3 className="w-3.5 h-3.5" />
             Edit Profile
@@ -128,122 +171,215 @@ export default function MentorProfile() {
         </div>
       </div>
 
-      {/* 4 Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
-          <span className="text-xs font-semibold text-slate-400">Teams Mentoring</span>
-          <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-            {user.stats?.teams || 12}
-          </p>
-        </div>
-        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
-          <span className="text-xs font-semibold text-slate-400">Mentor Rating</span>
-          <p className="text-2xl font-extrabold text-amber-500 mt-1 flex items-center justify-center gap-1">
-            <Star className="w-5 h-5 fill-amber-400" />
-            {user.stats?.rating || '4.9/5'}
-          </p>
-        </div>
-        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
-          <span className="text-xs font-semibold text-slate-400">Sessions Completed</span>
-          <p className="text-2xl font-extrabold text-[#5B45D9] mt-1">
-            {user.stats?.sessions || 38}
-          </p>
-        </div>
-        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
-          <span className="text-xs font-semibold text-slate-400">Alumni Cohorts</span>
-          <p className="text-2xl font-extrabold text-emerald-600 mt-1">
-            {user.stats?.completedMentorships || 27}
-          </p>
-        </div>
-      </div>
+      {/* Main Two-Column Layout (Matching Reference Image 1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* ========================================================= */}
+        {/* LEFT COLUMN: Mentor Profile Card & Availability Card (span 4) */}
+        {/* ========================================================= */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* A. Mentor Profile Card */}
+          <div className="bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 shadow-xs text-center transition-colors">
+            {/* Avatar Photo / Fallback */}
+            <div className="relative mx-auto w-28 h-28 mb-4">
+              {!imageError && user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  onError={() => setImageError(true)}
+                  className="w-28 h-28 rounded-full object-cover ring-4 ring-purple-100 dark:ring-purple-900/30 mx-auto shadow-sm"
+                />
+              ) : (
+                <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#5B45D9] to-indigo-500 text-white flex items-center justify-center font-bold text-2xl ring-4 ring-purple-100 dark:ring-purple-900/30 mx-auto shadow-sm">
+                  {initials}
+                </div>
+              )}
+            </div>
 
-      {/* Two Column Grid: Left About & Skills, Right Activity & Contact */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (span 7) */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* About / Bio */}
-          <div className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-              About & Mentorship Philosophy
+            {/* Mentor Name */}
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              {user.name}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
+
+            {/* Professional Designation and Organization */}
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[240px] mx-auto leading-relaxed">
+              {user.role} at {user.institution}
+            </p>
+
+            {/* Location Pill */}
+            <div className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-navy-950 text-slate-600 dark:text-slate-300 text-xs font-medium">
+              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span>{user.location}</span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-6 space-y-2.5">
+              <button
+                type="button"
+                onClick={handleRequestMentor}
+                className="w-full py-2.5 px-4 rounded-xl border border-[#5B45D9] text-[#5B45D9] hover:bg-[#5B45D9] hover:text-white dark:text-purple-300 dark:border-purple-500/50 dark:hover:bg-[#5B45D9] dark:hover:text-white font-bold text-xs transition-all shadow-xs active:scale-[0.99] cursor-pointer"
+              >
+                Request Mentor
+              </button>
+
+              <button
+                type="button"
+                onClick={handleViewLinkedIn}
+                className="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 font-bold text-xs transition-all shadow-2xs active:scale-[0.99] cursor-pointer"
+              >
+                View LinkedIn
+              </button>
+            </div>
+          </div>
+
+          {/* B. Availability Card */}
+          <div className="bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 shadow-xs space-y-4 transition-colors">
+            {/* Availability Header */}
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[#5B45D9] dark:text-purple-400" />
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                Availability
+              </h3>
+            </div>
+
+            {/* Current Mentor Status Indicator */}
+            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+              <span>{user.availabilityStatus}</span>
+            </div>
+
+            {/* Upcoming Available Slots */}
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-2.5">
+                Next available slots:
+              </p>
+              <div className="space-y-2">
+                {user.availableSlots.map((slot, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-[#F8F8FD] dark:bg-navy-950/70 border border-slate-100 dark:border-white/5 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs"
+                  >
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {slot.date}
+                    </span>
+                    <span className="font-semibold text-slate-900 dark:text-white">
+                      {slot.time}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mentorship Active Since Subtext */}
+            <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+              <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+              <span>{user.mentorshipActiveSince}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* RIGHT COLUMN: About, Expertise & Skills, Experience (span 8) */}
+        {/* ========================================================= */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* C. About Section */}
+          <div className="bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 shadow-xs transition-colors">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-3">
+              About
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
               {user.bio}
             </p>
           </div>
 
-          {/* Competencies */}
-          <div className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-              Areas of Expertise
-            </h2>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {(user.competencies || []).map((skill, i) => (
+          {/* D. Expertise & Skills Section */}
+          <div className="bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 shadow-xs space-y-5 transition-colors">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              Expertise & Skills
+            </h3>
+
+            {/* Skill Badges / Chips */}
+            <div className="flex flex-wrap gap-2">
+              {user.skills.map((skill, idx) => (
                 <span
-                  key={i}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-100 dark:border-purple-800/40"
+                  key={idx}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#F0EEFD] dark:bg-purple-950/50 text-[#5B45D9] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/30 transition-colors"
                 >
                   {skill}
                 </span>
               ))}
             </div>
-          </div>
-        </div>
 
-        {/* Right Column (span 5) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Contact & Social Links */}
-          <div className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-              Contact & Social Channels
-            </h2>
-            <div className="space-y-2.5 pt-1 text-xs">
-              <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-100 dark:border-white/5 text-slate-700 dark:text-slate-300 font-medium">
-                <Mail className="w-4 h-4 text-[#5B45D9]" />
-                {user.email}
+            {/* Subsections: Technical Strengths & Mentorship Style */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-1">
+              {/* Technical Strengths */}
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-3">
+                  TECHNICAL STRENGTHS
+                </h4>
+                <div className="space-y-2.5">
+                  {user.technicalStrengths.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-200"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-[#5B45D9] dark:text-purple-400 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              {user.social?.linkedin && (
-                <a
-                  href={user.social.linkedin}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-100 dark:border-white/5 hover:border-[#5B45D9] text-slate-700 dark:text-slate-300 font-medium transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <LinkedInIcon className="w-4 h-4 text-blue-600" />
-                    LinkedIn Profile
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                </a>
-              )}
-              {user.social?.github && (
-                <a
-                  href={user.social.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-100 dark:border-white/5 hover:border-[#5B45D9] text-slate-700 dark:text-slate-300 font-medium transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <GitHubIcon className="w-4 h-4 text-slate-800 dark:text-slate-200" />
-                    GitHub Profile
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                </a>
-              )}
+
+              {/* Mentorship Style */}
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-3">
+                  MENTORSHIP STYLE
+                </h4>
+                <div className="space-y-2.5">
+                  {user.mentorshipStyle.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-200"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-[#5B45D9] dark:text-purple-400 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Active Since Footer */}
+            <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+              <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+              <span>{user.mentorshipActiveSince}</span>
             </div>
           </div>
 
-          {/* Recent Mentorship Log */}
-          <div className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-              Recent Mentorship Actions
-            </h2>
-            <div className="space-y-3 pt-1 text-xs">
-              {(user.recentActions || []).map((act) => (
-                <div key={act.id} className="flex items-start gap-2.5">
-                  <div className="w-2 h-2 rounded-full bg-[#5B45D9] mt-1.5 shrink-0" />
+          {/* E. Mentoring Experience Section */}
+          <div className="bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 shadow-xs transition-colors">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-5">
+              Mentoring Experience
+            </h3>
+
+            {/* Vertical Timeline */}
+            <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/10">
+              {user.experiences.map((exp) => (
+                <div key={exp.id} className="relative group">
+                  <span
+                    className={`absolute -left-[22px] top-1.5 w-2.5 h-2.5 rounded-full ${exp.dotColor} ring-4 ring-white dark:ring-[#111625]`}
+                  />
                   <div>
-                    <h4 className="font-bold text-slate-800 dark:text-white">{act.title}</h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{act.detail} · {act.time}</p>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                      {exp.title}
+                    </h4>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">
+                      {exp.meta}
+                    </p>
+                    {exp.description && (
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-normal">
+                        {exp.description}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

@@ -370,26 +370,6 @@ async def get_all_certificates_admin(
 
     certs = await certs_col.find().sort("issuedAt", -1).to_list(200)
 
-    # Auto-seed if collection is empty
-    if not certs:
-        seed = [
-            {
-                "userId": "seed_u1",
-                "teamId": "seed_t1",
-                "hackathonId": "seed_h1",
-                "certificateUrl": "#",
-                "validationId": "CERT-SEED-001",
-                "issuedAt": datetime.utcnow(),
-                "status": "Issued",
-                "recipientName": "Alex Johnson",
-                "recipientEmail": "alex@example.com",
-                "eventTitle": "Global AI Summit 2024",
-                "certType": "Winner",
-            }
-        ]
-        await certs_col.insert_many(seed)
-        certs = await certs_col.find().to_list(200)
-
     result = []
     for c in certs:
         user = None

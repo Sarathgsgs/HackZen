@@ -1,18 +1,7 @@
 import apiClient from '../../api/api';
+import { getUIDataset, saveUIDataset } from '../uiDataApi';
 
-const STORAGE_KEY = 'student_hackathon_registration_drafts';
-
-const readDrafts = () => {
-    try {
-        return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
-    } catch (error) {
-        return {};
-    }
-};
-
-const writeDrafts = (drafts) => {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(drafts));
-};
+const STORAGE_KEY = 'student-registration-drafts';
 
 export const createInitialRegistrationDraft = (hackathon, user) => ({
     hackathonId: hackathon.id || hackathon._id,
@@ -26,7 +15,7 @@ export const createInitialRegistrationDraft = (hackathon, user) => ({
 });
 
 export const getRegistrationDraft = async (hackathon, user) => {
-    const drafts = readDrafts();
+    const drafts = await getUIDataset(STORAGE_KEY, {});
     const hId = hackathon.id || hackathon._id;
     const existing = drafts[hId];
 
@@ -36,14 +25,14 @@ export const getRegistrationDraft = async (hackathon, user) => {
 
     const draft = createInitialRegistrationDraft(hackathon, user);
     drafts[hId] = draft;
-    writeDrafts(drafts);
+    await saveUIDataset(STORAGE_KEY, drafts);
     return draft;
 };
 
 export const saveRegistrationDraft = async (hackathonId, nextDraft) => {
-    const drafts = readDrafts();
+    const drafts = await getUIDataset(STORAGE_KEY, {});
     drafts[hackathonId] = nextDraft;
-    writeDrafts(drafts);
+    await saveUIDataset(STORAGE_KEY, drafts);
     return nextDraft;
 };
 
@@ -70,10 +59,10 @@ export const submitHackathonRegistration = async (hackathonId, draft) => {
         };
 
         const { data } = await apiClient.post('/applications/', payload);
-
-        const drafts = readDrafts();
+        // Clean up local draft on success
+        const drafts = await getUIDataset(STORAGE_KEY, {});
         delete drafts[hackathonId];
-        writeDrafts(drafts);
+        await saveUIDataset(STORAGE_KEY, drafts);
 
         return {
             success: true,
