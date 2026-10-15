@@ -20,51 +20,10 @@ export default function MentorProfile() {
   const { openScheduleModal, addToast } = useMentor();
 
   const [user, setUser] = useState({
-    name: 'Sara',
-    fullName: 'Sarah Chen',
-    role: 'Lead Product Designer',
-    institution: 'Designify Studio',
-    location: 'San Francisco, CA (PST)',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=240&auto=format&fit=crop&q=80',
-    bio: 'With over 6 years of experience in user experience and product design, Sarah specializes in building intuitive interfaces for complex B2B platforms. She is passionate about mentoring teams to bridge the gap between design and development, ensuring a seamless user journey from concept to launch.',
-    email: 'sarah.chen@designify.studio',
-    availabilityStatus: 'Current Team Mentor',
-    availableSlots: [
-      { date: 'Oct 24, Tue', time: '10:00 - 12:00 PST' },
-      { date: 'Oct 26, Thu', time: '09:00 - 11:00 PST' }
-    ],
-    mentorshipActiveSince: 'Mentorship Active since Oct 2023',
-    skills: ['UX/UI', 'Product Strategy', 'User Research', 'Figma', 'Prototyping'],
-    technicalStrengths: [
-      'Design Systems',
-      'User-Centered Design',
-      'Responsive Web Apps'
-    ],
-    mentorshipStyle: [
-      'Collaborative',
-      'Hands-on',
-      'Design Thinking'
-    ],
-    experiences: [
-      {
-        id: 1,
-        title: 'Product Design Lead - Global Design Hackathon 2023',
-        meta: 'Oct 2023 • Remote',
-        description: 'Mentored design tracks for 12 teams, focusing on accessibility and user flow optimization.',
-        dotColor: 'bg-[#5B45D9]'
-      },
-      {
-        id: 2,
-        title: 'Senior Designer - Innovation Challenge 2022',
-        meta: '2022 • San Francisco',
-        description: 'Led workshops on rapid prototyping and design-to-dev handoff for early-stage startups.',
-        dotColor: 'bg-slate-300 dark:bg-slate-600'
-      }
-    ],
-    social: {
-      linkedin: 'https://linkedin.com/in/sarahchen-design',
-      github: 'https://github.com/sarahchen'
-    }
+    name: '', fullName: '', role: 'Mentor', institution: '', location: '', avatar: '',
+    bio: '', email: '', availabilityStatus: '', availableSlots: [], mentorshipActiveSince: '',
+    skills: [], technicalStrengths: [], mentorshipStyle: [], experiences: [],
+    social: { linkedin: '', github: '' }
   });
 
   const [imageError, setImageError] = useState(false);
@@ -76,17 +35,17 @@ export default function MentorProfile() {
           setUser((prev) => ({
             ...prev,
             ...data,
-            name: data.name ? (data.name.includes(' ') ? data.name.split(' ')[0] : data.name) : prev.name,
-            fullName: data.name || prev.fullName,
-            role: data.role || prev.role,
-            institution: data.companyName || data.institution || prev.institution,
-            bio: data.bio && data.bio.trim() ? data.bio : prev.bio,
+            name: data.name ? (data.name.includes(' ') ? data.name.split(' ')[0] : data.name) : '',
+            fullName: data.name || '',
+            role: data.role || 'Mentor',
+            institution: data.companyName || data.institution || '',
+            bio: data.bio || '',
             skills: Array.isArray(data.expertiseDomains) && data.expertiseDomains.length
               ? data.expertiseDomains
               : Array.isArray(data.expertise) && data.expertise.length
                 ? data.expertise
-                : prev.skills,
-            availabilityStatus: data.availability || prev.availabilityStatus,
+                : [],
+            availabilityStatus: data.availability || '',
             social: {
               ...prev.social,
               linkedin: data.links?.linkedin || data.linkedinUrl || prev.social.linkedin,
@@ -100,7 +59,7 @@ export default function MentorProfile() {
       });
   }, []);
 
-  const initials = (user.fullName || user.name || 'SC')
+  const initials = (user.fullName || user.name || 'M')
     .split(' ')
     .filter(Boolean)
     .map((n) => n[0])

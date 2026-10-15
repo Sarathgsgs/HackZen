@@ -6,12 +6,11 @@ import apiClient from '../../api/api';
  */
 
 export const fetchAssignedTeams = async () => {
-    try {
         const { data: teams } = await apiClient.get('/teams/mentor-teams');
-
-        const activeTeams = teams.map(team => ({
+        const mappedTeams = teams.map(team => ({
             id: String(team._id || team.id),
-            name: team.teamName,
+            name: team.teamName || team.name || 'Unnamed team',
+            hackathonId: String(team.hackathonId || ''),
             // hackathonId is a database reference, not a human-readable event name.
             hackathon: team.hackathonName || team.hackathonTitle || team.hackathon || team.hackathonId || 'Active Hackathon',
             domain: team.domain || 'Technology',
@@ -21,14 +20,13 @@ export const fetchAssignedTeams = async () => {
             nextActionTime: team.nextActionTime || 'TBD',
             alert: team.alert || null,
             members: team.memberCount || 0,
-            icon: (team.teamName || 'T')[0]
+            icon: (team.teamName || team.name || 'T')[0]
         }));
-
-        return { activeTeams, pastTeams: [] };
-    } catch (error) {
-        console.error('Failed to fetch assigned teams:', error);
-        return { activeTeams: [], pastTeams: [] };
-    }
+        const isPast = (team) => ['completed', 'past', 'concluded'].includes(String(team.status || '').toLowerCase());
+        return {
+            activeTeams: mappedTeams.filter((_, index) => !isPast(teams[index])),
+            pastTeams: mappedTeams.filter((_, index) => isPast(teams[index])),
+        };
 };
 
 export const joinTeam = async (code) => {

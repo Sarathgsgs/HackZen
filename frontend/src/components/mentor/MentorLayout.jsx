@@ -29,12 +29,13 @@ import ScheduleSessionModal from './ScheduleSessionModal';
 import AcceptRequestModal from './AcceptRequestModal';
 import HelpSupportModal from './HelpSupportModal';
 import ToastContainer from './ToastContainer';
+import apiClient from '../../api/api';
 
 export default function MentorLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logoutUser } = useAuth();
-  const { openHelpModal, globalSearch, setGlobalSearch } = useMentor();
+  const { openHelpModal, globalSearch, setGlobalSearch, addToast } = useMentor();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -98,9 +99,9 @@ export default function MentorLayout() {
     try {
       const sess = sessionStorage.getItem('user');
       const loc = localStorage.getItem('user');
-      return JSON.parse(sess || loc || '{"name": "Dr. Sarah Mitchell", "email": "mentor@proeduvate.com", "role": "mentor"}');
+      return JSON.parse(sess || loc || '{"name": "Mentor", "role": "mentor"}');
     } catch {
-      return { name: 'Dr. Sarah Mitchell', email: 'mentor@proeduvate.com', role: 'mentor' };
+      return { name: 'Mentor', role: 'mentor' };
     }
   });
 
@@ -124,38 +125,36 @@ export default function MentorLayout() {
     return (parts[0] ? parts[0].slice(0, 2) : 'ME').toUpperCase();
   }, [user?.name]);
 
-  // Notifications
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'New Mentorship Request',
-      detail: 'Team Nova requested your guidance on AI Model recommendation.',
-      time: '12m ago',
-      read: false,
-      link: '/mentor/requests',
-    },
-    {
-      id: 2,
-      title: 'Upcoming Session in 30 Mins',
-      detail: 'Project Architecture Review with Team Alpha at 10:30 AM.',
-      time: '25m ago',
-      read: false,
-      link: '/mentor/sessions',
-    },
-    {
-      id: 3,
-      title: 'Milestone Submission',
-      detail: 'Team CyberGuard submitted Sprint 2 code for review.',
-      time: '2h ago',
-      read: true,
-      link: '/mentor/teams',
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+
+  const loadNotifications = async () => {
+    try {
+      const { data } = await apiClient.get('/inbox/', { params: { limit: 50 } });
+      setNotifications((data || []).map((item) => ({
+        id: item.id || item._id,
+        title: item.type === 'mentor_request' ? 'New Mentorship Request' : item.type === 'meeting_reminder' ? 'Upcoming Session' : item.type === 'mentor_feedback' ? 'Mentor Feedback' : 'Platform Update',
+        detail: item.message,
+        time: item.createdAt ? new Date(item.createdAt).toLocaleString() : '',
+        read: Boolean(item.read),
+        link: item.type === 'mentor_request' ? '/mentor/requests' : item.type === 'meeting_reminder' ? '/mentor/sessions' : item.type === 'mentor_feedback' ? '/mentor/feedback' : '/mentor/teams',
+      })));
+    } catch (error) {
+      console.error('Mentor notifications could not be loaded:', error);
+    }
+  };
+
+  useEffect(() => { loadNotifications(); }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllAsRead = async () => {
+    const unread = notifications.filter((item) => !item.read);
+    try {
+      await Promise.all(unread.map((item) => apiClient.put(`/inbox/${item.id}/read`)));
+      setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
+    } catch (error) {
+      addToast('Could not update notifications', error.response?.data?.detail || 'Please try again.', 'error');
+    }
   };
 
   const handleLogout = () => {
@@ -400,8 +399,16 @@ export default function MentorLayout() {
                   {notifications.map((notif) => (
                     <div
                       key={notif.id}
-                      onClick={() => {
+                      onClick={async () => {
                         setNotificationDropdownOpen(false);
+                        if (!notif.read) {
+                          try {
+                            await apiClient.put(`/inbox/${notif.id}/read`);
+                            setNotifications((items) => items.map((item) => item.id === notif.id ? { ...item, read: true } : item));
+                          } catch (error) {
+                            addToast('Notification not updated', error.response?.data?.detail || 'Please try again.', 'error');
+                          }
+                        }
                         if (notif.link) navigate(notif.link);
                       }}
                       className={`p-3.5 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors ${
@@ -447,7 +454,7 @@ export default function MentorLayout() {
               </div>
               <div className="text-left hidden lg:block">
                 <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight">
-                  {user?.name || 'Dr. Sarah Mitchell'}
+                  {user?.name || 'Mentor'}
                 </p>
                 <p className="text-[10px] font-medium text-slate-400 leading-tight">
                   Mentor
@@ -702,7 +709,7 @@ export default function MentorLayout() {
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                  {user?.name || user?.fullName || 'Dr. Sarah Mitchell'}
+                  {user?.name || user?.fullName || 'Mentor'}
                 </p>
                 <p className="text-[10px] font-semibold text-[#5B45D9] dark:text-purple-300">
                   {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Mentor'}

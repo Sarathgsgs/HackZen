@@ -6,6 +6,15 @@ import { getUIDataset, saveUIDataset } from '../../services/uiDataApi';
 
 const CreateTeam = () => {
     const navigate = useNavigate();
+    const effectiveRole = (
+        sessionStorage.getItem('userRole') ||
+        localStorage.getItem('userRole') ||
+        (() => {
+            try { return JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}')?.role; }
+            catch { return null; }
+        })() || 'mentor'
+    ).toLowerCase();
+    const mentorBoundary = effectiveRole === 'mentor' || window.location.pathname.startsWith('/mentor');
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [draftLoaded, setDraftLoaded] = useState(false);
@@ -30,6 +39,10 @@ const CreateTeam = () => {
     // Fetch real hackathons
     useEffect(() => {
         const loadHackathons = async () => {
+            if (mentorBoundary) {
+                setLoadingHackathons(false);
+                return;
+            }
             try {
                 setLoadingHackathons(true);
                 const data = await fetchAllHackathons();
@@ -45,6 +58,7 @@ const CreateTeam = () => {
 
     // Load and persist the draft in MongoDB so it survives a new session/device.
     useEffect(() => {
+        if (mentorBoundary) return;
         getUIDataset('student-team-create-draft', formData).then((saved) => {
             if (saved) setFormData(saved);
             setDraftLoaded(true);
@@ -54,7 +68,7 @@ const CreateTeam = () => {
         });
     }, []);
     useEffect(() => {
-        if (draftLoaded) saveUIDataset('student-team-create-draft', formData).catch((error) => console.error('Could not save team draft:', error));
+        if (!mentorBoundary && draftLoaded) saveUIDataset('student-team-create-draft', formData).catch((error) => console.error('Could not save team draft:', error));
     }, [formData, draftLoaded]);
 
     // Mock Options
@@ -120,20 +134,7 @@ const CreateTeam = () => {
     // Team creation is deliberately a student workflow. The API enforces the
     // same rule, so mentors are guided to teams that need mentorship instead
     // of being shown a form that cannot be submitted successfully.
-    const effectiveRole = (
-        sessionStorage.getItem('userRole') ||
-        localStorage.getItem('userRole') ||
-        (() => {
-            try {
-                return JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}')?.role;
-            } catch {
-                return null;
-            }
-        })() ||
-        'mentor'
-    ).toLowerCase();
-
-    if (effectiveRole === 'mentor' || window.location.pathname.startsWith('/mentor')) {
+    if (mentorBoundary) {
         return (
             <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#111625] p-10 text-center shadow-xl">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-50 dark:bg-purple-500/15 text-2xl text-[#5B45D9] dark:text-purple-400">👥</div>

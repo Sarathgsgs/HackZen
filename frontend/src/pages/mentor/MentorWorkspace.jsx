@@ -37,10 +37,10 @@ export default function MentorWorkspace({ initialTab = 'reviews' }) {
   const hasTeam = () => { if (selectedTeam) return true; setErrors({ teamId: 'Select an assigned team first.' }); return false; };
   const requestAiGuidance = async () => {
     if (!hasTeam() || !form.projectText.trim()) return setAiError('Select a team and enter a project update first.');
-    if (!selectedTeam.hackathon || selectedTeam.hackathon === 'Active Hackathon') return setAiError('This team does not have a saved hackathon ID yet.');
+    if (!selectedTeam.hackathonId) return setAiError('This team does not have a saved hackathon ID yet.');
     setAiLoading(true); setAiError(''); setAiResponse('');
     try {
-      const response = await sendChatMessage(`Team: ${selectedTeam.name}\nProject update: ${form.projectText.trim()}`, selectedTeam.hackathon, 'Mentor project assessment');
+      const response = await sendChatMessage(`Team: ${selectedTeam.name}\nProject update: ${form.projectText.trim()}`, selectedTeam.hackathonId, 'Mentor project assessment');
       setAiResponse(response.text);
     } catch (error) {
       setAiError(error.response?.data?.detail || 'AI Co-Mentor could not respond. Verify the AI API configuration and try again.');

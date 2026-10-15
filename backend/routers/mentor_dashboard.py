@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, status, Query, UploadFile, File, Form
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from pathlib import Path
 import os
 import re
+from urllib.parse import urlparse
 from core.dependencies import with_auth
 from database import get_db
 from bson import ObjectId
@@ -102,6 +103,7 @@ def format_material_doc(doc: dict) -> dict:
         "category": doc.get("category", "General"),
         "description": doc.get("description", ""),
         "storagePath": doc.get("storagePath", ""),
+        "url": doc.get("externalUrl", ""),
         "uploadedBy": uploaded_by,
         "uploadedByName": uploaded_by.get("name", "Mentor"),
         "uploadedAt": (doc.get("createdAt") or datetime.utcnow()).isoformat() if isinstance(doc.get("createdAt"), datetime) else str(doc.get("createdAt", "")),
@@ -142,6 +144,57 @@ def format_feedback_doc(doc: dict) -> dict:
 
 
 # ============= TEAM MATERIALS ENDPOINTS =============
+@router.post("/resources", status_code=status.HTTP_201_CREATED)
+async def create_mentor_resource(payload: Dict[str, Any] = Body(...), current_user: dict = Depends(with_auth)):
+    """Share an external resource link with one or all of the mentor's teams."""
+    if current_user.get("role") != "mentor":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only mentors can share resources")
+    title = str(payload.get("title") or "").strip()
+    category = str(payload.get("category") or "General").strip()
+    url = str(payload.get("url") or "").strip()
+    team_id = str(payload.get("teamId") or "").strip()
+    if not title or len(title) > 200:
+        raise HTTPException(status_code=422, detail="Resource title is required and must be 200 characters or fewer")
+    parsed_url = urlparse(url)
+    if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+        raise HTTPException(status_code=422, detail="Enter a valid HTTP or HTTPS resource URL")
+    if not category or len(category) > 100:
+        raise HTTPException(status_code=422, detail="Invalid resource category")
+
+    db = get_db()
+    mentor_id = current_user.get("id") or current_user.get("sub")
+    if team_id:
+        if not ObjectId.is_valid(team_id):
+            raise HTTPException(status_code=400, detail="Invalid team ID")
+        teams = await db["teams"].find({"_id": ObjectId(team_id), "mentorId": mentor_id}).to_list(1)
+    else:
+        teams = await db["teams"].find({"mentorId": mentor_id}).to_list(100)
+    if not teams:
+        raise HTTPException(status_code=404, detail="No assigned team found for this resource")
+
+    now = datetime.utcnow()
+    documents = [{
+        "teamId": str(team["_id"]),
+        "teamName": team.get("teamName") or "Assigned team",
+        "originalName": title,
+        "type": "link",
+        "mimeType": "text/uri-list",
+        "size": 0,
+        "category": category,
+        "description": "",
+        "externalUrl": url,
+        "storagePath": "",
+        "uploadedById": mentor_id,
+        "uploadedByName": current_user.get("name") or "Mentor",
+        "createdAt": now,
+        "updatedAt": now,
+    } for team in teams]
+    result = await db["teamMaterials"].insert_many(documents)
+    for document, inserted_id in zip(documents, result.inserted_ids):
+        document["_id"] = inserted_id
+    return {"success": True, "data": [format_material_doc(document) for document in documents]}
+
+
 @router.get("/materials")
 async def get_team_materials(
     search: Optional[str] = Query(None),
@@ -256,7 +309,7 @@ async def get_materials_storage(current_user: dict = Depends(with_auth)):
         }
 
     pipeline = [
-        {"$match": {"teamId": {"$in": assigned_team_ids}}},
+        {"$match": {"teamId": {"$in": assigned_team_ids}, "type": {"$ne": "link"}}},
         {"$group": {"_id": None, "usedBytes": {"$sum": "$size"}, "fileCount": {"$sum": 1}}},
     ]
     agg_result = await db["teamMaterials"].aggregate(pipeline).to_list(1)
@@ -378,6 +431,13 @@ async def download_team_material(material_id: str, current_user: dict = Depends(
     team = await db["teams"].find_one({"_id": ObjectId(material["teamId"]), "$or": [{"mentorId": mentor_id}, {"mentor_id": mentor_id}, {"mentor": mentor_id}]})
     if not team:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to access this file")
+
+    external_url = material.get("externalUrl")
+    if external_url:
+        parsed_url = urlparse(external_url)
+        if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource link is invalid")
+        return RedirectResponse(external_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
     storage_path = material.get("storagePath")
     full_path = file_upload_service.get_full_path(storage_path)
@@ -816,18 +876,84 @@ async def get_student_feedback(
         db = get_db()
         assigned_teams = await db["teams"].find({"mentorId": mentor_id}, {"_id": 1}).to_list(100)
         team_ids = [str(team["_id"]) for team in assigned_teams]
-        membership = await db["teamMembers"].find_one({"userId": student_id, "teamId": {"$in": team_ids}})
-        if not membership:
+        memberships = await db["teamMembers"].find({"userId": student_id, "teamId": {"$in": team_ids}}, {"teamId": 1}).to_list(100)
+        student_team_ids = list({membership["teamId"] for membership in memberships})
+        if not student_team_ids:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Student is not in one of your assigned teams")
-        feedbacks = await db["feedback"].find({"studentId": student_id, "mentorId": mentor_id, "teamId": {"$in": team_ids}}).sort("createdAt", -1).to_list(100)
+        feedbacks = await db["feedback"].find({"mentorId": mentor_id, "teamId": {"$in": student_team_ids}}).sort("createdAt", -1).to_list(100)
         for feedback in feedbacks:
             feedback["_id"] = str(feedback["_id"])
         return {"success": True, "count": len(feedbacks), "data": feedbacks}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
         )
+
+
+# ============= MENTOR HACKATHONS =============
+@router.get("/hackathons")
+async def get_mentor_hackathons(current_user: dict = Depends(with_auth)):
+    """Return hackathons and assigned-team counts from MongoDB for this mentor."""
+    if current_user.get("role") != "mentor":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only mentors can view hackathons")
+
+    db = get_db()
+    mentor_id = current_user.get("id") or current_user.get("sub")
+    teams = await db["teams"].find({"mentorId": mentor_id}, {"hackathonId": 1}).to_list(500)
+    assigned_counts: Dict[str, int] = {}
+    for team in teams:
+        hackathon_id = str(team.get("hackathonId") or "")
+        if hackathon_id:
+            assigned_counts[hackathon_id] = assigned_counts.get(hackathon_id, 0) + 1
+
+    hackathons = await db["hackathons"].find({"status": {"$nin": ["Draft", "Pending", "Rejected", "draft", "pending", "rejected"]}}).sort("createdAt", -1).to_list(500)
+    now = datetime.utcnow()
+    data = []
+    for item in hackathons:
+        hackathon_id = str(item["_id"])
+        start = item.get("startDate") or item.get("start_date")
+        end = item.get("endDate") or item.get("end_date")
+        def as_datetime(value):
+            if isinstance(value, datetime):
+                return value.replace(tzinfo=None) if value.tzinfo else value
+            if isinstance(value, str):
+                try:
+                    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                    return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+                except ValueError:
+                    return None
+            return None
+        start_dt, end_dt = as_datetime(start), as_datetime(end)
+        stored_status = str(item.get("status") or "").strip().lower()
+        if stored_status in {"completed", "concluded", "past", "ended"} or (end_dt and end_dt < now):
+            event_status = "Past"
+        elif stored_status in {"ongoing", "active", "live"} or (start_dt and start_dt <= now and (not end_dt or end_dt >= now)):
+            event_status = "Ongoing"
+        else:
+            event_status = "Upcoming"
+        themes = item.get("themes") or item.get("tracks") or []
+        if isinstance(themes, str):
+            category = themes
+        else:
+            category = ", ".join(str(value) for value in themes if value) or item.get("category") or "Hackathon"
+        data.append({
+            "id": hackathon_id,
+            "title": item.get("title") or item.get("name") or "Untitled hackathon",
+            "organizer": item.get("organizerName") or item.get("organizer") or "Organizer",
+            "category": category,
+            "description": item.get("description") or "",
+            "status": event_status,
+            "startDate": start.isoformat() if isinstance(start, datetime) else start,
+            "endDate": end.isoformat() if isinstance(end, datetime) else end,
+            "assignedTeamsCount": assigned_counts.get(hackathon_id, 0),
+            "isMyHackathon": assigned_counts.get(hackathon_id, 0) > 0,
+            "prizePool": item.get("prizePool") or item.get("prize_pool") or "",
+            "url": item.get("website") or item.get("url") or "",
+        })
+    return {"success": True, "data": data}
 
 
 # ============= DASHBOARD OVERVIEW =============
@@ -1087,6 +1213,8 @@ async def get_mentor_tasks(
         
         tasks = await MentorDashboardService.get_mentor_tasks(current_user["sub"], student_id)
         return {"success": True, "count": len(tasks), "data": tasks}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1110,6 +1238,12 @@ async def update_task(
         
         result = await MentorDashboardService.update_task_status(task_id, task_update, current_user["sub"])
         return {"success": True, "data": result}
+    except HTTPException:
+        raise
+    except (ValueError, LookupError) as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1161,6 +1295,8 @@ async def get_mentor_meetings(
         
         meetings = await MentorDashboardService.get_mentor_meetings(current_user["sub"], upcoming_only)
         return {"success": True, "count": len(meetings), "data": meetings}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1184,6 +1320,10 @@ async def get_student_progress(
         
         progress = await MentorDashboardService.get_student_progress(current_user["sub"], student_id)
         return {"success": True, "data": progress}
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1205,6 +1345,8 @@ async def get_assigned_students(
         
         students = await MentorDashboardService.get_all_assigned_students(current_user["sub"])
         return {"success": True, "count": len(students), "data": students}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1231,6 +1373,10 @@ async def get_performance_metrics(
             student_id,
         )
         return {"success": True, "data": metrics}
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1259,6 +1405,10 @@ async def generate_student_report(
             report_type,
         )
         return {"success": True, "data": report}
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

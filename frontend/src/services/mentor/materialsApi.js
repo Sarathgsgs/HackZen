@@ -92,6 +92,12 @@ export const uploadMaterial = async (formData, onProgress) => {
     }
 };
 
+/** Save a link resource for one assigned team or every assigned team. */
+export const createResource = async (resource) => {
+    const { data } = await apiClient.post('/mentor/resources', resource);
+    return data.data || [];
+};
+
 /**
  * Download a material file securely with authorization.
  * @param {string} materialId
@@ -99,6 +105,11 @@ export const uploadMaterial = async (formData, onProgress) => {
  */
 export const downloadMaterial = async (materialId, fileName) => {
     try {
+        const { data: metadata } = await apiClient.get(`/mentor/materials/${materialId}`);
+        if (metadata.data?.url) {
+            window.open(metadata.data.url, '_blank', 'noopener,noreferrer');
+            return;
+        }
         const response = await apiClient.get(`/mentor/materials/${materialId}/download`, {
             responseType: 'blob',
         });

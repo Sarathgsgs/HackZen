@@ -10,7 +10,6 @@ import apiClient from '../../api/api';
  * @returns {Promise<Array>}
  */
 export const fetchDiscoverableTeams = async () => {
-    try {
         const { data: teams } = await apiClient.get('/teams/discoverable');
 
         return teams
@@ -28,10 +27,6 @@ export const fetchDiscoverableTeams = async () => {
                 requested: false,
                 icon: '⚛️'
             }));
-    } catch (error) {
-        console.error('Failed to fetch discoverable teams:', error);
-        return [];
-    }
 };
 
 /**
