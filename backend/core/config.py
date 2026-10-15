@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import List, Optional
 import os
 from dotenv import load_dotenv
@@ -16,7 +17,18 @@ class Settings(BaseSettings):
     # MongoDB
     MONGO_URI: str = os.getenv("MONGO_URI")
     LOG_LEVEL: str = "INFO"
-    DEBUG: bool = True
+
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug_setting(cls, value):
+        if isinstance(value, bool):
+            return value
+        normalized = str(value).strip().lower()
+        if normalized in {"true", "1", "yes", "on", "debug", "development", "dev"}:
+            return True
+        if normalized in {"false", "0", "no", "off", "release", "production", "prod", ""}:
+            return False
+        return False
 
     # File Uploads
     UPLOAD_DIR: str = "uploads"

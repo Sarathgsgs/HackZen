@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from typing import List, Optional, Dict, Any
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 from datetime import datetime
 
 from core.dependencies import with_auth, RequireRole
@@ -28,6 +29,27 @@ def get_team_members_collection():
     return get_db()["teamMembers"]
 
 
+def _authenticated_user_id(current_user: dict) -> str:
+    user_id = current_user.get("id") or current_user.get("sub") or current_user.get("_id")
+    return str(user_id) if user_id else ""
+
+
+def _require_student(current_user: dict) -> str:
+    if current_user.get("role") != "student":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students can join a team.")
+    user_id = _authenticated_user_id(current_user)
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authenticated student identity is missing.")
+    return user_id
+
+
+def _team_size_limit(hackathon: Optional[dict]) -> int:
+    try:
+        return max(1, int((hackathon or {}).get("maxTeamSize", 4)))
+    except (TypeError, ValueError):
+        return 4
+
+
 @router.post("/", response_model=TeamResponse, status_code=status.HTTP_201_CREATED)
 async def create_team(
     team_data: TeamCreate, current_user: dict = Depends(RequireRole(["student"]))
@@ -35,7 +57,7 @@ async def create_team(
     """Create a new team for a hackathon. hackathonId must be the MongoDB _id of the hackathon."""
     db = get_db()
     teams_collection = db["teams"]
-    user_id = current_user.get("id") or current_user.get("sub")
+    user_id = _authenticated_user_id(current_user)
 
     # 0. Validate hackathonId is a valid MongoDB ObjectId and hackathon exists
     if not ObjectId.is_valid(team_data.hackathonId):
@@ -97,7 +119,7 @@ async def create_team(
 
     # Get user name for createdBy
     user = await db.users.find_one({"_id": ObjectId(user_id)})
-    user_name = user.get("name", "Unknown Student") if user else "Unknown Student"
+    user_name = user.get("name", "") if user else ""
 
     team_dict = team_data.model_dump(by_alias=True)
     team_dict["createdBy"] = user_name
@@ -160,12 +182,13 @@ async def create_team(
 @router.get("/my-teams", response_model=List[TeamResponse])
 async def get_my_teams(current_user: dict = Depends(with_auth)):
     """Get all teams where the current user is a member"""
-    user_id = current_user.get("id") or current_user.get("sub")
+    user_id = _authenticated_user_id(current_user)
     members_collection = get_team_members_collection()
     cursor = members_collection.find({"userId": user_id})
     memberships = await cursor.to_list(100)
 
-    team_ids = [ObjectId(m["teamId"]) for m in memberships]
+    membership_by_id = {str(item.get("teamId")): item for item in memberships if item.get("teamId")}
+    team_ids = [ObjectId(team_id) for team_id in membership_by_id if ObjectId.is_valid(team_id)]
 
     if not team_ids:
         return []
@@ -176,15 +199,30 @@ async def get_my_teams(current_user: dict = Depends(with_auth)):
 
     for team in teams:
         team["_id"] = str(team["_id"])
+        membership = membership_by_id.get(team["_id"], {})
+        role = membership.get("role", TeamMemberRole.MEMBER.value)
+        team["myRole"] = role
+        if role != TeamMemberRole.LEADER.value:
+            team["teamCode"] = None
+        team["memberCount"] = await members_collection.count_documents({"teamId": team["_id"]})
+        hackathon = None
+        hackathon_id = team.get("hackathonId")
+        if hackathon_id and ObjectId.is_valid(str(hackathon_id)):
+            hackathon = await get_db()["hackathons"].find_one(
+                {"_id": ObjectId(str(hackathon_id))}, {"title": 1, "maxTeamSize": 1}
+            )
+        if hackathon:
+            team["hackathonName"] = hackathon.get("title")
+            team["maxTeamSize"] = hackathon.get("maxTeamSize", 4)
 
     return [TeamResponse(**team) for team in teams]
 
 
 @router.get("/my-mentor-requests", response_model=List[Dict[str, Any]])
 async def get_my_mentor_requests(current_user: dict = Depends(with_auth)):
-    """Get all mentor requests for the authenticated student from the backend context."""
+    """Return real mentor assignments for teams the authenticated student belongs to."""
     db = get_db()
-    user_id = current_user.get("id") or current_user.get("sub")
+    user_id = _authenticated_user_id(current_user)
     members_collection = get_team_members_collection()
     memberships = await members_collection.find(
         {"$or": [{"userId": user_id}, {"userId": str(user_id)}]}
@@ -226,8 +264,11 @@ async def get_my_mentor_requests(current_user: dict = Depends(with_auth)):
                 "teamName": team.get("teamName"),
                 "mentorId": mentor_id,
                 "mentorName": mentor_name,
-                "status": "Pending",
-                "requestedAt": team.get("createdAt"),
+                "status": "assigned",
+                "requestedAt": team.get("mentorAssignedAt"),
+                "focusArea": team.get("mentorRequest", {}).get("focusArea"),
+                "guidanceRequest": team.get("mentorRequest", {}).get("guidanceRequest"),
+                "preferredTimeWindow": team.get("mentorRequest", {}).get("preferredTimeWindow"),
             }
         )
 
@@ -239,7 +280,7 @@ async def get_mentor_teams(
     current_user: dict = Depends(RequireRole(["mentor", "admin"]))
 ):
     """Get all teams assigned to the current mentor"""
-    user_id = current_user.get("id") or current_user.get("sub")
+    user_id = _authenticated_user_id(current_user)
     teams_collection = get_team_collection()
 
     # In the current schema, team has mentorId field
@@ -248,6 +289,7 @@ async def get_mentor_teams(
 
     for team in teams:
         team["_id"] = str(team["_id"])
+        team["teamCode"] = None
 
     return [TeamResponse(**team) for team in teams]
 
@@ -264,12 +306,13 @@ async def get_mentor_teams_list(
 
     for team in teams:
         team["_id"] = str(team["_id"])
+        team["teamCode"] = None
 
     return [TeamResponse(**team) for team in teams]
 
 
 @router.get("/{team_id}", response_model=TeamResponse)
-async def get_team(team_id: str):
+async def get_team(team_id: str, current_user: dict = Depends(with_auth)):
     """Get team details by team ID"""
     if not ObjectId.is_valid(team_id):
         raise HTTPException(
@@ -283,46 +326,149 @@ async def get_team(team_id: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="Team not found"
         )
 
-    team["_id"] = str(team["_id"])
+    user_id = _authenticated_user_id(current_user)
+    team_id = str(team["_id"])
+    membership = await get_team_members_collection().find_one({"teamId": team_id, "userId": user_id})
+    is_assigned_mentor = str(team.get("mentorId") or "") == user_id
+    hackathon = None
+    hackathon_id = team.get("hackathonId")
+    if hackathon_id and ObjectId.is_valid(str(hackathon_id)):
+        hackathon = await get_db()["hackathons"].find_one({"_id": ObjectId(str(hackathon_id))}, {"organizerId": 1})
+    is_hackathon_organizer = bool(
+        current_user.get("role") == "organizer"
+        and hackathon
+        and str(hackathon.get("organizerId")) == user_id
+    )
+    if not membership and not is_assigned_mentor and not is_hackathon_organizer and current_user.get("role") != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to view this team.")
+    if not membership or membership.get("role") != TeamMemberRole.LEADER.value:
+        team["teamCode"] = None
+    team["_id"] = team_id
+    team["myRole"] = membership.get("role") if membership else None
     return TeamResponse(**team)
 
 
+@router.get("/lookup/{team_code}")
+async def lookup_team_by_code(
+    team_code: str, current_user: dict = Depends(RequireRole(["student"]))
+):
+    """Return the real team and roster so a student can review a code before joining."""
+    current_user_id = _require_student(current_user)
+    db = get_db()
+    team = await db["teams"].find_one({"teamCode": team_code.strip().upper()})
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found with the provided code")
+
+    team_id = str(team["_id"])
+    memberships = await db["teamMembers"].find({"teamId": team_id}).to_list(100)
+    roster = []
+    for membership in memberships:
+        user_id = membership.get("userId")
+        user = None
+        if user_id and ObjectId.is_valid(str(user_id)):
+            user = await db["users"].find_one({"_id": ObjectId(str(user_id))}, {"name": 1})
+        roster.append({"name": user.get("name") if user else "Team member", "role": membership.get("role", "member")})
+
+    hackathon = None
+    hackathon_id = team.get("hackathonId")
+    if hackathon_id and ObjectId.is_valid(str(hackathon_id)):
+        hackathon = await db["hackathons"].find_one({"_id": ObjectId(str(hackathon_id))}, {"maxTeamSize": 1})
+    if not hackathon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This team’s hackathon is no longer available.")
+    max_size = _team_size_limit(hackathon)
+    already_member = await db["teamMembers"].find_one(
+        {"teamId": team_id, "userId": current_user_id}
+    )
+    user_memberships = await db["teamMembers"].find(
+        {"userId": current_user_id}
+    ).to_list(100)
+    existing_team_ids = [
+        ObjectId(str(item.get("teamId")))
+        for item in user_memberships
+        if item.get("teamId") and ObjectId.is_valid(str(item.get("teamId")))
+    ]
+    already_in_hackathon = bool(
+        await db["teams"].find_one(
+            {"_id": {"$in": existing_team_ids}, "hackathonId": hackathon_id}
+        )
+    ) if existing_team_ids else False
+    is_open = len(memberships) < max_size
+    return {
+        "_id": team_id,
+        "teamName": team.get("teamName"),
+        "teamCode": team.get("teamCode"),
+        "memberCount": len(memberships),
+        "maxTeamSize": max_size,
+        "members": roster,
+        "isOpen": is_open,
+        "alreadyMember": bool(already_member),
+        "canJoin": is_open and not already_in_hackathon,
+    }
+
+
 @router.get("/{team_id}/members", response_model=List[TeamMemberResponse])
-async def get_team_members(team_id: str):
-    """Get all members of a team"""
+async def get_team_members(
+    team_id: str, current_user: dict = Depends(with_auth)
+):
+    """Return roster profile details only to an authenticated team member."""
     if not ObjectId.is_valid(team_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid team ID format"
         )
 
+    user_id = _authenticated_user_id(current_user)
     members_collection = get_team_members_collection()
+    viewer_membership = await members_collection.find_one({"teamId": team_id, "userId": user_id})
+    team = await get_team_collection().find_one({"_id": ObjectId(team_id)})
+    is_assigned_mentor = bool(team and str(team.get("mentorId") or "") == user_id)
+    hackathon = None
+    hackathon_id = (team or {}).get("hackathonId")
+    if hackathon_id and ObjectId.is_valid(str(hackathon_id)):
+        hackathon = await get_db()["hackathons"].find_one({"_id": ObjectId(str(hackathon_id))}, {"organizerId": 1})
+    is_hackathon_organizer = bool(
+        current_user.get("role") == "organizer"
+        and hackathon
+        and str(hackathon.get("organizerId")) == user_id
+    )
+    if not viewer_membership and not is_assigned_mentor and not is_hackathon_organizer and current_user.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a member of this team.",
+        )
     cursor = members_collection.find({"teamId": team_id})
     members = await cursor.to_list(100)
 
     for member in members:
+        member_user_id = str(member.get("userId") or "")
+        user = None
+        if ObjectId.is_valid(member_user_id):
+            user = await get_db()["users"].find_one(
+                {"_id": ObjectId(member_user_id)}, {"name": 1, "email": 1}
+            )
+        student_profile = await get_db()["students"].find_one(
+            {"userId": member_user_id}, {"department": 1}
+        )
+        member["name"] = (user or {}).get("name") or "Team member"
+        member["email"] = (user or {}).get("email")
+        member["department"] = (student_profile or {}).get("department")
         member["_id"] = str(member["_id"])
 
     return [TeamMemberResponse(**member) for member in members]
 
 
 @router.post("/join/{team_id_or_code}", response_model=TeamMemberResponse)
-async def join_team(team_id_or_code: str, current_user: dict = Depends(with_auth)):
-    """Join a team using its numeric team code or Team ID"""
+async def join_team(team_id_or_code: str, current_user: dict = Depends(RequireRole(["student"]))):
+    """Join an open team using the private team code shared by its leader."""
+    user_id = _require_student(current_user)
     db = get_db()
     teams_collection = db["teams"]
-    user_id = current_user.get("id") or current_user.get("sub")
 
-    # Try finding by teamCode first
-    team = await teams_collection.find_one({"teamCode": team_id_or_code})
-
-    # If not found by code, try finding by _id
-    if not team and ObjectId.is_valid(team_id_or_code):
-        team = await teams_collection.find_one({"_id": ObjectId(team_id_or_code)})
+    team = await teams_collection.find_one({"teamCode": team_id_or_code.strip().upper()})
 
     if not team:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Team not found with the provided ID or Code",
+            detail="Team not found with the provided code.",
         )
 
     hackathon_id = team["hackathonId"]
@@ -343,6 +489,8 @@ async def join_team(team_id_or_code: str, current_user: dict = Depends(with_auth
     # 2. Check if user is already in a team for this hackathon
     members_collection = get_team_members_collection()
     user_memberships = await members_collection.find({"userId": user_id}).to_list(100)
+    if await members_collection.find_one({"teamId": str(team["_id"]), "userId": user_id}):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You are already a member of this team.")
     user_team_ids = []
     for m in user_memberships:
         try:
@@ -360,7 +508,7 @@ async def join_team(team_id_or_code: str, current_user: dict = Depends(with_auth
             detail="You are already a member of a team in this hackathon",
         )
 
-    # 3. Check if team is full - look up hackathon by MongoDB _id
+    # Check capacity using the hackathon's configured team size.
     current_members_count = await members_collection.count_documents(
         {"teamId": str(team["_id"])}
     )
@@ -368,8 +516,10 @@ async def join_team(team_id_or_code: str, current_user: dict = Depends(with_auth
     hackathon = None
     if ObjectId.is_valid(hackathon_id):
         hackathon = await db["hackathons"].find_one({"_id": ObjectId(hackathon_id)})
+    if not hackathon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This team’s hackathon is no longer available.")
 
-    max_size = hackathon.get("maxTeamSize", 4) if hackathon else 4
+    max_size = _team_size_limit(hackathon)
 
     if current_members_count >= max_size:
         raise HTTPException(
@@ -382,7 +532,10 @@ async def join_team(team_id_or_code: str, current_user: dict = Depends(with_auth
         "role": TeamMemberRole.MEMBER.value,
         "joinedAt": datetime.utcnow(),
     }
-    result = await members_collection.insert_one(new_member)
+    try:
+        result = await members_collection.insert_one(new_member)
+    except DuplicateKeyError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You are already a member of this team.")
     new_member["_id"] = str(result.inserted_id)
 
     return TeamMemberResponse(**new_member)
@@ -390,12 +543,12 @@ async def join_team(team_id_or_code: str, current_user: dict = Depends(with_auth
 
 @router.post("/{team_id}/assign-mentor", response_model=TeamResponse)
 async def assign_mentor(
-    team_id: str, mentor_data: TeamMentorUpdate, current_user: dict = Depends(with_auth)
+    team_id: str, mentor_data: TeamMentorUpdate, current_user: dict = Depends(RequireRole(["student"]))
 ):
     """Assign a mentor to a team (One mentor per team, Team Leader only)"""
     db = get_db()
     teams_collection = db["teams"]
-    user_id = current_user.get("id") or current_user.get("sub")
+    user_id = _require_student(current_user)
 
     if not ObjectId.is_valid(team_id):
         raise HTTPException(
@@ -443,11 +596,35 @@ async def assign_mentor(
             )
 
     mentor_user_id = str(mentor["userId"])
+    if str(mentor.get("availability") or "Available").lower() != "available":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This mentor is not currently available.")
 
-    # Update team with mentorId
-    await teams_collection.update_one(
-        {"_id": ObjectId(team_id)}, {"$set": {"mentorId": mentor_user_id}}
+    assigned_at = datetime.utcnow()
+    request_details = {
+        key: value.strip()
+        for key, value in {
+            "focusArea": mentor_data.focusArea,
+            "guidanceRequest": mentor_data.guidanceRequest,
+            "preferredTimeWindow": mentor_data.preferredTimeWindow,
+        }.items()
+        if isinstance(value, str) and value.strip()
+    }
+    # This endpoint assigns a mentor immediately; keep the submitted request details
+    # with that assignment so the student status page reflects persisted data.
+    update_result = await teams_collection.update_one(
+        {
+            "_id": ObjectId(team_id),
+            "$or": [{"mentorId": {"$exists": False}}, {"mentorId": None}],
+        },
+        {"$set": {
+            "mentorId": mentor_user_id,
+            "mentorAssignedAt": assigned_at,
+            "mentorAssignedBy": user_id,
+            "mentorRequest": request_details,
+        }},
     )
+    if not getattr(update_result, "modified_count", 0):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This team already has a mentor assignment.")
 
     updated_team = await teams_collection.find_one({"_id": ObjectId(team_id)})
     updated_team["_id"] = str(updated_team["_id"])

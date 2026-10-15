@@ -4,6 +4,7 @@ import { fetchSubmissions } from '../../services/student/submissionsApi';
 const StudentSubmissions = () => {
     const [submissions, setSubmissions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
 
     useEffect(() => {
         const loadSubmissions = async () => {
@@ -11,8 +12,10 @@ const StudentSubmissions = () => {
             try {
                 const data = await fetchSubmissions();
                 setSubmissions(data);
+                setLoadError('');
             } catch (error) {
                 console.error("Failed to fetch submissions:", error);
+                setLoadError('Your submissions could not be loaded. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -45,6 +48,8 @@ const StudentSubmissions = () => {
                         <div key={i} className="glass p-6 rounded-2xl border border-white/5 animate-pulse h-64"></div>
                     ))}
                 </div>
+            ) : loadError ? (
+                <div role="alert" className="rounded-2xl border border-red-200 bg-white p-8 text-red-800">{loadError}</div>
             ) : submissions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center glass rounded-2xl border border-dashed border-white/10">
                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
@@ -60,10 +65,10 @@ const StudentSubmissions = () => {
                             <div>
                                 <div className="flex justify-between items-start mb-6">
                                     <div>
-                                        <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors w-11/12 leading-tight">{sub.project}</h3>
-                                        <p className="text-sm text-gray-400 mt-2">{sub.hackathon}</p>
+                                        <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors w-11/12 leading-tight">{sub.project || 'Project title unavailable'}</h3>
+                                        <p className="text-sm text-gray-400 mt-2">{sub.hackathon || 'Hackathon name unavailable'}</p>
                                     </div>
-                                    <StatusBadge status={sub.status} />
+                                    <StatusBadge status={sub.status || 'Status unavailable'} />
                                 </div>
 
                                 <div className="space-y-6 mb-8">
@@ -87,7 +92,7 @@ const StudentSubmissions = () => {
                             <div className="pt-4 border-t border-white/5 flex items-center justify-between mt-auto">
                                 <div className="flex items-center gap-2">
                                     <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    <span className="text-xs text-gray-400">{sub.submittedAt}</span>
+                                    <span className="text-xs text-gray-400">{sub.submittedAt || 'Submission date unavailable'}</span>
                                 </div>
                                 {sub.score && (
                                     <div className="text-right">

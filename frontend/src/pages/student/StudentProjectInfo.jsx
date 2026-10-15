@@ -9,16 +9,18 @@ const StudentProjectInfo = () => {
   const [team, setTeam] = useState(null);
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const teamQuery = searchParams.get('teamId') ? `?teamId=${searchParams.get('teamId')}` : '';
 
   useEffect(() => {
     const loadProjectInfo = async () => {
       setLoading(true);
       try {
+        setLoadError('');
         const teams = await getMyTeams();
         const requestedTeamId = searchParams.get('teamId');
         const activeTeam = requestedTeamId
-          ? teams.find((item) => String(item.id || item._id) === String(requestedTeamId)) || teams[0] || null
+          ? teams.find((item) => String(item.id || item._id) === String(requestedTeamId)) || null
           : teams[0] || null;
         setTeam(activeTeam);
 
@@ -32,6 +34,7 @@ const StudentProjectInfo = () => {
         setProject(submissions?.[0] || null);
       } catch (error) {
         console.error('Failed to load project information:', error);
+        setLoadError('Project information could not be loaded. Please try again.');
         setProject(null);
       } finally {
         setLoading(false);
@@ -52,6 +55,7 @@ const StudentProjectInfo = () => {
   }
 
   if (!team) {
+    if (loadError) return <div role="alert" className="mx-auto max-w-4xl rounded-[18px] border border-red-200 bg-white p-10 text-center text-red-800">{loadError}</div>;
     return (
       <div className="mx-auto max-w-4xl pb-10">
         <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f7f4fb] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
@@ -60,6 +64,10 @@ const StudentProjectInfo = () => {
         </div>
       </div>
     );
+  }
+
+  if (loadError) {
+    return <div role="alert" className="mx-auto max-w-4xl rounded-[18px] border border-red-200 bg-white p-10 text-center text-red-800">{loadError}</div>;
   }
 
   if (!project) {
@@ -78,11 +86,11 @@ const StudentProjectInfo = () => {
 
   const details = [
     ['Team', team.teamName || 'Not available'],
-    ['Hackathon', project.hackathon || 'Current Hackathon'],
-    ['Project', project.project || 'Untitled Project'],
-    ['Stage', project.status || 'Pending'],
+    ['Hackathon', project.hackathon || 'Hackathon name unavailable'],
+    ['Project', project.project || 'Project title unavailable'],
+    ['Stage', project.status || 'Status unavailable'],
     ['Version', project.version ? `v${project.version}` : 'Not assigned'],
-    ['Submitted', project.submittedAt || 'Not submitted yet'],
+    ['Submitted', project.submittedAt || 'Submission date unavailable'],
   ];
 
   return (
@@ -104,7 +112,7 @@ const StudentProjectInfo = () => {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e9e0ff] text-lg text-[#5a44c9]">✦</div>
               <div>
                 <div className="text-[18px] font-bold text-[#1d1a2a]">{team.teamName || 'Team Workspace'}</div>
-                <div className="text-[12px] text-[#7a7984]">{project.hackathon || 'Current Hackathon'}</div>
+                <div className="text-[12px] text-[#7a7984]">{project.hackathon || 'Hackathon name unavailable'}</div>
               </div>
             </div>
 
@@ -115,27 +123,21 @@ const StudentProjectInfo = () => {
 
             <div className="mt-6">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#7d7a88]">Solution Summary</p>
-              <p className="mt-3 text-[15px] leading-7 text-[#4a4656]">{project.project || 'Untitled Project'}</p>
+              <p className="mt-3 text-[15px] leading-7 text-[#4a4656]">{project.project || 'Project title unavailable'}</p>
             </div>
 
             <div className="mt-6">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#7d7a88]">Tech Stack</p>
-              <div className="mt-3 flex flex-wrap gap-2 text-[12px]">
-                {['React', 'Node.js', 'Python (ML)', 'AWS', 'IoT Sensors'].map((item) => (
-                  <span key={item} className="rounded-[10px] border border-[#e0d9ee] bg-white px-3 py-1.5 text-[#4a4656]">
-                    {item}
-                  </span>
-                ))}
-              </div>
+              <p className="mt-3 text-sm text-[#69707d]">Technology stack information is not available for this submission.</p>
             </div>
           </aside>
 
           <main className="space-y-8">
             <div className="rounded-[18px] border border-[#e0d9ee] bg-[#f8f5fb] p-5 shadow-[0_8px_26px_rgba(83,63,166,0.04)]">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-[26px] font-bold tracking-[-0.04em] text-[#1d1a2a]">{project.project || 'Untitled Project'}</h2>
+                <h2 className="text-[26px] font-bold tracking-[-0.04em] text-[#1d1a2a]">{project.project || 'Project title unavailable'}</h2>
                 <span className="rounded-full border border-[#d9d0ef] bg-[#ece7ff] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#5a44c9]">
-                  {project.status || 'Pending'}
+                  {project.status || 'Status unavailable'}
                 </span>
               </div>
 

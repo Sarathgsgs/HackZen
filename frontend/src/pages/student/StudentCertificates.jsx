@@ -1,330 +1,98 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-    fetchCertificates,
-    verifyCertificate,
-    downloadCertificate,
-    downloadAllCertificates,
-    shareTranscript
-} from '../../services/student/certificatesApi';
+import { fetchCertificates, verifyCertificate } from '../../services/student/certificatesApi';
+
+const formatDate = (value) => value ? new Date(value).toLocaleDateString() : 'Issue date unavailable';
 
 const StudentCertificates = () => {
     const [certId, setCertId] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
-    const [verifiedResult, setVerifiedResult] = useState(() => {
-        const saved = sessionStorage.getItem('lastVerifiedCert');
-        return saved ? JSON.parse(saved) : null;
-    });
+    const [verifiedResult, setVerifiedResult] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
-    const [isDownloadingAll, setIsDownloadingAll] = useState(false);
-    const [isSharing, setIsSharing] = useState(false);
     const [certificates, setCertificates] = useState([]);
 
     useEffect(() => {
-        const loadInitialData = async () => {
-            setIsLoading(true);
-            try {
-                const data = await fetchCertificates();
-                setCertificates(data);
-            } catch (error) {
-                console.error('Failed to fetch certificates:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadInitialData();
+        let active = true;
+        fetchCertificates()
+            .then((data) => { if (active) { setCertificates(data); setLoadError(''); } })
+            .catch(() => { if (active) setLoadError('Your certificates could not be loaded. Please try again.'); })
+            .finally(() => { if (active) setIsLoading(false); });
+        return () => { active = false; };
     }, []);
 
-    useEffect(() => {
-        if (verifiedResult) {
-            sessionStorage.setItem('lastVerifiedCert', JSON.stringify(verifiedResult));
-        }
-    }, [verifiedResult]);
-
-    const filteredCertificates = useMemo(() => (
-        certificates.filter((cert) =>
-            cert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            cert.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            cert.issuer.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    ), [certificates, searchQuery]);
-
-    const stats = useMemo(() => ({
-        total: certificates.length,
-        verified: certificates.filter((cert) => cert.status === 'Verified').length,
-        pending: certificates.filter((cert) => cert.status !== 'Verified').length,
-    }), [certificates]);
+    const filteredCertificates = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+        return certificates.filter((certificate) => [certificate.id, certificate.hackathonId]
+            .some((value) => String(value || '').toLowerCase().includes(query)));
+    }, [certificates, searchQuery]);
 
     const handleVerify = async () => {
         if (!certId.trim()) return;
-
         setIsVerifying(true);
         setVerifiedResult(null);
-
-        try {
-            const result = await verifyCertificate(certId);
-            setVerifiedResult(result);
-        } catch (error) {
-            console.error('Verification failed:', error);
-            setVerifiedResult({
-                status: 'error',
-                message: 'Internal verification link failure',
-                recipient: '-',
-                event: '-',
-                date: '-'
-            });
-        } finally {
-            setIsVerifying(false);
-        }
-    };
-
-    const handleDownloadIndividual = async (id) => {
-        setCertificates((prev) => prev.map((cert) => (
-            cert.id === id ? { ...cert, isDownloading: true } : cert
-        )));
-
-        try {
-            await downloadCertificate(id);
-        } catch (error) {
-            console.error('Download failed:', error);
-        } finally {
-            setCertificates((prev) => prev.map((cert) => (
-                cert.id === id ? { ...cert, isDownloading: false } : cert
-            )));
-        }
-    };
-
-    const handleDownloadAll = async () => {
-        setIsDownloadingAll(true);
-        try {
-            await downloadAllCertificates();
-        } catch (error) {
-            console.error('Bulk download failed:', error);
-        } finally {
-            setIsDownloadingAll(false);
-        }
-    };
-
-    const handleShareTranscript = async () => {
-        setIsSharing(true);
-        try {
-            await shareTranscript();
-        } catch (error) {
-            console.error('Share failed:', error);
-        } finally {
-            setIsSharing(false);
-        }
+        setVerifiedResult(await verifyCertificate(certId.trim()));
+        setIsVerifying(false);
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-500">
-            <div className="mb-10">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                    My <span className="gradient-text">Certificates</span>
-                </h1>
-                <p className="text-gray-400">Browse, verify, and share every achievement in the same visual style as your upcoming hackathons feed.</p>
-            </div>
+        <main className="min-h-screen space-y-8 bg-[#f3f0f8] px-4 py-8 text-[#1d1a2a] md:px-6 lg:px-8">
+            <header>
+                <h1 className="text-3xl font-bold md:text-4xl">My Certificates</h1>
+                <p className="mt-2 text-[#686779]">Certificate records issued to your account.</p>
+            </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass rounded-2xl border border-white/5 p-6">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Credentials</p>
-                    <p className="text-3xl font-bold text-white">{stats.total.toString().padStart(2, '0')}</p>
-                </div>
-                <div className="glass rounded-2xl border border-white/5 p-6">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Verified Records</p>
-                    <p className="text-3xl font-bold text-emerald-400">{stats.verified.toString().padStart(2, '0')}</p>
-                </div>
-                <div className="glass rounded-2xl border border-white/5 p-6">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Review</p>
-                    <p className="text-3xl font-bold text-amber-400">{stats.pending.toString().padStart(2, '0')}</p>
-                </div>
-            </div>
-
-            <div className="flex flex-col xl:flex-row gap-8">
-                <div className="xl:w-3/5 space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <h2 className="text-xl font-bold text-white">Achievement Collection</h2>
-                        <div className="w-full sm:w-72">
-                            <input
-                                type="text"
-                                placeholder="Search by title, issuer, or ID"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 transition-colors placeholder:text-gray-500"
-                            />
-                        </div>
-                    </div>
-
-                    {isLoading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {[1, 2, 3, 4].map((item) => (
-                                <div key={item} className="glass rounded-2xl border border-white/5 h-[360px] animate-pulse bg-navy-900/40" />
-                            ))}
-                        </div>
-                    ) : filteredCertificates.length === 0 ? (
-                        <div className="glass rounded-2xl border border-white/5 p-10 text-center">
-                            <h3 className="text-xl font-bold text-white mb-2">No certificates found</h3>
-                            <p className="text-gray-400">Try a different keyword to search your credentials.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {filteredCertificates.map((cert) => (
-                                <div
-                                    key={cert.id}
-                                    className="glass rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all duration-300 group flex flex-col overflow-hidden"
-                                >
-                                    <div className="h-40 relative overflow-hidden">
-                                        <img
-                                            src={cert.image}
-                                            alt={cert.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/30 to-transparent" />
-                                        <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-[10px] font-bold text-white uppercase">
-                                            {cert.category}
-                                        </div>
-                                        <div className="absolute bottom-4 left-6">
-                                            <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest">{cert.issuer}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6 flex-1 flex flex-col">
-                                        <div className="flex justify-between items-start mb-2 gap-3">
-                                            <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
-                                                {cert.title}
-                                            </h3>
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border whitespace-nowrap ${
-                                                cert.status === 'Verified'
-                                                    ? 'text-green-400 bg-green-500/10 border-green-500/20'
-                                                    : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-                                            }`}>
-                                                {cert.status}
-                                            </span>
-                                        </div>
-
-                                        <p className="text-gray-400 text-sm mb-6">
-                                            Credential ID: <span className="font-mono text-gray-300">{cert.id}</span>
-                                        </p>
-
-                                        <div className="mt-auto pt-4 border-t border-white/5 space-y-4">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-gray-400">Issued</span>
-                                                <span className="text-white font-semibold">{cert.date}</span>
-                                            </div>
-
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={() => setCertId(cert.id)}
-                                                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/5 transition-colors"
-                                                >
-                                                    Use for Verify
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDownloadIndividual(cert.id)}
-                                                    disabled={cert.isDownloading}
-                                                    className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-semibold transition-colors disabled:opacity-50"
-                                                >
-                                                    {cert.isDownloading ? '...' : 'Download'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+            <section className="rounded-2xl border border-[#e0d9ee] bg-white p-5 shadow-sm md:p-7">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div><p className="text-sm text-[#777287]">Certificate records</p><p className="mt-1 text-3xl font-bold">{certificates.length}</p></div>
+                    <input
+                        type="search"
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        placeholder="Search by certificate or hackathon ID"
+                        aria-label="Search certificates"
+                        className="w-full rounded-xl border border-[#ddd6eb] bg-[#fbfaff] px-4 py-3 text-sm sm:max-w-sm"
+                    />
                 </div>
 
-                <div className="xl:w-2/5">
-                    <div className="glass p-8 rounded-2xl border border-purple-500/20 shadow-xl relative overflow-hidden xl:sticky xl:top-24">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-3xl -z-10"></div>
-
-                        <div className="space-y-6">
-                            <div>
-                                <h3 className="text-2xl font-bold text-white mb-2">Credential Center</h3>
-                                <p className="text-sm text-gray-400 italic">Verify a certificate or export your full achievement history.</p>
+                {isLoading ? <p role="status" className="py-12 text-center text-[#697386]">Loading certificates…</p>
+                    : loadError ? <p role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{loadError}</p>
+                        : filteredCertificates.length ? (
+                            <div className="mt-6 grid gap-4 md:grid-cols-2">
+                                {filteredCertificates.map((certificate) => (
+                                    <article key={certificate.id || `${certificate.hackathonId}-${certificate.issuedAt}`} className="rounded-xl border border-[#e7e1f0] bg-[#fbfaff] p-5">
+                                        <h2 className="text-lg font-bold">Certificate</h2>
+                                        <dl className="mt-4 space-y-3 text-sm">
+                                            <div className="flex flex-wrap justify-between gap-2"><dt className="text-[#777287]">Certificate ID</dt><dd className="break-all font-mono">{certificate.id || 'Unavailable'}</dd></div>
+                                            <div className="flex flex-wrap justify-between gap-2"><dt className="text-[#777287]">Hackathon ID</dt><dd className="break-all">{certificate.hackathonId || 'Unavailable'}</dd></div>
+                                            <div className="flex flex-wrap justify-between gap-2"><dt className="text-[#777287]">Issued</dt><dd>{formatDate(certificate.issuedAt)}</dd></div>
+                                        </dl>
+                                        <p className="mt-4 border-t border-[#e7e1f0] pt-4 text-sm text-[#697386]">Certificate file download is unavailable from the current backend.</p>
+                                        <button type="button" onClick={() => setCertId(certificate.id || '')} disabled={!certificate.id} className="mt-3 rounded-lg border border-[#d9d3e8] bg-white px-4 py-2 text-sm font-semibold text-[#5140c8] disabled:opacity-50">Use ID to verify</button>
+                                    </article>
+                                ))}
                             </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={handleShareTranscript}
-                                    disabled={isSharing}
-                                    className="py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 transition-colors disabled:opacity-50"
-                                >
-                                    {isSharing ? 'Sharing...' : 'Share Transcript'}
-                                </button>
-                                <button
-                                    onClick={handleDownloadAll}
-                                    disabled={isDownloadingAll}
-                                    className="py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
-                                >
-                                    {isDownloadingAll ? 'Preparing...' : 'Download All'}
-                                </button>
+                        ) : (
+                            <div className="mt-6 rounded-xl border border-dashed border-[#d9d3e8] p-10 text-center">
+                                <h2 className="font-semibold">{certificates.length ? 'No matching certificates' : 'No certificate records'}</h2>
+                                <p className="mt-2 text-sm text-[#697386]">{certificates.length ? 'Try a different search term.' : 'An issued certificate will appear here when one is available.'}</p>
                             </div>
+                        )}
+            </section>
 
-                            <div className="glass p-6 rounded-2xl border border-white/5">
-                                <h4 className="text-lg font-bold text-white mb-4">Certificate Verification</h4>
-                                <div className="space-y-4">
-                                    <input
-                                        type="text"
-                                        value={certId}
-                                        onChange={(e) => setCertId(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-                                        placeholder="e.g., PE-2024-NX8829-VZ"
-                                        className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 transition-colors placeholder:text-gray-500 font-mono text-sm uppercase"
-                                    />
-
-                                    <button
-                                        onClick={handleVerify}
-                                        disabled={isVerifying || !certId.trim()}
-                                        className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg transition-all disabled:opacity-50"
-                                    >
-                                        {isVerifying ? 'Verifying...' : 'Verify Certificate'}
-                                    </button>
-                                </div>
-
-                                {verifiedResult && (
-                                    <div className={`mt-5 rounded-2xl border p-5 ${
-                                        verifiedResult.status === 'success'
-                                            ? 'bg-emerald-500/10 border-emerald-500/20'
-                                            : 'bg-red-500/10 border-red-500/20'
-                                    }`}>
-                                        <p className={`text-xs font-bold uppercase tracking-widest mb-4 ${
-                                            verifiedResult.status === 'success' ? 'text-emerald-400' : 'text-red-400'
-                                        }`}>
-                                            {verifiedResult.status === 'success' ? 'Authentic Record' : 'Invalid ID'}
-                                        </p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between gap-4">
-                                                <span className="text-gray-400">Recipient</span>
-                                                <span className="text-white font-semibold text-right">{verifiedResult.recipient}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                                <span className="text-gray-400">Event</span>
-                                                <span className="text-white font-semibold text-right">{verifiedResult.event}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                                <span className="text-gray-400">Issued</span>
-                                                <span className="text-white font-semibold text-right">{verifiedResult.date}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="glass p-6 rounded-2xl border border-white/5">
-                                <h4 className="text-lg font-bold text-white mb-3">Achievement Notes</h4>
-                                <div className="space-y-3 text-sm text-gray-400">
-                                    <p>Verified certificates are ready for transcript sharing and portfolio downloads.</p>
-                                    <p>Pending credentials remain visible here so you can track new awards in one place.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <section className="rounded-2xl border border-[#e0d9ee] bg-white p-5 shadow-sm md:p-7">
+                <h2 className="text-xl font-bold">Verify a certificate record</h2>
+                <p className="mt-2 text-sm text-[#697386]">Verification checks whether the backend has a record for the entered ID.</p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <input value={certId} onChange={(event) => setCertId(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && handleVerify()} placeholder="Certificate ID" className="min-w-0 flex-1 rounded-xl border border-[#ddd6eb] bg-[#fbfaff] px-4 py-3 text-sm" />
+                    <button type="button" onClick={handleVerify} disabled={isVerifying || !certId.trim()} className="rounded-xl bg-[#5b4ce1] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{isVerifying ? 'Checking…' : 'Verify'}</button>
                 </div>
-            </div>
-        </div>
+                {verifiedResult && <div role={verifiedResult.status === 'success' ? 'status' : 'alert'} className={`mt-4 rounded-xl p-4 text-sm ${verifiedResult.status === 'success' ? 'border border-emerald-200 bg-emerald-50 text-emerald-900' : 'border border-red-200 bg-red-50 text-red-800'}`}>
+                    <p className="font-semibold">{verifiedResult.message}</p>
+                    {verifiedResult.details && <p className="mt-2">ID: {verifiedResult.details.id} · Hackathon ID: {verifiedResult.details.hackathonId || 'Unavailable'} · Issued: {formatDate(verifiedResult.details.issuedAt)}</p>}
+                </div>}
+            </section>
+        </main>
     );
 };
 

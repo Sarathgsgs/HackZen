@@ -12,6 +12,7 @@ const StudentSubmissionStatus = () => {
   const [submission, setSubmission] = useState(null);
   const [evaluation, setEvaluation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const teamQuery = searchParams.get('teamId') ? `?teamId=${searchParams.get('teamId')}` : '';
 
   useEffect(() => {
@@ -21,7 +22,7 @@ const StudentSubmissionStatus = () => {
         const teams = await getMyTeams();
         const requestedTeamId = searchParams.get('teamId');
         const activeTeam = requestedTeamId
-          ? teams.find((item) => String(item.id || item._id) === String(requestedTeamId)) || teams[0] || null
+          ? teams.find((item) => String(item.id || item._id) === String(requestedTeamId)) || null
           : teams[0] || null;
         if (!activeTeam) {
           setSubmission(null);
@@ -43,6 +44,7 @@ const StudentSubmissionStatus = () => {
         setEvaluation(Array.isArray(evals) && evals.length > 0 ? evals[0] : null);
       } catch (error) {
         console.error('Unable to load submission status:', error);
+        setLoadError('Submission status could not be loaded. Please try again.');
         setSubmission(null);
         setEvaluation(null);
       } finally {
@@ -63,6 +65,10 @@ const StudentSubmissionStatus = () => {
     );
   }
 
+  if (loadError) {
+    return <div role="alert" className="mx-auto max-w-4xl rounded-[18px] border border-red-200 bg-white p-10 text-center text-red-800">{loadError}</div>;
+  }
+
   if (!submission) {
     return (
       <div className="mx-auto max-w-4xl pb-10">
@@ -76,7 +82,7 @@ const StudentSubmissionStatus = () => {
 
   const statusText = evaluation
     ? (submission?.status || 'Evaluated')
-    : (submission?.status || 'Pending');
+    : (submission?.status || 'Status unavailable');
 
   const statusTone =
     statusText?.toLowerCase().includes('approved') || statusText?.toLowerCase().includes('accepted')
@@ -86,11 +92,11 @@ const StudentSubmissionStatus = () => {
         : 'border-[#e1d5c1] bg-[#fff7eb] text-[#a66a1d]';
 
   const details = [
-    ['Project', submission.project || 'Untitled Project'],
+    ['Project', submission.project || 'Project title unavailable'],
     ['Version', submission.version ? `v${submission.version}` : 'Not assigned'],
-    ['Submitted at', submission.submittedAt || 'Not submitted'],
-    ['Review state', evaluation ? (submission.status || 'Evaluated') : (submission.status || 'Pending')],
-    ['Score', evaluation?.totalScore ?? evaluation?.score ?? 'Pending'],
+    ['Submitted at', submission.submittedAt || 'Submission date unavailable'],
+    ['Review state', submission.status || 'Status unavailable'],
+    ['Score', evaluation?.totalScore ?? evaluation?.score ?? 'Score unavailable'],
     ['Feedback', evaluation?.feedback || 'No feedback available yet'],
     ['Evaluated at', evaluation?.evaluatedAt ? new Date(evaluation.evaluatedAt).toLocaleString() : 'Not evaluated yet'],
   ];

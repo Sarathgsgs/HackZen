@@ -14,6 +14,10 @@ const QUICK_STARTERS = [
 ];
 
 const FRIENDLY_AI_BUSY_MESSAGE = 'AI service is temporarily busy. Please try again in a moment.';
+const FRIENDLY_AI_CONFIG_MESSAGE = 'The AI service is not configured correctly. Please contact support.';
+const FRIENDLY_AI_QUOTA_MESSAGE = 'The AI service has reached its request limit. Please try again later.';
+const FRIENDLY_AUTH_MESSAGE = 'Your session has expired. Please sign in again.';
+const FRIENDLY_AI_RETRY_MESSAGE = 'The AI request could not be completed. Please try again.';
 
 const normalizeAiErrorText = (value) => {
     if (!value) return '';
@@ -33,53 +37,62 @@ const normalizeAiErrorText = (value) => {
     return String(value);
 };
 
-const isTemporaryAiUnavailable = (error) => {
-    const haystack = [
-        normalizeAiErrorText(error?.response?.data),
-        normalizeAiErrorText(error?.response?.data?.detail),
-        normalizeAiErrorText(error?.response?.data?.message),
-        normalizeAiErrorText(error?.response?.data?.error),
-        normalizeAiErrorText(error?.message),
-        normalizeAiErrorText(error)
-    ].join(' ').toLowerCase();
-
-    return (
-        haystack.includes('503') ||
-        haystack.includes('unavailable') ||
-        haystack.includes('high demand') ||
-        haystack.includes('temporarily busy')
-    );
-};
-
 const resolveAiError = (error) => {
-    if (isTemporaryAiUnavailable(error)) {
+    const status = error?.response?.status;
+    const details = normalizeAiErrorText(error?.response?.data).toLowerCase();
+    if (status === 401) return new Error(FRIENDLY_AUTH_MESSAGE);
+    if (status === 403) return new Error('Your account is not permitted to use the AI Assistant.');
+    if (details.includes('do not have permission to use this model')) {
+        return new Error('The configured AI credentials do not have permission to use this model. Please contact support.');
+    }
+    if (details.includes('configured ai model is unavailable')) {
+        return new Error('The configured AI model is unavailable. Please contact support.');
+    }
+    if (details.includes('credential') || details.includes('api key') || details.includes('model configuration') || details.includes('not configured') || details.includes('configured request')) {
+        return new Error(FRIENDLY_AI_CONFIG_MESSAGE);
+    }
+    if (status === 429 || details.includes('quota') || details.includes('rate limit') || details.includes('resource_exhausted')) {
+        return new Error(FRIENDLY_AI_QUOTA_MESSAGE);
+    }
+    if (status === 504 || status === 408 || details.includes('timed out') || details.includes('timeout')) {
+        return new Error('The AI service took too long to respond. Please retry your question.');
+    }
+    if (status === 503 || details.includes('503') || details.includes('unavailable') || details.includes('high demand') || details.includes('temporarily busy')) {
         return new Error(FRIENDLY_AI_BUSY_MESSAGE);
     }
-
-    const detail = [
-        normalizeAiErrorText(error?.response?.data),
-        normalizeAiErrorText(error?.response?.data?.detail),
-        normalizeAiErrorText(error?.response?.data?.message),
-        normalizeAiErrorText(error?.message),
-        normalizeAiErrorText(error)
-    ].find(Boolean) || FRIENDLY_AI_BUSY_MESSAGE;
-
-    return new Error(detail);
+    if (typeof status === 'number' && status >= 500) return new Error(FRIENDLY_AI_RETRY_MESSAGE);
+    return new Error(FRIENDLY_AI_RETRY_MESSAGE);
 };
 
-const toUiMessage = (entry) => ({
-    id: entry._id || entry.id || Date.now(),
-    sender: entry.sender === 'user' ? 'user' : 'ai',
-    text: entry.response || entry.text || '',
-    timestamp: entry.timestamp
+const toUiMessages = (entry) => {
+    const id = entry._id || entry.id || `history-${entry.timestamp}`;
+    const timestamp = entry.timestamp
         ? new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-});
+        : '';
+    return [
+        ...(typeof entry.query === 'string' && entry.query.trim() ? [{
+            id: `${id}-user`,
+            sender: 'user',
+            text: entry.query,
+            timestamp,
+        }] : []),
+        ...(typeof entry.response === 'string' && entry.response.trim() ? [{
+            id: `${id}-ai`,
+            sender: 'ai',
+            text: entry.response,
+            timestamp,
+        }] : []),
+    ];
+};
 
 export const fetchInitialMessages = async () => {
     try {
         const { data } = await apiClient.get('/ai/logs');
-        return Array.isArray(data) ? data.map(toUiMessage) : [];
+        if (!Array.isArray(data)) return [];
+        return data
+            .slice()
+            .sort((first, second) => new Date(first.timestamp) - new Date(second.timestamp))
+            .flatMap(toUiMessages);
     } catch (error) {
         throw resolveAiError(error);
     }
@@ -89,32 +102,27 @@ export const fetchQuickStarters = async () => {
     return QUICK_STARTERS;
 };
 
-export const sendChatMessage = async (text, context, objective) => {
+export const sendChatMessage = async (text, hackathonId) => {
     try {
-        const cachedUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-        const currentHackathon = cachedUser.currentHackathonId || cachedUser.hackathonId || cachedUser.team?.hackathonId;
-
         const payload = {
             query: text,
-            hackathon_id: currentHackathon || null,
-            context,
-            objective
+            hackathon_id: hackathonId || null,
         };
 
-        const url = `${apiClient.defaults.baseURL || 'http://localhost:8000/api'}/ai/chat`;
-        console.log('AI request', 'POST', url, payload);
-
         const { data } = await apiClient.post('/ai/chat', payload);
-        console.log('AI response', data);
+        const responseText = typeof data?.response === 'string' ? data.response.trim() : '';
+        if (!responseText) {
+            throw new Error('The AI service returned no answer. Please try again.');
+        }
 
         return {
             id: Date.now(),
             sender: 'ai',
-            text: data?.response || 'AI Co-Mentor is currently unavailable.',
+            text: responseText,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
     } catch (error) {
-        console.error('AI request failed', error);
+        console.error('AI request failed');
         throw resolveAiError(error);
     }
 };

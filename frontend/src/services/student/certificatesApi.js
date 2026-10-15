@@ -1,78 +1,48 @@
 import apiClient from '../../api/api';
 
-/**
- * Student Certificates API
- * Provides service functions for certificate management and verification using the real backend.
- */
-
-/**
- * Fetches all certificates for the current student.
- */
+/** Return certificate records exactly as confirmed by the authenticated API. */
 export const fetchCertificates = async () => {
-    try {
-        const { data } = await apiClient.get('/certificates/me');
-        
-        return data.map(c => ({
-            id: c._id,
-            title: 'Hackathon Award', // Placeholder until hackathon title join
-            issuer: 'ProEduvate Platform',
-            date: new Date(c.issuedAt).toLocaleDateString(),
-            category: 'Participant',
-            image: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=2070&auto=format&fit=crop',
-            status: 'Verified',
-            isDownloading: false,
-            url: c.certificateUrl
-        }));
-    } catch (error) {
-        console.error('Failed to fetch certificates:', error);
-        return [];
-    }
+    const { data } = await apiClient.get('/certificates/me');
+    return Array.isArray(data) ? data.map((certificate) => ({
+        id: certificate.id || certificate._id || null,
+        userId: certificate.userId || null,
+        teamId: certificate.teamId || null,
+        hackathonId: certificate.hackathonId || null,
+        issuedAt: certificate.issuedAt || null,
+        certificateUrl: certificate.certificateUrl || null,
+    })) : [];
 };
 
-/**
- * Verifies a certificate by its unique ID.
- * @param {string} certId 
- */
+/** Verify only whether a certificate record with this ID exists. */
 export const verifyCertificate = async (certId) => {
     try {
-        const { data } = await apiClient.get(`/certificates/${certId}`);
+        const { data } = await apiClient.get(`/certificates/${encodeURIComponent(certId)}`);
         return {
             status: 'success',
-            message: `Certificate ${certId} is Authentic`,
-            recipient: 'Authenticated User',
-            event: 'ProEduvate Hackathon',
-            date: new Date(data.issuedAt).toLocaleDateString()
+            message: 'Certificate record found.',
+            details: {
+                id: data.id || data._id || certId,
+                hackathonId: data.hackathonId || null,
+                issuedAt: data.issuedAt || null,
+            },
         };
     } catch (error) {
-        console.error('Verification failed:', error);
         return {
             status: 'error',
-            message: 'No record found with this ID',
-            recipient: '-',
-            event: '-',
-            date: '-'
+            message: error?.response?.status === 404 ? 'No certificate record was found with this ID.' : 'Certificate verification is unavailable right now.',
+            details: null,
         };
     }
 };
 
-/**
- * Simulates downloading a certificate.
- */
-export const downloadCertificate = async (certId) => {
-    // In a real app, this would open a PDF link
-    return { success: true, message: `Redirecting to certificate view...` };
+export const downloadCertificate = async () => {
+    throw new Error('Certificate file downloads are not available from the backend yet.');
 };
 
-/**
- * Simulates downloading all certificates as an archive.
- */
 export const downloadAllCertificates = async () => {
-    return { success: true, message: 'Archive generation started...' };
+    throw new Error('Bulk certificate downloads are not available from the backend yet.');
 };
 
-/**
- * Simulates sharing the transcript link.
- */
 export const shareTranscript = async () => {
-    return { success: true, shareLink: window.location.origin + '/share/profile' };
+    throw new Error('Transcript sharing is not available from the backend yet.');
 };

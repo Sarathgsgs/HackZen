@@ -98,6 +98,11 @@ async def get_my_certificates(current_user: dict = Depends(with_auth)):
 @router.get("/{certificate_id}", response_model=CertificateResponse)
 async def get_certificate(certificate_id: str):
     """Get certificate details"""
+    if not ObjectId.is_valid(certificate_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid certificate ID format",
+        )
     collection = get_certificates_collection()
     cert = await collection.find_one({"_id": ObjectId(certificate_id)})
     if not cert:

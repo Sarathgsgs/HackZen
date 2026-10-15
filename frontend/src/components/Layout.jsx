@@ -4,7 +4,6 @@ import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 const DashboardLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
 
@@ -51,6 +50,7 @@ const DashboardLayout = () => {
 
     // Determine Role based on URL path
     const currentPath = location.pathname;
+    const isStudent = currentPath.startsWith('/student');
     const isAdmin = currentPath.startsWith('/admin');
     const isOrganizer = currentPath.startsWith('/organizer');
     const isMentor = currentPath.startsWith('/mentor');
@@ -303,109 +303,43 @@ const DashboardLayout = () => {
     }
 
     return (
-        <div className="flex h-screen bg-navy-900 bg-radial text-white overflow-hidden font-sans">
-            {/* Mobile Overlay */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
+        <div className={`flex h-screen flex-col ${isStudent ? 'bg-white' : 'bg-navy-900 bg-radial'} text-white overflow-hidden font-sans`}>
+            <header className={`shrink-0 border-b sticky top-0 z-30 ${isStudent ? 'bg-white border-gray-200 shadow-sm' : 'glass-strong border-white/10'}`}>
+                <div className="h-16 flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                        <Link to="/" className="shrink-0 group" aria-label="ProEduvate home">
+                            <img
+                                src="/proeduvatee-removebg-preview.png"
+                                alt="ProEduvate"
+                                className="h-10 w-auto transition-transform duration-300 group-hover:scale-105"
+                            />
+                        </Link>
 
-            {/* Sidebar */}
-            <aside className={`
-                fixed lg:relative z-50 w-64 h-full glass-strong border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out
-                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            `}>
-                {/* Logo Area */}
-                <Link to="/" className="py-6 w-full flex items-center justify-center border-b border-white/10 group">
-                    <img
-                        src="/proeduvatee-removebg-preview.png"
-                        alt="ProEduvate"
-                        className="mx-auto h-14 w-auto transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                    />
-                </Link>
-
-                {/* Navigation Menu */}
-                <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-                    {navItems.map((item) => {
-                        // For the main dashboard path, use exact match to avoid highlighting it for every sub-route
-                        // For other routes, use startsWith to keep the parent nav item highlighted
-                        const isDashboardRoot = item.path.endsWith('/dashboard');
-                        const isActive = isDashboardRoot
-                            ? location.pathname === item.path
-                            : location.pathname.startsWith(item.path);
-                        return (
-                            <Link
-                                key={item.name}
-                                to={item.path}
-                                onClick={() => setSidebarOpen(false)}
-                                className={`
-                                    flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group
-                                    ${isActive
-                                        ? `${activeStyles[themeColor] || activeStyles.purple} border`
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'}
-                                `}
-                            >
-                                <span className={`transition-transform duration-300 ${iconStyles[themeColor] || iconStyles.purple}`}>
-                                    {item.icon}
-                                </span>
-                                <span className="font-bold tracking-wide uppercase text-[12px]">{item.name}</span>
-                                {isActive && (
-                                    <div className={`ml-auto w-1.5 h-1.5 rounded-full ${indicatorStyles[themeColor] || indicatorStyles.purple}`} />
-                                )}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-
-                {/* Bottom Badge */}
-                <div className="p-4 mt-auto">
-                    <div className="glass p-4 rounded-xl flex items-center gap-3 border border-white/5">
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${currentRole.avatarGradient} flex items-center justify-center`}>
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Deployment Role</p>
-                            <p className="text-sm font-bold text-white tracking-tight uppercase">{currentRole.roleName}</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-full relative overflow-hidden">
-                {/* Header */}
-                <header className="h-20 glass-strong border-b border-white/10 flex items-center justify-between px-6 lg:px-10 sticky top-0 z-30">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="lg:hidden p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>
 
                         {/* Search Bar - Common for dashboard */}
-                        <div className="relative hidden md:block w-96 group">
+                        <div className="relative hidden min-w-0 max-w-96 flex-1 group lg:block">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg className={`w-5 h-5 text-gray-400 group-focus-within:text-${themeColor}-400 transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <svg className={`w-5 h-5 text-gray-400 ${isStudent ? 'group-focus-within:text-indigo-600' : `group-focus-within:text-${themeColor}-400`} transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             </div>
                             <input
                                 type="text"
                                 placeholder={isAdmin ? "SEARCH USERS, HACKATHONS..." : "SEARCH..."}
-                                className={`w-full pl-10 pr-4 py-2.5 bg-navy-900/50 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-${themeColor}-500/50 transition-all`}
+                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-[10px] font-black uppercase tracking-widest focus:outline-none focus:ring-1 transition-all ${isStudent ? 'bg-slate-50 border-gray-200 text-slate-800 placeholder-slate-500 focus:ring-indigo-500/50' : `bg-navy-900/50 border-white/10 text-white placeholder-gray-600 focus:ring-${themeColor}-500/50`}`}
                             />
                         </div>
                     </div>
 
                     {/* Right Actions */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex shrink-0 items-center gap-2 sm:gap-4 lg:gap-6">
+                        <div className="hidden items-center gap-2 text-[10px] uppercase tracking-wider sm:flex">
+                            <span className="font-semibold text-gray-500">Deployment Role</span>
+                            <span className={`font-bold ${isStudent ? 'text-slate-800' : 'text-white'}`}>{currentRole.roleName}</span>
+                        </div>
                         {/* Notifications */}
                         <div className="relative">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className="relative p-2 text-gray-300 hover:text-white transition-colors"
+                                className={`relative p-2 transition-colors ${isStudent ? 'text-slate-600 hover:text-indigo-700' : 'text-gray-300 hover:text-white'}`}
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                                 {unreadCount > 0 && (
@@ -458,15 +392,15 @@ const DashboardLayout = () => {
                         <div className="relative">
                             <button
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                                className="flex items-center gap-3 hover:bg-white/5 py-1.5 px-3 rounded-full transition-all border border-transparent hover:border-white/10"
+                                className={`flex items-center gap-3 py-1.5 px-3 rounded-full transition-all border border-transparent ${isStudent ? 'text-slate-700 hover:bg-slate-100 hover:border-gray-200' : 'hover:bg-white/5 hover:border-white/10'}`}
                             >
                                 <div className={`w-9 h-9 rounded-full bg-gradient-to-r ${currentRole.avatarGradient} flex items-center justify-center text-white font-black shadow-lg shadow-purple-500/20 ring-2 ring-white/10 italic`}>
                                     {currentRole.name.charAt(0)}
                                 </div>
-                                <span className="hidden md:block text-[12px] font-bold text-white uppercase tracking-wider">
+                                <span className={`hidden md:block text-[12px] font-bold uppercase tracking-wider ${isStudent ? 'text-slate-800' : 'text-white'}`}>
                                     {currentRole.fullName.toUpperCase()}
                                 </span>
-                                <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showProfileMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                <svg className={`w-4 h-4 transition-transform duration-200 ${isStudent ? 'text-slate-500' : 'text-gray-400'} ${showProfileMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
 
                             {showProfileMenu && (
@@ -485,13 +419,51 @@ const DashboardLayout = () => {
                             )}
                         </div>
                     </div>
-                </header>
+                </div>
+                <nav
+                    aria-label={`${currentRole.roleName} navigation`}
+                    className="custom-scrollbar flex items-center gap-1 overflow-x-auto px-3 pb-2 sm:px-6 lg:px-10"
+                >
+                    {navItems.map((item) => {
+                        // Keep dashboard exact-match behavior and parent-route highlighting.
+                        const isDashboardRoot = item.path.endsWith('/dashboard');
+                        const isActive = isDashboardRoot
+                            ? location.pathname === item.path
+                            : location.pathname.startsWith(item.path);
+                        return (
+                            <Link
+                                key={item.name}
+                                to={item.path}
+                                className={`
+                                    flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 transition-all duration-300 group
+                                    ${isStudent
+                                        ? (isActive
+                                            ? 'bg-indigo-50 text-indigo-800 border border-indigo-200'
+                                            : 'text-slate-700 hover:text-indigo-700 hover:bg-slate-50')
+                                        : (isActive
+                                            ? `${activeStyles[themeColor] || activeStyles.purple} border`
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5')}
+                                `}
+                            >
+                                <span className={`transition-transform duration-300 ${isStudent
+                                    ? (isActive ? 'text-indigo-700' : 'text-slate-600 group-hover:text-indigo-600')
+                                    : (iconStyles[themeColor] || iconStyles.purple)}`}>
+                                    {item.icon}
+                                </span>
+                                <span className="whitespace-nowrap font-bold tracking-wide uppercase text-[10px] sm:text-[11px]">{item.name}</span>
+                                {isActive && (
+                                    <div className={`ml-1 h-1.5 w-1.5 shrink-0 rounded-full ${isStudent ? 'bg-indigo-600' : (indicatorStyles[themeColor] || indicatorStyles.purple)}`} />
+                                )}
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </header>
 
-                {/* Main Content from child routes */}
-                <main className="flex-1 overflow-y-auto p-6 lg:p-10 scrollbar-hide">
-                    <Outlet />
-                </main>
-            </div>
+            {/* Main content scrolls below the persistent navigation header. */}
+            <main className="min-h-0 flex-1 overflow-y-auto p-6 lg:p-10 scrollbar-hide">
+                <Outlet />
+            </main>
         </div>
     );
 };

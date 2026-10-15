@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchAllHackathons } from '../../api/hackathonApi';
 import { fetchMyApplications } from '../../api/applicationApi';
 
@@ -58,6 +58,30 @@ const statusLabel = (hackathon, registered) => {
     return hackathon.status || 'Available';
 };
 
+const hackathonBanners = [
+    { name: 'ai', src: '/assets/hackathon-ai.svg', keywords: ['artificial intelligence', 'machine learning', 'aiml', 'genai', 'llm', 'data science'] },
+    { name: 'cyber', src: '/assets/hackathon-cyber.svg', keywords: ['cyber', 'security', 'privacy', 'devsecops'] },
+    { name: 'robotics', src: '/assets/hackathon-robotics.svg', keywords: ['robot', 'iot', 'internet of things', 'hardware'] },
+    { name: 'climate', src: '/assets/hackathon-climate.svg', keywords: ['sustain', 'climate', 'environment', 'energy', 'green'] },
+    { name: 'web', src: '/assets/hackathon-web.svg', keywords: ['web', 'blockchain', 'cloud', 'mobile', 'gaming', 'finance'] },
+    { name: 'health', src: '/assets/hackathon-health.svg', keywords: ['health', 'medical', 'social good', 'education'] },
+];
+
+const bannerForHackathon = (hackathon, id) => {
+    const themeText = (Array.isArray(hackathon.themes) ? hackathon.themes : [])
+        .join(' ')
+        .toLowerCase();
+    const themedBanner = hackathonBanners.find(({ name, keywords }) =>
+        (name === 'ai' && /\bai\b/.test(themeText))
+        || keywords.some((keyword) => themeText.includes(keyword))
+    );
+    if (themedBanner) return themedBanner.src;
+
+    const stableKey = String(id || hackathon.title || 'hackathon');
+    const stableHash = [...stableKey].reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 7);
+    return hackathonBanners[stableHash % hackathonBanners.length].src;
+};
+
 const Select = ({ label, value, onChange, children }) => (
     <label className="relative block min-w-0">
         <span className="sr-only">{label}</span>
@@ -70,6 +94,7 @@ const Select = ({ label, value, onChange, children }) => (
 
 const StudentHackathons = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [hackathons, setHackathons] = useState([]);
     const [registeredIds, setRegisteredIds] = useState(new Set());
     const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +105,13 @@ const StudentHackathons = () => {
     const [mode, setMode] = useState('all');
     const [sort, setSort] = useState('newest');
     const [selectedHackathon, setSelectedHackathon] = useState(null);
+
+    useEffect(() => {
+        const selectedId = location.state?.hackathonId;
+        if (selectedId) {
+            navigate(`/student/hackathons/${encodeURIComponent(selectedId)}`, { replace: true, state: null });
+        }
+    }, [location.state, navigate]);
 
     const loadHackathons = async () => {
         setIsLoading(true);
@@ -175,9 +207,15 @@ const StudentHackathons = () => {
                         const id = hackathon.id || hackathon._id;
                         const registered = registeredIds.has(id);
                         const poster = hackathon.posterUrl;
+                        const fallbackBanner = bannerForHackathon(hackathon, id);
                         return <article key={id} className="flex min-h-[500px] flex-col overflow-hidden rounded-2xl border border-[#e5e1ed] bg-white shadow-[0_1px_2px_rgba(31,22,60,0.03)]">
-                            <div className="relative h-52 shrink-0 bg-[#eeebf6]">
-                                {poster ? <img src={poster} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center px-6 text-center text-lg font-semibold text-[#777488]">{hackathon.title}</div>}
+                            <div className="relative aspect-video w-full shrink-0 bg-[#eeebf6]">
+                                <img
+                                    src={poster || fallbackBanner}
+                                    alt={`${hackathon.title} banner`}
+                                    onError={poster ? (event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackBanner; } : undefined}
+                                    className="h-full w-full object-cover"
+                                />
                                 <span className="absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-sm font-medium text-[#5a42d8] shadow-sm">{statusLabel(hackathon, registered)}</span>
                             </div>
                             <div className="flex flex-1 flex-col p-6">
@@ -188,7 +226,10 @@ const StudentHackathons = () => {
                                     <p className="flex gap-3"><span aria-hidden="true">◎</span>{modeFor(hackathon.location)}</p>
                                     <p className="flex gap-3"><span aria-hidden="true">♧</span>Team: {hackathon.minTeamSize || 1} – {hackathon.maxTeamSize || 1} Members</p>
                                 </div>
-                                <button onClick={() => registered ? setSelectedHackathon(hackathon) : navigate(`/student/hackathons/${id}/register`)} className={`mt-auto w-full rounded-lg py-3.5 text-lg font-medium transition ${registered ? 'bg-[#5740d6] text-white hover:bg-[#4530bd]' : 'border-2 border-[#6952e5] bg-white text-[#6149dc] hover:bg-[#f6f4ff]'}`}>{registered ? 'View Details' : 'Register Now'}</button>
+                                <div className="mt-auto flex gap-3">
+                                    <button onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}`)} className={`w-full rounded-lg py-3.5 text-lg font-medium transition ${registered ? 'bg-[#5740d6] text-white hover:bg-[#4530bd]' : 'border-2 border-[#6952e5] bg-white text-[#6149dc] hover:bg-[#f6f4ff]'}`}>View Details</button>
+                                    {!registered && <button onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}/register`)} className="w-full rounded-lg bg-[#5740d6] py-3.5 text-lg font-medium text-white transition hover:bg-[#4530bd]">Register Now</button>}
+                                </div>
                             </div>
                         </article>;
                     })}

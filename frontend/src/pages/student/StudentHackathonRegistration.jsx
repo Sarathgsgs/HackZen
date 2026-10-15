@@ -38,9 +38,12 @@ const StudentHackathonRegistration = () => {
 
             try {
                 const nextHackathon = await fetchHackathonById(hackathonId);
-                const storedUser = JSON.parse(
-                    sessionStorage.getItem('user') || localStorage.getItem('user') || '{"name":"Student","email":""}'
-                );
+                let storedUser = {};
+                try {
+                    storedUser = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+                } catch {
+                    storedUser = {};
+                }
                 const nextDraft = await getRegistrationDraft(nextHackathon, storedUser);
                 setHackathon(nextHackathon);
                 setDraft(nextDraft);
@@ -89,7 +92,7 @@ const StudentHackathonRegistration = () => {
             <div className="mx-auto max-w-[1200px]">
                 <div className="mb-8 text-center">
                     <h1 className="text-[clamp(2rem,3vw,3rem)] font-black tracking-[-0.06em] text-[#1e2433]">Register for Hackathon</h1>
-                    <p className="mt-3 text-lg font-medium text-[#5a5d6d]">{hackathon?.title || 'AI Innovation Challenge 2025'}</p>
+                    <p className="mt-3 text-lg font-medium text-[#5a5d6d]">{hackathon?.title || 'Hackathon title unavailable'}</p>
                 </div>
 
                 <div className="mx-auto mb-8 flex max-w-[720px] items-center justify-center gap-3 sm:gap-4">

@@ -5,6 +5,8 @@ File upload utilities for hackathon posters and templates
 import os
 import shutil
 import uuid
+import zipfile
+import re
 from pathlib import Path
 from typing import Optional
 from fastapi import UploadFile, HTTPException
@@ -19,10 +21,78 @@ class FileUploadService:
         self.base_dir = backend_dir / "uploads"
         self.posters_dir = self.base_dir / "posters"
         self.templates_dir = self.base_dir / "templates"
+        # Shared team files live outside /uploads, which is mounted publicly.
+        self.shared_files_dir = Path(__file__).parent.parent.resolve() / "private_team_files"
 
         # Create directories
         self.posters_dir.mkdir(parents=True, exist_ok=True)
         self.templates_dir.mkdir(parents=True, exist_ok=True)
+        self.shared_files_dir.mkdir(parents=True, exist_ok=True)
+
+    async def save_shared_file(self, file: UploadFile) -> tuple[str, str, int, str]:
+        """Validate and persist a private team file using a server-generated name."""
+        allowed = {".pptx", ".pdf", ".zip", ".mp4"}
+        original_name = (file.filename or "").replace("\\", "/").split("/")[-1].strip()
+        if not original_name or len(original_name) > 180 or any(ord(char) < 32 for char in original_name):
+            raise HTTPException(status_code=400, detail="Enter a valid file name.")
+
+        extension = Path(original_name).suffix.lower()
+        if extension not in allowed:
+            raise HTTPException(status_code=400, detail="Supported file types are PPTX, PDF, ZIP, and MP4.")
+
+        file.file.seek(0, os.SEEK_END)
+        size = file.file.tell()
+        file.file.seek(0)
+        max_size = 200 * 1024 * 1024
+        if size <= 0:
+            raise HTTPException(status_code=400, detail="The selected file is empty.")
+        if size > max_size:
+            raise HTTPException(status_code=413, detail="Files must be 200 MB or smaller.")
+
+        header = file.file.read(16)
+        file.file.seek(0)
+        valid = False
+        content_type = "application/octet-stream"
+        if extension == ".pdf":
+            valid = header.startswith(b"%PDF-")
+            content_type = "application/pdf"
+        elif extension in {".zip", ".pptx"}:
+            valid = zipfile.is_zipfile(file.file)
+            file.file.seek(0)
+            if valid and extension == ".pptx":
+                try:
+                    with zipfile.ZipFile(file.file) as archive:
+                        valid = "ppt/presentation.xml" in archive.namelist()
+                except (OSError, zipfile.BadZipFile):
+                    valid = False
+            content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation" if extension == ".pptx" else "application/zip"
+        elif extension == ".mp4":
+            valid = len(header) >= 8 and header[4:8] == b"ftyp"
+            content_type = "video/mp4"
+        file.file.seek(0)
+        if not valid:
+            raise HTTPException(status_code=400, detail="The file contents do not match the selected file type.")
+
+        storage_name = f"{uuid.uuid4().hex}{extension}"
+        target = self.shared_files_dir / storage_name
+        try:
+            with target.open("xb") as output:
+                shutil.copyfileobj(file.file, output)
+        except Exception:
+            target.unlink(missing_ok=True)
+            raise
+        finally:
+            file.file.seek(0)
+        return storage_name, original_name, size, content_type
+
+    def get_shared_file_path(self, storage_name: str) -> Path:
+        """Resolve only generated storage names, never caller-supplied paths."""
+        if not storage_name or not re.fullmatch(r"[a-f0-9]{32}\.(pptx|pdf|zip|mp4)", storage_name):
+            raise HTTPException(status_code=404, detail="File not found.")
+        target = (self.shared_files_dir / storage_name).resolve()
+        if target.parent != self.shared_files_dir.resolve() or not target.is_file():
+            raise HTTPException(status_code=404, detail="File not found.")
+        return target
 
     async def save_poster(self, file: UploadFile) -> tuple:
         """Save hackathon poster image"""

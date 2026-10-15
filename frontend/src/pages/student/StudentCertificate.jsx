@@ -6,87 +6,53 @@ const StudentCertificate = () => {
   const navigate = useNavigate();
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const loadCertificates = async () => {
-      setLoading(true);
-      try {
-        const { data } = await apiClient.get('/certificates/me');
-        setCertificates(data || []);
-      } catch (error) {
-        console.error('Failed to load certificates:', error);
-        setCertificates([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCertificates();
+    let active = true;
+    apiClient.get('/certificates/me')
+      .then(({ data }) => { if (active) setCertificates(Array.isArray(data) ? data : []); })
+      .catch((requestError) => {
+        console.error('Failed to load certificates:', requestError);
+        if (active) setError('Certificates could not be loaded. Please try again.');
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-5xl space-y-8 pb-10 animate-in fade-in duration-500">
-        <div className="glass rounded-[2rem] border border-white/10 p-8 text-center text-gray-300">Loading certificates…</div>
-      </div>
-    );
-  }
-
-  if (certificates.length === 0) {
-    return (
-      <div className="mx-auto max-w-5xl pb-10">
-        <div className="glass rounded-[2rem] border border-dashed border-white/10 bg-white/5 p-10 text-center">
-          <h2 className="text-2xl font-bold text-white">No certificates available</h2>
-          <p className="mt-3 text-gray-400">Your authenticated account does not currently have any certificate records to display.</p>
-          <button
-            onClick={() => navigate('/student/certificates/verify')}
-            className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200"
-          >
-            Verify certificate
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const primaryCertificate = certificates[0];
-  const issuedDate = primaryCertificate?.issuedAt ? new Date(primaryCertificate.issuedAt).toLocaleDateString() : 'Not available';
-  const primaryCertificateId = primaryCertificate?._id || primaryCertificate?.id || '';
-
-  const handleVerifyNavigation = () => {
-    if (primaryCertificateId) {
-      navigate('/student/certificates/verify', { state: { certificateId: primaryCertificateId } });
-      return;
-    }
-
-    navigate('/student/certificates/verify');
-  };
-
+  const certificate = certificates[0];
+  const id = certificate?._id || certificate?.id;
   return (
-    <div className="mx-auto max-w-5xl space-y-8 pb-10 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-violet-300">Award</p>
-          <h1 className="mt-2 text-3xl font-bold text-white">Certificate</h1>
+    <main className="min-h-screen bg-[#fbf8ff] px-5 py-10 text-[#1f2430] md:px-10">
+      <div className="mx-auto max-w-[1440px]">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div><h1 className="text-4xl font-bold tracking-tight">Certificates</h1><p className="mt-3 text-lg text-[#686779]">Your certificates issued for completed hackathons.</p></div>
+          <button onClick={() => navigate('/student/certificates/verify', { state: id ? { certificateId: id } : undefined })} className="rounded-xl border border-[#d9d4e8] bg-white px-5 py-3 font-semibold text-[#5748dc]">Verify Certificate</button>
         </div>
-        <button onClick={handleVerifyNavigation} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200">
-          Verify certificate
-        </button>
+        <section className="mt-8 rounded-2xl border border-[#eeeaf4] bg-white p-6 shadow-sm md:p-10">
+          {loading ? <p role="status" className="py-12 text-center text-[#71758a]">Loading your certificates…</p> : error ? (
+            <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-800">{error}</div>
+          ) : certificate ? (
+            <div className="rounded-2xl border border-emerald-200 bg-[#eaf8f1] p-6 md:p-8">
+              <h2 className="text-2xl font-bold">Certificate issued</h2>
+              <dl className="mt-6 divide-y divide-emerald-200">
+                <div className="flex flex-wrap justify-between gap-2 py-4"><dt className="text-[#63716d]">Hackathon</dt><dd className="font-semibold">{certificate.hackathonTitle || certificate.hackathonId}</dd></div>
+                <div className="flex flex-wrap justify-between gap-2 py-4"><dt className="text-[#63716d]">Issue date</dt><dd className="font-semibold">{certificate.issuedAt ? new Date(certificate.issuedAt).toLocaleDateString() : 'Not provided'}</dd></div>
+                <div className="flex flex-wrap justify-between gap-2 py-4"><dt className="text-[#63716d]">Certificate ID</dt><dd className="font-mono font-semibold">{id}</dd></div>
+              </dl>
+              <p className="mt-4 text-sm text-[#697386]">Certificate file download is unavailable from the current backend.</p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-[#d9d4e8] bg-[#fbfaff] px-6 py-16 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eeeaff] text-2xl text-[#5b4ce1]">✓</div>
+              <h2 className="mt-5 text-2xl font-bold">No certificate issued yet</h2>
+              <p className="mx-auto mt-2 max-w-xl text-[#71758a]">Certificates will appear here after an organizer issues one for your hackathon participation.</p>
+              <button onClick={() => navigate('/student/certificates/verify')} className="mt-6 rounded-xl bg-[#5b4ce1] px-6 py-3 font-semibold text-white">Verify a Certificate</button>
+            </div>
+          )}
+        </section>
       </div>
-
-      <div className="glass rounded-[2rem] border border-white/10 p-8">
-        <div className="rounded-[1.75rem] border border-violet-500/30 bg-gradient-to-br from-violet-600/20 to-indigo-600/20 p-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-violet-200">ProEduvate</p>
-          <h2 className="mt-6 text-4xl font-bold text-white">Certificate of Participation</h2>
-          <p className="mt-5 text-xl text-gray-200">Awarded to the authenticated student</p>
-          <p className="mt-2 text-sm text-gray-300">Issued from the platform certificate record for this account</p>
-          <div className="mt-8 flex items-center justify-center gap-8 text-sm text-gray-200 flex-wrap">
-            <span>Issued on: {issuedDate}</span>
-            <span>ID: {primaryCertificate?._id || 'Not available'}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    </main>
   );
 };
 

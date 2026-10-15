@@ -1,32 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchInitialMessages, fetchQuickStarters, sendChatMessage } from '../../services/student/aiAssistantApi';
-
-const starterConversation = [
-    {
-        id: 'assistant-1',
-        sender: 'ai',
-        text: "Let's break the problem into user needs, current challenges, existing gaps, and possible opportunities. Start by identifying who is affected and what difficulty they currently experience.",
-        timestamp: '10:24 AM'
-    },
-    {
-        id: 'user-1',
-        sender: 'user',
-        text: 'I want to understand the main pain points related to this problem statement.',
-        timestamp: '10:24 AM'
-    },
-    {
-        id: 'assistant-2',
-        sender: 'ai',
-        text: 'How can I structure my project?',
-        timestamp: '10:25 AM'
-    },
-    {
-        id: 'user-2',
-        sender: 'user',
-        text: 'You can structure your project around Problem → Target Users → Pain Point → Proposed Solution → Key Features → Technology → Impact → Validation.',
-        timestamp: '10:25 AM'
-    }
-];
+import { getMyTeams } from '../../api/teamApi';
+import { fetchMyApplications } from '../../api/applicationApi';
+import { fetchHackathonById } from '../../api/hackathonApi';
 
 const suggestionLabels = [
     'Help me understand this problem',
@@ -35,17 +11,59 @@ const suggestionLabels = [
     'How can I structure my project?'
 ];
 
-const AI_BUSY_MESSAGE = 'AI service is temporarily busy. Please try again in a moment.';
-
 const StudentAIAssistant = () => {
-    const [selectedContext, setSelectedContext] = useState('AI for Social Impact');
-    const [selectedObjective, setSelectedObjective] = useState('Problem Statement');
-    const [messages, setMessages] = useState(starterConversation);
+    const [hackathons, setHackathons] = useState([]);
+    const [selectedHackathonId, setSelectedHackathonId] = useState('');
+    const [teams, setTeams] = useState([]);
+    const [messages, setMessages] = useState([]);
     const [quickStarters, setQuickStarters] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isContextLoading, setIsContextLoading] = useState(true);
     const [isAITyping, setIsAITyping] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [historyError, setHistoryError] = useState('');
+    const sendingRef = useRef(false);
+
+    const selectedHackathon = hackathons.find((item) => String(item.id || item._id) === String(selectedHackathonId));
+    const selectedTeam = teams.find((item) => String(item.hackathonId) === String(selectedHackathonId));
+
+    useEffect(() => {
+        let active = true;
+        const loadHackathonContext = async () => {
+            try {
+                const [myTeams, applications] = await Promise.all([getMyTeams(), fetchMyApplications()]);
+                if (!active) return;
+                const teamsList = Array.isArray(myTeams) ? myTeams : [];
+                const applicationList = Array.isArray(applications) ? applications : [];
+                setTeams(teamsList);
+                const ids = [...new Set([
+                    ...teamsList.map((team) => team.hackathonId),
+                    ...applicationList.map((application) => application.hackathonId),
+                ].filter(Boolean).map(String))];
+                const results = await Promise.allSettled(ids.map((id) => fetchHackathonById(id)));
+                if (!active) return;
+                const loaded = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+                setHackathons(loaded);
+                let cachedUser = {};
+                try {
+                    cachedUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}') || {};
+                } catch {
+                    // The authenticated API results remain authoritative if the local profile is malformed.
+                }
+                const preferredId = cachedUser.currentHackathonId || cachedUser.hackathonId || cachedUser.team?.hackathonId;
+                const preferred = loaded.find((item) => String(item.id || item._id) === String(preferredId));
+                const selected = preferred || loaded[0];
+                setSelectedHackathonId(selected ? String(selected.id || selected._id) : '');
+            } catch (error) {
+                console.error('Failed to load AI hackathon context:', error);
+            } finally {
+                if (active) setIsContextLoading(false);
+            }
+        };
+        loadHackathonContext();
+        return () => { active = false; };
+    }, []);
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -59,13 +77,14 @@ const StudentAIAssistant = () => {
                 if (Array.isArray(initialMsgs) && initialMsgs.length > 0) {
                     setMessages(initialMsgs);
                 } else {
-                    setMessages(starterConversation);
+                    setMessages([]);
                 }
                 setQuickStarters(triggers || []);
             } catch (error) {
                 console.error('Failed to load AI data:', error);
-                setMessages(starterConversation);
+                setMessages([]);
                 setQuickStarters([]);
+                setHistoryError('Conversation history could not be loaded. You can still send a new question.');
             } finally {
                 setIsLoading(false);
             }
@@ -76,7 +95,8 @@ const StudentAIAssistant = () => {
 
     const handleSendMessage = async () => {
         const trimmed = inputValue.trim();
-        if (!trimmed) return;
+        if (!trimmed || sendingRef.current) return;
+        sendingRef.current = true;
 
         const userMsg = {
             id: `user-${Date.now()}`,
@@ -85,28 +105,18 @@ const StudentAIAssistant = () => {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
-        setMessages(prev => [...prev, userMsg]);
-        setInputValue('');
         setIsAITyping(true);
         setErrorMessage('');
 
         try {
-            const aiResponse = await sendChatMessage(trimmed, selectedContext, selectedObjective);
-            setMessages(prev => [...prev, aiResponse]);
+            const aiResponse = await sendChatMessage(trimmed, selectedHackathonId);
+            setMessages(prev => [...prev, userMsg, aiResponse]);
+            setInputValue('');
         } catch (error) {
             console.error('AI Assistant error:', error);
-            const friendlyMessage = error?.message?.includes('503') || error?.message?.toLowerCase().includes('unavailable') || error?.message?.toLowerCase().includes('high demand')
-                ? AI_BUSY_MESSAGE
-                : (error?.message || AI_BUSY_MESSAGE);
-
-            setErrorMessage(friendlyMessage);
-            setMessages(prev => [...prev, {
-                id: `error-${Date.now()}`,
-                sender: 'ai',
-                text: friendlyMessage,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }]);
+            setErrorMessage(error?.message || 'The AI service could not complete this request. Please try again.');
         } finally {
+            sendingRef.current = false;
             setIsAITyping(false);
         }
     };
@@ -143,6 +153,9 @@ const StudentAIAssistant = () => {
                         <div className="h-[560px] bg-[#f9f8fb] p-4 sm:p-5">
                             <div className="flex h-full flex-col">
                                 <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+                                    {isLoading ? <p className="py-6 text-center text-sm text-[#777487]">Loading conversation…</p> : null}
+                                    {historyError && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{historyError}</p>}
+                                    {!isLoading && messages.length === 0 && <p className="py-10 text-center text-sm text-[#777487]">No saved conversation yet. Ask a question to get started.</p>}
                                     {messages.map((msg) => (
                                         <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                                             {msg.sender === 'user' ? (
@@ -174,6 +187,7 @@ const StudentAIAssistant = () => {
                                             key={starter.id}
                                             type="button"
                                             onClick={() => setInputValue(starter.text)}
+                                            disabled={isAITyping}
                                             className="rounded-full border border-[#dfe2ea] bg-[#f8f8fb] px-3 py-2 text-[0.77rem] font-medium text-[#2d2e39] transition hover:border-[#b9b3d0] hover:bg-white"
                                         >
                                             {starter.text}
@@ -182,8 +196,9 @@ const StudentAIAssistant = () => {
                                 </div>
 
                                 {errorMessage && (
-                                    <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
-                                        {errorMessage}
+                                    <div role="alert" className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                                        <span>{errorMessage}</span>
+                                        <button type="button" onClick={handleSendMessage} disabled={!inputValue.trim() || isAITyping || isContextLoading} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 font-semibold text-amber-900 disabled:opacity-50">Retry</button>
                                     </div>
                                 )}
 
@@ -192,6 +207,7 @@ const StudentAIAssistant = () => {
                                         <textarea
                                             value={inputValue}
                                             onChange={(e) => setInputValue(e.target.value)}
+                                            disabled={isAITyping}
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' && !e.shiftKey) {
                                                     e.preventDefault();
@@ -206,7 +222,7 @@ const StudentAIAssistant = () => {
                                     <button
                                         type="button"
                                         onClick={handleSendMessage}
-                                        disabled={!inputValue.trim() || isAITyping}
+                                        disabled={!inputValue.trim() || isAITyping || isContextLoading}
                                         className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#4d3bb5] text-white shadow-[0_10px_20px_rgba(77,59,181,0.25)] transition hover:bg-[#4233a6] disabled:cursor-not-allowed disabled:opacity-60"
                                         aria-label="Send message"
                                     >
@@ -231,30 +247,26 @@ const StudentAIAssistant = () => {
                                 </div>
                             </div>
 
-                            <h2 className="mt-4 text-[1.05rem] font-semibold text-[#1d1e2a]">AI Innovation Challenge</h2>
+                            {selectedHackathon ? <>
+                            <select aria-label="Current hackathon" value={selectedHackathonId} onChange={(event) => setSelectedHackathonId(event.target.value)} className="mt-4 w-full rounded-lg border border-[#d8d4de] bg-white px-3 py-2 text-[1.05rem] font-semibold text-[#1d1e2a]">
+                                {hackathons.map((hackathon) => <option key={hackathon.id || hackathon._id} value={hackathon.id || hackathon._id}>{hackathon.title}</option>)}
+                            </select>
 
                             <div className="mt-5 rounded-[12px] border border-[#e8e3f1] bg-[#f5f1fa] p-3 text-sm text-[#4c4b57]">
                                 <div className="mb-1 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#756f86]">Theme</div>
-                                <div className="text-[0.95rem] text-[#232534]">AI for Social Impact</div>
+                                <div className="text-[0.95rem] text-[#232534]">{(selectedHackathon.themes || []).map((theme) => typeof theme === 'string' ? theme : theme?.value || theme?.name).filter(Boolean).join(', ') || 'No theme specified'}</div>
                             </div>
 
                             <div className="mt-4 rounded-[12px] border border-[#e8e3f1] bg-[#f5f1fa] p-3 text-sm text-[#4c4b57]">
                                 <div className="mb-1 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#756f86]">Problem Statement</div>
-                                <div className="text-[0.95rem] text-[#232534]">Improving access to essential services in underserved communities using localized AI solutions.</div>
+                                <div className="text-[0.95rem] text-[#232534]">{selectedHackathon.problemStatement || selectedHackathon.description || 'No problem statement provided.'}</div>
                             </div>
 
-                            <div className="mt-5 flex items-center gap-2 text-[0.86rem] text-[#3a3942]">
+                            {selectedTeam && <div className="mt-5 flex items-center gap-2 text-[0.86rem] text-[#3a3942]">
                                 <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#d5d0e2] bg-white text-[#413847]">👥</span>
-                                <span>Team: Team Innovators</span>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() => setSelectedContext('AI for Social Impact')}
-                                className="mt-5 w-full rounded-xl border border-[#d5d0e2] bg-white px-4 py-3 text-sm font-semibold text-[#2c2c35] transition hover:bg-[#f5f0ff]"
-                            >
-                                Change Context
-                            </button>
+                                <span>Team: {selectedTeam.teamName}</span>
+                            </div>}
+                            </> : <p className="mt-4 text-sm text-[#625e70]">No registered hackathon or team is linked to your account yet. You can still ask for general hackathon guidance.</p>}
                         </div>
 
                         <div className="rounded-[18px] border border-[#d9d2e4] bg-[#f8f5fb] p-5">

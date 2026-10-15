@@ -53,6 +53,10 @@ class HackathonResponse(HackathonBase):
     createdAt: datetime = Field(..., alias="createdAt")
     updatedAt: datetime = Field(..., alias="updatedAt")
     participants_count: int = Field(default=0, alias="participants_count")
+    organizerName: Optional[str] = None
+    maxTeams: Optional[int] = None
+    resources: List[Dict[str, Any]] = []
+    prizes: List[Dict[str, Any]] = []
 
     class Config:
         populate_by_name = True

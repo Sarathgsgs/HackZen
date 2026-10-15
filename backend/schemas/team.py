@@ -23,6 +23,9 @@ class TeamMemberCreate(TeamMemberBase):
 class TeamMemberResponse(TeamMemberBase):
     id: str = Field(..., alias="_id")
     joinedAt: datetime = Field(..., alias="joinedAt")
+    name: Optional[str] = None
+    email: Optional[str] = None
+    department: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -44,14 +47,21 @@ class TeamUpdate(BaseModel):
 
 class TeamMentorUpdate(BaseModel):
     mentorId: str
+    focusArea: Optional[str] = Field(None, max_length=100)
+    guidanceRequest: Optional[str] = Field(None, max_length=600)
+    preferredTimeWindow: Optional[str] = Field(None, max_length=80)
 
 
 class TeamResponse(TeamBase):
     id: str = Field(None, alias="_id")
-    teamCode: str = Field(None, alias="teamCode")
+    teamCode: Optional[str] = Field(None, alias="teamCode")
     createdBy: str = Field(None, alias="createdBy")
     mentorId: Optional[str] = Field(None, alias="mentorId")
     createdAt: datetime = Field(..., alias="createdAt")
+    myRole: Optional[TeamMemberRole] = None
+    memberCount: Optional[int] = None
+    maxTeamSize: Optional[int] = None
+    hackathonName: Optional[str] = None
 
     class Config:
         populate_by_name = True

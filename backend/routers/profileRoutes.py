@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from typing import Dict, Any, List
 from database import get_db
-from core.dependencies import with_auth
+from core.dependencies import with_auth, RequireRole
 from schemas.profileSchema import ProfileResponse, MentorProfile
 from services.profileService import ProfileService
 
@@ -64,7 +64,7 @@ async def update_my_profile_details(
 
 
 @router.get("/mentors", response_model=List[MentorProfile])
-async def get_available_mentors():
+async def get_available_mentors(current_user: Dict[str, Any] = Depends(RequireRole(["student"]))):
     """Fetch all mentors with 'Available' status"""
     db = get_db()
     mentors = await ProfileService.get_available_mentors(db)

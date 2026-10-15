@@ -9,6 +9,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentCertificates from './pages/student/StudentCertificates';
 import StudentHackathons from './pages/student/StudentHackathons';
+import StudentHackathonDetails from './pages/student/StudentHackathonDetails';
 import StudentHackathonRegistration from './pages/student/StudentHackathonRegistration';
 import StudentRegistrationSuccess from './pages/student/StudentRegistrationSuccess';
 import HackathonRegistrationStepOne from './pages/student/HackathonRegistrationStepOne';
@@ -34,7 +35,6 @@ import StudentProjectInfo from './pages/student/StudentProjectInfo';
 import StudentSubmission from './pages/student/StudentSubmission';
 import StudentFileSharing from './pages/student/StudentFileSharing';
 import StudentSubmissionStatus from './pages/student/StudentSubmissionStatus';
-import StudentCertificate from './pages/student/StudentCertificate';
 import StudentCertificateVerification from './pages/student/StudentCertificateVerification';
 import DashboardLayout from './components/Layout';
 import MyHackathons from './pages/organizer/MyHackathons';
@@ -151,9 +151,9 @@ function AppContent() {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<StudentDashboard />} />
-          <Route path="certificates" element={<StudentCertificate />} />
           <Route path="submissions" element={<StudentSubmissions />} />
           <Route path="hackathons" element={<StudentHackathons />} />
+          <Route path="hackathons/:hackathonId" element={<StudentHackathonDetails />} />
           <Route path="hackathons/:hackathonId/register" element={<StudentHackathonRegistration />}>
             <Route index element={<Navigate to="step-1" replace />} />
             <Route path="step-1" element={<HackathonRegistrationStepOne />} />
@@ -165,6 +165,7 @@ function AppContent() {
             <Route index element={<StudentTeamOverview />} />
             <Route path="create" element={<StudentCreateTeam />} />
             <Route path="join" element={<StudentJoinTeam />} />
+            <Route path="members" element={<StudentTeamMembers />} />
             <Route path=":teamId/workspace" element={<StudentTeamWorkspace />} />
             <Route path=":teamId/members" element={<StudentTeamMembers />} />
           </Route>
@@ -184,7 +185,7 @@ function AppContent() {
           <Route path="files" element={<StudentFileSharing />} />
           <Route path="ai-assistant" element={<StudentAIAssistant />} />
           <Route path="certificates">
-            <Route index element={<StudentCertificate />} />
+            <Route index element={<StudentCertificates />} />
             <Route path="verify" element={<StudentCertificateVerification />} />
           </Route>
           <Route path="profile">
