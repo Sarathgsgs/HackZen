@@ -469,16 +469,17 @@ const UsersManagement = () => {
     const currentUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
     const renderPaginationBar = (position) => (
-        <div className={`flex flex-wrap items-center justify-between px-4 py-3 border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] shrink-0 text-xs font-medium ${position === 'top' ? 'border-b rounded-t-2xl' : 'border-t rounded-b-2xl mt-auto'}`}>
-            <div className="text-[11px] font-bold text-slate-500 dark:text-gray-400">
-                Showing <span className="text-slate-900 dark:text-white font-extrabold">{filteredUsers.length === 0 ? 0 : startIndex + 1}</span> to <span className="text-slate-900 dark:text-white font-extrabold">{Math.min(startIndex + itemsPerPage, filteredUsers.length)}</span> of <span className="text-slate-900 dark:text-white font-extrabold">{filteredUsers.length}</span> Users • Page {currentPage} of {totalPages}
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] shrink-0 text-xs font-medium ${position === 'top' ? 'border-b rounded-t-2xl' : 'border-t rounded-b-2xl mt-auto'}`}>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-gray-400 text-center sm:text-left">
+                <span className="hidden sm:inline">Showing </span>
+                <span className="text-slate-900 dark:text-white font-extrabold">{filteredUsers.length === 0 ? 0 : startIndex + 1}–{Math.min(startIndex + itemsPerPage, filteredUsers.length)}</span> of <span className="text-slate-900 dark:text-white font-extrabold">{filteredUsers.length}</span><span className="hidden sm:inline"> Users</span> • Page <span className="font-extrabold text-slate-900 dark:text-white">{currentPage}</span>/{totalPages}
             </div>
             
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center">
                 <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-95 ${
+                    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-95 ${
                         currentPage === 1
                             ? 'opacity-40 cursor-not-allowed border-slate-200 dark:border-white/10 text-slate-400'
                             : 'bg-white dark:bg-navy-800 text-slate-700 dark:text-gray-200 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-navy-700 shadow-xs'
@@ -487,12 +488,12 @@ const UsersManagement = () => {
                     ← Prev
                 </button>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 overflow-x-auto max-w-[200px] sm:max-w-none scrollbar-none py-0.5">
                     {[...Array(totalPages)].map((_, i) => (
                         <button
                             key={i}
                             onClick={() => setCurrentPage(i + 1)}
-                            className={`w-7 h-7 flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg sm:rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
                                 currentPage === i + 1 
                                     ? 'bg-[#7C65F6] !text-white font-bold shadow-xs' 
                                     : 'text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5'
@@ -506,7 +507,7 @@ const UsersManagement = () => {
                 <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages || filteredUsers.length === 0}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-95 ${
+                    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-95 ${
                         currentPage === totalPages || filteredUsers.length === 0
                             ? 'opacity-40 cursor-not-allowed border-slate-200 dark:border-white/10 text-slate-400'
                             : 'bg-white dark:bg-navy-800 text-slate-700 dark:text-gray-200 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-navy-700 shadow-xs'
@@ -519,7 +520,7 @@ const UsersManagement = () => {
     );
 
     return (
-        <div className="space-y-5 sm:space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-16 max-w-7xl mx-auto">
+        <div className="space-y-5 sm:space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-16 max-w-7xl mx-auto min-w-0 w-full max-w-full overflow-x-hidden">
             
             {/* Notification Toast */}
             {toastMessage && (
@@ -637,23 +638,25 @@ const UsersManagement = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     
                     {/* Status Tabs with Dynamic Counts */}
-                    <div className="p-1.5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex overflow-x-auto gap-1">
+                    <div className="w-full sm:w-auto p-1.5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex items-center overflow-x-auto gap-1 scrollbar-none max-w-full shrink-0">
                         {[
-                            { name: 'All Users', count: populationStats.total },
-                            { name: 'Active', count: populationStats.active },
-                            { name: 'Suspended', count: populationStats.suspended },
-                            { name: 'Verification Required', count: populationStats.verificationPending }
+                            { name: 'All Users', shortName: 'All Users', count: populationStats.total },
+                            { name: 'Active', shortName: 'Active', count: populationStats.active },
+                            { name: 'Suspended', shortName: 'Suspended', count: populationStats.suspended },
+                            { name: 'Verification Required', shortName: 'Verification', count: populationStats.verificationPending }
                         ].map((tab) => (
                             <button
                                 key={tab.name}
                                 onClick={() => { setActiveTab(tab.name); setCurrentPage(1); }}
-                                className={`px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
+                                className={`px-3 sm:px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
                                     activeTab === tab.name 
                                         ? 'bg-purple-50 dark:bg-purple-500/20 text-[#6D5CE8] dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 font-bold shadow-xs' 
                                         : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
                                 }`}
+                                title={tab.name}
                             >
-                                <span>{tab.name}</span>
+                                <span className="hidden sm:inline">{tab.name}</span>
+                                <span className="sm:hidden">{tab.shortName}</span>
                                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
                                     activeTab === tab.name 
                                     ? 'bg-[#7C65F6]/15 dark:bg-purple-500/30 text-[#6D5CE8] dark:text-purple-200' 
@@ -782,16 +785,16 @@ const UsersManagement = () => {
             )}
 
             {/* SPLIT PANE WORKSPACE */}
-            <div className="flex flex-col lg:flex-row gap-6 items-start">
+            <div className="flex flex-col lg:flex-row gap-6 items-start min-w-0 w-full max-w-full">
                 
                 {/* LEFT PANE: Directory Table (60% Width, 10 Items Per Page) */}
-                <div className="w-full lg:w-[60%] flex flex-col rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden">
+                <div className="w-full lg:w-[60%] min-w-0 max-w-full flex flex-col rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden">
                     
                     {/* TOP PAGINATION */}
                     {renderPaginationBar('top')}
 
-                    <div className="overflow-x-auto relative scrollbar-none">
-                        <table className="w-full text-left border-collapse table-auto">
+                    <div className="overflow-x-auto relative w-full min-w-0 scrollbar-thin">
+                        <table className="w-full min-w-[620px] text-left border-collapse table-auto">
                             <thead>
                                 <tr className="border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
                                     <th className="w-8 px-3 py-3 text-center">
@@ -915,7 +918,7 @@ const UsersManagement = () => {
                 </div>
 
                 {/* RIGHT PANE: Detailed User Profile Workspace (40% Width, Sticky & 2-Tab Two-Page Inspector) */}
-                <div className="w-full lg:w-[40%] rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col lg:sticky lg:top-4 max-h-none lg:max-h-[calc(100vh-5rem)] overflow-y-auto custom-scrollbar">
+                <div className="w-full lg:w-[40%] min-w-0 max-w-full rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden flex flex-col lg:sticky lg:top-4 max-h-none lg:max-h-[calc(100vh-5rem)] overflow-y-auto custom-scrollbar">
                     {selectedUser ? (
                         <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                             

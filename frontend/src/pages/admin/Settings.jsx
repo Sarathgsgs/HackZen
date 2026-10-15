@@ -127,17 +127,10 @@ const Settings = () => {
         window.dispatchEvent(new Event('admin-nav-layout-change'));
         showToast(
             mode === 'navbar' 
-                ? "Switched to Top Navbar navigation (Figma spec)." 
-                : "Switched to Classic Sidebar navigation.",
+                ? "Switched to Top Navbar navigation." 
+                : "Switched to Sidebar navigation.",
             "success"
         );
-    };
-
-    const handleRevokeToSidebar = () => {
-        localStorage.setItem('admin_nav_layout', 'sidebar');
-        setNavLayout('sidebar');
-        window.dispatchEvent(new Event('admin-nav-layout-change'));
-        showToast("Navigation layout revoked! Classic sidebar layout restored.", "success");
     };
 
     // Global Configuration State
@@ -757,38 +750,20 @@ const Settings = () => {
                                 </div>
                             </div>
 
-                            {/* Workspace Navigation Layout Architecture & TL Review Stand */}
+                            {/* Workspace Navigation Layout */}
                             <div className="pt-2">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2.5 mb-4 border-slate-200 dark:border-white/10">
-                                    <div>
-                                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                                            <span>Admin Navigation Layout Architecture</span>
-                                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/20 text-[#7C65F6] border border-purple-200 dark:border-purple-500/30">
-                                                Dual Mode
-                                            </span>
-                                        </h3>
-                                        <p className="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5">
-                                            Switch between the modern Figma top-bar layout requested by your TL and the classic sidebar navigation.
-                                        </p>
-                                    </div>
-                                    {navLayout === 'navbar' && (
-                                        <button
-                                            type="button"
-                                            onClick={handleRevokeToSidebar}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-300 dark:border-amber-500/30 rounded-xl transition-all shadow-xs active:scale-95 shrink-0"
-                                            title="Immediately revert and restore classic vertical sidebar navigation"
-                                        >
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a5 5 0 0 1 5 5v2m0 0l-4-4m4 4l4-4" />
-                                            </svg>
-                                            <span>↩ Revoke to Sidebar</span>
-                                        </button>
-                                    )}
+                                <div className="border-b pb-2.5 mb-4 border-slate-200 dark:border-white/10">
+                                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                                        Admin Navigation Layout
+                                    </h3>
+                                    <p className="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5">
+                                        Select your preferred navigation style for the administration portal.
+                                    </p>
                                 </div>
 
                                 {/* Visual Choice Cards */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Card 1: Top Navbar Mode (Figma Spec) */}
+                                    {/* Card 1: Top Navbar Navigation */}
                                     <div 
                                         onClick={() => handleNavLayoutChange('navbar')}
                                         className={`p-4 rounded-2xl border transition-all cursor-pointer relative flex flex-col justify-between ${
@@ -824,18 +799,15 @@ const Settings = () => {
                                             </div>
 
                                             <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                                    <span>Top Navbar Navigation</span>
-                                                    <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono font-bold bg-[#7C65F6] text-white">
-                                                        Figma Spec
-                                                    </span>
+                                                <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                                                    Top Navbar Navigation
                                                 </span>
                                                 {navLayout === 'navbar' && (
                                                     <span className="w-2 h-2 rounded-full bg-[#7C65F6] ring-4 ring-purple-400/30"></span>
                                                 )}
                                             </div>
                                             <p className="text-[11px] text-slate-600 dark:text-gray-300 leading-relaxed">
-                                                Places all administrative navigation links horizontally inside the top navbar with active purple underline indicators. Removes the vertical sidebar to maximize page workspace.
+                                                Places navigation links horizontally inside the top header. Expands the main page workspace.
                                             </p>
                                         </div>
 
@@ -853,7 +825,7 @@ const Settings = () => {
                                         </div>
                                     </div>
 
-                                    {/* Card 2: Sidebar Mode (Classic Stand) */}
+                                    {/* Card 2: Sidebar Navigation */}
                                     <div 
                                         onClick={() => handleNavLayoutChange('sidebar')}
                                         className={`p-4 rounded-2xl border transition-all cursor-pointer relative flex flex-col justify-between ${
@@ -886,18 +858,15 @@ const Settings = () => {
                                             </div>
 
                                             <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                                    <span>Classic Sidebar Navigation</span>
-                                                    <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono font-bold bg-indigo-600 text-white">
-                                                        Your Stand
-                                                    </span>
+                                                <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                                                    Sidebar Navigation
                                                 </span>
                                                 {navLayout === 'sidebar' && (
                                                     <span className="w-2 h-2 rounded-full bg-indigo-600 ring-4 ring-indigo-400/30"></span>
                                                 )}
                                             </div>
                                             <p className="text-[11px] text-slate-600 dark:text-gray-300 leading-relaxed">
-                                                Retains the classic collapsible vertical sidebar with icons, badge counters, and category groupings. Traditional enterprise dashboard ergonomics.
+                                                Traditional collapsible vertical sidebar navigation with category groupings and quick access.
                                             </p>
                                         </div>
 
@@ -914,28 +883,6 @@ const Settings = () => {
                                             </span>
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* Revoke Banner / Fallback Protection */}
-                                <div className="mt-3 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-500/20 bg-amber-50/60 dark:bg-amber-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                    <div className="flex items-start gap-2.5">
-                                        <span className="text-base leading-none mt-0.5">💡</span>
-                                        <div>
-                                            <h5 className="text-xs font-extrabold text-amber-900 dark:text-amber-200">
-                                                Decision Safety & Revocation Policy
-                                            </h5>
-                                            <p className="text-[11px] text-amber-800/80 dark:text-amber-300/70 mt-0.5">
-                                                If your Tech Lead changes their mind or requests the traditional layout back, click <strong>"Revoke & Reset to Sidebar"</strong>. The classic sidebar will be reinstated across your platform immediately.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={handleRevokeToSidebar}
-                                        className="w-full sm:w-auto px-3.5 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-100 bg-amber-200/70 dark:bg-amber-500/30 hover:bg-amber-300/80 dark:hover:bg-amber-500/40 border border-amber-300 dark:border-amber-500/40 rounded-xl transition-all shadow-xs active:scale-95 shrink-0"
-                                    >
-                                        ↩ Revoke & Reset to Sidebar
-                                    </button>
                                 </div>
                             </div>
 

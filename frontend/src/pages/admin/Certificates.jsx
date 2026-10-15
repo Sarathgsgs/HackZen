@@ -170,9 +170,9 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
     return (
         <div className="relative group rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-md bg-white dark:bg-slate-950 text-slate-800 dark:text-white my-2 transition-all">
             {/* Top Toolbar */}
-            <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-50/90 dark:bg-slate-900/95 border-b border-slate-200 dark:border-white/10 text-xs">
-                <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 bg-slate-50/90 dark:bg-slate-900/95 border-b border-slate-200 dark:border-white/10 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                     <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px] tracking-wide">
                         Template: <strong className="text-slate-900 dark:text-white">{cert.template || `${type} Certificate`}</strong>
                     </span>
@@ -181,7 +181,7 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
                     </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-auto">
                     <button
                         type="button"
                         onClick={() => onPreviewFull?.({
@@ -189,7 +189,7 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
                             imageUrl: certImage,
                             category: type
                         })}
-                        className="px-2.5 py-1 text-[11px] font-bold bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-700 dark:text-white border border-slate-200 dark:border-transparent rounded-lg transition-colors flex items-center gap-1 shadow-sm"
+                        className="px-2.5 py-1 text-[11px] font-bold bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-700 dark:text-white border border-slate-200 dark:border-transparent rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
                         title="View high-resolution certificate"
                     >
                         <EyeIcon className="w-3.5 h-3.5" />
@@ -198,7 +198,7 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
                     <a
                         href={certImage}
                         download={`${recipient.replace(/\s+/g, '_')}_Certificate.png`}
-                        className="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-400/30 rounded-lg transition-colors flex items-center gap-1 shadow-sm"
+                        className="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-400/30 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
                         title="Download certificate image"
                     >
                         <DownloadIcon className="w-3.5 h-3.5" />
@@ -1791,7 +1791,7 @@ const Certificates = () => {
                             </div>
 
                             {/* Sub-tab Navigation */}
-                            <div className="flex border-b border-slate-200/80 dark:border-white/10 px-5 pt-3 gap-4 shrink-0 bg-white dark:bg-transparent overflow-x-auto scrollbar-hide">
+                            <div className="flex border-b border-slate-200/80 dark:border-white/10 px-4 sm:px-5 pt-3 gap-2 sm:gap-4 shrink-0 bg-white dark:bg-transparent overflow-x-auto scrollbar-none">
                                 {[
                                     { id: 'checklist', label: '1. Document & Checklist', icon: <FileTextIcon className="w-3.5 h-3.5" /> },
                                     { id: 'delivery', label: '2. Delivery & Tracking', icon: <ZapIcon className="w-3.5 h-3.5" /> },
@@ -1800,7 +1800,7 @@ const Certificates = () => {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveDetailTab(tab.id)}
-                                        className={`pb-2.5 px-2 text-xs font-extrabold transition-all border-b-2 flex items-center gap-1.5 cursor-pointer ${
+                                        className={`pb-2.5 px-2.5 text-xs font-extrabold transition-all border-b-2 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                                             activeDetailTab === tab.id
                                             ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
                                             : 'border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'
@@ -1813,7 +1813,7 @@ const Certificates = () => {
                             </div>
 
                             {/* Main Scrollable Body */}
-                            <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+                            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 custom-scrollbar">
                                 
                                 {activeDetailTab === 'checklist' && (
                                     <div className="space-y-4 animate-in fade-in duration-200">
@@ -1848,15 +1848,22 @@ const Certificates = () => {
                                             <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-gray-400 mb-3">
                                                 8-Point Issuance Verification Checklist
                                             </h4>
-                                            <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold">
                                                 {Object.entries(selectedCert.checklist || {
                                                     registered: true, teamVerified: true, hackathonCompleted: true,
                                                     submissionCompleted: true, evaluationCompleted: true,
                                                     resultFinalized: true, notPreviouslyIssued: true, userActive: true
                                                 }).map(([k, v]) => (
-                                                    <div key={k} className={v ? 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5' : 'text-rose-600 dark:text-rose-400 flex items-center gap-1.5'}>
+                                                    <div 
+                                                        key={k} 
+                                                        className={`p-2 rounded-xl border flex items-center gap-2 ${
+                                                            v 
+                                                                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-500/20' 
+                                                                : 'text-rose-700 dark:text-rose-300 bg-rose-50/40 dark:bg-rose-950/20 border-rose-200/50 dark:border-rose-500/20'
+                                                        }`}
+                                                    >
                                                         {v ? <CheckIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <XIcon className="w-3.5 h-3.5 text-rose-500 shrink-0" />}
-                                                        <span className="capitalize">{k.replace(/([A-Z])/g, ' $1')}</span>
+                                                        <span className="capitalize text-[11px] font-bold">{k.replace(/([A-Z])/g, ' $1')}</span>
                                                     </div>
                                                 ))}
                                             </div>
