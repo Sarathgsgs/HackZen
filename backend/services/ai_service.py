@@ -510,6 +510,89 @@ Provide mentor matching criteria in order of priority."""
             self._log_provider_error(e)
             return []
 
+    async def generate_admin_insights(self, stats: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate platform analytics insights calculated from live database counts"""
+        total_users = stats.get('total_users', 0)
+        running_hacks = stats.get('running_hacks', 0)
+        completed_hacks = stats.get('completed_hacks', 0)
+        total_teams = stats.get('total_teams', 0)
+        total_subs = stats.get('total_subs', 0)
+        certs_minted = stats.get('certs_minted', 0)
+        pending_approvals = stats.get('pending_approvals', 0)
+
+        prompt = f"""You are the ProEduvate Platform AI Analytics Engine.
+Analyze these EXACT live platform metrics:
+- Total Registered Builders: {total_users}
+- Active Hackathon Arenas: {running_hacks}
+- Completed Hackathons: {completed_hacks}
+- Participating Teams: {total_teams}
+- Total Submissions: {total_subs}
+- Certificates Minted: {certs_minted}
+- Pending Approvals in Queue: {pending_approvals}
+
+Generate exactly 6 strategic, concise platform insights for the administrator.
+Every insight MUST cite relevant real numbers from above and offer actionable intelligence.
+
+Return ONLY a valid JSON array of 6 objects with keys:
+- "title": Short title (e.g. "User Community Trajectory", "Approval Backlog Alert")
+- "content": 1-2 sentences citing real numbers from the metrics.
+- "type": One of ["positive", "info", "warning", "purple", "danger"]"""
+
+        try:
+            if self.client:
+                loop = asyncio.get_event_loop()
+                response = await asyncio.wait_for(
+                    loop.run_in_executor(
+                        self.executor,
+                        lambda: self.client.models.generate_content(
+                            model=self.model_name,
+                            contents=prompt,
+                        )
+                    ),
+                    timeout=20.0
+                )
+                text = getattr(response, "text", "")
+                if text:
+                    cleaned = re.sub(r'```json\s*|\s*```', '', text).strip()
+                    parsed = json.loads(cleaned)
+                    if isinstance(parsed, list) and len(parsed) >= 4:
+                        return parsed
+        except Exception as e:
+            print(f"[AI Service] Admin insights notice: {e}")
+
+        return [
+            {
+                "title": "Platform Registration Trajectory",
+                "content": f"Platform engagement is active with {total_users} registered builders across participating institutions.",
+                "type": "positive"
+            },
+            {
+                "title": "Event Pipeline Activity",
+                "content": f"Currently {running_hacks} active hackathon arenas running with {total_teams} collaborating teams.",
+                "type": "info"
+            },
+            {
+                "title": "Governance & Approvals Queue",
+                "content": f"{pending_approvals} organizer & event approval requests awaiting administrative review.",
+                "type": "warning" if pending_approvals > 0 else "positive"
+            },
+            {
+                "title": "Project Submission Velocity",
+                "content": f"Submissions reached {total_subs} across active tracks with strong repository completion rates.",
+                "type": "purple"
+            },
+            {
+                "title": "Credential Issuance Index",
+                "content": f"{certs_minted} tamper-proof verifiable certificates issued to date.",
+                "type": "positive"
+            },
+            {
+                "title": "Evaluation Readiness Alert",
+                "content": "Verify judge allocations across all active tracks prior to final round closure.",
+                "type": "danger"
+            }
+        ]
+
 
 # Singleton instance
 ai_service = AICoMentorService()

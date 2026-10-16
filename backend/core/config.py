@@ -71,6 +71,10 @@ class Settings(BaseSettings):
     VECTOR_DB_URL: Optional[str] = None
     VECTOR_DB_COLLECTION: Optional[str] = None
 
+    @property
+    def cors_origins(self) -> List[str]:
+        return self.CORS_ORIGINS
+
     class Config:
         env_file = ".env"
         extra = "ignore"
