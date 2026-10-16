@@ -87,18 +87,56 @@ class AICoMentorService:
             except (TypeError, ValueError, OverflowError):
                 return None
 
+    def _log_model_attempt(
+        self,
+        model_name: str,
+        attempt: int,
+        max_attempts: int,
+        error: Optional[Exception] = None,
+    ) -> None:
+        """Log model-attempt outcomes without request or provider payload data."""
+        if not isinstance(model_name, str) or not re.fullmatch(r"[A-Za-z0-9._-]{1,100}", model_name):
+            model_name = "unknown"
+        attempt_label = f"{attempt}/{max_attempts}"
+        if error is None:
+            print(f"Gemini model attempt succeeded (model={model_name}, attempt={attempt_label})")
+            return
+
+        exception_type = type(error).__name__
+        if not re.fullmatch(r"[A-Za-z0-9_]{1,80}", exception_type):
+            exception_type = "unknown"
+        provider_status = self._provider_status(error)
+        provider_reason = "not_provider_error"
+        if isinstance(error, genai_errors.APIError):
+            status_label = provider_status if provider_status is not None else "unknown"
+            raw_reason = getattr(error, "status", None)
+            provider_reason = raw_reason.upper() if isinstance(raw_reason, str) else "UNKNOWN"
+            if provider_reason not in self.SAFE_PROVIDER_REASONS:
+                provider_reason = "UNKNOWN"
+        else:
+            status_label = "not_applicable"
+        print(
+            f"Gemini model attempt failed (model={model_name}, attempt={attempt_label}, "
+            f"exception_type={exception_type}, provider_status={status_label}, "
+            f"provider_reason={provider_reason})"
+        )
+
     async def _request_with_retries(self, model_name: str, prompt: str, attempts=None):
         attempts = attempts or self.MAX_PROVIDER_ATTEMPTS
         for attempt in range(attempts):
             try:
-                return await self._request_model(model_name, prompt)
+                response = await self._request_model(model_name, prompt)
             except Exception as error:
+                self._log_model_attempt(model_name, attempt + 1, attempts, error)
                 if self._provider_status(error) not in {408, 429, 500, 502, 503, 504} or attempt + 1 >= attempts:
                     raise
                 delay = self._retry_after_seconds(error)
                 if delay is None:
                     delay = min(0.5 * (2 ** attempt) + random.uniform(0, 0.35), 4.0)
                 await asyncio.sleep(delay)
+            else:
+                self._log_model_attempt(model_name, attempt + 1, attempts)
+                return response
 
     def _provider_http_error(self, raw_error: Exception):
         """Map provider failures to safe, actionable API errors."""
