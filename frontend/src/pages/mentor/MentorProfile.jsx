@@ -32,36 +32,11 @@ export default function MentorProfile() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState({
-    name: 'Dr. Sarah Mitchell',
-    role: 'Expert Hackathon Mentor',
-    institution: 'Stanford AI Lab / Google Research',
-    bio: 'Senior Machine Learning researcher & system architect with 10+ years of experience guiding hackathon teams through production LLM integration, distributed systems, and pitch delivery.',
-    email: 'mentor@proeduvate.com',
-    phoneNumber: '+1 (555) 234-5678',
-    stats: {
-      teams: 12,
-      rating: '4.9/5',
-      sessions: 38,
-      completedMentorships: 27,
-    },
-    competencies: [
-      'Deep Learning & Multimodal LLMs',
-      'Distributed Systems & Cloud Scaling',
-      'AI Ethics, Privacy & Safety',
-      'Product Architecture & Pitch Coaching',
-      'Vector Search & RAG Optimization',
-    ],
-    social: {
-      linkedin: 'https://linkedin.com/in/sarahmitchell',
-      github: 'https://github.com/sarahmitchell-ai',
-      website: 'https://mitchell-lab.stanford.edu',
-    },
-    recentActions: [
-      { id: 1, type: 'Review', title: 'Team Alpha Architecture Review', detail: 'Technical milestone approved', time: '2 hours ago' },
-      { id: 2, type: 'Session', title: 'Consultation with Team Nova', detail: 'Concluded 1:1 consultation', time: '4 hours ago' },
-      { id: 3, type: 'Feedback', title: 'Sprint 2 Milestone Feedback', detail: 'Scored 8.5/10 rubric review', time: 'Yesterday' },
-    ],
+    name: '', role: '', institution: '', bio: '', email: '', phoneNumber: '',
+    stats: {}, competencies: [], social: {}, recentActions: [],
   });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     fetchMentorProfile()
@@ -79,8 +54,10 @@ export default function MentorProfile() {
         }
       })
       .catch((err) => {
-        console.warn('Profile fetch notice:', err);
-      });
+        console.warn('Profile fetch failed:', err);
+        setLoadError('Unable to load your mentor profile. Please try again.');
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const initials = user.name
@@ -90,6 +67,9 @@ export default function MentorProfile() {
     .join('')
     .slice(0, 2)
     .toUpperCase();
+
+  if (loading) return <div className="py-12 text-center text-sm text-slate-400">Loading profile...</div>;
+  if (loadError) return <div role="alert" className="py-12 text-center text-sm text-rose-500">{loadError}</div>;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
@@ -133,26 +113,26 @@ export default function MentorProfile() {
         <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
           <span className="text-xs font-semibold text-slate-400">Teams Mentoring</span>
           <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-            {user.stats?.teams || 12}
+            {user.stats?.teams ?? '?'}
           </p>
         </div>
         <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
           <span className="text-xs font-semibold text-slate-400">Mentor Rating</span>
           <p className="text-2xl font-extrabold text-amber-500 mt-1 flex items-center justify-center gap-1">
             <Star className="w-5 h-5 fill-amber-400" />
-            {user.stats?.rating || '4.9/5'}
+            {user.stats?.rating ?? '?'}
           </p>
         </div>
         <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
           <span className="text-xs font-semibold text-slate-400">Sessions Completed</span>
           <p className="text-2xl font-extrabold text-[#5B45D9] mt-1">
-            {user.stats?.sessions || 38}
+            {user.stats?.sessions ?? '?'}
           </p>
         </div>
         <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
           <span className="text-xs font-semibold text-slate-400">Alumni Cohorts</span>
           <p className="text-2xl font-extrabold text-emerald-600 mt-1">
-            {user.stats?.completedMentorships || 27}
+            {user.stats?.completedMentorships ?? '?'}
           </p>
         </div>
       </div>
@@ -238,7 +218,7 @@ export default function MentorProfile() {
               Recent Mentorship Actions
             </h2>
             <div className="space-y-3 pt-1 text-xs">
-              {(user.recentActions || []).map((act) => (
+              {user.recentActions?.length ? user.recentActions.map((act) => (
                 <div key={act.id} className="flex items-start gap-2.5">
                   <div className="w-2 h-2 rounded-full bg-[#5B45D9] mt-1.5 shrink-0" />
                   <div>
@@ -246,7 +226,7 @@ export default function MentorProfile() {
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{act.detail} · {act.time}</p>
                   </div>
                 </div>
-              ))}
+              )) : <p className="py-5 text-center text-xs text-slate-400">No recent activity.</p>}
             </div>
           </div>
         </div>

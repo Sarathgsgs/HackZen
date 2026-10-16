@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 from bson import ObjectId
 
 from database import get_db
@@ -47,159 +47,22 @@ async def get_all_disputes(
     db = get_db()
     disputes = await db["disputes"].find().sort("createdAt", -1).to_list(100)
 
-    # Seed mock disputes if collection is empty
-    if not disputes:
-        mock_disputes = [
-            {
-                "id": "DSP-2026-00421",
-                "disputeCode": "DSP-2026-00421",
-                "type": "Plagiarism",
-                "category": "Plagiarism",
-                "severity": "CRITICAL",
-                "status": "Under Investigation",
-                "createdAt": datetime.utcnow() - timedelta(hours=6),
-                "slaDeadline": datetime.utcnow() + timedelta(hours=18),
-                "reporter": {
-                    "name": "John Doe",
-                    "email": "johndoe@mit.edu",
-                    "role": "Participant",
-                    "previousReports": 0,
-                    "accuracyRating": "100%",
-                },
-                "reportedTeam": {
-                    "name": "CyberKnights",
-                    "college": "ABC Engineering College",
-                    "previousCases": 2,
-                    "confirmedViolations": 1,
-                    "warnings": 1,
-                },
-                "hackathonTitle": "Global AI Summit 2026",
-                "assessment": {
-                    "riskLevel": "CRITICAL",
-                    "evidenceVerified": "3 / 4",
-                    "aiConfidence": 91,
-                    "slaRemaining": "17h 42m remaining",
-                    "recommendation": "INVESTIGATE & REQUEST EXPLANATION",
-                },
-                "similarityAnalysis": {
-                    "overallSimilarity": 94,
-                    "sourceCode": 97,
-                    "documentation": 82,
-                    "readme": 91,
-                    "matchedSourceUrl": "https://github.com/open-ai/reference-health-llm",
-                },
-                "evidence": [
-                    {
-                        "id": "ev_1",
-                        "type": "Original Repository",
-                        "source": "GitHub",
-                        "uploaded": "Aug 12, 10:21 AM",
-                        "verified": True,
-                    },
-                    {
-                        "id": "ev_2",
-                        "type": "Plagiarism Analysis Report",
-                        "source": "AI Scanner",
-                        "uploaded": "Aug 12, 10:25 AM",
-                        "verified": True,
-                    },
-                    {
-                        "id": "ev_3",
-                        "type": "Git Commit History Log",
-                        "source": "GitHub API",
-                        "uploaded": "Aug 12, 11:00 AM",
-                        "verified": True,
-                    },
-                    {
-                        "id": "ev_4",
-                        "type": "Reporter Screenshot",
-                        "source": "Upload",
-                        "uploaded": "Aug 12, 10:12 AM",
-                        "verified": False,
-                    },
-                ],
-                "evidenceIntegrity": {
-                    "sourceVerified": True,
-                    "hashVerified": True,
-                    "versionMatched": True,
-                    "timestampVerified": True,
-                    "modified": False,
-                },
-                "investigationChecklist": {
-                    "complaintReviewed": True,
-                    "reporterVerified": True,
-                    "reportedTeamIdentified": True,
-                    "submissionInspected": True,
-                    "evidenceVerified": True,
-                    "similarityChecked": True,
-                    "teamResponseReceived": False,
-                    "finalDecisionRecorded": False,
-                },
-                "coi": {
-                    "detected": True,
-                    "relationship": "Mentor",
-                    "message": "Assigned investigator Dr. Kumar is currently assigned as team mentor.",
-                },
-                "assignedInvestigator": {
-                    "name": "Dr. S. Kumar",
-                    "assignedAt": "Aug 12, 10:45 AM",
-                },
-                "timeline": [
-                    {
-                        "date": "Aug 12, 10:12 AM",
-                        "event": "Report received from John Doe",
-                    },
-                    {
-                        "date": "Aug 12, 10:45 AM",
-                        "event": "Investigator Dr. Kumar assigned",
-                    },
-                    {
-                        "date": "Aug 12, 11:35 AM",
-                        "event": "Evidence chain verified (94% similarity)",
-                    },
-                ],
-                "communications": [
-                    {
-                        "author": "System",
-                        "role": "Automated",
-                        "text": "Plagiarism flag auto-triggered by AI evaluation.",
-                        "isInternal": False,
-                        "date": "Aug 12, 10:12 AM",
-                    },
-                    {
-                        "author": "Admin Alex",
-                        "role": "Internal Note",
-                        "text": "Internal: Similarity confirmed against reference repo. Team explanation requested.",
-                        "isInternal": True,
-                        "date": "Aug 12, 11:40 AM",
-                    },
-                ],
-            }
-        ]
-        await db["disputes"].insert_many(mock_disputes)
-        disputes = await db["disputes"].find().to_list(100)
-
     result = []
     now = datetime.utcnow()
     for d in disputes:
-        created_dt = d.get("createdAt", now - timedelta(hours=6))
-        if not isinstance(created_dt, datetime):
-            created_dt = now - timedelta(hours=6)
-
-        sla_deadline = d.get("slaDeadline") or (created_dt + timedelta(hours=24))
-        if not isinstance(sla_deadline, datetime):
-            sla_deadline = created_dt + timedelta(hours=24)
-
-        diff_sec = (sla_deadline - now).total_seconds()
-        if diff_sec <= 0:
-            sla_text = "SLA EXCEEDED"
+        sla_deadline = d.get("slaDeadline")
+        if isinstance(sla_deadline, datetime):
+            diff_sec = (sla_deadline - now).total_seconds()
+            if diff_sec <= 0:
+                sla_text = "SLA EXCEEDED"
+            else:
+                rem_h = int(diff_sec // 3600)
+                rem_m = int((diff_sec % 3600) // 60)
+                sla_text = f"{rem_h}h {rem_m}m remaining"
         else:
-            rem_h = int(diff_sec // 3600)
-            rem_m = int((diff_sec % 3600) // 60)
-            sla_text = f"{rem_h}h {rem_m}m remaining"
+            sla_text = "Unavailable"
 
-        assessment = d.get("assessment", {})
-        assessment["slaRemaining"] = sla_text
+        assessment = {**(d.get("assessment") or {}), "slaRemaining": sla_text}
 
         result.append(
             {
@@ -207,90 +70,23 @@ async def get_all_disputes(
                 "disputeCode": d.get(
                     "disputeCode", f"DSP-2026-{str(d['_id'])[-5:].upper()}"
                 ),
-                "type": d.get("type", d.get("category", "Plagiarism")),
-                "category": d.get("category", "Plagiarism"),
-                "severity": d.get("severity", "CRITICAL"),
-                "status": d.get("status", "Under Investigation"),
-                "reporter": d.get(
-                    "reporter",
-                    {
-                        "name": "Anonymous",
-                        "email": "reporter@hackzen.io",
-                        "role": "Participant",
-                    },
-                ),
-                "reportedTeam": d.get(
-                    "reportedTeam",
-                    {"name": "Target Team", "college": "Engineering Institution"},
-                ),
-                "hackathonTitle": d.get("hackathonTitle", "Global Hackathon 2026"),
-                "assessment": (
-                    assessment
-                    if assessment
-                    else {
-                        "riskLevel": "CRITICAL",
-                        "evidenceVerified": "3 / 4",
-                        "aiConfidence": 91,
-                        "slaRemaining": sla_text,
-                        "recommendation": "INVESTIGATE & REQUEST EXPLANATION",
-                    }
-                ),
-                "similarityAnalysis": d.get(
-                    "similarityAnalysis",
-                    {
-                        "overallSimilarity": 94,
-                        "sourceCode": 97,
-                        "documentation": 82,
-                        "readme": 91,
-                        "matchedSourceUrl": "https://github.com/reference/project",
-                    },
-                ),
-                "evidence": d.get("evidence", []),
-                "evidenceIntegrity": d.get(
-                    "evidenceIntegrity",
-                    {
-                        "sourceVerified": True,
-                        "hashVerified": True,
-                        "versionMatched": True,
-                        "timestampVerified": True,
-                        "modified": False,
-                    },
-                ),
-                "investigationChecklist": d.get(
-                    "investigationChecklist",
-                    {
-                        "complaintReviewed": True,
-                        "reporterVerified": True,
-                        "reportedTeamIdentified": True,
-                        "submissionInspected": True,
-                        "evidenceVerified": True,
-                        "similarityChecked": True,
-                        "teamResponseReceived": False,
-                        "finalDecisionRecorded": False,
-                    },
-                ),
-                "coi": d.get(
-                    "coi",
-                    {
-                        "detected": False,
-                        "relationship": None,
-                        "message": "No conflict of interest detected.",
-                    },
-                ),
-                "assignedInvestigator": d.get(
-                    "assignedInvestigator",
-                    {"name": "Admin User", "assignedAt": "Recently"},
-                ),
+                "type": d.get("type") or d.get("category"),
+                "category": d.get("category"),
+                "severity": d.get("severity"),
+                "status": d.get("status"),
+                "reporter": d.get("reporter"),
+                "reportedTeam": d.get("reportedTeam"),
+                "hackathonTitle": d.get("hackathonTitle"),
+                "assessment": assessment,
+                "similarityAnalysis": d.get("similarityAnalysis") or {},
+                "evidence": d.get("evidence") or [],
+                "evidenceIntegrity": d.get("evidenceIntegrity") or {},
+                "investigationChecklist": d.get("investigationChecklist") or {},
+                "coi": d.get("coi"),
+                "assignedInvestigator": d.get("assignedInvestigator"),
                 "timeline": d.get("timeline", []),
                 "communications": d.get("communications", []),
-                "appeal": d.get(
-                    "appeal",
-                    {
-                        "eligible": True,
-                        "windowHours": 48,
-                        "status": "No appeal submitted",
-                    },
-                ),
+                "appeal": d.get("appeal"),
             }
         )
 
@@ -510,22 +306,7 @@ async def get_dispute_ai_assessment(
         )
 
     if not dispute:
-        dispute = {
-            "disputeCode": dispute_id,
-            "type": "Plagiarism",
-            "category": "Plagiarism",
-            "reportedTeam": {"name": "AI Builders"},
-            "hackathonTitle": "Autonomous Agentic Hackathon",
-            "similarityAnalysis": {
-                "overallSimilarity": 94,
-                "sourceCode": 97,
-                "documentation": 82,
-            },
-            "evidence": [
-                "Similarity in repository model code",
-                "Commit timeline discrepancies",
-            ],
-        }
+        raise HTTPException(status_code=404, detail="Dispute not found")
 
     assessment = await ai_service.analyze_dispute_case(dispute)
     return {"success": True, "assessment": assessment}

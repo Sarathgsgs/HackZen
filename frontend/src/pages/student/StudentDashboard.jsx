@@ -43,6 +43,28 @@ const prizePool = (prizes) => {
     return values.length ? values.join(' · ') : null;
 };
 
+const dashboardHackathonBanners = [
+    { name: 'ai', src: '/assets/hackathon-ai.svg', keywords: ['artificial intelligence', 'machine learning', 'aiml', 'genai', 'llm', 'data science'] },
+    { name: 'cyber', src: '/assets/hackathon-cyber.svg', keywords: ['cyber', 'security', 'privacy', 'devsecops'] },
+    { name: 'robotics', src: '/assets/hackathon-robotics.svg', keywords: ['robot', 'iot', 'internet of things', 'hardware'] },
+    { name: 'climate', src: '/assets/hackathon-climate.svg', keywords: ['sustain', 'climate', 'environment', 'energy', 'green'] },
+    { name: 'web', src: '/assets/hackathon-web.svg', keywords: ['web', 'blockchain', 'cloud', 'mobile', 'gaming', 'finance'] },
+    { name: 'health', src: '/assets/hackathon-health.svg', keywords: ['health', 'medical', 'social good', 'education'] },
+];
+
+const bannerForDashboardHackathon = (hackathon) => {
+    const themeText = (Array.isArray(hackathon.themes) ? hackathon.themes : []).join(' ').toLowerCase();
+    const themedBanner = dashboardHackathonBanners.find(({ name, keywords }) =>
+        (name === 'ai' && /\bai\b/.test(themeText))
+        || keywords.some((keyword) => themeText.includes(keyword))
+    );
+    if (themedBanner) return themedBanner.src;
+
+    const stableKey = String(hackathon.id || hackathon._id || hackathon.title || 'hackathon');
+    const stableHash = [...stableKey].reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 7);
+    return dashboardHackathonBanners[stableHash % dashboardHackathonBanners.length].src;
+};
+
 const getStatusClasses = (status) => {
     const normalized = `${status || ''}`.toLowerCase();
     if (normalized.includes('accepted') || normalized.includes('active') || normalized.includes('approved')) {
@@ -167,7 +189,7 @@ const StudentDashboard = () => {
                                 <MetricCard
                                     key={metric.key}
                                     label={metric.label}
-                                    value={dashboard?.metrics?.[metric.key] ?? 0}
+                                    value={dashboard?.metrics?.[metric.key] ?? '—'}
                                 />
                             ))}
                         </section>
@@ -187,22 +209,25 @@ const StudentDashboard = () => {
                                 ) : (
                                     <div className="space-y-5">
                                         {registeredHackathons.map((hackathon) => {
-                                            const progressValue = hackathon.team?.progress?.percentage ?? hackathon.progress ?? 0;
+                                            const rawProgress = hackathon.team?.progress?.percentage ?? hackathon.progress;
+                                            const progressValue = rawProgress !== null && rawProgress !== undefined && Number.isFinite(Number(rawProgress))
+                                                ? Math.max(0, Math.min(100, Number(rawProgress)))
+                                                : null;
                                             const status = hackathon.team?.progress?.status || hackathon.status || hackathon.applicationStatus || 'Registered';
                                             const teamName = hackathon.team?.name || 'No team assigned';
                                             const workspaceRoute = hackathon.team?.id ? `/student/teams/${hackathon.team.id}/workspace` : `/student/hackathons/${hackathon.id}`;
+                                            const fallbackBanner = bannerForDashboardHackathon(hackathon);
 
                                             return (
                                                 <article key={hackathon.id} className="rounded-[20px] border border-[#e3dff0] bg-white p-4 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-5">
                                                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                                                        <div className="flex h-[108px] w-full shrink-0 items-center justify-center overflow-hidden rounded-[16px] border border-[#eae3f6] bg-gradient-to-br from-[#f7f4ff] via-white to-[#eef6ff] sm:w-[142px]">
-                                                            {hackathon.posterUrl ? (
-                                                                <img src={hackathon.posterUrl} alt={hackathon.title} className="h-full w-full object-cover" />
-                                                            ) : (
-                                                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#efe9ff] to-[#edf2ff] text-3xl font-black text-[#5950d2]">
-                                                                    {hackathon.title?.charAt(0)?.toUpperCase() || 'H'}
-                                                                </div>
-                                                            )}
+                                                        <div className="aspect-video w-full shrink-0 overflow-hidden rounded-[16px] border border-[#eae3f6] bg-[#eeebf6] sm:w-[142px]">
+                                                            <img
+                                                                src={hackathon.posterUrl || fallbackBanner}
+                                                                alt={`${hackathon.title || 'Hackathon'} banner`}
+                                                                onError={hackathon.posterUrl ? (event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackBanner; } : undefined}
+                                                                className="h-full w-full object-cover"
+                                                            />
                                                         </div>
 
                                                         <div className="min-w-0 flex-1">
@@ -219,10 +244,10 @@ const StudentDashboard = () => {
                                                             <div className="mt-5">
                                                                 <div className="mb-2 flex items-center justify-between text-[12px] font-medium text-[#6a647c]">
                                                                     <span>Progress</span>
-                                                                    <span className="font-semibold text-[#3b2d63]">{Math.max(0, Math.min(100, progressValue))}%</span>
+                                                                    <span className="font-semibold text-[#3b2d63]">{progressValue === null ? 'Unavailable' : `${progressValue}%`}</span>
                                                                 </div>
                                                                 <div className="h-2.5 overflow-hidden rounded-full bg-[#efe9fb]">
-                                                                    <div className="h-full rounded-full bg-gradient-to-r from-[#4b3bc0] to-[#6f5bd4]" style={{ width: `${Math.max(0, Math.min(100, progressValue))}%` }} />
+                                                                    {progressValue !== null && <div className="h-full rounded-full bg-gradient-to-r from-[#4b3bc0] to-[#6f5bd4]" style={{ width: `${progressValue}%` }} />}
                                                                 </div>
                                                             </div>
                                                         </div>

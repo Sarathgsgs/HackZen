@@ -35,89 +35,24 @@ export default function MentorSessions() {
       const records = await getMentorMeetings(false);
       const stored = JSON.parse(localStorage.getItem('proeduvate_mentor_sessions') || '[]');
 
-      if (records && records.length) {
-        const mapped = records.map((m) => ({
+      const mapped = (Array.isArray(records) ? records : []).map((m) => {
+        const startTime = m.startTime ? new Date(m.startTime) : null;
+        return {
           id: m._id || m.id,
-          teamName: m.teamName || 'Team Alpha',
-          topic: m.title || 'Technical Guidance',
-          date: new Date(m.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          rawDate: new Date(m.startTime),
-          time: new Date(m.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          meetingType: m.location || 'Google Meet',
-          meetingLink: m.meetingLink || 'https://meet.google.com/pro-session',
-          status: new Date(m.startTime) < new Date() ? 'Completed' : 'Upcoming',
-          description: m.description,
-        }));
-        setSessions([...stored, ...mapped]);
-      } else if (stored.length) {
-        setSessions(stored);
-      } else {
-        // High quality seed sessions
-        setSessions([
-          {
-            id: 's-1',
-            teamName: 'Team Alpha',
-            topic: 'Project Architecture & Scalability Review',
-            date: 'Today, Oct 25, 2025',
-            rawDate: new Date(),
-            time: '10:30 AM',
-            meetingType: 'Google Meet',
-            meetingLink: 'https://meet.google.com/pro-alpha-rev',
-            status: 'Upcoming',
-            description: 'Discuss WebSocket streaming and vector indexing latency.',
-          },
-          {
-            id: 's-2',
-            teamName: 'Team Nova',
-            topic: 'AI Model Recommendation Discussion',
-            date: 'Tomorrow, Oct 26, 2025',
-            rawDate: new Date(Date.now() + 86400000),
-            time: '2:00 PM',
-            meetingType: 'Zoom Meeting',
-            meetingLink: 'https://zoom.us/j/982341234',
-            status: 'Upcoming',
-            description: 'Evaluate open-source vs proprietary LLM inference tradeoffs.',
-          },
-          {
-            id: 's-3',
-            teamName: 'Team Phoenix',
-            topic: 'Sprint 2 Milestone Checkpoint',
-            date: 'Oct 28, 2025',
-            rawDate: new Date(Date.now() + 259200000),
-            time: '4:30 PM',
-            meetingType: 'Google Meet',
-            meetingLink: 'https://meet.google.com/pro-phx-pitch',
-            status: 'Upcoming',
-            description: 'Review pitch deck and prototype readiness for judging phase.',
-          },
-          {
-            id: 's-4',
-            teamName: 'Team CyberGuard',
-            topic: 'Security Audit & Threat Modeling',
-            date: 'Oct 20, 2025',
-            rawDate: new Date(Date.now() - 432000000),
-            time: '11:00 AM',
-            meetingType: 'Google Meet',
-            meetingLink: '',
-            status: 'Completed',
-            description: 'Reviewed authentication tokens and cross-origin security rules.',
-          },
-          {
-            id: 's-5',
-            teamName: 'Team EcoTrack',
-            topic: 'IoT Sensor Calibration Check',
-            date: 'Oct 18, 2025',
-            rawDate: new Date(Date.now() - 604800000),
-            time: '3:00 PM',
-            meetingType: 'Microsoft Teams',
-            meetingLink: '',
-            status: 'Completed',
-            description: 'Telemetry ingestion tested and approved.',
-          },
-        ]);
-      }
+          teamName: m.teamName || '',
+          topic: m.title || '',
+          date: startTime ? startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date unavailable',
+          rawDate: startTime,
+          time: startTime ? startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+          meetingType: m.location || '',
+          meetingLink: m.meetingLink || '',
+          status: m.status || (startTime && startTime < new Date() ? 'Completed' : 'Upcoming'),
+          description: m.description || '',
+        };
+      });
+      setSessions([...(Array.isArray(stored) ? stored : []), ...mapped]);
     } catch (e) {
-      console.warn('Meetings load fallback:', e);
+      console.warn('Failed to load meetings:', e);
     } finally {
       setLoading(false);
     }

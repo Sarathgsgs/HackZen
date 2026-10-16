@@ -9,6 +9,7 @@ from fastapi import (
     Request,
     Body,
 )
+from bson import ObjectId as BsonId
 from typing import List, Optional, Dict, Any
 from database import get_db
 from core.dependencies import with_auth
@@ -254,6 +255,20 @@ async def get_hackathon(
     hackathon = await HackathonService.get_hackathon_by_id(id, db)
     if not hackathon:
         raise HTTPException(status_code=404, detail="Hackathon not found")
+
+    if current_user.get("role") == "student" and (
+        not hackathon.get("isPublic", True)
+        or str(hackathon.get("status", "")).lower() == HackathonStatus.DRAFT.value.lower()
+    ):
+        raise HTTPException(status_code=404, detail="Hackathon not found")
+
+    organizer_id = hackathon.get("organizerId")
+    if organizer_id and BsonId.is_valid(str(organizer_id)):
+        organizer = await db["users"].find_one(
+            {"_id": BsonId(str(organizer_id))}, {"name": 1}
+        )
+        if organizer and organizer.get("name"):
+            hackathon["organizerName"] = organizer["name"]
 
     return hackathon
 

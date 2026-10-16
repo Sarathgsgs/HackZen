@@ -15,6 +15,12 @@ class MilestoneProgressBase(BaseModel):
     progressId: str = Field(..., alias="progressId")
     milestoneId: str = Field(..., alias="milestoneId")
     completed: bool = False
+    title: Optional[str] = Field(None, max_length=160)
+    description: Optional[str] = Field(None, max_length=2000)
+    priority: Optional[str] = None
+    dueDate: Optional[datetime] = None
+    assigneeId: Optional[str] = None
+    assigneeName: Optional[str] = None
     verifiedBy: Optional[str] = Field(None, alias="verifiedBy")
     verifiedAt: Optional[datetime] = Field(None, alias="verifiedAt")
 
@@ -25,9 +31,17 @@ class MilestoneProgressCreate(MilestoneProgressBase):
 
 class MilestoneProgressResponse(MilestoneProgressBase):
     id: str = Field(..., alias="_id")
+    createdBy: Optional[str] = None
+    createdAt: Optional[datetime] = None
+    updatedBy: Optional[str] = None
+    updatedAt: Optional[datetime] = None
 
     class Config:
         populate_by_name = True
+
+
+class MilestoneProgressUpdate(BaseModel):
+    completed: bool
 
 
 class TeamProgressBase(BaseModel):

@@ -13,6 +13,7 @@ from routers import (
     inbox,
     progress,
     submission,
+    team_files,
     admin_users,
     admin_approvals,
     admin_certificates,
@@ -42,6 +43,7 @@ router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 router.include_router(inbox.router, prefix="/inbox", tags=["Notifications"])
 router.include_router(application.router, prefix="/applications", tags=["Applications"])
 router.include_router(submission.router, prefix="/submissions", tags=["Submissions"])
+router.include_router(team_files.router, prefix="/team-files", tags=["Team Files"])
 router.include_router(settingsRoutes.router, prefix="/settings", tags=["Settings"])
 router.include_router(evaluation.router, prefix="/evaluations", tags=["Evaluations"])
 

@@ -53,139 +53,17 @@ export default function MentorDashboard() {
         setDashboardData(dashRes.value);
       }
 
-      // Teams
-      if (teamsRes.status === 'fulfilled' && teamsRes.value?.activeTeams?.length) {
-        setTeams(teamsRes.value.activeTeams);
-      } else if (dashRes.status === 'fulfilled' && dashRes.value?.teams?.length) {
-        setTeams(dashRes.value.teams.map((t) => ({
-          id: t.id,
-          name: t.team || t.teamName || 'Team Alpha',
-          hackathon: t.hackathon || 'AI Innovation Hackathon',
-          members: t.members || 4,
-          progress: t.progress ?? 72,
-          status: t.progress >= 75 ? 'On Track' : t.progress < 40 ? 'Needs Attention' : 'On Track',
-          lastActivity: '2 hours ago',
-          avatars: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80']
-        })));
-      } else {
-        // High fidelity ProEduvate seed teams
-        setTeams([
-          {
-            id: 'team-alpha',
-            name: 'Team Alpha',
-            hackathon: 'AI Innovation Hackathon',
-            members: 4,
-            progress: 72,
-            status: 'On Track',
-            lastActivity: '2 hours ago',
-            avatars: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80']
-          },
-          {
-            id: 'team-nova',
-            name: 'Team Nova',
-            hackathon: 'HealthTech Global 2025',
-            members: 3,
-            progress: 45,
-            status: 'Needs Attention',
-            lastActivity: '4 hours ago',
-            avatars: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&auto=format&fit=crop&q=80']
-          },
-          {
-            id: 'team-phoenix',
-            name: 'Team Phoenix',
-            hackathon: 'NextGen FinTech Challenge',
-            members: 5,
-            progress: 90,
-            status: 'On Track',
-            lastActivity: '1 day ago',
-            avatars: ['https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&auto=format&fit=crop&q=80']
-          },
-          {
-            id: 'team-delta',
-            name: 'Team Delta',
-            hackathon: 'EcoTrack Climate Summit',
-            members: 4,
-            progress: 100,
-            status: 'Completed',
-            lastActivity: '3 days ago',
-            avatars: ['https://images.unsplash.com/photo-1517841905240-472988babdf9?w=60&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=60&auto=format&fit=crop&q=80']
-          }
-        ]);
-      }
+      const assignedTeams = teamsRes.status === 'fulfilled' ? teamsRes.value?.activeTeams : null;
+      const dashboardTeams = dashRes.status === 'fulfilled' ? dashRes.value?.teams : null;
+      setTeams(Array.isArray(assignedTeams) ? assignedTeams : Array.isArray(dashboardTeams) ? dashboardTeams : []);
 
-      // Mentorship requests
-      if (reqsRes.status === 'fulfilled' && reqsRes.value?.length) {
-        setRequests(reqsRes.value);
-      } else {
-        setRequests([
-          {
-            id: 'req-1',
-            teamName: 'Team Nova',
-            message: 'Looking for guidance with our AI recommendation model.',
-            track: 'Artificial Intelligence',
-            domain: 'Artificial Intelligence',
-            requestedDate: 'Today',
-            createdAt: new Date().toISOString(),
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-            teamSize: 3,
-          },
-          {
-            id: 'req-2',
-            teamName: 'Team EcoPulse',
-            message: 'Need assistance setting up IoT data ingestion pipelines with cloud functions.',
-            track: 'Climate & IoT',
-            domain: 'Climate & IoT',
-            requestedDate: 'Yesterday',
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-            teamSize: 4,
-          },
-        ]);
-      }
+      const loadedRequests = reqsRes.status === 'fulfilled' ? reqsRes.value : null;
+      setRequests(Array.isArray(loadedRequests) ? loadedRequests : []);
 
-      // Meetings / Sessions
-      if (meetingsRes.status === 'fulfilled' && meetingsRes.value?.length) {
-        setMeetings(meetingsRes.value);
-      } else {
-        // Check stored local sessions
-        const stored = JSON.parse(localStorage.getItem('proeduvate_mentor_sessions') || '[]');
-        if (stored.length) {
-          setMeetings(stored);
-        } else {
-          setMeetings([
-            {
-              id: 'sess-1',
-              dateLabel: 'Today',
-              timeLabel: '10:30 AM',
-              teamName: 'Team Alpha',
-              topic: 'Project Architecture Review',
-              type: 'Architecture Review',
-              meetingType: 'Google Meet',
-              link: 'https://meet.google.com/pro-alpha-rev',
-            },
-            {
-              id: 'sess-2',
-              dateLabel: 'Tomorrow',
-              timeLabel: '2:00 PM',
-              teamName: 'Team Nova',
-              topic: 'AI Model Discussion',
-              type: 'Technical Advisory',
-              meetingType: 'Zoom Meeting',
-              link: 'https://zoom.us/j/982341234',
-            },
-            {
-              id: 'sess-3',
-              dateLabel: 'Oct 28',
-              timeLabel: '4:30 PM',
-              teamName: 'Team Phoenix',
-              topic: 'Final Pitch Deck Rehearsal',
-              type: 'Pitch Prep',
-              meetingType: 'Google Meet',
-              link: 'https://meet.google.com/pro-phx-pitch',
-            },
-          ]);
-        }
-      }
+      // Keep sessions explicitly created in this browser when the API has none.
+      const stored = JSON.parse(localStorage.getItem('proeduvate_mentor_sessions') || '[]');
+      const loadedMeetings = meetingsRes.status === 'fulfilled' ? meetingsRes.value : null;
+      setMeetings(Array.isArray(loadedMeetings) && loadedMeetings.length ? loadedMeetings : stored);
     } catch (e) {
       console.error('Error loading mentor dashboard:', e);
     } finally {
@@ -206,7 +84,8 @@ export default function MentorDashboard() {
     try {
       await updateMentorshipRequestStatus(requestId, 'reject');
     } catch (e) {
-      console.warn('Decline status warning:', e);
+      addToast('Request Failed', 'Unable to decline this request. Please try again.', 'error');
+      return;
     }
     setRequests((prev) => prev.filter((r) => r.id !== requestId));
     addToast('Request Declined', `Declined mentorship request from ${teamName}.`, 'info');
@@ -220,7 +99,7 @@ export default function MentorDashboard() {
       {
         id: 'active-teams',
         title: 'Active Teams',
-        value: summary.activeTeams ?? teams.length ?? 12,
+        value: summary.activeTeams ?? teams.length,
         subtitle: 'Currently mentoring',
         icon: Users,
         iconBg: 'bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300',
@@ -229,7 +108,7 @@ export default function MentorDashboard() {
       {
         id: 'pending-requests',
         title: 'Pending Requests',
-        value: summary.mentorshipRequests ?? requests.length ?? 5,
+        value: summary.mentorshipRequests ?? requests.length,
         subtitle: 'Need your attention',
         icon: Inbox,
         iconBg: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300',
@@ -238,7 +117,7 @@ export default function MentorDashboard() {
       {
         id: 'upcoming-sessions',
         title: 'Upcoming Sessions',
-        value: summary.upcomingMeetings ?? meetings.length ?? 8,
+        value: summary.upcomingMeetings ?? meetings.length,
         subtitle: 'This week',
         icon: Calendar,
         iconBg: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300',
@@ -247,7 +126,7 @@ export default function MentorDashboard() {
       {
         id: 'completed-mentorships',
         title: 'Completed Mentorships',
-        value: summary.completedMentorships ?? 27,
+        value: summary.completedMentorships ?? 0,
         subtitle: 'Total completed',
         icon: CheckCircle2,
         iconBg: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300',
@@ -367,7 +246,9 @@ export default function MentorDashboard() {
 
             {/* Teams Grid / List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredTeams.slice(0, 4).map((team) => {
+              {filteredTeams.length === 0 ? (
+                <p className="py-8 text-center text-sm text-slate-400">No assigned teams are available.</p>
+              ) : filteredTeams.slice(0, 4).map((team) => {
                 const status = team.status || (team.progress >= 75 ? 'On Track' : team.progress < 40 ? 'Needs Attention' : 'On Track');
                 const isNeedsAttention = status === 'Needs Attention';
                 const isCompleted = status === 'Completed';
@@ -404,10 +285,7 @@ export default function MentorDashboard() {
                       {/* Team Member Avatars & Count */}
                       <div className="flex items-center gap-2 mt-3 text-xs text-slate-500 dark:text-slate-400">
                         <div className="flex -space-x-2 overflow-hidden">
-                          {(team.avatars || [
-                            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80',
-                            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80',
-                          ]).map((avatar, idx) => (
+                          {(team.avatars || []).map((avatar, idx) => (
                             <img
                               key={idx}
                               src={avatar}
@@ -417,7 +295,7 @@ export default function MentorDashboard() {
                           ))}
                         </div>
                         <span className="font-medium">
-                          {team.members || 4} members
+                          {team.members ?? 0} members
                         </span>
                       </div>
 
@@ -443,7 +321,7 @@ export default function MentorDashboard() {
                     {/* Bottom: Last Activity + View Team Button */}
                     <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
                       <span className="text-slate-400 font-medium">
-                        Last activity: {team.lastActivity || '2 hours ago'}
+                        Last activity: {team.lastActivity || 'Unavailable'}
                       </span>
                       <button
                         onClick={() => navigate(`/mentor/teams/${team.id}`)}
@@ -499,14 +377,14 @@ export default function MentorDashboard() {
                             {req.teamName}
                           </h4>
                           <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 font-medium">
-                            {req.domain || req.track || 'Artificial Intelligence'}
+                            {req.domain || req.track || 'Unspecified'}
                           </span>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 line-clamp-2 italic">
-                          "{req.description || req.message || 'Looking for guidance with our AI recommendation model.'}"
+                          "{req.description || req.message || 'No request details provided.'}"
                         </p>
                         <p className="text-[11px] text-slate-400 mt-1.5">
-                          Topic: <span className="font-medium text-slate-700 dark:text-slate-300">{req.domain || req.track || 'Artificial Intelligence'}</span> · Requested: {req.requestedDate || 'Today'}
+                          Topic: <span className="font-medium text-slate-700 dark:text-slate-300">{req.domain || req.track || 'Unspecified'}</span> · Requested: {req.requestedDate || 'Date unavailable'}
                         </p>
                       </div>
                     </div>
@@ -553,9 +431,11 @@ export default function MentorDashboard() {
 
             {/* Vertical timeline/list */}
             <div className="space-y-4">
-              {meetings.slice(0, 3).map((session, index) => {
-                const dateLabel = session.dateLabel || (session.startTime ? new Date(session.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Today');
-                const timeLabel = session.timeLabel || (session.startTime ? new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '10:30 AM');
+              {meetings.length === 0 ? (
+                <p className="py-6 text-center text-sm text-slate-400">No upcoming sessions.</p>
+              ) : meetings.slice(0, 3).map((session, index) => {
+                const dateLabel = session.dateLabel || (session.startTime ? new Date(session.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date unavailable');
+                const timeLabel = session.timeLabel || (session.startTime ? new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
 
                 return (
                   <div
@@ -567,7 +447,7 @@ export default function MentorDashboard() {
                         {dateLabel} · {timeLabel}
                       </span>
                       <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-purple-50 dark:bg-purple-950/40 text-[#5B45D9] dark:text-purple-300 border border-purple-100 dark:border-purple-800/40">
-                        {session.meetingType || session.type || 'Google Meet'}
+                        {session.meetingType || session.type || 'Meeting type unavailable'}
                       </span>
                     </div>
 

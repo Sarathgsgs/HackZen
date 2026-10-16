@@ -62,69 +62,8 @@ export default function TeamDetails() {
         setTeam(data.data);
       }
     } catch (err) {
-      // Fallback data for seamless UI presentation
-      setTeam({
-        id: teamId || 'team-alpha',
-        name: teamId === 'team-nova' ? 'Team Nova' : teamId === 'team-phoenix' ? 'Team Phoenix' : 'Team Alpha',
-        hackathon: 'AI Innovation Hackathon 2025',
-        status: 'On Track',
-        domain: 'Artificial Intelligence & Machine Learning',
-        description:
-          'Developing a multimodal AI assistant that helps neurodivergent students synthesize complex academic lectures into interactive mind-maps and digestible audio flashcards in real-time.',
-        progress: 72,
-        goals: [
-          { id: 1, title: 'Define project scope & architecture', done: true, due: 'Day 1' },
-          { id: 2, title: 'Train speech-to-text fine-tuned model', done: true, due: 'Day 2' },
-          { id: 3, title: 'Build interactive mind-map canvas UI', done: true, due: 'Day 3' },
-          { id: 4, title: 'Integrate real-time WebSocket audio pipeline', done: false, due: 'Day 4' },
-          { id: 5, title: 'Conduct user testing with 10 students', done: false, due: 'Day 5' },
-        ],
-        technologies: ['React 19', 'FastAPI', 'PyTorch', 'WebSockets', 'Tailwind CSS', 'Docker', 'MongoDB'],
-        challenges: [
-          'Minimizing streaming latency during concurrent live audio transcription.',
-          'Ensuring responsive SVG rendering for large hierarchical mind-map nodes.',
-        ],
-        recentActivity: [
-          { text: 'Pushed commit: Implement audio chunk streaming to backend', time: '1 hour ago' },
-          { text: 'Completed milestone: Frontend node layout engine', time: '3 hours ago' },
-          { text: 'Team lead updated Sprint 2 progress to 72%', time: 'Yesterday' },
-        ],
-        members: [
-          {
-            id: 1,
-            name: 'Alex Rivera',
-            role: 'Team Lead & ML Engineer',
-            email: 'alex@stanford.edu',
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 2,
-            name: 'Marcus Chen',
-            role: 'Full Stack Developer',
-            email: 'marcus@berkeley.edu',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 3,
-            name: 'Priya Sharma',
-            role: 'UI/UX & Product Designer',
-            email: 'priya@mit.edu',
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 4,
-            name: 'David Kim',
-            role: 'Backend & Cloud Ops',
-            email: 'david@cmu.edu',
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-          },
-        ],
-        links: {
-          github: 'https://github.com/proeduvate-hackathons/team-alpha-ai-maps',
-          demo: 'https://team-alpha-demo.proeduvate.com',
-          deck: 'https://pitch.com/p/team-alpha-presentation',
-        },
-      });
+      console.error('Failed to load team details:', err);
+      setTeam(null);
     } finally {
       setLoading(false);
     }
@@ -138,30 +77,11 @@ export default function TeamDetails() {
   useEffect(() => {
     getMentorMeetings(true)
       .then((records) => {
-        if (records?.length) {
-          setMeetings(records.filter((m) => m.teamId === teamId));
-        } else {
-          setMeetings([
-            {
-              id: 'm1',
-              title: 'Project Architecture Review',
-              startTime: new Date().toISOString(),
-              location: 'Google Meet',
-              meetingLink: 'https://meet.google.com/pro-alpha-rev',
-            },
-          ]);
-        }
+        setMeetings(Array.isArray(records) ? records.filter((m) => m.teamId === teamId) : []);
       })
-      .catch(() => {
-        setMeetings([
-          {
-            id: 'm1',
-            title: 'Project Architecture Review',
-            startTime: new Date().toISOString(),
-            location: 'Google Meet',
-            meetingLink: 'https://meet.google.com/pro-alpha-rev',
-          },
-        ]);
+      .catch((error) => {
+        console.error('Failed to load team meetings:', error);
+        setMeetings([]);
       });
   }, [teamId]);
 
@@ -236,7 +156,7 @@ export default function TeamDetails() {
     );
   }
 
-  if (!team) return null;
+  if (!team) return <div role="status" className="max-w-6xl mx-auto py-12 text-center text-slate-500">Team details are unavailable.</div>;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">

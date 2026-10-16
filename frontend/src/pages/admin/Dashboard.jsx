@@ -548,13 +548,7 @@ const AdminDashboard = () => {
                         <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">All Active Events</span>
                     </div>
                     <div className="space-y-2">
-                        {(dashboardData?.funnel || [
-                            { step: 'Registered Users', val: '1,240', pct: '100%', color: 'bg-indigo-500', link: '/admin/users?filter=all', context: 'All verified platform accounts (Students, Mentors, Organizers)' },
-                            { step: 'Teams Formed', val: '412', pct: '33%', color: 'bg-indigo-600', link: '/admin/users?role=Student', context: 'Student participants grouped into hackathon squads' },
-                            { step: 'Mentor Assigned', val: '389', pct: '31%', color: 'bg-purple-600', link: '/admin/users?role=Mentor', context: 'Teams paired with certified academic or industry mentors' },
-                            { step: 'Project Deliverables', val: '284', pct: '22%', color: 'bg-pink-600', link: '/admin/submissions?filter=all', context: 'GitHub repos & live demos submitted across active hackathons' },
-                            { step: 'Evaluated Finalists', val: '60', pct: '4%', color: 'bg-emerald-600', link: '/admin/submissions?filter=approved', context: 'Approved submissions qualifying through jury scoring' },
-                        ]).map((f, i) => (
+                        {(dashboardData?.funnel || []).map((f, i) => (
                             <div 
                                 key={i} 
                                 onClick={() => navigate(f.link || '/admin/users')}
@@ -573,6 +567,9 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         ))}
+                        {(!dashboardData?.funnel || dashboardData.funnel.length === 0) && (
+                            <p className="py-3 text-center text-xs text-slate-500">Participation data is unavailable.</p>
+                        )}
                     </div>
                 </div>
 
@@ -593,7 +590,7 @@ const AdminDashboard = () => {
                                     <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-gray-400">Running</p>
                                     <span className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold">Live →</span>
                                 </div>
-                                <p className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">{dashboardData?.health?.running || 8}</p>
+                                <p className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">{dashboardData?.hackathonHealth?.running ?? 0}</p>
                                 <p className="text-[9px] text-slate-500 dark:text-gray-400 mt-0.5">Active event tracks</p>
                             </div>
 
@@ -605,7 +602,7 @@ const AdminDashboard = () => {
                                     <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">On Track</p>
                                     <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">Good →</span>
                                 </div>
-                                <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">{dashboardData?.health?.onTrack || 5}</p>
+                                <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">{dashboardData?.hackathonHealth?.onTrack ?? 0}</p>
                                 <p className="text-[9px] text-emerald-600/70 dark:text-emerald-400/70 mt-0.5">Meeting timeline SLAs</p>
                             </div>
 
@@ -617,7 +614,7 @@ const AdminDashboard = () => {
                                     <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase">At Risk</p>
                                     <span className="text-[9px] text-amber-600 dark:text-amber-400 font-bold">Fix →</span>
                                 </div>
-                                <p className="text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">{dashboardData?.health?.atRisk || 2}</p>
+                                <p className="text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">{dashboardData?.hackathonHealth?.atRisk ?? 0}</p>
                                 <p className="text-[9px] text-amber-600/70 dark:text-amber-400/70 mt-0.5">Needs judges/revisions</p>
                             </div>
 
@@ -629,7 +626,7 @@ const AdminDashboard = () => {
                                     <p className="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase">Critical</p>
                                     <span className="text-[9px] text-rose-600 dark:text-rose-400 font-bold">Review →</span>
                                 </div>
-                                <p className="text-xl font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">{dashboardData?.health?.critical || 1}</p>
+                                <p className="text-xl font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">{dashboardData?.hackathonHealth?.critical ?? 0}</p>
                                 <p className="text-[9px] text-rose-600/70 dark:text-rose-400/70 mt-0.5">Disputes / SLA overdue</p>
                             </div>
                         </div>
@@ -642,9 +639,9 @@ const AdminDashboard = () => {
 
                     <div onClick={() => navigate('/admin/hackathon-approvals?filter=approved')} className="space-y-1.5 cursor-pointer">
                         <div className="w-full h-1.5 rounded-full overflow-hidden bg-slate-100 dark:bg-white/10">
-                            <div className="w-[82%] h-full bg-emerald-500"></div>
+                            <div className="h-full bg-emerald-500" style={{ width: `${dashboardData?.hackathonHealth?.healthPercentage ?? 0}%` }}></div>
                         </div>
-                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold text-right">82% Operational Health</p>
+                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold text-right">{dashboardData?.hackathonHealth?.healthPercentage ?? 0}% Operational Health</p>
                     </div>
                 </div>
 
@@ -657,24 +654,24 @@ const AdminDashboard = () => {
                         <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                             <div onClick={() => navigate('/admin/submissions?filter=pending')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all">
                                 <span className="text-slate-500 dark:text-gray-400 font-medium text-[11px]">Pending Review</span>
-                                <span className="font-bold text-slate-900 dark:text-white">32</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{dashboardData?.quickActionCounts?.pendingSubmissions ?? 0}</span>
                             </div>
                             <div onClick={() => navigate('/admin/submissions?filter=approved')} className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex justify-between items-center cursor-pointer hover:bg-emerald-500/15 transition-all">
-                                <span className="text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">Approved</span>
-                                <span className="font-bold text-emerald-600 dark:text-emerald-400">180</span>
+                                <span className="text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">Evaluated</span>
+                                <span className="font-bold text-emerald-600 dark:text-emerald-400">{dashboardData?.evaluationStatus?.evaluationsCompleted ?? 0}</span>
                             </div>
                             <div onClick={() => navigate('/admin/submissions?filter=rejected')} className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex justify-between items-center cursor-pointer hover:bg-rose-500/15 transition-all">
                                 <span className="text-rose-600 dark:text-rose-400 font-medium text-[11px]">Rejected</span>
-                                <span className="font-bold text-rose-600 dark:text-rose-400">14</span>
+                                <span className="font-bold text-rose-600 dark:text-rose-400">Unavailable</span>
                             </div>
                             <div onClick={() => navigate('/admin/submissions?filter=flagged')} className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 flex justify-between items-center cursor-pointer hover:bg-amber-500/15 transition-all">
                                 <span className="text-amber-600 dark:text-amber-400 font-medium text-[11px]">Incomplete</span>
-                                <span className="font-bold text-amber-600 dark:text-amber-400">10</span>
+                                <span className="font-bold text-amber-600 dark:text-amber-400">Unavailable</span>
                             </div>
                         </div>
                     </div>
                     <div onClick={() => navigate('/admin/submissions?filter=pending')} className="p-3 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors">
-                        <p className="text-xs text-indigo-900 dark:text-indigo-200 font-medium leading-relaxed">63% Submissions Approved across active stages.</p>
+                        <p className="text-xs text-indigo-900 dark:text-indigo-200 font-medium leading-relaxed">{dashboardData?.evaluationStatus?.alert || 'Submission evaluation data is unavailable.'}</p>
                         <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mt-0.5">Investigate Submissions →</p>
                     </div>
                 </div>
@@ -691,14 +688,14 @@ const AdminDashboard = () => {
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Mentor Capacity</h2>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Available</span><span className="font-bold text-slate-900 dark:text-white">18</span></div>
-                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Assigned</span><span className="font-bold text-slate-900 dark:text-white">42</span></div>
-                            <div onClick={() => navigate('/admin/users?role=Mentor&filter=unassigned')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Unassigned</span><span className="font-bold text-slate-900 dark:text-white">11</span></div>
-                            <div onClick={() => navigate('/admin/users?role=Mentor&filter=overloaded')} className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex justify-between items-center cursor-pointer hover:bg-rose-500/15 transition-all"><span className="text-rose-600 dark:text-rose-400 font-bold">Overloaded</span><span className="text-rose-600 dark:text-rose-400 font-bold">5</span></div>
+                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Available</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.available ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Assigned</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.assigned ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/users?role=Mentor&filter=unassigned')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Unassigned</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.unassigned ?? 0}</span></div>
+                            <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex justify-between items-center"><span className="text-rose-600 dark:text-rose-400 font-bold">Capacity</span><span className="text-rose-600 dark:text-rose-400 font-bold">{dashboardData?.mentorCapacity?.healthPercentage ?? 0}%</span></div>
                         </div>
                     </div>
                     <div onClick={() => navigate('/admin/users?role=Mentor&filter=overloaded')} className="mt-3 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors">
-                        <p className="text-xs text-amber-900 dark:text-amber-200 font-medium leading-relaxed flex items-center gap-1.5"><TriangleAlertIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" /> 5 mentors currently handling more teams than recommended.</p>
+                        <p className="text-xs text-amber-900 dark:text-amber-200 font-medium leading-relaxed flex items-center gap-1.5"><TriangleAlertIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" /> {dashboardData?.mentorCapacity?.alert || 'Mentor capacity data is unavailable.'}</p>
                         <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mt-0.5">View Mentors →</p>
                     </div>
                 </div>
@@ -709,21 +706,21 @@ const AdminDashboard = () => {
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Evaluation Progress Status</h2>
                     </div>
                     <div className="text-center mb-3">
-                        <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">70<span className="text-lg text-slate-400 dark:text-gray-400">%</span></p>
+                        <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{dashboardData?.evaluationStatus?.completionRate ?? 0}<span className="text-lg text-slate-400 dark:text-gray-400">%</span></p>
                         <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mt-0.5">Judges Completion Rate</p>
                     </div>
                     <ul className="space-y-1.5 text-xs font-medium p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5">
                         <li onClick={() => navigate('/admin/hackathon-approvals')} className="flex justify-between items-center cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1 rounded-md">
-                            <span className="text-slate-600 dark:text-gray-300">Judges Assigned</span>
-                            <span className="font-bold text-slate-900 dark:text-white">54</span>
+                            <span className="text-slate-600 dark:text-gray-300">Evaluations Completed</span>
+                            <span className="font-bold text-slate-900 dark:text-white">{dashboardData?.evaluationStatus?.evaluationsCompleted ?? 0}</span>
                         </li>
                         <li onClick={() => navigate('/admin/submissions?filter=approved')} className="flex justify-between items-center cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1 rounded-md">
-                            <span className="text-slate-600 dark:text-gray-300">Evaluations Done</span>
-                            <span className="font-bold text-slate-900 dark:text-white">38</span>
+                            <span className="text-slate-600 dark:text-gray-300">Pending Evaluation</span>
+                            <span className="font-bold text-slate-900 dark:text-white">{dashboardData?.evaluationStatus?.pending ?? 0}</span>
                         </li>
                         <li onClick={() => navigate('/admin/submissions?filter=pending')} className="flex justify-between items-center cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 transition-colors p-1 rounded-md text-amber-600 dark:text-amber-400 font-bold">
-                            <span>Pending Scrutiny</span>
-                            <span>16</span>
+                            <span>Evaluation Status</span>
+                            <span>{dashboardData?.evaluationStatus?.alert || 'Unavailable'}</span>
                         </li>
                     </ul>
                 </div>
@@ -735,14 +732,14 @@ const AdminDashboard = () => {
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Certificate Minting Pipeline</h2>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div onClick={() => navigate('/admin/certificates?filter=eligibility')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Eligible</span><span className="font-bold text-slate-900 dark:text-white">180</span></div>
-                            <div onClick={() => navigate('/admin/certificates?filter=active')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Generated</span><span className="font-bold text-slate-900 dark:text-white">168</span></div>
-                            <div onClick={() => navigate('/admin/certificates?filter=active')} className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 flex justify-between items-center cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all"><span className="text-indigo-700 dark:text-indigo-300">Downloaded</span><span className="font-bold text-indigo-700 dark:text-indigo-300">142</span></div>
-                            <div onClick={() => navigate('/admin/certificates?filter=verify')} className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex justify-between items-center cursor-pointer hover:bg-emerald-500/15 transition-all"><span className="text-emerald-600 dark:text-emerald-400">Verified</span><span className="font-bold text-emerald-600 dark:text-emerald-400">97</span></div>
+                            <div onClick={() => navigate('/admin/certificates?filter=eligibility')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Eligible</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.certificatePipeline?.eligible ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/certificates?filter=active')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Issued</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.certificatePipeline?.issued ?? 0}</span></div>
+                            <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 flex justify-between items-center"><span className="text-indigo-700 dark:text-indigo-300">Pending Generation</span><span className="font-bold text-indigo-700 dark:text-indigo-300">{dashboardData?.certificatePipeline?.pendingGeneration ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/certificates?filter=verify')} className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex justify-between items-center cursor-pointer hover:bg-emerald-500/15 transition-all"><span className="text-emerald-600 dark:text-emerald-400">Verified</span><span className="font-bold text-emerald-600 dark:text-emerald-400">{dashboardData?.certificatePipeline?.verified ?? 0}</span></div>
                         </div>
                     </div>
                     <div onClick={() => navigate('/admin/certificates?filter=active')} className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors">
-                        <p className="text-xs text-emerald-900 dark:text-emerald-200 font-medium leading-relaxed">168 Certificates generated & ledger signed.</p>
+                        <p className="text-xs text-emerald-900 dark:text-emerald-200 font-medium leading-relaxed">{dashboardData?.certificatePipeline?.issued ?? 0} certificates issued.</p>
                         <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mt-0.5">Manage Certificates →</p>
                     </div>
                 </div>
@@ -761,14 +758,14 @@ const AdminDashboard = () => {
                             </h2>
                         </div>
                         <div className="space-y-2.5 text-xs font-medium">
-                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Queries Today:</span><strong className="font-mono text-slate-900 dark:text-white">248 queries</strong></div>
-                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Avg Response Time:</span><strong className="text-emerald-600 dark:text-emerald-400 font-mono">1.1s</strong></div>
-                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Helpful Responses:</span><strong className="text-emerald-600 dark:text-emerald-400">94.2%</strong></div>
-                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Top Question Category:</span><strong className="text-indigo-600 dark:text-indigo-400">Problem Alignment</strong></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Queries Today:</span><strong className="font-mono text-slate-900 dark:text-white">{dashboardData?.aiHealth?.queriesToday ?? 0}</strong></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Avg Response Time:</span><strong className="text-emerald-600 dark:text-emerald-400 font-mono">{dashboardData?.aiHealth?.avgResponseTime || 'Unavailable'}</strong></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Helpful Responses:</span><strong className="text-emerald-600 dark:text-emerald-400">{dashboardData?.aiHealth?.helpfulPercentage ?? 'Unavailable'}{dashboardData?.aiHealth?.helpfulPercentage != null ? '%' : ''}</strong></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Top Question Category:</span><strong className="text-indigo-600 dark:text-indigo-400">{dashboardData?.aiHealth?.topTopic || 'Unavailable'}</strong></div>
                         </div>
                     </div>
                     <div className="mt-3 p-2.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg text-xs font-medium text-indigo-800 dark:text-indigo-200 flex items-center gap-2">
-                        <ZapIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" /> RAG context engine operational with zero sync errors.
+                        <ZapIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" /> {dashboardData?.aiHealth ? 'AI service metrics loaded.' : 'AI service metrics are unavailable.'}
                     </div>
                 </div>
 
@@ -778,25 +775,25 @@ const AdminDashboard = () => {
                         <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-white/5 mb-3">
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Protocol Shield & Security</h2>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                                <CheckIcon className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Secure
+                                <CheckIcon className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> {dashboardData?.securityCenter?.systemStatus || 'Status unavailable'}
                             </span>
                         </div>
                         <div className="space-y-2 text-xs font-medium">
                             <div onClick={() => navigate('/admin/users?filter=suspended')} className="flex justify-between items-center cursor-pointer hover:bg-slate-50/80 dark:hover:bg-white/[0.02] p-1 rounded-md transition-colors">
                                 <span className="text-slate-500 dark:text-gray-400">Failed Logins Today:</span>
-                                <strong className="text-amber-600 dark:text-amber-400 font-mono">3 attempts</strong>
+                                <strong className="text-amber-600 dark:text-amber-400 font-mono">{dashboardData?.securityCenter?.failedLogins ?? 0} attempts</strong>
                             </div>
                             <div onClick={() => navigate('/admin/users?filter=suspicious')} className="flex justify-between items-center cursor-pointer hover:bg-slate-50/80 dark:hover:bg-white/[0.02] p-1 rounded-md transition-colors">
                                 <span className="text-slate-500 dark:text-gray-400">Suspicious Activity:</span>
-                                <strong className="text-rose-600 dark:text-rose-400 font-mono">1 alert</strong>
+                                <strong className="text-rose-600 dark:text-rose-400 font-mono">{dashboardData?.securityCenter?.suspiciousActivity ?? 0} alerts</strong>
                             </div>
                             <div onClick={() => navigate('/admin/users?filter=suspended')} className="flex justify-between items-center cursor-pointer hover:bg-slate-50/80 dark:hover:bg-white/[0.02] p-1 rounded-md transition-colors">
                                 <span className="text-slate-500 dark:text-gray-400">Blocked Accounts:</span>
-                                <strong className="font-mono text-slate-900 dark:text-white">2 users</strong>
+                                <strong className="font-mono text-slate-900 dark:text-white">{dashboardData?.securityCenter?.blockedUsers ?? 0} users</strong>
                             </div>
                             <div className="flex justify-between items-center text-slate-400 dark:text-gray-500 text-[10px] pt-0.5">
                                 <span>Last Audit:</span>
-                                <span>Today, 10:42 AM</span>
+                                <span>{dashboardData?.securityCenter?.lastAudit || 'Unavailable'}</span>
                             </div>
                         </div>
                     </div>
@@ -816,16 +813,7 @@ const AdminDashboard = () => {
                             <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Leaderboard</span>
                         </div>
                         <ul className="space-y-1.5 text-xs">
-                            {(dashboardData?.topColleges && dashboardData.topColleges.length > 0 && dashboardData.topColleges.some(c => c && c.name)
-                                ? dashboardData.topColleges.filter(c => c && c.name)
-                                : [
-                                    { name: "ABC Engineering College", participants: 284, trend: "+12%" },
-                                    { name: "VIT Chennai", participants: 231, trend: "+8%" },
-                                    { name: "SRM Institute of Science", participants: 198, trend: "+15%" },
-                                    { name: "IIT Madras", participants: 176, trend: "+6%" },
-                                    { name: "Anna University", participants: 142, trend: "+10%" }
-                                ]
-                            ).map((col, idx) => (
+                            {(dashboardData?.topColleges || []).filter(c => c && c.name).map((col, idx) => (
                                 <li 
                                     key={idx} 
                                     onClick={() => navigate('/admin/analytics?focus=colleges#college-breakdown')} 
@@ -835,10 +823,13 @@ const AdminDashboard = () => {
                                     <span className="truncate max-w-[170px] text-slate-700 dark:text-gray-300 font-medium group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{idx + 1}. {col.name || 'Institution'}</span>
                                     <div className="flex items-center gap-1.5">
                                         <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{col.participants || 0}</span>
-                                        <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">{col.trend || '+10%'}</span>
+                                        {col.trend && <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">{col.trend}</span>}
                                     </div>
                                 </li>
                             ))}
+                            {(!dashboardData?.topColleges || dashboardData.topColleges.length === 0) && (
+                                <li className="py-3 text-center text-slate-500">College data is unavailable.</li>
+                            )}
                         </ul>
                     </div>
 
@@ -913,24 +904,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="flex-1 w-full">
                         <h2 className="text-xs font-extrabold uppercase tracking-widest mb-2.5 text-indigo-600 dark:text-indigo-400">✦ Smart Admin Intelligence & Operator Recommendations</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div onClick={() => navigate('/admin/analytics')} className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all">
-                                <p className="text-xs font-medium text-slate-700 dark:text-gray-200 mb-0.5">Platform participation increased <span className="text-emerald-600 dark:text-emerald-400 font-bold">18.4%</span> this month.</p>
-                                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold">View Analytics →</span>
-                            </div>
-                            <div onClick={() => navigate('/admin/users?role=Mentor&filter=overloaded')} className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all">
-                                <p className="text-xs font-medium text-slate-700 dark:text-gray-200 mb-0.5 flex items-center gap-1.5"><TriangleAlertIcon className="w-3.5 h-3.5 text-rose-500 shrink-0" /><span><span className="text-rose-600 dark:text-rose-400 font-bold">5 mentors</span> are overloaded.</span></p>
-                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">Inspect Mentors →</span>
-                            </div>
-                            <div onClick={() => navigate('/admin/submissions?filter=pending')} className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all">
-                                <p className="text-xs font-medium text-slate-700 dark:text-gray-200 mb-0.5 flex items-center gap-1.5"><TriangleAlertIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" /><span><span className="text-amber-600 dark:text-amber-400 font-bold">12 teams</span> missed milestones.</span></p>
-                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">Check Submissions →</span>
-                            </div>
-                            <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 flex flex-col justify-between">
-                                <p className="text-xs text-indigo-900 dark:text-indigo-200 mb-1.5 font-medium leading-relaxed"><strong className="block mb-0.5 uppercase tracking-wider text-[10px] text-indigo-700 dark:text-indigo-400">Recommendation:</strong> Assign 3 available mentors to affected teams.</p>
-                                <button onClick={() => navigate('/admin/users?role=Mentor&filter=overloaded')} className="text-xs font-bold bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 py-1.5 rounded-lg transition-all w-full shadow-sm cursor-pointer active:scale-95">Review Issues</button>
-                            </div>
-                        </div>
+                        <p className="text-xs text-slate-600 dark:text-gray-300">Automated recommendations are unavailable.</p>
                     </div>
                 </div>
             </div>

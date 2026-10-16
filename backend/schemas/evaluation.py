@@ -6,6 +6,7 @@ from bson import ObjectId
 
 class EvaluationBase(BaseModel):
     teamId: str = Field(..., alias="teamId")
+    submissionId: Optional[str] = Field(None, alias="submissionId")
     judgeId: Optional[str] = Field(
         None, alias="judgeId"
     )  # mentor userId, set by backend

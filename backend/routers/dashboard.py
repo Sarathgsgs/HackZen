@@ -1155,18 +1155,18 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
     )
 
     funnel_data = {
-        "accepted": accepted_count or (12 if total_submissions == 0 else 0),
-        "inReview": in_review_count or (5 if total_submissions == 0 else 0),
-        "shortlisted": shortlisted_count or (8 if total_submissions == 0 else 0),
-        "flagged": flagged_count or (2 if total_submissions == 0 else 0),
-        "rejected": rejected_count or (1 if total_submissions == 0 else 0),
-        "total": total_submissions or 28,
+        "accepted": accepted_count,
+        "inReview": in_review_count,
+        "shortlisted": shortlisted_count,
+        "flagged": flagged_count,
+        "rejected": rejected_count,
+        "total": total_submissions,
     }
 
     sub_rate = (
         round((total_submissions / max(1, total_teams)) * 100, 1)
         if total_teams > 0
-        else 84.5
+        else 0
     )
 
     breakdown = []
@@ -1176,7 +1176,7 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
     def format_date_span(s_val, e_val):
         try:
             if not s_val:
-                return "Oct 12 - Oct 15"
+                return "Dates unavailable"
             s_dt = (
                 datetime.fromisoformat(str(s_val).replace("Z", "+00:00"))
                 if isinstance(s_val, str)
@@ -1191,7 +1191,7 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
                 return f"{s_dt.strftime('%b %d')} - {e_dt.strftime('%b %d')}"
             return s_dt.strftime("%b %d")
         except Exception:
-            return "Oct 12 - Oct 15"
+            return "Dates unavailable"
 
     for idx, h in enumerate(user_hackathons):
         h_id_str = str(h["_id"])
@@ -1218,11 +1218,8 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
                 "id": h_id_str,
                 "title": h.get("title", "Hackathon Event"),
                 "status": clean_status,
-                "participantCount": p_count
-                or h.get("totalParticipants", 0)
-                or (h.get("teamCount", 0) * 3)
-                or 24,
-                "progress": h.get("progress") or 65,
+                "participantCount": p_count or h.get("totalParticipants", 0),
+                "progress": h.get("progress", 0),
                 "category": (
                     (h.get("themes") or ["General"])[0]
                     if isinstance(h.get("themes"), list) and h.get("themes")
@@ -1247,8 +1244,8 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
             {
                 "id": h_id_str,
                 "title": h.get("title", f"Hackathon #{idx + 1}"),
-                "participants": f"{p_count or h.get('totalParticipants', 0) or (342 - idx * 50)} Participants",
-                "participantCount": p_count or h.get("totalParticipants", 0) or 342,
+                "participants": f"{p_count or h.get('totalParticipants', 0)} Participants",
+                "participantCount": p_count or h.get("totalParticipants", 0),
                 "status": badge_status,
                 "timeline": timeline_str,
                 "category": (
@@ -1275,77 +1272,32 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
     activity_stream = []
     recent_registrations_feed = []
 
-    mock_recent_defaults = [
-        {
-            "name": "Sarah Jenkins",
-            "initials": "SJ",
-            "hackathon": (
-                user_hackathons[0].get("title", "Global Fintech Hack")
-                if user_hackathons
-                else "Global Fintech Hack"
-            ),
-            "roleOrMembers": "Developer",
-            "timeAgo": "2 mins ago",
-            "color": "purple",
-        },
-        {
-            "name": "Team Mavericks",
-            "initials": "TM",
-            "hackathon": (
-                user_hackathons[0].get("title", "Global Fintech Hack")
-                if user_hackathons
-                else "Global Fintech Hack"
-            ),
-            "roleOrMembers": "4 Members",
-            "timeAgo": "15 mins ago",
-            "color": "slate",
-        },
-        {
-            "name": "David Chen",
-            "initials": "DC",
-            "hackathon": (
-                user_hackathons[1].get("title", "AI for Good")
-                if len(user_hackathons) > 1
-                else "AI for Good"
-            ),
-            "roleOrMembers": "UI/UX Designer",
-            "timeAgo": "1 hour ago",
-            "color": "indigo",
-        },
-        {
-            "name": "CyberPulse Team",
-            "initials": "CP",
-            "hackathon": (
-                user_hackathons[0].get("title", "Global Fintech Hack")
-                if user_hackathons
-                else "Global Fintech Hack"
-            ),
-            "roleOrMembers": "3 Members",
-            "timeAgo": "3 hours ago",
-            "color": "teal",
-        },
-    ]
-
     for app in recent_apps:
         h_name = "Hackathon Event"
         for b in breakdown:
             if b["id"] == str(app.get("hackathonId")):
                 h_name = b["title"]
                 break
-        name = app.get("applicantName") or app.get("userName") or "Applicant"
+        name = app.get("applicantName") or app.get("userName") or ""
         name_parts = name.strip().split()
         initials = (
-            "".join([p[0].upper() for p in name_parts[:2]]) if name_parts else "AP"
+            "".join([p[0].upper() for p in name_parts[:2]]) if name_parts else ""
+        )
+        applied_at = app.get("appliedAt")
+        activity_time = (
+            applied_at.strftime("%b %d, %I:%M %p")
+            if isinstance(applied_at, datetime)
+            else "Time unavailable"
         )
 
         activity_stream.append(
             {
                 "id": str(app.get("_id")),
                 "name": name,
-                "email": app.get("applicantEmail") or "student@proeduvate.com",
+                "email": app.get("applicantEmail"),
                 "hackathon": h_name,
-                "time": "Recently",
-                "status": app.get("status", "Registered"),
+                "time": activity_time,
+                "status": app.get("status") or "Status unavailable",
             }
         )
 
@@ -1355,86 +1307,41 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
                 "name": name,
                 "initials": initials,
                 "hackathon": h_name,
-                "roleOrMembers": app.get("track") or app.get("role") or "Developer",
-                "timeAgo": "Recently",
+                "roleOrMembers": app.get("track") or app.get("role"),
+                "timeAgo": activity_time,
                 "color": "purple",
             }
         )
 
-    if len(recent_registrations_feed) < 3:
-        for item in mock_recent_defaults:
-            if len(recent_registrations_feed) >= 4:
-                break
-            if not any(r["name"] == item["name"] for r in recent_registrations_feed):
-                recent_registrations_feed.append(item)
-
-    # Upcoming Deadlines computed or populated with clean indicators
-    first_title = (
-        user_hackathons[0].get("title", "Global Fintech Hack")
-        if user_hackathons
-        else "Global Fintech Hack"
-    )
-    second_title = (
-        user_hackathons[1].get("title", "Eco-Innovation Challenge")
-        if len(user_hackathons) > 1
-        else "Eco-Innovation Challenge"
-    )
-
-    upcoming_deadlines = [
-        {
-            "id": "d1",
-            "color": "red",
-            "time": "Today, 11:59 PM",
-            "label": "Registration Closes",
-            "hackathon": first_title,
-        },
-        {
-            "id": "d2",
-            "color": "purple",
-            "time": "Tomorrow, 9:00 AM",
-            "label": "Judging Commences",
-            "hackathon": first_title,
-        },
-        {
-            "id": "d3",
-            "color": "grey",
-            "time": "Oct 25, 5:00 PM",
-            "label": "Submission Deadline",
-            "hackathon": second_title,
-        },
-    ]
+    upcoming_deadlines = []
 
     return {
         "stats": [
             {
                 "id": "activeHackathons",
                 "title": "ACTIVE HACKATHONS",
-                "value": total_hackathons or 3,
-                "change": "+2",
+                "value": total_hackathons,
                 "isPositive": True,
                 "icon": "rocket",
             },
             {
                 "id": "totalRegistrations",
                 "title": "TOTAL REGISTRATIONS",
-                "value": total_participants or 1240,
-                "change": "+12%",
+                "value": total_participants,
                 "isPositive": True,
                 "icon": "users",
             },
             {
                 "id": "submissions",
                 "title": "SUBMISSIONS",
-                "value": total_submissions or 458,
-                "change": "+8%",
+                "value": total_submissions,
                 "isPositive": True,
                 "icon": "document",
             },
             {
                 "id": "mentorsJudges",
                 "title": "MENTORS & JUDGES",
-                "value": mentors_count or 86,
-                "change": "Verified",
+                "value": mentors_count,
                 "isPositive": True,
                 "icon": "shield",
             },
@@ -1446,8 +1353,7 @@ async def get_organizer_stats(current_user: dict = Depends(with_auth)):
         "totalParticipants": total_participants
         or sum(b["participantCount"] for b in breakdown),
         "totalTeams": total_teams
-        or sum(h.get("teamCount", 0) for h in user_hackathons)
-        or (total_hackathons * 6),
+        or sum(h.get("teamCount", 0) for h in user_hackathons),
         "totalSubmissions": total_submissions or accepted_count + in_review_count,
         "submissionRate": f"{sub_rate}%",
         "funnelData": funnel_data,

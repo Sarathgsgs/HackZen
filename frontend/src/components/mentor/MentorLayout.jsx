@@ -104,32 +104,7 @@ export default function MentorLayout() {
   }, [user?.name]);
 
   // Notifications
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'New Mentorship Request',
-      detail: 'Team Nova requested your guidance on AI Model recommendation.',
-      time: '12m ago',
-      read: false,
-      link: '/mentor/requests',
-    },
-    {
-      id: 2,
-      title: 'Upcoming Session in 30 Mins',
-      detail: 'Project Architecture Review with Team Alpha at 10:30 AM.',
-      time: '25m ago',
-      read: false,
-      link: '/mentor/sessions',
-    },
-    {
-      id: 3,
-      title: 'Milestone Submission',
-      detail: 'Team CyberGuard submitted Sprint 2 code for review.',
-      time: '2h ago',
-      read: true,
-      link: '/mentor/teams',
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

@@ -174,11 +174,7 @@ async def get_certificate_eligibility_queue(
             if ObjectId.is_valid(str(hack_id))
             else None
         )
-        event_name = (
-            hackathon.get("title", "Global AI Hackathon 2026")
-            if hackathon
-            else "Global AI Hackathon 2026"
-        )
+        event_name = hackathon.get("title") if hackathon else None
 
         team_members = await db["teamMembers"].find({"teamId": team_id}).to_list(10)
         for tm in team_members:
@@ -204,6 +200,7 @@ async def get_certificate_eligibility_queue(
                             "id": f"elig_{str(u_doc['_id'])}",
                             "name": u_doc.get("name", "Team Member"),
                             "email": email,
+                            "hackathonId": str(hack_id) if hack_id else None,
                             "event": event_name,
                             "achievement": "Winner" if is_approved else "Participant",
                             "template": (

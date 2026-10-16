@@ -17,56 +17,12 @@ import { useMentor } from '../../context/MentorContext';
 export default function MentorMessages() {
   const { openScheduleModal, addToast, globalSearch } = useMentor();
 
-  const [activeChatId, setActiveChatId] = useState('chat-alpha');
+  const [activeChatId, setActiveChatId] = useState(null);
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef(null);
 
   // Conversations list
-  const [conversations, setConversations] = useState([
-    {
-      id: 'chat-alpha',
-      teamName: 'Team Alpha',
-      hackathon: 'AI Innovation Hackathon',
-      domain: 'Artificial Intelligence',
-      unread: 1,
-      lastMessage: 'We just pushed the latest commit with the WebSocket audio pipeline.',
-      time: '12m ago',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-      messages: [
-        { id: 1, sender: 'Alex Rivera (Team Lead)', text: 'Hi Dr. Mitchell! We had a quick question regarding the vector indexing architecture.', time: '10:14 AM', isMentor: false },
-        { id: 2, sender: 'You', text: 'Hello Alex! I suggest keeping chunk sizes around 512 tokens with 10% overlap to preserve semantic context.', time: '10:20 AM', isMentor: true },
-        { id: 3, sender: 'Marcus Chen', text: 'That makes sense! We also just pushed the latest commit with the WebSocket audio pipeline.', time: '10:25 AM', isMentor: false },
-      ],
-    },
-    {
-      id: 'chat-nova',
-      teamName: 'Team Nova',
-      hackathon: 'HealthTech Global 2025',
-      domain: 'HealthTech',
-      unread: 0,
-      lastMessage: 'Looking forward to our scheduled discussion tomorrow at 2 PM!',
-      time: '2h ago',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-      messages: [
-        { id: 1, sender: 'Maya Lin', text: 'Thanks for accepting our mentorship request Dr. Mitchell!', time: 'Yesterday', isMentor: false },
-        { id: 2, sender: 'You', text: 'Glad to work with Team Nova! Let us review your model fine-tuning checkpoints.', time: 'Yesterday', isMentor: true },
-        { id: 3, sender: 'Maya Lin', text: 'Looking forward to our scheduled discussion tomorrow at 2 PM!', time: '2h ago', isMentor: false },
-      ],
-    },
-    {
-      id: 'chat-phoenix',
-      teamName: 'Team Phoenix',
-      hackathon: 'NextGen FinTech Challenge',
-      domain: 'FinTech',
-      unread: 0,
-      lastMessage: 'Slide deck updated with regulatory compliance framework.',
-      time: '1d ago',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-      messages: [
-        { id: 1, sender: 'Kenji Sato', text: 'Slide deck updated with regulatory compliance framework.', time: '1d ago', isMentor: false },
-      ],
-    },
-  ]);
+  const [conversations, setConversations] = useState([]);
 
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeChatId) || conversations[0],
@@ -76,6 +32,17 @@ export default function MentorMessages() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeConversation?.messages]);
+
+  if (!activeConversation) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6 pb-12">
+        <div className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Team Messages</h1>
+          <p role="status" className="mt-4 text-sm text-slate-500 dark:text-slate-400">No conversations are available from the messaging service.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSendMessage = (e) => {
     e.preventDefault();

@@ -4,44 +4,23 @@ import apiClient from '../../api/api';
  * Mentor Profile API Integration
  */
 
-const DEFAULT_PROFILE = {
-    name: 'Dr. Arun Kumar',
-    role: 'Senior Mentor',
-    institution: 'ABC Technologies',
-    bio: '',
-    avatarGradient: 'from-purple-600 to-indigo-600',
-    expertise: [],
-    links: {
-        scholar: '',
-        linkedin: '',
-        github: ''
-    },
-    stats: {
-        teams: 0,
-        rating: '0/5',
-        sessions: 0
-    },
-    initials: 'SM'
-};
-
 export const fetchMentorProfile = async () => {
     try {
         const { data } = await apiClient.get('/profile/me');
         const roleProfile = data.mentor_profile || data.organizer_profile || data.profile || {};
         
         const profileData = {
-            ...DEFAULT_PROFILE,
             ...data,
             ...roleProfile,
-            institution: roleProfile.companyName || DEFAULT_PROFILE.institution,
-            expertise: roleProfile.expertiseDomains || [],
-            availability: roleProfile.availability || 'Available',
+            institution: roleProfile.companyName || roleProfile.institution || '',
+            expertise: Array.isArray(roleProfile.expertiseDomains) ? roleProfile.expertiseDomains : [],
+            availability: roleProfile.availability || '',
             links: {
                 scholar: roleProfile.scholarUrl || '',
                 linkedin: roleProfile.linkedinUrl || '',
                 github: roleProfile.githubUrl || ''
             },
-            initials: (data.name || '').split(' ').map(n => n[0]).join('').toUpperCase() || 'SM'
+            initials: (data.name || '').split(' ').map(n => n[0]).join('').toUpperCase()
         };
         
         // Cache in localStorage for persistence
