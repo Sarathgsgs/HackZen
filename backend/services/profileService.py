@@ -135,9 +135,13 @@ class ProfileService:
                 # A hidden contact number is never included in mentor listings
                 # that are consumed by teams and other public-facing pages.
                 preferences = await db.user_settings.find_one(
-                    {"userId": m["userId"]}, {"mentor.contactNumberVisibility": 1}
+                    {"userId": m["userId"]},
+                    {"mentor.contactNumberVisibility": 1, "mentor.profileVisibility": 1},
                 )
-                if (preferences or {}).get("mentor", {}).get("contactNumberVisibility") == "hidden":
+                visibility = str((preferences or {}).get("mentor", {}).get("profileVisibility", "Visible to All Hackathon Participants")).strip().lower()
+                if visibility in {"private", "visible to assigned teams"}:
+                    continue
+                if str((preferences or {}).get("mentor", {}).get("contactNumberVisibility", "")).strip().lower() in {"hidden", "private"}:
                     m.pop("phoneNumber", None)
                 # Fetch name from user collection
                 user = await db.users.find_one({"_id": ObjectId(m["userId"])})

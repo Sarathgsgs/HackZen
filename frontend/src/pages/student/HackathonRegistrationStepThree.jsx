@@ -33,6 +33,7 @@ const HackathonRegistrationStepThree = () => {
                 state: {
                     registrationId: result?.registrationId || null,
                     registeredAt: result?.timestamp || null,
+                    status: result?.status || null,
                 },
             });
         } catch (submitError) {

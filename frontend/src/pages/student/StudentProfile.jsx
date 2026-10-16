@@ -37,8 +37,8 @@ const StudentProfile = () => {
                         if (typeof skill === 'object') return skill;
                         return {
                             name: skill,
-                            level: 'Beginner',
-                            value: 40
+                            level: 'Intermediate',
+                            value: 60
                         };
                     });
 
@@ -52,6 +52,7 @@ const StudentProfile = () => {
                         competencies: mappedCompetencies,
                         stats: {
                             ...prev.stats,
+                            performance: profileData.stats?.performance ?? prev.stats.performance,
                             collaborations: Array.isArray(certsData) ? certsData.length : 0,
                             engagements: Number(profileData.stats?.hackathons || 0) * 5
                         },

@@ -1,12 +1,45 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../api/api';
 
 const StudentCertificateVerification = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [code, setCode] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [certificateCount, setCertificateCount] = useState(null);
+  const [certificateLoadError, setCertificateLoadError] = useState('');
+
+  useEffect(() => {
+    const routeCertificateId = location.state?.certificateId;
+
+    if (routeCertificateId) {
+      setCode(routeCertificateId);
+      setCertificateCount(1);
+      setResult(null);
+      return;
+    }
+
+    const loadMyCertificateId = async () => {
+      try {
+        const { data } = await apiClient.get('/certificates/me');
+        const certs = Array.isArray(data) ? data : [];
+        setCertificateCount(certs.length);
+        setCertificateLoadError('');
+
+        if (certs.length > 0) {
+          const realCertificateId = certs[0]._id || certs[0].id || '';
+          setCode((previousCode) => previousCode || realCertificateId);
+        }
+      } catch (error) {
+        console.error('Failed to load student certificates:', error);
+        setCertificateLoadError('Your certificate list could not be loaded. You can still verify an ID you already have.');
+      }
+    };
+
+    loadMyCertificateId();
+  }, [location.state]);
 
   const verify = async () => {
     const normalized = code.trim();
@@ -30,58 +63,96 @@ const StudentCertificateVerification = () => {
       });
     } catch (error) {
       console.error('Certificate verification failed:', error);
+      const detail = error?.response?.data?.detail || error?.response?.data?.message || 'This certificate ID could not be verified against the backend.';
       setResult({
         success: false,
-        message: 'This certificate ID could not be verified against the backend.',
+        message: detail.includes('not found') || detail.includes('invalid')
+          ? 'No certificate found for this ID.'
+          : 'This certificate ID could not be verified against the backend.',
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      verify();
+    }
+  };
+
   return (
-    <div className="mx-auto max-w-4xl space-y-8 pb-10 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-violet-300">Verification</p>
-          <h1 className="mt-2 text-3xl font-bold text-white">Certificate Verification</h1>
-        </div>
-        <button onClick={() => navigate('/student/certificates')} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200">
-          Certificate
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#f3eef7] px-4 py-8 text-[#1f2430] md:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1280px]">
+        <h1 className="mb-8 text-[42px] font-bold tracking-[-0.05em] text-[#1d1a2a]">Verify Certificate</h1>
+        <p className="mb-8 text-[#6c6878]">Validate the authenticity of your hackathon certificate issued by ProEduvate.</p>
 
-      <div className="glass rounded-[2rem] border border-white/10 p-6 md:p-8">
-        <div className="space-y-4">
-          <label className="text-xs font-bold uppercase tracking-[0.25em] text-gray-400">Certificate ID</label>
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Paste certificate ID"
-            className="w-full rounded-xl border border-white/10 bg-navy-950/60 px-4 py-4 text-lg font-semibold text-white placeholder:text-gray-500 focus:border-violet-500/50 focus:outline-none"
-          />
-        </div>
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.05fr)_minmax(350px,0.95fr)]">
+          <div className="rounded-[22px] border border-[#dfe7f8] bg-[#f8f6fb] p-6 shadow-[0_8px_26px_rgba(83,63,166,0.04)] md:p-8">
+            <h2 className="mb-4 text-[28px] font-bold tracking-[-0.04em] text-[#1d1a2a]">Enter Details</h2>
+            <label className="mb-2 block text-sm font-semibold text-[#2d2c39]">Certificate Validation ID</label>
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter certificate ID"
+              className="w-full rounded-xl border border-[#d7d0ea] bg-white px-4 py-3 text-[#1d1a2a] placeholder:text-[#8e8b98] focus:border-[#6d5ef7] focus:outline-none"
+            />
 
-        <div className="mt-6 flex justify-end">
-          <button onClick={verify} disabled={loading} className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70">
-            {loading ? 'Verifying...' : 'Verify'}
-          </button>
-        </div>
+            {certificateLoadError && (
+              <div role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{certificateLoadError}</div>
+            )}
 
-        {result && (
-          <div className={`mt-8 rounded-2xl border p-5 ${result.success ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
-            <p className={`text-xs font-bold uppercase tracking-[0.25em] ${result.success ? 'text-emerald-300' : 'text-red-300'}`}>
-              {result.success ? 'Verified' : 'Unavailable'}
-            </p>
-            <p className="mt-3 text-lg font-semibold text-white">{result.message}</p>
-            {result.details && (
-              <div className="mt-4 text-sm text-gray-300">
-                <p>ID: {result.details.id}</p>
-                <p>Issued: {result.details.issuedAt}</p>
+            {certificateCount === 0 && !certificateLoadError && (
+              <div className="mt-4 rounded-xl border border-[#f3b4b0] bg-[#fff1f0] px-4 py-3 text-sm text-[#b42318]">
+                No certificates are currently available for this account.
               </div>
             )}
+
+            <button
+              onClick={verify}
+              disabled={loading}
+              className="mt-6 rounded-xl bg-gradient-to-r from-[#6051d6] to-[#4f46e5] px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(79,70,229,0.28)] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading ? 'Verifying...' : 'Verify Certificate'}
+            </button>
           </div>
-        )}
+
+          <div className="space-y-6">
+            <div className="rounded-[22px] border border-[#dfe7f8] bg-[#f8f6fb] p-6 shadow-[0_8px_26px_rgba(83,63,166,0.04)] md:p-8">
+              <h2 className="mb-4 text-[28px] font-bold tracking-[-0.04em] text-[#1d1a2a]">Recently Verified</h2>
+              {certificateCount === 0 && !certificateLoadError ? (
+                <div className="rounded-[16px] border border-dashed border-[#d9d1ef] bg-[#f4f1fa] p-5 text-[#5f5a74]">
+                  No recent verification results for this account.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {result && result.success ? (
+                    <div className="rounded-[16px] border border-[#dfe7f8] bg-[#ecfdf5] p-4 text-[#1d1a2a]">
+                      <div className="font-semibold">Certificate record found</div>
+                      <div className="mt-2 text-sm text-[#3d4a5c]">ID: {result.details?.id || code}</div>
+                      <div className="text-sm text-[#3d4a5c]">Issued: {result.details?.issuedAt || 'Not available'}</div>
+                    </div>
+                  ) : (
+                    <div className="rounded-[16px] border border-[#e5d5d3] bg-[#fff1f0] p-4 text-[#b42318]">
+                      {result ? result.message : 'No verification yet.'}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[22px] border border-[#dfe7f8] bg-[#f8f6fb] p-6 shadow-[0_8px_26px_rgba(83,63,166,0.04)] md:p-8">
+              <h3 className="text-[28px] font-bold tracking-[-0.04em] text-[#1d1a2a]">How it works</h3>
+              <div className="mt-4 space-y-3 text-[#5f5a74]">
+                <p>Where to find your ID? The validation ID is located at the bottom right corner of your certificate.</p>
+                <p>What is a validation ID? It identifies the certificate record stored by the platform.</p>
+                <p>What does verification confirm? The platform has a record matching the entered ID.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

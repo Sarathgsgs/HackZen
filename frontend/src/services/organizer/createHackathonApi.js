@@ -1,4 +1,5 @@
 import apiClient from '../../api/api';
+import { getUIDataset, saveUIDataset } from '../uiDataApi';
 
 const THEME_VALUE_MAP = {
     ai: 'AIML',
@@ -48,10 +49,13 @@ const toIsoString = (value) => {
  * Saves the current hackathon draft to the backend or local storage.
  */
 export const saveHackathonDraft = async (draft) => {
-    // For now, we'll continue to use sessionStorage for drafts to avoid partial database entries,
-    // but we'll simulate a backend save for consistency.
-    const { posterFile, ...serializableDraft } = draft;
-    sessionStorage.setItem('hackathonDraft', JSON.stringify(serializableDraft));
+    try {
+        const { posterFile, ...serializableDraft } = draft;
+        sessionStorage.setItem('hackathonDraft', JSON.stringify(serializableDraft));
+        await saveUIDataset('organizer-hackathon-draft', serializableDraft);
+    } catch (e) {
+        console.warn('Draft save notice:', e);
+    }
     return draft;
 };
 
@@ -124,7 +128,7 @@ export const publishHackathon = async (draft) => {
         const { data } = response;
         
         // Clear draft after successful publishing
-        sessionStorage.removeItem('hackathonDraft');
+        await saveUIDataset('organizer-hackathon-draft', null);
 
         return {
             id: data._id || data.id,
@@ -141,7 +145,11 @@ export const publishHackathon = async (draft) => {
 /**
  * Retrieves the current hackathon draft.
  */
-export const getHackathonDraft = () => {
+export const getHackathonDraft = async () => {
+    try {
+        const remote = await getUIDataset('organizer-hackathon-draft', null);
+        if (remote) return remote;
+    } catch {}
     const saved = sessionStorage.getItem('hackathonDraft');
     return saved ? JSON.parse(saved) : null;
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Trophy,
@@ -14,6 +14,7 @@ import {
   Search
 } from 'lucide-react';
 import { useMentor } from '../../context/MentorContext';
+import { fetchMentorHackathons } from '../../services/mentor/hackathonsApi';
 
 const TABS = ['Upcoming Hackathons', 'Ongoing Hackathons', 'Past Hackathons', 'My Hackathons'];
 
@@ -22,93 +23,20 @@ export default function MentorHackathons() {
   const { globalSearch } = useMentor();
   const [activeTab, setActiveTab] = useState('Upcoming Hackathons');
   const [localSearch, setLocalSearch] = useState('');
+  const [hackathons, setHackathons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  const hackathons = [
-    {
-      id: 'hack-1',
-      title: 'AI Innovation Hackathon 2025',
-      organizer: 'Stanford AI Student Alliance & Google Cloud',
-      category: 'Artificial Intelligence',
-      status: 'Ongoing',
-      phase: 'Development Sprint (Day 4/7)',
-      dates: 'Oct 22 - Oct 29, 2025',
-      assignedTeamsCount: 4,
-      role: 'Lead AI & Architecture Mentor',
-      description: 'Global hackathon focusing on multimodal LLMs, agentic workflows, and real-time inference applications.',
-      prizePool: '$45,000 USD',
-      isMyHackathon: true,
-    },
-    {
-      id: 'hack-2',
-      title: 'HealthTech Global Hackathon',
-      organizer: 'BioHealth Ventures & Johns Hopkins',
-      category: 'Healthcare Tech',
-      status: 'Ongoing',
-      phase: 'Prototype Verification',
-      dates: 'Oct 15 - Nov 2, 2025',
-      assignedTeamsCount: 2,
-      role: 'Clinical AI Advisor',
-      description: 'Building patient-centric diagnostic systems, medical robotics algorithms, and remote care pipelines.',
-      prizePool: '$60,000 USD',
-      isMyHackathon: true,
-    },
-    {
-      id: 'hack-3',
-      title: 'NextGen FinTech Challenge',
-      organizer: 'Open Finance Collective',
-      category: 'FinTech',
-      status: 'Upcoming',
-      phase: 'Orientation & Team Formation',
-      dates: 'Nov 10 - Nov 17, 2025',
-      assignedTeamsCount: 0,
-      role: 'Invited Expert Mentor',
-      description: 'Decentralized identity, zero-knowledge fraud detection, and algorithmic settlement networks.',
-      prizePool: '$35,000 USD',
-      isMyHackathon: false,
-    },
-    {
-      id: 'hack-4',
-      title: 'EcoTrack Climate Summit Hack',
-      organizer: 'ClimateWorks & CleanTech Labs',
-      category: 'Climate & IoT',
-      status: 'Past',
-      phase: 'Judging Completed',
-      dates: 'Sep 12 - Sep 19, 2025',
-      assignedTeamsCount: 3,
-      role: 'Hardware & IoT Mentor',
-      description: 'Distributed sensor telemetry, solar grid load balancing, and carbon footprint tracking models.',
-      prizePool: '$25,000 USD',
-      isMyHackathon: true,
-    },
-    {
-      id: 'hack-5',
-      title: 'CyberShield Defense Arena 2025',
-      organizer: 'MIT Cyber Security Club & DEF CON',
-      category: 'Cybersecurity',
-      status: 'Upcoming',
-      phase: 'Registration Open',
-      dates: 'Dec 05 - Dec 12, 2025',
-      assignedTeamsCount: 0,
-      role: 'Security Architecture Mentor',
-      description: 'Live red/blue team simulations, memory safety audits, and automated vulnerability triage.',
-      prizePool: '$50,000 USD',
-      isMyHackathon: false,
-    },
-    {
-      id: 'hack-6',
-      title: 'NeuroVibe Assistive Tech Sprint',
-      organizer: 'Inclusive Tech Initiative',
-      category: 'EdTech & Accessibility',
-      status: 'Past',
-      phase: 'Awards Concluded',
-      dates: 'Aug 01 - Aug 08, 2025',
-      assignedTeamsCount: 2,
-      role: 'UX & Accessibility Advisor',
-      description: 'Assistive hardware and software adaptations for neurodivergent and differently-abled learners.',
-      prizePool: '$20,000 USD',
-      isMyHackathon: true,
-    },
-  ];
+  useEffect(() => {
+    let active = true;
+    fetchMentorHackathons()
+      .then((items) => { if (active) setHackathons(items); })
+      .catch((error) => {
+        if (active) setLoadError(error.response?.data?.detail || 'Unable to load hackathons. Please try again.');
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const filteredHackathons = useMemo(() => {
     let list = hackathons;
@@ -134,6 +62,13 @@ export default function MentorHackathons() {
     }
     return list;
   }, [hackathons, activeTab, localSearch, globalSearch]);
+
+  const formatDates = (hack) => {
+    const format = (value) => value ? new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    const start = format(hack.startDate);
+    const end = format(hack.endDate);
+    return start && end ? `${start} – ${end}` : start || end || 'Dates not announced';
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
@@ -199,7 +134,11 @@ export default function MentorHackathons() {
       </div>
 
       {/* Hackathons Grid */}
-      {filteredHackathons.length === 0 ? (
+      {loading ? (
+        <div className="p-12 text-center text-slate-400 text-sm">Loading hackathons...</div>
+      ) : loadError ? (
+        <div role="alert" className="p-5 rounded-2xl border border-rose-300 bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:border-rose-900 dark:text-rose-300">{loadError}</div>
+      ) : filteredHackathons.length === 0 ? (
         <div className="p-12 text-center bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 text-slate-400 text-sm">
           No hackathons found matching your search in this category.
         </div>
@@ -251,7 +190,7 @@ export default function MentorHackathons() {
                       <span className="text-slate-400 text-[11px] block">Dates</span>
                       <span className="font-semibold text-slate-800 dark:text-white flex items-center gap-1 mt-0.5">
                         <Calendar className="w-3.5 h-3.5 text-[#5B45D9]" />
-                        {hack.dates}
+                        {formatDates(hack)}
                       </span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-100 dark:border-white/5">
@@ -265,15 +204,13 @@ export default function MentorHackathons() {
 
                   <div className="mt-3 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                     <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    Your Role: <span className="font-semibold text-slate-800 dark:text-white">{hack.role}</span>
+                    {hack.isMyHackathon ? 'Mentoring assigned teams' : 'Open event'}
                   </div>
                 </div>
 
                 {/* Bottom Actions */}
                 <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#5B45D9] dark:text-purple-300">
-                    {hack.prizePool}
-                  </span>
+                  <span className="text-xs font-bold text-[#5B45D9] dark:text-purple-300">{hack.prizePool || ''}</span>
                   <button
                     onClick={() => navigate('/mentor/teams')}
                     className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-[#5B45D9] hover:text-white text-slate-800 dark:text-white text-xs font-bold transition-all shadow-2xs flex items-center gap-1"

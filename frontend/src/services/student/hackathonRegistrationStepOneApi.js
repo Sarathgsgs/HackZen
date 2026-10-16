@@ -1,19 +1,11 @@
 import { saveRegistrationDraft } from './hackathonRegistrationApi';
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export const getStepOneConfig = async (hackathon, user, platformConstraints = {}) => {
-    await delay(250);
-    const minTeam = platformConstraints.minTeamSize || 1;
-    const maxTeam = platformConstraints.maxTeamSize 
-        ? Math.min(platformConstraints.maxTeamSize, hackathon?.teamSizeLimit || platformConstraints.maxTeamSize)
-        : (hackathon?.teamSizeLimit || 4);
-
+export const getStepOneConfig = async (hackathon, user) => {
     return {
-        leaderName: user?.name || 'Student',
+        leaderName: user?.name || '',
         leaderEmail: user?.email || '',
-        minTeamSize: minTeam,
-        maxTeamSize: maxTeam,
+        minTeamSize: Number(hackathon.minTeamSize ?? 1),
+        maxTeamSize: Number(hackathon.maxTeamSize ?? hackathon.teamSizeLimit ?? 4),
     };
 };
 

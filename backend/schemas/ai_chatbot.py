@@ -1,6 +1,33 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
-from bson import ObjectId
+from typing import Optional
+
+from pydantic import BaseModel, Field, field_validator
+
+
+class AIChatRequest(BaseModel):
+    query: str = Field(..., min_length=1, max_length=4000)
+    hackathon_id: Optional[str] = Field(None, min_length=1, max_length=128)
+
+    @field_validator("query")
+    @classmethod
+    def trim_query(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Message cannot be blank.")
+        return value
+
+    @field_validator("hackathon_id")
+    @classmethod
+    def trim_hackathon_id(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
+
+
+class AIChatResponse(BaseModel):
+    response: str
+    timestamp: datetime
 
 
 class AILogBase(BaseModel):

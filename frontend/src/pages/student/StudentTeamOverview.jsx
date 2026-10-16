@@ -1,26 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchMyTeams, leaveTeam } from '../../services/student/teamsApi';
+import { fetchStudentTeams } from '../../services/student/teamsApi';
 
 const StudentTeamOverview = () => {
   const navigate = useNavigate();
   const [teams, setTeams] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [teamToLeave, setTeamToLeave] = useState(null);
-  const [isLeaving, setIsLeaving] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     let isMounted = true;
 
     const loadTeams = async () => {
       try {
-        const data = await fetchMyTeams();
+        const data = await fetchStudentTeams();
         if (isMounted) setTeams(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to load student teams:', error);
-        if (isMounted) setTeams([]);
+        if (isMounted) setLoadError('Your teams could not be loaded. Please try again.');
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -40,160 +38,100 @@ const StudentTeamOverview = () => {
     });
   }, [search, teams]);
 
-  const avgProgress = teams.length
-    ? Math.round(teams.reduce((sum, team) => sum + Number(team.progress || 0), 0) / teams.length)
-    : 0;
-
-  const handleConfirmLeave = async () => {
-    if (!teamToLeave) return;
-    setIsLeaving(true);
-    try {
-      await leaveTeam(teamToLeave.id);
-      setTeams((prev) => prev.filter((t) => t.id !== teamToLeave.id));
-      setToastMessage(`You have left ${teamToLeave.name}.`);
-      setTeamToLeave(null);
-      setTimeout(() => setToastMessage(''), 4000);
-    } catch (err) {
-      alert(err.response?.data?.detail || err.message || 'Failed to leave team.');
-    } finally {
-      setIsLeaving(false);
-    }
-  };
+  const knownProgress = teams.map((team) => team.progress).filter((value) => Number.isFinite(value));
+  const avgProgress = knownProgress.length
+    ? Math.round(knownProgress.reduce((sum, value) => sum + value, 0) / knownProgress.length)
+    : null;
+  const allMemberCountsKnown = teams.every((team) => Number.isFinite(team.members));
 
   return (
-    <div className="space-y-8 pb-10 animate-in fade-in duration-500">
-      {toastMessage && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-400">
-          <span>{toastMessage}</span>
-          <button onClick={() => setToastMessage('')} className="text-emerald-400 hover:text-white">✕</button>
-        </div>
-      )}
-
+    <div className="min-h-screen space-y-8 bg-[#fbf9ff] px-4 py-6 pb-10 text-[#202432] animate-in fade-in duration-500 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-purple-300">Portfolio</p>
-          <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl">My Teams</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#776b9d]">Portfolio</p>
+          <h1 className="mt-2 text-3xl font-bold text-[#202432] md:text-4xl">My Teams</h1>
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <button onClick={() => navigate('/student/teams/join')} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10">Join Team</button>
-          <button onClick={() => navigate('/student/teams/create')} className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/30 transition hover:brightness-110">Create Team</button>
+          <button onClick={() => navigate('/student/teams/join')} className="rounded-xl border border-[#d9d3e8] bg-white px-4 py-2.5 text-sm font-semibold text-[#514b63] transition hover:border-[#b8aee0] hover:bg-[#f8f6ff]">Join Team</button>
+          <button onClick={() => navigate('/student/teams/create')} className="rounded-xl bg-[#5d4be5] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4e3bd1]">Create Team</button>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="glass rounded-2xl border border-white/10 p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Active Teams</p>
-          <p className="mt-4 text-3xl font-bold text-white">{teams.length}</p>
+        <div className="rounded-2xl border border-[#e4dfed] bg-white p-5 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#777287]">Teams</p>
+          <p className="mt-4 text-3xl font-bold text-[#202432]">{teams.length}</p>
         </div>
-        <div className="glass rounded-2xl border border-white/10 p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Avg. Progress</p>
-          <p className="mt-4 text-3xl font-bold text-violet-400">{avgProgress}%</p>
+        <div className="rounded-2xl border border-[#e4dfed] bg-white p-5 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#777287]">Avg. Progress</p>
+          <p className="mt-4 text-3xl font-bold text-[#5140c8]">{avgProgress === null ? 'Unavailable' : `${avgProgress}%`}</p>
         </div>
-        <div className="glass rounded-2xl border border-white/10 p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Members</p>
-          <p className="mt-4 text-3xl font-bold text-cyan-400">{teams.reduce((sum, team) => sum + Number(team.members || 0), 0)}</p>
+        <div className="rounded-2xl border border-[#e4dfed] bg-white p-5 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#777287]">Members</p>
+          <p className="mt-4 text-3xl font-bold text-[#5140c8]">{allMemberCountsKnown ? teams.reduce((sum, team) => sum + team.members, 0) : 'Unavailable'}</p>
         </div>
       </div>
 
-      <div className="glass rounded-2xl border border-white/10 p-4 md:p-5">
+      <div className="rounded-2xl border border-[#e4dfed] bg-white p-4 shadow-sm md:p-5">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by team or hackathon"
-          className="w-full rounded-xl border border-white/10 bg-navy-950/60 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:border-violet-500/50 focus:outline-none"
+          className="w-full rounded-xl border border-[#e2ddec] bg-[#fbfaff] px-4 py-3 text-sm text-[#202432] placeholder:text-[#898397] focus:border-[#8b7be8] focus:outline-none"
         />
       </div>
 
       {loading ? (
-        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-8 text-sm text-gray-300">Loading your teams...</div>
+        <div className="rounded-[1.5rem] border border-[#e4dfed] bg-white p-8 text-sm text-[#697386] shadow-sm">Loading your teams...</div>
+      ) : loadError ? (
+        <div role="alert" className="rounded-[1.5rem] border border-red-200 bg-white p-8 text-center text-sm text-red-700 shadow-sm">{loadError}</div>
       ) : filteredTeams.length === 0 ? (
-        <div className="glass rounded-[1.75rem] border border-dashed border-white/10 p-12 text-center">
-          <h2 className="text-2xl font-bold text-white">No teams yet</h2>
-          <p className="mt-3 text-gray-400">Join an existing team or create one for your next hackathon.</p>
+        <div className="rounded-[1.75rem] border border-dashed border-[#d8d1e4] bg-white p-12 text-center shadow-sm">
+          <h2 className="text-2xl font-bold text-[#202432]">No teams yet</h2>
+          <p className="mt-3 text-[#697386]">Join an existing team or create one for your next hackathon.</p>
           <div className="mt-6 flex justify-center gap-3">
-            <button onClick={() => navigate('/student/teams/join')} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white">Join Team</button>
-            <button onClick={() => navigate('/student/teams/create')} className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white">Create Team</button>
+            <button onClick={() => navigate('/student/teams/join')} className="rounded-xl border border-[#d9d3e8] bg-white px-4 py-2.5 text-sm font-semibold text-[#514b63]">Join Team</button>
+            <button onClick={() => navigate('/student/teams/create')} className="rounded-xl bg-[#5d4be5] px-4 py-2.5 text-sm font-semibold text-white">Create Team</button>
           </div>
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-2">
           {filteredTeams.map((team) => (
-            <div key={team.id} className="glass overflow-hidden rounded-[1.75rem] border border-white/10">
+            <div key={team.id} className="overflow-hidden rounded-[1.75rem] border border-[#e4dfed] bg-white shadow-sm">
               <div className={`h-28 bg-gradient-to-r ${team.gradient || 'from-violet-600 to-indigo-600'} p-5`}>
                 <div className="flex items-center justify-between">
-                  <span className="rounded-full border border-white/20 bg-black/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] text-white/90">{team.status || 'Active'}</span>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80">{team.members || 0} members</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80">{team.members === null ? 'Member count unavailable' : `${team.members} ${team.members === 1 ? 'member' : 'members'}`}</span>
                 </div>
-                <p className="mt-8 text-xs uppercase tracking-[0.3em] text-white/80">{team.hackathon || 'Hackathon'}</p>
+                <p className="mt-8 text-xs uppercase tracking-[0.3em] text-white/80">{team.hackathon || 'Hackathon name unavailable'}</p>
               </div>
 
               <div className="space-y-5 p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-bold text-white">{team.name}</h2>
-                    <p className="mt-1 text-sm text-gray-400">{team.domain || 'Technology'}</p>
+                    <h2 className="text-2xl font-bold text-[#202432]">{team.name || 'Team name unavailable'}</h2>
+                    <p className="mt-1 text-sm text-[#777287]">{team.roleInTeam || 'Team role unavailable'}</p>
                   </div>
-                  <button onClick={() => navigate(`/student/teams/${team.id}/workspace`)} className="rounded-xl border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.2em] text-violet-300">Open</button>
+                  <button onClick={() => navigate(`/student/teams/${team.id}/workspace`)} className="rounded-xl border border-[#ddd6f5] bg-[#f3f0ff] px-3 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#5140c8]">Open</button>
                 </div>
 
                 <div>
-                  <div className="mb-2 flex items-center justify-between text-xs text-gray-400">
+                  <div className="mb-2 flex items-center justify-between text-xs text-[#777287]">
                     <span>Progress</span>
-                    <span className="font-semibold text-white">{team.progress || 0}%</span>
+                    <span className="font-semibold text-[#202432]">{team.progress === null ? 'Unavailable' : `${team.progress}%`}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-white/5">
-                    <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500" style={{ width: `${team.progress || 0}%` }} />
+                  <div className="h-2 rounded-full bg-[#eeeaf6]">
+                    {team.progress !== null && <div className="h-full rounded-full bg-[#5d4be5]" style={{ width: `${Math.max(0, Math.min(100, team.progress))}%` }} />}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
-                  <span className="text-sm text-gray-300">Role in team</span>
-                  <span className="text-sm font-semibold text-violet-300">{team.roleInTeam || 'Member'}</span>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => navigate(`/student/teams/${team.id}/workspace`)} className="flex-1 rounded-xl bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Workspace</button>
-                  <button onClick={() => navigate(`/student/teams/${team.id}/members`)} className="flex-1 rounded-xl border border-white/10 bg-transparent px-4 py-3 text-sm font-semibold text-gray-200 transition hover:border-white/20 hover:bg-white/5">Members</button>
-                  <button
-                    onClick={() => setTeamToLeave(team)}
-                    className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-3 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/20"
-                    title="Leave Team"
-                  >
-                    Leave
-                  </button>
+                <div className="flex gap-3">
+                  <button onClick={() => navigate(`/student/teams/${team.id}/workspace`)} className="flex-1 rounded-xl bg-[#5d4be5] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#4e3bd1]">Workspace</button>
+                  <button onClick={() => navigate(`/student/teams/${team.id}/members`)} className="flex-1 rounded-xl border border-[#d9d3e8] bg-white px-4 py-3 text-sm font-semibold text-[#514b63] transition hover:border-[#b8aee0] hover:bg-[#f8f6ff]">Members</button>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Confirmation Modal */}
-      {teamToLeave && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#16122b] p-6 shadow-2xl">
-            <h3 className="text-xl font-bold text-white">Leave Team?</h3>
-            <p className="mt-3 text-sm text-gray-300">
-              Are you sure you want to leave <strong className="text-white">{teamToLeave.name}</strong>? You will lose access to the team workspace and file repository.
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                disabled={isLeaving}
-                onClick={() => setTeamToLeave(null)}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={isLeaving}
-                onClick={handleConfirmLeave}
-                className="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-500"
-              >
-                {isLeaving ? 'Leaving...' : 'Confirm & Leave'}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

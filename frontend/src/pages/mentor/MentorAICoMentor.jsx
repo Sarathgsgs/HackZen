@@ -21,10 +21,10 @@ export default function MentorAICoMentor() {
   const getGuidance = async (event) => {
     event.preventDefault();
     if (!selectedTeam || !projectUpdate.trim()) return setError('Choose a team and enter its project update.');
-    if (!selectedTeam.hackathon || selectedTeam.hackathon === 'Active Hackathon') return setError('This team does not have a saved hackathon ID yet.');
+    if (!selectedTeam.hackathonId) return setError('This team does not have a saved hackathon ID yet.');
     setLoading(true); setError(''); setResponse('');
     try {
-      const result = await sendChatMessage(`You are advising ${selectedTeam.name}.\nProject update:\n${projectUpdate.trim()}`, selectedTeam.hackathon, 'Mentor project assessment');
+      const result = await sendChatMessage(`You are advising ${selectedTeam.name}.\nProject update:\n${projectUpdate.trim()}`, selectedTeam.hackathonId, 'Mentor project assessment');
       setResponse(result.text);
     } catch (requestError) {
       setError(requestError.response?.data?.detail || 'AI Co-Mentor could not respond. Check the Gemini API configuration and try again.');

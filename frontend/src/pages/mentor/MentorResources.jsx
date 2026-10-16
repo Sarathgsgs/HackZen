@@ -18,9 +18,11 @@ import {
 import { useMentor } from '../../context/MentorContext';
 import {
   fetchMaterials,
-  uploadMaterial,
+  createResource,
+  downloadMaterial,
   deleteMaterial
 } from '../../services/mentor/materialsApi';
+import { fetchAssignedTeams } from '../../services/mentor/assignedTeamsApi';
 
 export default function MentorResources() {
   const { addToast, globalSearch } = useMentor();
@@ -28,75 +30,35 @@ export default function MentorResources() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState('Architecture & Boilerplates');
-  const [newTeam, setNewTeam] = useState('All Mentored Teams');
+  const [newTeam, setNewTeam] = useState('');
   const [newUrl, setNewUrl] = useState('');
 
   const loadResources = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchMaterials();
-      if (data && data.length) {
-        setResources(data);
-      } else {
-        // High quality seed resources
-        setResources([
-          {
-            id: 'res-1',
-            title: 'Multimodal AI Streaming Boilerplate (FastAPI + React 19)',
-            category: 'Architecture & Boilerplates',
-            team: 'All Mentored Teams',
-            format: 'ZIP / Code',
-            size: '4.8 MB',
-            updatedAt: '2 days ago',
-            url: 'https://github.com/proeduvate-templates/ai-stream-starter',
-          },
-          {
-            id: 'res-2',
-            title: 'Winning Hackathon Pitch Deck & Demo Checklist',
-            category: 'Pitch Decks',
-            team: 'All Mentored Teams',
-            format: 'PDF',
-            size: '1.2 MB',
-            updatedAt: 'Oct 23, 2025',
-            url: '#',
-          },
-          {
-            id: 'res-3',
-            title: 'Vector Search Benchmark & Embedding Guidelines',
-            category: 'Guidelines',
-            team: 'Team Alpha',
-            format: 'DOCX',
-            size: '850 KB',
-            updatedAt: 'Yesterday',
-            url: '#',
-          },
-          {
-            id: 'res-4',
-            title: 'HIPAA & Health Data Compliance Whitepaper',
-            category: 'Guidelines',
-            team: 'Team Nova',
-            format: 'PDF',
-            size: '2.1 MB',
-            updatedAt: 'Oct 20, 2025',
-            url: '#',
-          },
-          {
-            id: 'res-5',
-            title: 'Synthetic Medical Dataset Generator Script',
-            category: 'Datasets & APIs',
-            team: 'Team Nova',
-            format: 'PY',
-            size: '340 KB',
-            updatedAt: 'Oct 19, 2025',
-            url: '#',
-          },
-        ]);
-      }
+      const [materialResult, teamResult] = await Promise.all([
+        fetchMaterials({ limit: 100 }),
+        fetchAssignedTeams(),
+      ]);
+      setResources((materialResult.data || []).map((item) => ({
+        id: item.id,
+        title: item.name,
+        team: item.teamName,
+        category: item.category,
+        size: item.sizeFormatted,
+        updatedAt: item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '',
+        url: item.url,
+        type: item.type,
+      })));
+      setTeams(teamResult.activeTeams || []);
     } catch (e) {
-      console.warn('Fallback resources:', e);
+      console.error('Could not load resources:', e);
+      setResources([]);
     } finally {
       setLoading(false);
     }
@@ -131,31 +93,45 @@ export default function MentorResources() {
     return list;
   }, [resources, activeCategory, globalSearch]);
 
-  const handleUploadSubmit = (e) => {
+  const handleUploadSubmit = async (e) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
-
-    const newRes = {
-      id: 'res-' + Date.now(),
-      title: newTitle.trim(),
-      category: newCategory,
-      team: newTeam,
-      format: 'DOC / Link',
-      size: '1.0 MB',
-      updatedAt: 'Just now',
-      url: newUrl || '#',
-    };
-
-    setResources((prev) => [newRes, ...prev]);
-    setUploadModalOpen(false);
-    setNewTitle('');
-    setNewUrl('');
-    addToast('Resource Shared', `"${newRes.title}" shared with ${newRes.team}.`, 'success');
+    setSaving(true);
+    try {
+      await createResource({
+        title: newTitle.trim(),
+        category: newCategory,
+        teamId: newTeam || undefined,
+        url: newUrl.trim(),
+      });
+      await loadResources();
+      setUploadModalOpen(false);
+      setNewTitle('');
+      setNewUrl('');
+      setNewTeam('');
+      addToast('Resource Shared', `"${newTitle.trim()}" saved for ${newTeam ? 'the selected team' : 'all assigned teams'}.`, 'success');
+    } catch (error) {
+      addToast('Resource not saved', error.response?.data?.detail || 'The database could not save this resource.', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = (id, title) => {
-    setResources((prev) => prev.filter((r) => r.id !== id));
-    addToast('Resource Removed', `Deleted "${title}".`, 'info');
+  const handleDelete = async (id, title) => {
+    try {
+      await deleteMaterial(id);
+      setResources((prev) => prev.filter((r) => r.id !== id));
+      addToast('Resource Removed', `Deleted "${title}".`, 'info');
+    } catch (error) {
+      addToast('Resource not deleted', error.response?.data?.detail || 'The database could not delete this resource.', 'error');
+    }
+  };
+
+  const handleDownload = async (resource) => {
+    try {
+      await downloadMaterial(resource.id, resource.title);
+    } catch (error) {
+      addToast('Resource unavailable', error.response?.data?.detail || 'Could not access this resource.', 'error');
+    }
   };
 
   return (
@@ -199,7 +175,12 @@ export default function MentorResources() {
 
       {/* Resources Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredResources.map((res) => (
+        {loading ? (
+          <p className="col-span-full py-10 text-center text-sm text-slate-400">Loading resources...</p>
+        ) : filteredResources.length === 0 ? (
+          <p className="col-span-full py-10 text-center text-sm text-slate-400">No shared resources are available.</p>
+        ) : (
+          filteredResources.map((res) => (
           <div
             key={res.id}
             className="p-5 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-[#5B45D9]/40 transition-all flex flex-col justify-between group"
@@ -233,20 +214,16 @@ export default function MentorResources() {
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
-                <a
-                  href={res.url || '#'}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => addToast('Downloading...', `Accessing ${res.title}`, 'info')}
-                  className="px-3 py-1.5 rounded-lg bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-2xs"
-                >
+                {res.url ? <a href={res.url} target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-lg bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-2xs">
                   <Download className="w-3 h-3" />
-                  Download
-                </a>
+                  Open Resource
+                </a> : <button onClick={() => handleDownload(res)} className="px-3 py-1.5 rounded-lg bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-2xs">
+                  <Download className="w-3 h-3" /> Download
+                </button>}
               </div>
             </div>
           </div>
-        ))}
+        )))}
       </div>
 
       {/* Share Resource Modal */}
@@ -297,10 +274,8 @@ export default function MentorResources() {
                   onChange={(e) => setNewTeam(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
                 >
-                  <option value="All Mentored Teams">All Mentored Teams</option>
-                  <option value="Team Alpha">Team Alpha</option>
-                  <option value="Team Nova">Team Nova</option>
-                  <option value="Team Phoenix">Team Phoenix</option>
+                  <option value="">All Mentored Teams</option>
+                  {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
                 </select>
               </div>
 
@@ -310,6 +285,7 @@ export default function MentorResources() {
                 </label>
                 <input
                   type="url"
+                  required
                   value={newUrl}
                   onChange={(e) => setNewUrl(e.target.value)}
                   placeholder="https://drive.google.com/... or GitHub link"
@@ -327,9 +303,10 @@ export default function MentorResources() {
                 </button>
                 <button
                   type="submit"
+                  disabled={saving}
                   className="px-5 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs transition-all"
                 >
-                  Share Resource
+                  {saving ? 'Saving...' : 'Share Resource'}
                 </button>
               </div>
             </form>

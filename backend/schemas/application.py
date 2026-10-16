@@ -16,6 +16,9 @@ class ApplicationBase(BaseModel):
     userId: Optional[str] = Field(None, alias="userId")
     teamId: Optional[str] = Field(None, alias="teamId")
     status: ApplicationStatus = ApplicationStatus.PENDING
+    teamName: Optional[str] = None
+    teamSize: Optional[int] = Field(None, ge=1)
+    notes: Optional[str] = None
 
 
 class ApplicationCreate(BaseModel):

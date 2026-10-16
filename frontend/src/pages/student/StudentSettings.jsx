@@ -204,7 +204,7 @@ const StudentSettings = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-[60vh]">
-                <div className="glass rounded-2xl border border-white/5 p-8 w-full max-w-2xl">
+                <div className="bg-navy-800 rounded-2xl border border-white/10 p-8 w-full max-w-2xl">
                     <div className="animate-pulse space-y-4">
                         <div className="h-8 bg-white/10 rounded-lg w-3/4"></div>
                         <div className="h-4 bg-white/10 rounded-lg w-1/2"></div>
@@ -244,16 +244,16 @@ const StudentSettings = () => {
 
                 {/* Settings Overview Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="glass rounded-2xl border border-white/5 p-6">
+                    <div className="bg-navy-800 rounded-2xl border border-white/10 p-6">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Profile Mode</p>
                         <p className="text-2xl font-bold text-white">{settings.profileMode}</p>
                     </div>
                     
-                    <div className="glass rounded-2xl border border-white/5 p-6">
+                    <div className="bg-navy-800 rounded-2xl border border-white/10 p-6">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Theme</p>
                         <p className="text-2xl font-bold text-white">{settings.theme}</p>
                     </div>
-                    <div className="glass rounded-2xl border border-white/5 p-6">
+                    <div className="bg-navy-800 rounded-2xl border border-white/10 p-6">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Language</p>
                         <p className="text-2xl font-bold text-white">{settings.contentLanguage}</p>
                     </div>
@@ -261,7 +261,7 @@ const StudentSettings = () => {
 
                 {/* Privacy & Account Section */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <div className="glass rounded-2xl border border-white/5 p-8 space-y-6">
+                    <div className="bg-navy-800 rounded-2xl border border-white/10 p-8 space-y-6">
                         <div>
                             <h2 className="text-2xl font-bold text-white mb-2">Privacy & Account</h2>
                             <p className="text-sm text-gray-400">Control visibility, language, and data-sharing preferences.</p>
@@ -338,7 +338,7 @@ const StudentSettings = () => {
                                 <h3 className="text-lg font-semibold text-white">Security</h3>
                                 <p className="text-sm text-gray-400">Keep your account protected with a strong password.</p>
                             </div>
-                            <form onSubmit={handlePasswordSubmit} className="glass rounded-2xl border border-white/5 bg-white/5 p-5 space-y-4">
+                            <form onSubmit={handlePasswordSubmit} className="bg-navy-900 rounded-2xl border border-white/10 p-5 space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Password</label>
                                     <input
@@ -387,7 +387,7 @@ const StudentSettings = () => {
                     </div>
 
                     {/* Notifications Section */}
-                    <div className="glass rounded-2xl border border-white/5 p-8 space-y-6">
+                    <div className="bg-navy-800 rounded-2xl border border-white/10 p-8 space-y-6">
                         <div>
                             <h2 className="text-2xl font-bold text-white mb-2">Notifications</h2>
                             <p className="text-sm text-gray-400">Choose how the platform keeps you updated.</p>
@@ -441,7 +441,7 @@ const StudentSettings = () => {
                 </div>
 
                 {/* Danger Zone */}
-                <div className="glass rounded-2xl border border-red-500/20 bg-red-500/5 p-8 space-y-4">
+                <div className="bg-red-950/40 rounded-2xl border border-red-500/20 p-8 space-y-4">
                     <h2 className="text-2xl font-bold text-red-400">Danger Zone</h2>
                     <p className="text-sm text-gray-300">Deactivate your account if you no longer want access to your student profile, teams, and certificates. Your data will be retained for 30 days before permanent deletion.</p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-start">

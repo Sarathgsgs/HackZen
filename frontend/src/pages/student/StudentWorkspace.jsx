@@ -1,38 +1,30 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/api';
 import { getMyTeams } from '../../api/teamApi';
-import { usePlatformSettings } from '../../context/PlatformSettingsContext';
 
 const StudentWorkspace = () => {
     const navigate = useNavigate();
-    const { 
-        allowTeamChanges,
-        maxUploadFileSize,
-        allowedFileTypes,
-        gitHubRepo,
-        demoUrl
-    } = usePlatformSettings();
     // State management
     const [teams, setTeams] = useState([]);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [activeTab, setActiveTab] = useState('Chat');
     const [messageInput, setMessageInput] = useState('');
-    const [teamFiles, setTeamFiles] = useState([]);
-    const [isLoadingFiles, setIsLoadingFiles] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [isUploading, setIsUploading] = useState(false);
-    const [fileUploadError, setFileUploadError] = useState('');
-    const fileInputRef = useRef(null);
     const [teamMessages, setTeamMessages] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const chatEndRef = useRef(null);
     const socketRef = useRef(null);
 
     // User data from session/local storage
-    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{"_id": "guest_id", "name": "Hari"}');
-    const userId = currentUser._id || currentUser.id || 'guest_id';
-    const userName = currentUser.name || 'Hari';
+    const currentUser = (() => {
+        try {
+            return JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+        } catch {
+            return {};
+        }
+    })();
+    const userId = currentUser._id || currentUser.id || '';
+    const userName = currentUser.name || '';
 
     // 1. Fetch Real Teams
     useEffect(() => {
@@ -42,10 +34,8 @@ const StudentWorkspace = () => {
                 const data = await getMyTeams();
                 const mappedTeams = data.map((team, idx) => ({
                     id: team.id || team._id,
-                    name: team.teamName,
+                    name: team.teamName || 'Team name unavailable',
                     avatarColor: idx % 2 === 0 ? 'from-blue-500 to-indigo-600' : 'from-purple-500 to-pink-600',
-                    isOnline: true, // System status
-                    status: 'Active Workspace'
                 }));
                 setTeams(mappedTeams);
                 if (mappedTeams.length > 0) {
@@ -62,13 +52,9 @@ const StudentWorkspace = () => {
 
     // 2. WebSocket Connection Logic
     useEffect(() => {
-        if (activeTab !== 'Chat' || !selectedTeam) return;
-
-        let isCleanedUp = false;
-        let retryTimeoutId = null;
+        if (activeTab !== 'Chat' || !selectedTeam || !userId) return;
 
         const connectWS = () => {
-            if (isCleanedUp) return;
             const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
             // Correctly handle the base URL to create the WS URL
             const wsBase = apiBase.replace(/^http/, 'ws').replace(/\/api$/, '');
@@ -81,38 +67,34 @@ const StudentWorkspace = () => {
             ws.onopen = () => console.log("Chat connected");
 
             ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'new_message') {
-                        const msg = data.message;
-                        const newMessage = {
-                            id: msg._id || Date.now(),
-                            text: msg.content,
-                            sender: msg.senderId === userId ? 'me' : 'them',
-                            user: msg.senderName || (msg.senderId === userId ? userName : 'Teammate'),
-                            time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                            type: msg.messageType || 'text'
-                        };
-                        
-                        setTeamMessages(prev => ({
-                            ...prev,
-                            [selectedTeam]: [...(prev[selectedTeam] || []), newMessage]
-                        }));
-                    }
-                } catch (e) {
-                    console.error("Failed to parse websocket message:", e);
+                const data = JSON.parse(event.data);
+                if (data.type === 'new_message') {
+                    const msg = data.message;
+                    const messageId = msg._id || msg.id;
+                    if (!messageId) return;
+                    const newMessage = {
+                        id: messageId,
+                        text: msg.content,
+                        sender: msg.senderId === userId ? 'me' : 'them',
+                        user: msg.senderName || (msg.senderId === userId ? (userName || 'You') : 'Team member'),
+                        time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        type: msg.messageType || 'text'
+                    };
+                    
+                    setTeamMessages(prev => ({
+                        ...prev,
+                        [selectedTeam]: [...(prev[selectedTeam] || []), newMessage]
+                    }));
                 }
             };
 
             ws.onclose = () => {
-                if (!isCleanedUp) {
-                    console.log("Chat disconnected. Retrying in 3s...");
-                    retryTimeoutId = setTimeout(() => {
-                        if (!isCleanedUp && activeTab === 'Chat' && socketRef.current?.readyState !== WebSocket.OPEN) {
-                            connectWS();
-                        }
-                    }, 3000);
-                }
+                console.log("Chat disconnected. Retrying in 3s...");
+                setTimeout(() => {
+                    if (activeTab === 'Chat' && socketRef.current?.readyState !== WebSocket.OPEN) {
+                        connectWS();
+                    }
+                }, 3000);
             };
 
             ws.onerror = (err) => console.error("WebSocket Error:", err);
@@ -121,8 +103,6 @@ const StudentWorkspace = () => {
         connectWS();
 
         return () => {
-            isCleanedUp = true;
-            if (retryTimeoutId) clearTimeout(retryTimeoutId);
             if (socketRef.current) {
                 socketRef.current.close();
             }
@@ -131,7 +111,7 @@ const StudentWorkspace = () => {
 
     // 3. Fetch History on team change
     useEffect(() => {
-        if (!selectedTeam || activeTab !== 'Chat') return;
+        if (!selectedTeam || activeTab !== 'Chat' || !userId) return;
 
         const fetchHistory = async () => {
             try {
@@ -141,7 +121,7 @@ const StudentWorkspace = () => {
                         id: m._id,
                         text: m.content,
                         sender: m.senderId === userId ? 'me' : 'them',
-                        user: m.senderName || (m.senderId === userId ? userName : 'Teammate'),
+                        user: m.senderName || (m.senderId === userId ? (userName || 'You') : 'Team member'),
                         time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         type: m.messageType
                     }));
@@ -165,9 +145,9 @@ const StudentWorkspace = () => {
                 const { data: milestones } = await apiClient.get(`/progress/milestones/${data._id}`);
                 setTasks(milestones.map(m => ({
                     id: m._id,
-                    title: m.milestoneId,
+                    title: m.title || 'Task title unavailable',
                     status: m.completed ? 'Done' : 'In Progress',
-                    assignee: 'Team Member'
+                    assignee: m.assigneeName || 'Assignee unavailable'
                 })));
             } catch (err) {
                 console.error("Tasks fetch failed:", err);
@@ -175,98 +155,6 @@ const StudentWorkspace = () => {
         };
         fetchTasks();
     }, [selectedTeam, activeTab]);
-
-    // 5. Team Files Integration
-    const fetchTeamFiles = useCallback(async () => {
-        if (!selectedTeam) return;
-        setIsLoadingFiles(true);
-        try {
-            const { data } = await apiClient.get(`/chat/${selectedTeam}/files`);
-            setTeamFiles(Array.isArray(data) ? data : []);
-        } catch (err) {
-            console.error("Failed to fetch team files:", err);
-            setTeamFiles([]);
-        } finally {
-            setIsLoadingFiles(false);
-        }
-    }, [selectedTeam]);
-
-    useEffect(() => {
-        if (activeTab === 'Files' && selectedTeam) {
-            fetchTeamFiles();
-        }
-    }, [activeTab, selectedTeam, fetchTeamFiles]);
-
-    const handleFileUpload = async (event) => {
-        const file = event.target.files?.[0];
-        if (!file || !selectedTeam) return;
-
-        setFileUploadError('');
-
-        // Parse max size limit
-        const sizeMatch = String(maxUploadFileSize || '10MB').match(/\d+/);
-        const maxBytes = sizeMatch ? parseInt(sizeMatch[0], 10) * 1024 * 1024 : 10 * 1024 * 1024;
-        if (file.size > maxBytes) {
-            setFileUploadError(`File exceeds maximum size limit of ${maxUploadFileSize}.`);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-        }
-
-        // Validate extension
-        const ext = '.' + file.name.split('.').pop().toLowerCase();
-        const allowed = allowedFileTypes || ['.pdf', '.zip', '.tar.gz', '.png', '.jpg'];
-        const isAllowed = allowed.some(a => a.toLowerCase() === ext || a.toLowerCase() === ext.replace('.', ''));
-        if (!isAllowed && allowed.length > 0) {
-            setFileUploadError(`Invalid file format. Allowed formats: ${allowed.join(', ')}`);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        setIsUploading(true);
-        setUploadProgress(0);
-
-        try {
-            await apiClient.post(`/chat/${selectedTeam}/files`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-                onUploadProgress: (progressEvent) => {
-                    const percent = progressEvent.total
-                        ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                        : 0;
-                    setUploadProgress(percent);
-                }
-            });
-            await fetchTeamFiles();
-        } catch (err) {
-            console.error("File upload failed:", err);
-            setFileUploadError(err.response?.data?.detail || 'Failed to upload file.');
-        } finally {
-            setIsUploading(false);
-            setUploadProgress(0);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        }
-    };
-
-    const handleDownloadFile = async (file) => {
-        try {
-            const fileId = file._id || file.id;
-            const downloadUrl = file.url?.startsWith('/api') ? file.url : `/chat/${selectedTeam}/files/${fileId}/download`;
-            const response = await apiClient.get(downloadUrl, { responseType: 'blob' });
-            const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.setAttribute('download', file.name || 'download');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (err) {
-            console.error("File download failed:", err);
-            alert("Could not download file. Please try again.");
-        }
-    };
 
     // Auto-scroll to bottom of chat
     const scrollToBottom = () => {
@@ -280,7 +168,7 @@ const StudentWorkspace = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
         const trimmedMessage = messageInput.trim();
-        if (!trimmedMessage || !selectedTeam) return;
+        if (!trimmedMessage || !selectedTeam || !userId) return;
 
         try {
             const { data } = await apiClient.post(`/chat/${selectedTeam}/send`, {
@@ -288,12 +176,15 @@ const StudentWorkspace = () => {
                 type: 'text'
             });
 
+            const messageId = data?._id || data?.id;
+            if (!messageId) throw new Error('The server did not return a persisted message record.');
+
             const newMessage = {
-                id: data?._id || Date.now(),
+                id: messageId,
                 text: data?.content || trimmedMessage,
                 sender: data?.senderId === userId ? 'me' : 'them',
-                user: data?.senderName || userName,
-                time: new Date(data?.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                user: data?.senderName || userName || 'You',
+                time: data?.createdAt ? new Date(data.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time unavailable',
                 type: data?.messageType || 'text'
             };
 
@@ -330,7 +221,7 @@ const StudentWorkspace = () => {
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold text-white">Your Teams</h2>
                         <span className="bg-blue-600/20 text-blue-400 text-xs font-semibold px-2.5 py-1 rounded-md border border-blue-500/20">
-                            {teams.length} Active
+                            {teams.length} teams
                         </span>
                     </div>
                 </div>
@@ -347,9 +238,6 @@ const StudentWorkspace = () => {
                         >
                             <div className={`relative shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${team.avatarColor} flex items-center justify-center text-white font-bold text-lg shadow-md transform group-hover:scale-105 transition-transform`}>
                                 {team.name.charAt(0)}
-                                {team.isOnline && (
-                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
-                                )}
                             </div>
 
                             <div className="flex-1 min-w-0 text-left">
@@ -368,32 +256,9 @@ const StudentWorkspace = () => {
             {/* Main Workspace */}
             <div className="flex-1 glass border border-white/5 rounded-2xl flex flex-col overflow-hidden shadow-xl relative bg-black/10">
                 {!selectedTeam ? (
-                    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
-                        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
-                            🏢
-                        </div>
-                        <h3 className="text-xl font-bold text-white">No Active Team Workspace</h3>
-                        <p className="text-gray-400 text-sm max-w-sm">
-                            {teams.length === 0
-                                ? "You haven't joined a team yet. Register for a hackathon or create a team to activate your collaboration workspace."
-                                : "Select a team from the sidebar to view chat, deliverables, and tasks."}
-                        </p>
-                        {teams.length === 0 && (
-                            <div className="flex flex-wrap gap-3 pt-2">
-                                <button
-                                    onClick={() => navigate('/student/hackathons')}
-                                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 text-white font-semibold text-xs rounded-xl shadow transition"
-                                >
-                                    Browse Hackathons
-                                </button>
-                                <button
-                                    onClick={() => navigate('/student/teams/create')}
-                                    className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs rounded-xl border border-white/10 transition"
-                                >
-                                    Create a Team
-                                </button>
-                            </div>
-                        )}
+                    <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
+                        <div className="text-6xl">🏢</div>
+                        <p className="text-xl font-medium">Select a team to start collaborating</p>
                     </div>
                 ) : (
                     <>
@@ -406,15 +271,10 @@ const StudentWorkspace = () => {
                                 <div>
                                     <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">{currentTeam?.name} Workspace</h2>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <span className={`w-2 h-2 rounded-full ${currentTeam?.isOnline ? 'bg-green-500' : 'bg-gray-500'}`}></span>
+                                        <span className="w-2 h-2 rounded-full bg-gray-500"></span>
                                         <span className="text-sm text-gray-400 font-medium">
-                                            {currentTeam?.isOnline ? `Online • ${currentTeam?.status}` : 'Offline'}
+                                            Team workspace
                                         </span>
-                                        {!allowTeamChanges && (
-                                            <span className="ml-2 text-[10px] px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold">
-                                                🔒 Team members locked by platform
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -505,8 +365,8 @@ const StudentWorkspace = () => {
                                     <div className="max-w-4xl mx-auto space-y-6">
                                         <div className="flex items-center justify-between">
                                             <h3 className="text-xl font-bold text-white">Project Milestones</h3>
-                                            <button className="px-4 py-2 bg-blue-600/20 text-blue-400 text-sm font-semibold rounded-xl border border-blue-500/20 hover:bg-blue-600/30 transition-colors">
-                                                + New Task
+                                            <button onClick={() => navigate(`/student/teams/${selectedTeam}/workspace`)} className="px-4 py-2 bg-blue-600/20 text-blue-400 text-sm font-semibold rounded-xl border border-blue-500/20 hover:bg-blue-600/30 transition-colors">
+                                                Open team tasks
                                             </button>
                                         </div>
                                         
@@ -543,133 +403,12 @@ const StudentWorkspace = () => {
                             )}
 
                             {activeTab === 'Files' && (
-                                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 custom-scrollbar">
-                                    {/* Header & Upload Controls */}
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-white">Team File Repository</h3>
-                                            <p className="text-xs text-gray-400 mt-1">Shared project assets, documentation, and source archives.</p>
-                                        </div>
-
-                                        <div>
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                onChange={handleFileUpload}
-                                                className="hidden"
-                                                disabled={isUploading}
-                                            />
-                                            <button
-                                                disabled={isUploading}
-                                                onClick={() => fileInputRef.current?.click()}
-                                                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2 disabled:opacity-50"
-                                            >
-                                                <span>{isUploading ? 'Uploading...' : '+ Upload File'}</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Upload Progress Bar */}
-                                    {isUploading && (
-                                        <div className="glass p-4 rounded-xl border border-blue-500/30 bg-blue-500/10 space-y-2">
-                                            <div className="flex justify-between text-xs font-semibold text-blue-300">
-                                                <span>Uploading file...</span>
-                                                <span>{uploadProgress}%</span>
-                                            </div>
-                                            <div className="h-2 w-full rounded-full bg-black/40 overflow-hidden">
-                                                <div
-                                                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300"
-                                                    style={{ width: `${uploadProgress}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Error Message */}
-                                    {fileUploadError && (
-                                        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-semibold text-rose-300">
-                                            {fileUploadError}
-                                        </div>
-                                    )}
-
-                                    {/* File List */}
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Uploaded Files ({teamFiles.length})</h4>
-                                        {isLoadingFiles ? (
-                                            <div className="glass p-8 text-center rounded-2xl text-xs text-gray-400">Loading files...</div>
-                                        ) : teamFiles.length === 0 ? (
-                                            <div className="glass p-8 text-center rounded-2xl border border-dashed border-white/10 text-xs text-gray-400">
-                                                No files shared in this team yet. Use the upload button above to share attachments with your teammates.
-                                            </div>
-                                        ) : (
-                                            <div className="grid gap-3 sm:grid-cols-2">
-                                                {teamFiles.map((file) => (
-                                                    <div key={file._id || file.id} className="glass p-4 rounded-2xl border border-white/5 flex items-center justify-between gap-3 group hover:border-white/10 transition">
-                                                        <div className="flex items-center gap-3 min-w-0">
-                                                            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg shrink-0">
-                                                                📄
-                                                            </div>
-                                                            <div className="min-w-0">
-                                                                <p className="truncate text-sm font-bold text-white">{file.name}</p>
-                                                                <p className="text-[11px] text-gray-400 mt-0.5">
-                                                                    {(Number(file.size || 0) / (1024 * 1024)).toFixed(2)} MB • {file.uploadedByName || 'Teammate'}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleDownloadFile(file)}
-                                                            className="shrink-0 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-200 border border-white/10 transition"
-                                                        >
-                                                            Download
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Platform Deliverables Baseline Policy Card */}
-                                    <div className="w-full glass p-5 rounded-2xl border border-white/10 space-y-3.5 text-xs">
-                                        <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                                            <span className="font-bold text-white uppercase tracking-wider text-[10px]">Platform Deliverable Baseline</span>
-                                            <span className="px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-bold">Live Enforced</span>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                            <div className="p-3 bg-black/20 rounded-xl border border-white/5">
-                                                <span className="text-[10px] text-gray-400 uppercase font-semibold block mb-0.5">Max Archive Size</span>
-                                                <span className="text-sm font-bold text-white">{maxUploadFileSize}</span>
-                                            </div>
-                                            <div className="p-3 bg-black/20 rounded-xl border border-white/5">
-                                                <span className="text-[10px] text-gray-400 uppercase font-semibold block mb-0.5">GitHub Repository</span>
-                                                <span className={`text-xs font-bold ${gitHubRepo ? 'text-sky-400' : 'text-gray-400'}`}>
-                                                    {gitHubRepo ? 'Mandatory Link' : 'Optional'}
-                                                </span>
-                                            </div>
-                                            <div className="p-3 bg-black/20 rounded-xl border border-white/5">
-                                                <span className="text-[10px] text-gray-400 uppercase font-semibold block mb-0.5">Live Demo URL</span>
-                                                <span className={`text-xs font-bold ${demoUrl ? 'text-sky-400' : 'text-gray-400'}`}>
-                                                    {demoUrl ? 'Mandatory Link' : 'Optional'}
-                                                </span>
-                                            </div>
-                                            <div className="p-3 bg-black/20 rounded-xl border border-white/5">
-                                                <span className="text-[10px] text-gray-400 uppercase font-semibold block mb-0.5">Accepted Formats</span>
-                                                <span className="text-xs font-bold text-purple-300 truncate block">
-                                                    {(allowedFileTypes || []).join(', ')}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-2">
-                                            <button 
-                                                onClick={() => navigate('/student/submissions')}
-                                                className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center justify-center gap-2"
-                                            >
-                                                <span>Open Deliverables & Project Submission Portal</span>
-                                                <span>→</span>
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
+                                    <div className="text-6xl">📁</div>
+                                    <p className="text-xl font-medium">Team files will appear here</p>
+                                    <button onClick={() => navigate(`/student/files?teamId=${encodeURIComponent(selectedTeam)}`)} className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition-colors">
+                                        Open File Sharing to upload
+                                    </button>
                                 </div>
                             )}
                         </div>

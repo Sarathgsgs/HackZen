@@ -2,17 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { fetchAssignedTeams } from '../../services/mentor/assignedTeamsApi';
 import { createMeeting, getMentorMeetings } from '../../api/mentorApi';
 import { sendChatMessage } from '../../services/student/aiAssistantApi';
+import { getUIDataset, saveUIDataset } from '../../services/uiDataApi';
 
-const STORAGE_KEY = 'hackzen_mentor_workspace_v2';
+const STORAGE_KEY = 'mentor-workspace';
 const emptyData = { reviews: [], feedback: [], discussions: [], decisions: [], checkpoints: [], sessions: [] };
 const rubric = [['innovation', 'Innovation'], ['feasibility', 'Technical feasibility'], ['execution', 'Execution quality'], ['experience', 'UI / UX'], ['presentation', 'Presentation']];
-const loadWorkspace = () => { try { return { ...emptyData, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }; } catch { return emptyData; } };
 const FieldError = ({ children }) => children ? <p className="mt-1 text-xs text-rose-400">{children}</p> : null;
 const Input = ({ label, error, ...props }) => <label className="block text-sm text-gray-300">{label}<input {...props} className="mt-2 w-full rounded-xl border border-white/10 bg-navy-900/70 px-3 py-2.5 text-white outline-none focus:border-purple-400"/><FieldError>{error}</FieldError></label>;
 const Select = ({ label, children, ...props }) => <label className="block text-sm text-gray-300">{label}<select {...props} className="mt-2 w-full rounded-xl border border-white/10 bg-navy-900/70 px-3 py-2.5 text-white outline-none focus:border-purple-400">{children}</select></label>;
 
 export default function MentorWorkspace({ initialTab = 'reviews' }) {
-  const [tab, setTab] = useState(initialTab), [teams, setTeams] = useState([]), [data, setData] = useState(loadWorkspace), [sessions, setSessions] = useState([]), [notice, setNotice] = useState(''), [errors, setErrors] = useState({});
+  const [tab, setTab] = useState(initialTab), [teams, setTeams] = useState([]), [data, setData] = useState(emptyData), [sessions, setSessions] = useState([]), [notice, setNotice] = useState(''), [errors, setErrors] = useState({});
   const [calendarMonth, setCalendarMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [now, setNow] = useState(() => Date.now());
   const [aiResponse, setAiResponse] = useState('');
@@ -20,6 +20,7 @@ export default function MentorWorkspace({ initialTab = 'reviews' }) {
   const [aiError, setAiError] = useState('');
   const [form, setForm] = useState({ teamId: '', review: '', repositoryUrl: '', demoUrl: '', innovation: 5, feasibility: 5, execution: 5, experience: 5, presentation: 5, feedbackType: 'General', feedback: '', topic: '', decision: '', checkpoint: '', sessionTitle: 'Mentoring session', sessionDate: '', sessionTime: '', sessionMode: 'Online', projectText: '' });
   useEffect(() => { fetchAssignedTeams().then(({ activeTeams }) => setTeams(activeTeams)).catch(() => setTeams([])); }, []);
+  useEffect(() => { getUIDataset(STORAGE_KEY, emptyData).then(value => setData({ ...emptyData, ...value })).catch(error => console.error('Workspace load failed:', error)); }, []);
   useEffect(() => { getMentorMeetings(true).then(meetings => setSessions(meetings.map(meeting => ({ id: meeting._id, teamId: meeting.teamId, title: meeting.title, when: new Date(meeting.startTime).toLocaleString(), startsAt: meeting.startTime, mode: meeting.location ? 'In person' : 'Online', date: new Date(meeting.createdAt || meeting.startTime).toLocaleDateString() })))).catch(() => setSessions([])); }, []);
   useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 60000); return () => window.clearInterval(timer); }, []);
   const selectedTeam = useMemo(() => teams.find(t => t.id === form.teamId) || teams[0], [teams, form.teamId]);
@@ -31,15 +32,15 @@ export default function MentorWorkspace({ initialTab = 'reviews' }) {
   const today = useMemo(() => { const value = new Date(); value.setHours(0, 0, 0, 0); return value; }, []);
   const toDateValue = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   const change = e => setForm(x => ({ ...x, [e.target.name]: e.target.value }));
-  const save = (next, message) => { setData(next); localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); setNotice(message); setErrors({}); };
+  const save = (next, message) => { setData(next); saveUIDataset(STORAGE_KEY, next).then(() => setNotice(message)).catch(() => setNotice('Could not save to the database. Please try again.')); setErrors({}); };
   const requireFields = values => { const next = {}; Object.entries(values).forEach(([key, value]) => { if (!String(value || '').trim()) next[key] = 'This field is required.'; }); setErrors(next); return !Object.keys(next).length; };
   const hasTeam = () => { if (selectedTeam) return true; setErrors({ teamId: 'Select an assigned team first.' }); return false; };
   const requestAiGuidance = async () => {
     if (!hasTeam() || !form.projectText.trim()) return setAiError('Select a team and enter a project update first.');
-    if (!selectedTeam.hackathon || selectedTeam.hackathon === 'Active Hackathon') return setAiError('This team does not have a saved hackathon ID yet.');
+    if (!selectedTeam.hackathonId) return setAiError('This team does not have a saved hackathon ID yet.');
     setAiLoading(true); setAiError(''); setAiResponse('');
     try {
-      const response = await sendChatMessage(`Team: ${selectedTeam.name}\nProject update: ${form.projectText.trim()}`, selectedTeam.hackathon, 'Mentor project assessment');
+      const response = await sendChatMessage(`Team: ${selectedTeam.name}\nProject update: ${form.projectText.trim()}`, selectedTeam.hackathonId, 'Mentor project assessment');
       setAiResponse(response.text);
     } catch (error) {
       setAiError(error.response?.data?.detail || 'AI Co-Mentor could not respond. Verify the AI API configuration and try again.');

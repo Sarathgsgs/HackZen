@@ -69,7 +69,7 @@ const OrganizerDashboard = () => {
             setUpcomingDeadlines(data.upcomingDeadlines || []);
         } catch (error) {
             console.error("Failed to load organizer dashboard data:", error);
-            showToast("Failed to refresh live metrics. Using cached operational data.", "error");
+            showToast("Unable to load dashboard data. Please try again.", "error");
         } finally {
             setIsLoading(false);
         }
@@ -295,7 +295,9 @@ const OrganizerDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                    {activeHackathons.map((event) => (
+                                    {activeHackathons.length === 0 ? (
+                                        <tr><td colSpan={4} className="py-8 text-center text-xs text-slate-400">No hackathons are available.</td></tr>
+                                    ) : activeHackathons.map((event) => (
                                         <tr 
                                             key={event.id}
                                             className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors group"
@@ -349,7 +351,9 @@ const OrganizerDashboard = () => {
                         </div>
 
                         <div className="space-y-4">
-                            {recentRegistrations.map((reg, idx) => {
+                            {recentRegistrations.length === 0 ? (
+                                <p className="py-6 text-center text-xs text-slate-400">No recent registrations.</p>
+                            ) : recentRegistrations.map((reg, idx) => {
                                 const avatarBg = idx === 0 
                                     ? 'bg-[#EDE9FE] text-[#7C65F6] dark:bg-purple-500/20' 
                                     : idx === 1 
@@ -406,7 +410,9 @@ const OrganizerDashboard = () => {
                         </div>
 
                         <div className="space-y-4">
-                            {upcomingDeadlines.map((dl, idx) => {
+                            {upcomingDeadlines.length === 0 ? (
+                                <p className="py-6 text-center text-xs text-slate-400">No upcoming deadlines.</p>
+                            ) : upcomingDeadlines.map((dl, idx) => {
                                 const dotColor = dl.color === 'red'
                                     ? 'bg-rose-500'
                                     : dl.color === 'purple'

@@ -78,8 +78,7 @@ export default function EditMentorProfile() {
       setTimeout(() => navigate('/mentor/profile'), 400);
     } catch (err) {
       console.error('Save profile error:', err);
-      addToast('Update Notice', 'Profile data updated locally.', 'info');
-      setTimeout(() => navigate('/mentor/profile'), 400);
+      addToast('Profile not saved', err.response?.data?.detail || 'The server could not save your profile. Please retry.', 'error');
     } finally {
       setSaving(false);
     }

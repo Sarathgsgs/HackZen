@@ -1,259 +1,109 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import {
-  MessageSquare,
-  Search,
-  Send,
-  Calendar,
-  Users,
-  Paperclip,
-  Check,
-  CheckCheck,
-  ChevronRight,
-  ExternalLink,
-  Plus
-} from 'lucide-react';
-import { useMentor } from '../../context/MentorContext';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Send, Users } from 'lucide-react';
+import apiClient from '../../api/api';
+import { fetchAssignedTeams } from '../../services/mentor/assignedTeamsApi';
 
 export default function MentorMessages() {
-  const { openScheduleModal, addToast, globalSearch } = useMentor();
-
-  const [activeChatId, setActiveChatId] = useState('chat-alpha');
-  const [inputText, setInputText] = useState('');
-  const messagesEndRef = useRef(null);
-
-  // Conversations list
-  const [conversations, setConversations] = useState([
-    {
-      id: 'chat-alpha',
-      teamName: 'Team Alpha',
-      hackathon: 'AI Innovation Hackathon',
-      domain: 'Artificial Intelligence',
-      unread: 1,
-      lastMessage: 'We just pushed the latest commit with the WebSocket audio pipeline.',
-      time: '12m ago',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-      messages: [
-        { id: 1, sender: 'Alex Rivera (Team Lead)', text: 'Hi Dr. Mitchell! We had a quick question regarding the vector indexing architecture.', time: '10:14 AM', isMentor: false },
-        { id: 2, sender: 'You', text: 'Hello Alex! I suggest keeping chunk sizes around 512 tokens with 10% overlap to preserve semantic context.', time: '10:20 AM', isMentor: true },
-        { id: 3, sender: 'Marcus Chen', text: 'That makes sense! We also just pushed the latest commit with the WebSocket audio pipeline.', time: '10:25 AM', isMentor: false },
-      ],
-    },
-    {
-      id: 'chat-nova',
-      teamName: 'Team Nova',
-      hackathon: 'HealthTech Global 2025',
-      domain: 'HealthTech',
-      unread: 0,
-      lastMessage: 'Looking forward to our scheduled discussion tomorrow at 2 PM!',
-      time: '2h ago',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-      messages: [
-        { id: 1, sender: 'Maya Lin', text: 'Thanks for accepting our mentorship request Dr. Mitchell!', time: 'Yesterday', isMentor: false },
-        { id: 2, sender: 'You', text: 'Glad to work with Team Nova! Let us review your model fine-tuning checkpoints.', time: 'Yesterday', isMentor: true },
-        { id: 3, sender: 'Maya Lin', text: 'Looking forward to our scheduled discussion tomorrow at 2 PM!', time: '2h ago', isMentor: false },
-      ],
-    },
-    {
-      id: 'chat-phoenix',
-      teamName: 'Team Phoenix',
-      hackathon: 'NextGen FinTech Challenge',
-      domain: 'FinTech',
-      unread: 0,
-      lastMessage: 'Slide deck updated with regulatory compliance framework.',
-      time: '1d ago',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-      messages: [
-        { id: 1, sender: 'Kenji Sato', text: 'Slide deck updated with regulatory compliance framework.', time: '1d ago', isMentor: false },
-      ],
-    },
-  ]);
-
-  const activeConversation = useMemo(
-    () => conversations.find((c) => c.id === activeChatId) || conversations[0],
-    [conversations, activeChatId]
-  );
+  const [teams, setTeams] = useState([]);
+  const [teamId, setTeamId] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState('');
+  const [loadingTeams, setLoadingTeams] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  const user = useMemo(() => {
+    try { return JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}'); }
+    catch { return {}; }
+  }, []);
+  const selectedTeam = teams.find((team) => team.id === teamId);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeConversation?.messages]);
+    let active = true;
+    fetchAssignedTeams()
+      .then(({ activeTeams }) => {
+        if (!active) return;
+        setTeams(activeTeams);
+        setTeamId(activeTeams[0]?.id || '');
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.response?.data?.detail || 'Could not load assigned teams.');
+      })
+      .finally(() => { if (active) setLoadingTeams(false); });
+    return () => { active = false; };
+  }, []);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
+  const loadMessages = useCallback(async () => {
+    if (!teamId) { setMessages([]); return; }
+    setLoadingMessages(true);
+    setError('');
+    try {
+      const { data } = await apiClient.get(`/chat/${teamId}/messages`);
+      setMessages(Array.isArray(data) ? data : []);
+    } catch (requestError) {
+      setMessages([]);
+      setError(requestError.response?.data?.detail || 'Could not load this team conversation.');
+    } finally {
+      setLoadingMessages(false);
+    }
+  }, [teamId]);
 
-    const newMessage = {
-      id: Date.now(),
-      sender: 'You',
-      text: inputText.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isMentor: true,
-    };
+  useEffect(() => { loadMessages(); }, [loadMessages]);
 
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === activeChatId
-          ? {
-              ...c,
-              lastMessage: inputText.trim(),
-              time: 'Just now',
-              messages: [...c.messages, newMessage],
-            }
-          : c
-      )
-    );
-
-    setInputText('');
+  const sendMessage = async (event) => {
+    event.preventDefault();
+    if (!teamId || !text.trim() || sending) return;
+    setSending(true);
+    setError('');
+    try {
+      const { data } = await apiClient.post(`/chat/${teamId}/messages`, { content: text.trim(), messageType: 'text' });
+      setMessages((current) => [...current, data]);
+      setText('');
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || 'Message was not saved. Please try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
-      {/* Header */}
-      <div className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            Team Messages
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Direct real-time communication channels with your mentored cohorts.
-          </p>
-        </div>
-      </div>
-
-      {/* Messages Layout: Left Channels + Right Chat Box */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden h-[620px]">
-        {/* Left: Conversations List (span 4) */}
-        <div className="md:col-span-4 border-r border-slate-200/80 dark:border-white/10 flex flex-col h-full bg-[#FAFAFD]/50 dark:bg-navy-950/20">
-          <div className="p-4 border-b border-slate-200/80 dark:border-white/10">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search conversations..."
-                className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#5B45D9]"
-              />
-            </div>
+    <main className="mx-auto max-w-7xl pb-12">
+      <section className="flex h-[calc(100vh-160px)] min-h-[560px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-white/10 dark:bg-[#111625]">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 p-5 dark:border-white/10">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Team Messages</h1>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Messages are shared with your assigned team and saved to the workspace.</p>
           </div>
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <Users className="h-4 w-4" />
+            <select value={teamId} onChange={(event) => setTeamId(event.target.value)} disabled={loadingTeams || teams.length === 0} className="max-w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-navy-950 dark:text-white">
+              {loadingTeams && <option value="">Loading teams...</option>}
+              {!loadingTeams && teams.length === 0 && <option value="">No assigned teams</option>}
+              {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+            </select>
+          </label>
+        </header>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-white/5">
-            {conversations.map((conv) => {
-              const isSelected = conv.id === activeChatId;
-              return (
-                <div
-                  key={conv.id}
-                  onClick={() => {
-                    setActiveChatId(conv.id);
-                    setConversations((prev) =>
-                      prev.map((c) => (c.id === conv.id ? { ...c, unread: 0 } : c))
-                    );
-                  }}
-                  className={`p-4 cursor-pointer transition-all flex items-start gap-3 ${
-                    isSelected
-                      ? 'bg-purple-50/70 dark:bg-purple-950/30 border-l-4 border-[#5B45D9]'
-                      : 'hover:bg-slate-100/60 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <img
-                    src={conv.avatar}
-                    alt={conv.teamName}
-                    className="w-10 h-10 rounded-xl object-cover shrink-0 ring-1 ring-slate-200 dark:ring-white/10"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-1">
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                        {conv.teamName}
-                      </h4>
-                      <span className="text-[10px] text-slate-400 shrink-0">{conv.time}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                      {conv.lastMessage}
-                    </p>
-                  </div>
-                  {conv.unread > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-[#5B45D9] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-                      {conv.unread}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        {selectedTeam && <div className="border-b border-slate-100 px-5 py-3 text-sm font-semibold text-slate-800 dark:border-white/5 dark:text-slate-200">{selectedTeam.name}</div>}
+        {error && <p role="alert" className="mx-5 mt-4 rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-300">{error}</p>}
+
+        <div className="flex-1 space-y-4 overflow-y-auto p-5">
+          {loadingMessages ? <p className="py-10 text-center text-sm text-slate-400">Loading messages...</p>
+            : messages.length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No messages yet. Start the conversation with your team.</p>
+              : messages.map((message) => {
+                const ownMessage = String(message.senderId) === String(user._id || user.id);
+                return <article key={message.id || message._id} className={`max-w-[85%] rounded-2xl px-4 py-3 ${ownMessage ? 'ml-auto bg-[#5B45D9] text-white' : 'bg-slate-100 text-slate-800 dark:bg-white/5 dark:text-slate-100'}`}>
+                  <div className="flex items-center justify-between gap-5 text-[11px] opacity-75"><span>{ownMessage ? 'You' : message.senderName || 'Team member'}</span><time>{message.createdAt ? new Date(message.createdAt).toLocaleString() : ''}</time></div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{message.content}</p>
+                </article>;
+              })}
         </div>
 
-        {/* Right: Active Chat Area (span 8) */}
-        <div className="md:col-span-8 flex flex-col h-full bg-white dark:bg-[#111625]">
-          {/* Chat Header */}
-          <div className="p-4 px-6 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-[#FAFAFD] dark:bg-navy-950/30">
-            <div className="flex items-center gap-3 min-w-0">
-              <img
-                src={activeConversation.avatar}
-                alt={activeConversation.teamName}
-                className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-white/10 shrink-0"
-              />
-              <div className="min-w-0">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                  {activeConversation.teamName}
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  {activeConversation.hackathon} · <span className="font-semibold text-[#5B45D9]">{activeConversation.domain}</span>
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => openScheduleModal({ teamName: activeConversation.teamName })}
-              className="px-3 py-1.5 rounded-xl bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40 hover:bg-[#5B45D9] hover:text-white text-xs font-bold transition-all flex items-center gap-1.5"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              Schedule Session
-            </button>
-          </div>
-
-          {/* Chat Messages Body */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {activeConversation.messages.map((m) => (
-              <div
-                key={m.id}
-                className={`flex flex-col ${m.isMentor ? 'items-end' : 'items-start'}`}
-              >
-                <span className="text-[10px] text-slate-400 mb-1 px-1">
-                  {m.sender} · {m.time}
-                </span>
-                <div
-                  className={`max-w-md p-3.5 rounded-2xl text-xs font-medium leading-relaxed ${
-                    m.isMentor
-                      ? 'bg-[#5B45D9] text-white rounded-br-xs shadow-xs'
-                      : 'bg-slate-100 dark:bg-navy-950 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/60 dark:border-white/5'
-                  }`}
-                >
-                  {m.text}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Chat Input Bar */}
-          <form
-            onSubmit={handleSendMessage}
-            className="p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center gap-2 bg-[#FAFAFD] dark:bg-navy-950/30"
-          >
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder={`Message ${activeConversation.teamName}...`}
-              className="flex-1 px-4 py-2.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#5B45D9]"
-            />
-            <button
-              type="submit"
-              disabled={!inputText.trim()}
-              className="p-2.5 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white disabled:opacity-50 transition-colors shadow-xs"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+        <form onSubmit={sendMessage} className="flex items-end gap-3 border-t border-slate-200 p-4 dark:border-white/10">
+          <textarea value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} maxLength={5000} rows={2} disabled={!teamId || sending} placeholder={teamId ? 'Write a message...' : 'Select an assigned team to message'} className="min-h-12 flex-1 resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 outline-none focus:border-[#5B45D9] dark:border-white/10 dark:bg-navy-950 dark:text-white" />
+          <button type="submit" disabled={!teamId || !text.trim() || sending} className="inline-flex items-center gap-2 rounded-xl bg-[#5B45D9] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-4 w-4" />{sending ? 'Sending' : 'Send'}</button>
+        </form>
+      </section>
+    </main>
   );
 }

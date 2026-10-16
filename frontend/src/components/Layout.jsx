@@ -111,28 +111,8 @@ const globalSearchItems = [
     { id: 'p8', title: 'Analytics & College Rankings', subtitle: 'Participation trends & performance benchmarks', category: 'Pages', path: '/admin/analytics' },
     { id: 'p9', title: 'Platform Security Settings', subtitle: 'Access controls and system preferences', category: 'Pages', path: '/admin/settings' },
 
-    // Users
-    { id: 'u1', title: 'Dr. Ramesh Kumar', subtitle: 'Mentor • 12 Teams (Overloaded) • Microsoft Research', category: 'Users', path: '/admin/users?role=MENTOR&filter=overloaded' },
-    { id: 'u2', title: 'Dr. Priya Nair', subtitle: 'Mentor • 10 Teams (Overloaded) • IIT Madras', category: 'Users', path: '/admin/users?role=MENTOR&filter=overloaded' },
-    { id: 'u3', title: 'Prof. Arun Selvam', subtitle: 'Mentor • 9 Teams (Overloaded) • VIT Chennai', category: 'Users', path: '/admin/users?role=MENTOR&filter=overloaded' },
-    { id: 'u4', title: 'Divya Krishnan', subtitle: 'Mentor • 11 Teams (Overloaded) • Google Cloud Labs', category: 'Users', path: '/admin/users?role=MENTOR&filter=overloaded' },
-    { id: 'u5', title: 'Mohan Das', subtitle: 'Mentor • 9 Teams (Overloaded) • Amazon Web Services', category: 'Users', path: '/admin/users?role=MENTOR&filter=overloaded' },
-    { id: 'u6', title: 'Sarath G', subtitle: 'Student • ABC Engineering College • 3 Submissions', category: 'Users', path: '/admin/users?tab=All%20Users' },
-    { id: 'u7', title: 'P Saravanan', subtitle: 'Organizer • ProEduvate Partner Org • 5 Events', category: 'Users', path: '/admin/organizer-approvals' },
-    { id: 'u8', title: 'M Sailesh', subtitle: 'Student • VIT Chennai • 2 Hackathons', category: 'Users', path: '/admin/users?tab=All%20Users' },
-    { id: 'u9', title: 'Ananya Rao', subtitle: 'Mentor • Microsoft Research • AI & Data Science', category: 'Users', path: '/admin/users?role=MENTOR' },
+    // Current navigation pages are searchable; dashboard records come from APIs.
 
-    // Hackathons
-    { id: 'h1', title: 'Global AI Summit 2026', subtitle: 'Live Event • Stage 2 Final Submissions • 180 Participants', category: 'Hackathons', path: '/admin/hackathon-approvals?filter=active' },
-    { id: 'h2', title: 'Smart Campus Hackathon', subtitle: 'Pending Approval • SRM Institute of Science', category: 'Hackathons', path: '/admin/hackathon-approvals?filter=pending' },
-    { id: 'h3', title: 'CyberKnights Shield 2026', subtitle: 'Active Security Jam • Results Finalizing', category: 'Hackathons', path: '/admin/hackathon-approvals?filter=active' },
-    { id: 'h4', title: 'FinTech Innovate Challenge', subtitle: 'Draft Proposal • IIT Madras', category: 'Hackathons', path: '/admin/hackathon-approvals?filter=draft' },
-
-    // Submissions & Disputes
-    { id: 's1', title: 'Project CloudMatrix (Team Alpha)', subtitle: 'Final Deliverable • AI Summit • Health Score 92/100', category: 'Submissions', path: '/admin/submissions?filter=pending' },
-    { id: 's2', title: 'QuantumLeap Milestone 2', subtitle: 'Smart Campus • 88% Originality', category: 'Submissions', path: '/admin/submissions?filter=approved' },
-    { id: 's3', title: 'Dispute: Team Delta Plagiarism Flag', subtitle: 'High Similarity Alert on repo submission', category: 'Disputes', path: '/admin/disputes' },
-    { id: 's4', title: 'Certificate CERT-2026-0182 (Alex Johnson)', subtitle: 'Winner Credential • Global AI Summit 2026', category: 'Certificates', path: '/admin/certificates?filter=active' }
 ];
 
 

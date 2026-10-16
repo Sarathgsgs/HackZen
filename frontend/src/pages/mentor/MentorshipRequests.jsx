@@ -26,6 +26,7 @@ export default function MentorshipRequests() {
   const [selectedTrack, setSelectedTrack] = useState('All');
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   // Load requests
   const loadRequests = useCallback(async () => {
@@ -33,97 +34,12 @@ export default function MentorshipRequests() {
     try {
       const apiStatus = activeTab === 'All' ? undefined : activeTab.toLowerCase() === 'accepted' ? 'approved' : activeTab.toLowerCase();
       const res = await fetchMentorshipRequests(apiStatus);
-      if (res && res.length) {
-        setRequests(res);
-      } else {
-        // High quality seed data
-        setRequests([
-          {
-            id: 'req-1',
-            teamName: 'Team Nova',
-            track: 'Artificial Intelligence',
-            domain: 'Artificial Intelligence',
-            description: 'Looking for guidance with our AI recommendation model and distributed inference optimization.',
-            requestedDate: 'Today, 2:30 PM',
-            createdAt: new Date().toISOString(),
-            status: 'pending',
-            teamSize: 3,
-            requiredSkills: ['Machine Learning', 'PyTorch', 'Vector Search'],
-            studentName: 'Maya Lin',
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 'req-2',
-            teamName: 'Team EcoPulse',
-            track: 'Climate & IoT',
-            domain: 'Climate & IoT',
-            description: 'Need assistance setting up IoT data ingestion pipelines with cloud functions and battery efficiency.',
-            requestedDate: 'Yesterday',
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            status: 'pending',
-            teamSize: 4,
-            requiredSkills: ['IoT', 'MQTT', 'Node.js', 'Time-series DB'],
-            studentName: 'Julian Vance',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 'req-3',
-            teamName: 'Team MedAI',
-            track: 'Healthcare Tech',
-            domain: 'Healthcare Tech',
-            description: 'Building HIPAA-compliant diagnostic radiograph classification. Need medical AI ethics check.',
-            requestedDate: 'Oct 22, 2025',
-            createdAt: new Date(Date.now() - 172800000).toISOString(),
-            status: 'approved',
-            teamSize: 4,
-            requiredSkills: ['Computer Vision', 'Medical Imaging', 'FastAPI'],
-            studentName: 'Sarah Jenkins',
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80',
-          },
-          {
-            id: 'req-4',
-            teamName: 'Team QuantumBits',
-            track: 'DeepTech',
-            domain: 'DeepTech',
-            description: 'Quantum circuit simulations for cryptographic vulnerability analysis. Requesting mentor review.',
-            requestedDate: 'Oct 20, 2025',
-            createdAt: new Date(Date.now() - 345600000).toISOString(),
-            status: 'rejected',
-            teamSize: 2,
-            requiredSkills: ['Quantum Computing', 'Qiskit', 'Python'],
-            studentName: 'Kenji Sato',
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-          },
-        ]);
-      }
+      setRequests(Array.isArray(res) ? res : []);
+      setLoadError('');
     } catch (e) {
-      console.warn('API requests fallback:', e);
-      setRequests([
-        {
-          id: 'req-1',
-          teamName: 'Team Nova',
-          track: 'Artificial Intelligence',
-          domain: 'Artificial Intelligence',
-          description: 'Looking for guidance with our AI recommendation model and distributed inference optimization.',
-          requestedDate: 'Today, 2:30 PM',
-          status: 'pending',
-          teamSize: 3,
-          requiredSkills: ['Machine Learning', 'PyTorch', 'Vector Search'],
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-        },
-        {
-          id: 'req-2',
-          teamName: 'Team EcoPulse',
-          track: 'Climate & IoT',
-          domain: 'Climate & IoT',
-          description: 'Need assistance setting up IoT data ingestion pipelines with cloud functions and battery efficiency.',
-          requestedDate: 'Yesterday',
-          status: 'pending',
-          teamSize: 4,
-          requiredSkills: ['IoT', 'MQTT', 'Node.js'],
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-        },
-      ]);
+      console.error('Could not load mentorship requests:', e);
+      setRequests([]);
+      setLoadError('Unable to load mentorship requests. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -136,14 +52,13 @@ export default function MentorshipRequests() {
   const handleDecline = async (id, teamName) => {
     try {
       await updateMentorshipRequestStatus(id, 'reject');
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r)));
+      addToast('Request Declined', `You declined the mentorship request from ${teamName}.`, 'info');
+      triggerRefresh();
     } catch (e) {
-      console.warn('Reject fallback:', e);
+      console.error('Could not decline mentorship request:', e);
+      addToast('Request Failed', 'Unable to decline this request. Please try again.', 'error');
     }
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r))
-    );
-    addToast('Request Declined', `You declined the mentorship request from ${teamName}.`, 'info');
-    triggerRefresh();
   };
 
   const handleAccept = (request) => {
@@ -245,6 +160,10 @@ export default function MentorshipRequests() {
       {/* Requests List */}
       {loading ? (
         <div className="py-12 text-center text-slate-400 text-sm">Loading requests...</div>
+      ) : loadError ? (
+        <div role="alert" className="p-12 text-center bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 text-rose-500 text-sm">
+          {loadError}
+        </div>
       ) : filteredRequests.length === 0 ? (
         <div className="p-12 text-center bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 text-slate-400 text-sm">
           No {activeTab.toLowerCase()} mentorship requests found.

@@ -13,6 +13,7 @@ from routers import (
     inbox,
     progress,
     submission,
+    team_files,
     admin_users,
     admin_approvals,
     admin_certificates,
@@ -24,6 +25,7 @@ from routers import (
     oauth,
     mentor_dashboard,
     mentor_settings,
+    ui_data,
 )
 
 router = APIRouter()
@@ -42,13 +44,13 @@ router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 router.include_router(inbox.router, prefix="/inbox", tags=["Notifications"])
 router.include_router(application.router, prefix="/applications", tags=["Applications"])
 router.include_router(submission.router, prefix="/submissions", tags=["Submissions"])
+router.include_router(team_files.router, prefix="/team-files", tags=["Team Files"])
 router.include_router(settingsRoutes.router, prefix="/settings", tags=["Settings"])
 router.include_router(evaluation.router, prefix="/evaluations", tags=["Evaluations"])
 
 # Mentor Routers
 router.include_router(mentor_dashboard.router, prefix="/mentor", tags=["Mentor Dashboard"])
 router.include_router(mentor_settings.router, prefix="/mentor", tags=["Mentor Settings"])
-
 # Admin Backend Routers
 router.include_router(admin_users.router)
 router.include_router(admin_approvals.router)
@@ -57,3 +59,5 @@ router.include_router(admin_disputes.router)
 router.include_router(admin_organizers.router)
 router.include_router(admin_analytics.router)
 router.include_router(admin_settings.router)
+
+router.include_router(ui_data.router, prefix="/ui-data", tags=["UI Data"])
