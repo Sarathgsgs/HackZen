@@ -60,6 +60,7 @@ export default function ScheduleSessionModal() {
           console.error('Failed to load teams for scheduling:', error);
           setTeams([]);
           setTeamsError('Unable to load teams. Please try again.');
+          addToast('Teams unavailable', 'Could not load your assigned teams from the database.', 'error');
         })
         .finally(() => setLoadingTeams(false));
     }
@@ -170,6 +171,7 @@ export default function ScheduleSessionModal() {
               placeholder="e.g. Architecture Review & Cloud Deploy"
               className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] focus:ring-1 focus:ring-[#5B45D9]"
               required
+              disabled={loadingTeams || teams.length === 0}
             />
           </div>
 

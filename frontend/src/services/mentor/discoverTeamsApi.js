@@ -13,7 +13,7 @@ export const fetchDiscoverableTeams = async () => {
     try {
         const { data: teams } = await apiClient.get('/teams/discoverable');
 
-        return teams
+        return (teams || [])
             .map(team => ({
                 id: team._id,
                 name: team.teamName,
@@ -43,6 +43,7 @@ export const requestMentorTeam = async (teamId) => {
         await apiClient.post(`/teams/${teamId}/request-mentor`);
         return { success: true, message: 'You are now mentoring this team.' };
     } catch (error) {
+        console.error('Mentor team request failed:', error);
         throw error;
     }
 };

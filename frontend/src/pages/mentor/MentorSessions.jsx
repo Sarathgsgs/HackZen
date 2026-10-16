@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useMentor } from '../../context/MentorContext';
 import { getMentorMeetings } from '../../api/mentorApi';
+import { fetchAssignedTeams } from '../../services/mentor/assignedTeamsApi';
 
 export default function MentorSessions() {
   const { openScheduleModal, addToast, refreshKey, triggerRefresh, globalSearch } = useMentor();
@@ -32,19 +33,25 @@ export default function MentorSessions() {
   const loadSessions = useCallback(async () => {
     setLoading(true);
     try {
-      const records = await getMentorMeetings(false);
-      const stored = JSON.parse(localStorage.getItem('proeduvate_mentor_sessions') || '[]');
+      const [records, assignedTeams] = await Promise.all([
+        getMentorMeetings(false),
+        fetchAssignedTeams(),
+      ]);
+      const teamsById = new Map(
+        [...(assignedTeams?.activeTeams || []), ...(assignedTeams?.pastTeams || [])]
+          .map((team) => [String(team.id), team.name])
+      );
 
       const mapped = (Array.isArray(records) ? records : []).map((m) => {
         const startTime = m.startTime ? new Date(m.startTime) : null;
         return {
           id: m._id || m.id,
-          teamName: m.teamName || '',
-          topic: m.title || '',
+          teamName: m.teamName || teamsById.get(String(m.teamId)) || 'Assigned team',
+          topic: m.title || 'Technical Guidance',
           date: startTime ? startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date unavailable',
           rawDate: startTime,
           time: startTime ? startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-          meetingType: m.location || '',
+          meetingType: m.location || 'Google Meet',
           meetingLink: m.meetingLink || '',
           status: m.status || (startTime && startTime < new Date() ? 'Completed' : 'Upcoming'),
           description: m.description || '',
@@ -52,7 +59,8 @@ export default function MentorSessions() {
       });
       setSessions([...(Array.isArray(stored) ? stored : []), ...mapped]);
     } catch (e) {
-      console.warn('Failed to load meetings:', e);
+      console.error('Meetings load failed:', e);
+      setSessions([]);
     } finally {
       setLoading(false);
     }
@@ -287,6 +295,14 @@ export default function MentorSessions() {
             {/* Calendar Days */}
             {Array.from({ length: daysInMonth.totalDays }).map((_, i) => {
               const dayNum = i + 1;
+              const daySessions = sessions.filter((session) => {
+                const sessionDate = session.rawDate;
+                return sessionDate instanceof Date &&
+                  !Number.isNaN(sessionDate.valueOf()) &&
+                  sessionDate.getDate() === dayNum &&
+                  sessionDate.getMonth() === daysInMonth.month &&
+                  sessionDate.getFullYear() === daysInMonth.year;
+              });
               const isToday =
                 new Date().getDate() === dayNum &&
                 new Date().getMonth() === daysInMonth.month &&
@@ -312,15 +328,17 @@ export default function MentorSessions() {
                     {dayNum}
                   </span>
 
-                  {dayNum === new Date().getDate() && (
-                    <span className="w-full truncate px-1 py-0.5 rounded text-[10px] font-bold bg-[#5B45D9] text-white">
-                      10:30 AM Team Alpha
+                  {daySessions.slice(0, 2).map((session) => (
+                    <span
+                      key={session.id}
+                      title={`${session.time} · ${session.teamName} · ${session.topic}`}
+                      className={`w-full truncate px-1 py-0.5 rounded text-[10px] font-bold text-white ${session.status === 'Completed' ? 'bg-emerald-600' : 'bg-[#5B45D9]'}`}
+                    >
+                      {session.time} {session.teamName}
                     </span>
-                  )}
-                  {dayNum === new Date().getDate() + 1 && (
-                    <span className="w-full truncate px-1 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white">
-                      2:00 PM Team Nova
-                    </span>
+                  ))}
+                  {daySessions.length > 2 && (
+                    <span className="text-[10px] font-semibold text-slate-500">+{daySessions.length - 2} more</span>
                   )}
                 </div>
               );

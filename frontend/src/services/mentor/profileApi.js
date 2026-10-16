@@ -4,17 +4,36 @@ import apiClient from '../../api/api';
  * Mentor Profile API Integration
  */
 
+const DEFAULT_PROFILE = {
+    name: '',
+    role: 'Mentor',
+    institution: '',
+    bio: '',
+    avatarGradient: 'from-purple-600 to-indigo-600',
+    expertise: [],
+    links: {
+        scholar: '',
+        linkedin: '',
+        github: ''
+    },
+    stats: {
+        teams: 0,
+        rating: '0/5',
+        sessions: 0
+    },
+    initials: ''
+};
+
 export const fetchMentorProfile = async () => {
-    try {
-        const { data } = await apiClient.get('/profile/me');
-        const roleProfile = data.mentor_profile || data.organizer_profile || data.profile || {};
+    const { data } = await apiClient.get('/profile/me');
+    const roleProfile = data.mentor_profile || data.profile || {};
         
         const profileData = {
             ...data,
             ...roleProfile,
             institution: roleProfile.companyName || roleProfile.institution || '',
-            expertise: Array.isArray(roleProfile.expertiseDomains) ? roleProfile.expertiseDomains : [],
-            availability: roleProfile.availability || '',
+            expertise: Array.isArray(roleProfile.expertiseDomains) ? roleProfile.expertiseDomains : (roleProfile.expertise || []),
+            availability: roleProfile.availability || 'Available',
             links: {
                 scholar: roleProfile.scholarUrl || '',
                 linkedin: roleProfile.linkedinUrl || '',
@@ -29,23 +48,7 @@ export const fetchMentorProfile = async () => {
         localStorage.setItem('user', JSON.stringify(cachedUser));
         sessionStorage.setItem('user', JSON.stringify(cachedUser));
         
-        return profileData;
-    } catch (error) {
-        console.error('Failed to fetch mentor profile from server:', error);
-        
-        // Fallback to cached data if server request fails
-        try {
-            const cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
-            if (cachedUser && cachedUser.mentor_profile) {
-                console.log('Using cached profile data from localStorage');
-                return cachedUser.mentor_profile;
-            }
-        } catch (cacheError) {
-            console.error('Failed to retrieve cached profile:', cacheError);
-        }
-        
-        throw error;
-    }
+    return profileData;
 };
 
 /**
@@ -96,11 +99,7 @@ export const updateMentorProfile = async (updatedFields) => {
             delete backendPayload.expertise;
         }
 
-        console.log('[API] Sending payload to backend:', backendPayload);
-        
         const { data } = await apiClient.put('/profile/me', backendPayload);
-        
-        console.log('[API] Backend response:', data);
         
         // Sync updated profile to localStorage for persistence across sessions
         if (data) {

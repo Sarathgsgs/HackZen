@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
 
     # MongoDB
-    MONGO_URI: str = os.getenv("MONGO_URI")
+    MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
     LOG_LEVEL: str = "INFO"
 
     @field_validator("DEBUG", mode="before")

@@ -80,23 +80,8 @@ export const submitTeamEvaluation = async (teamId, evaluationData) => {
  * @returns {Promise<Object>} A promise resolving to the update status.
  */
 export const updateTeamShortlistStatus = async (teamId, isShortlisted) => {
-    try {
-        const newStatus = isShortlisted ? 'Shortlisted' : 'Reviewed';
-        const { data } = await apiClient.post(`/submissions/${teamId}/status`, {
-            status: newStatus,
-            reason: isShortlisted ? 'Team shortlisted during evaluation round' : 'Shortlist status removed'
-        });
-
-        return {
-            success: true,
-            message: `Team ${isShortlisted ? 'added to' : 'removed from'} shortlist`,
-            shortlisted: isShortlisted,
-            ...data
-        };
-    } catch (error) {
-        console.error('Failed to update shortlist status:', error);
-        throw error;
-    }
+    const { data } = await apiClient.put(`/submissions/${teamId}/shortlist`, { shortlisted: isShortlisted });
+    return data;
 };
 
 export const resetEvaluationsData = async () => {

@@ -745,7 +745,6 @@ async def get_admin_submissions(
 
     if status and status.lower() != "all":
         query["status"] = status
-
     if hackathonId:
         query["hackathonId"] = hackathonId
 
@@ -1384,3 +1383,27 @@ async def get_submission_ai_review(
     review = await ai_service.review_project_submission(submission)
 
     return {"success": True, "review": review}
+
+
+@router.put("/{submission_id}/shortlist")
+async def update_submission_shortlist(
+    submission_id: str,
+    payload: dict = Body(...),
+    current_user: dict = Depends(with_auth),
+):
+    user_role = str(current_user.get("role", "")).lower()
+    if user_role not in ["organizer", "admin", "superadmin"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    if not ObjectId.is_valid(submission_id):
+        raise HTTPException(status_code=400, detail="Invalid submission ID")
+    shortlisted = bool(payload.get("shortlisted"))
+    result = await get_submission_collection().update_one(
+        {"_id": ObjectId(submission_id)},
+        {"$set": {
+            "isShortlisted": shortlisted,
+            "status": "Shortlisted" if shortlisted else "Reviewed",
+        }},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"success": True, "shortlisted": shortlisted, "status": "Shortlisted" if shortlisted else "Reviewed"}

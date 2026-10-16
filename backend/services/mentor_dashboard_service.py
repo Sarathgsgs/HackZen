@@ -13,6 +13,22 @@ from schemas.mentor_dashboard import (
 class MentorDashboardService:
     """Service for mentor dashboard operations"""
 
+    @staticmethod
+    async def _assigned_student_teams(mentor_id: str, student_id: str):
+        """Return the mentor's teams containing this student or reject access."""
+        if MongoDB.db is None:
+            await MongoDB.connect()
+        teams = await MongoDB.db.teams.find({"mentorId": mentor_id}, {"_id": 1, "teamName": 1}).to_list(None)
+        team_ids = [str(team["_id"]) for team in teams]
+        memberships = await MongoDB.db.teamMembers.find(
+            {"teamId": {"$in": team_ids}, "userId": student_id}, {"teamId": 1}
+        ).to_list(None) if team_ids else []
+        assigned_ids = list(dict.fromkeys(item["teamId"] for item in memberships))
+        if not assigned_ids:
+            raise PermissionError("Student is not in one of your assigned teams")
+        team_map = {str(team["_id"]): team for team in teams}
+        return assigned_ids, team_map
+
     # ============= TASK MANAGEMENT =============
     @staticmethod
     async def create_task(task_data: TaskCreate, mentor_id: str) -> Dict[str, Any]:
@@ -75,7 +91,8 @@ class MentorDashboardService:
             raise ValueError("Provide at least one task field to update")
         updates["updatedAt"] = datetime.utcnow()
         result = await tasks_collection.update_one({"_id": ObjectId(task_id), "mentorId": mentor_id}, {"$set": updates})
-        
+        if not result.matched_count:
+            raise LookupError("Task not found")
         return {"matched": result.matched_count, "modified": result.modified_count}
 
     # ============= FEEDBACK SYSTEM =============
@@ -233,17 +250,19 @@ class MentorDashboardService:
         if MongoDB.db is None:
             await MongoDB.connect()
         
+        team_ids, _ = await MentorDashboardService._assigned_student_teams(mentor_id, student_id)
         tasks_collection = MongoDB.db.tasks
-        students_collection = MongoDB.db.students
+        users_collection = MongoDB.db.users
         
         # Get all tasks for the student
         tasks = await tasks_collection.find({
             "mentorId": mentor_id,
-            "studentId": student_id
+            "studentId": student_id,
+            "teamId": {"$in": team_ids},
         }).to_list(None)
         
         # Get student info
-        student = await students_collection.find_one({"userId": student_id})
+        student = await users_collection.find_one({"_id": ObjectId(student_id)}) if ObjectId.is_valid(student_id) else None
         
         # Calculate metrics
         total_tasks = len(tasks)
@@ -301,6 +320,7 @@ class MentorDashboardService:
         if MongoDB.db is None:
             await MongoDB.connect()
         
+        team_ids, _ = await MentorDashboardService._assigned_student_teams(mentor_id, student_id)
         tasks_collection = MongoDB.db.tasks
         feedback_collection = MongoDB.db.feedback
         meetings_collection = MongoDB.db.meetings
@@ -308,7 +328,8 @@ class MentorDashboardService:
         # Task completion rate
         all_tasks = await tasks_collection.find({
             "mentorId": mentor_id,
-            "studentId": student_id
+            "studentId": student_id,
+            "teamId": {"$in": team_ids},
         }).to_list(None)
         
         completed = len([t for t in all_tasks if t["status"] == "completed"])
@@ -317,15 +338,19 @@ class MentorDashboardService:
         # Feedback ratings
         feedbacks = await feedback_collection.find({
             "mentorId": mentor_id,
-            "studentId": student_id,
-            "rating": {"$exists": True}
+            "teamId": {"$in": team_ids},
+            "$or": [{"rating": {"$exists": True}}, {"overallScore": {"$exists": True}}],
         }).to_list(None)
-        
-        avg_feedback_rating = (sum(f["rating"] for f in feedbacks) / len(feedbacks)) if feedbacks else 0
+        feedback_scores = [
+            score for score in (feedback.get("overallScore", feedback.get("rating")) for feedback in feedbacks)
+            if isinstance(score, (int, float))
+        ]
+        avg_feedback_rating = sum(feedback_scores) / len(feedback_scores) if feedback_scores else 0
         
         # Attendance rate
         meetings = await meetings_collection.find({
             "mentorId": mentor_id,
+            "teamId": {"$in": team_ids},
             "studentIds": student_id
         }).to_list(None)
         
@@ -333,7 +358,7 @@ class MentorDashboardService:
         attendance_rate = (attended / len(meetings) * 100) if meetings else 0
         
         # Activity score (0-100)
-        activity_score = (avg_task_completion * 0.4 + avg_feedback_rating * 0.4 + attendance_rate * 0.2)
+        activity_score = (avg_task_completion * 0.4 + avg_feedback_rating * 20 * 0.4 + attendance_rate * 0.2)
         
         return {
             "studentId": student_id,
@@ -358,6 +383,7 @@ class MentorDashboardService:
         
         # Calculate period based on report type
         now = datetime.utcnow()
+        team_ids, team_map = await MentorDashboardService._assigned_student_teams(mentor_id, student_id)
         if report_type == "weekly":
             start = now - timedelta(days=7)
         elif report_type == "monthly":
@@ -374,24 +400,19 @@ class MentorDashboardService:
         tasks = await tasks_collection.find({
             "mentorId": mentor_id,
             "studentId": student_id,
+            "teamId": {"$in": team_ids},
             "createdAt": {"$gte": start}
         }).to_list(None)
         
         feedbacks = await feedback_collection.find({
             "mentorId": mentor_id,
-            "studentId": student_id,
+            "teamId": {"$in": team_ids},
             "createdAt": {"$gte": start}
         }).to_list(None)
         
         # Get student and team info
-        student = await users_collection.find_one({"_id": ObjectId(student_id)})
-        teams = await teams_collection.find({
-            "mentorId": mentor_id,
-            "$or": [
-                {"teamLead": student_id},
-                {"members": student_id}
-            ]
-        }).to_list(None)
+        student = await users_collection.find_one({"_id": ObjectId(student_id)}) if ObjectId.is_valid(student_id) else None
+        teams = [team_map[team_id] for team_id in team_ids if team_id in team_map]
         
         # Generate summaries
         tasks_summary = {
@@ -418,7 +439,7 @@ class MentorDashboardService:
             "studentId": student_id,
             "studentName": student.get("name", "") if student else "Unknown",
             "teamId": str(teams[0]["_id"]) if teams else None,
-            "teamName": teams[0].get("name", "") if teams else "N/A",
+            "teamName": teams[0].get("teamName", "") if teams else "N/A",
             "reportType": report_type,
             "period": {
                 "start": start.isoformat(),

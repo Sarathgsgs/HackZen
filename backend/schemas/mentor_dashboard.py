@@ -45,7 +45,7 @@ class TaskCreate(BaseModel):
     studentId: str
     teamId: str
     title: str = Field(min_length=1, max_length=160)
-    description: str = Field(min_length=1, max_length=2000)
+    description: str = Field(default="", max_length=2000)
     deadline: datetime
     priority: str = "medium"
     category: str = "development"

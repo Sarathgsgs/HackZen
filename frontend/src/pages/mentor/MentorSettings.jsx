@@ -37,7 +37,7 @@ const DEFAULT_SETTINGS = {
   preferredProjectStages: ['Development', 'Testing'],
   preferredCommunication: ['Chat', 'Video Meeting'],
   profileVisibility: 'Visible to Assigned Teams',
-  contactNumberVisibility: 'Visible',
+  contactNumberVisibility: 'Visible to Cohort Leaders',
 };
 
 const Field = ({ label, children }) => (
@@ -190,7 +190,7 @@ export default function MentorSettings() {
       addToast('Settings Synced', 'Your mentoring preferences and availability were saved.', 'success');
     } catch (error) {
       console.warn('Settings save warning:', error);
-      addToast('Settings Updated', 'Preferences updated in workspace.', 'success');
+      addToast('Settings not saved', error.response?.data?.detail || 'The server could not save your settings. Please retry.', 'error');
     } finally {
       setSaving(false);
     }

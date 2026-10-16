@@ -142,15 +142,16 @@ const EvaluationPanel = () => {
     };
 
     const handleShortlistToggle = async () => {
+        if (!activeTeam) return;
+        const subId = activeTeam.submissionId || activeTeam.id;
         const nextState = !isShortlisted;
         setIsShortlisted(nextState);
-        if (activeTeam) {
-            try {
-                await updateTeamShortlistStatus(activeTeam.submissionId || activeTeam.id, nextState);
-                setTeams(prev => prev.map(t => t.id === activeTeam.id ? { ...t, shortlisted: nextState } : t));
-            } catch (err) {
-                console.error("Failed to toggle shortlist:", err);
-            }
+        try {
+            await updateTeamShortlistStatus(subId, nextState);
+            setTeams(prev => prev.map(t => t.id === activeTeam.id ? { ...t, shortlisted: nextState } : t));
+        } catch (err) {
+            console.error("Failed to toggle shortlist:", err);
+            setIsShortlisted(!nextState);
         }
     };
 

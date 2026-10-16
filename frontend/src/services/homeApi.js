@@ -35,18 +35,12 @@ export const fetchHomeHackathons = async () => {
 
 /**
  * Fetches landing page statistics (e.g., total participants, active mentors)
- * Currently returns mock data synchronized with future backend telemetry endpoints.
+ * Fetches aggregate counts directly from MongoDB-backed platform collections.
  */
 export const fetchHomeStats = async () => {
     try {
-        // Placeholder for future telemetry endpoint
-        // const { data } = await apiClient.get('/telemetry/landing-stats');
-        return {
-            totalUsers: '5000+',
-            activeHackathons: '12+',
-            mentors: '150+',
-            successRate: '94%'
-        };
+        const { data } = await apiClient.get('/dashboard/public-stats');
+        return data;
     } catch (error) {
         console.error('Home Service Error [fetchHomeStats]:', error);
         return null;

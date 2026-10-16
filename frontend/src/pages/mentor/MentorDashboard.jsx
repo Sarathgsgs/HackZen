@@ -27,6 +27,7 @@ import { fetchMentorDashboard } from '../../services/mentor/dashboardApi';
 import { fetchAssignedTeams } from '../../services/mentor/assignedTeamsApi';
 import { fetchMentorshipRequests, updateMentorshipRequestStatus } from '../../services/mentor/mentorshipRequestsApi';
 import { getMentorMeetings } from '../../api/mentorApi';
+import { fetchMentorHackathons } from '../../services/mentor/hackathonsApi';
 
 export default function MentorDashboard() {
   const navigate = useNavigate();
@@ -37,16 +38,18 @@ export default function MentorDashboard() {
   const [teams, setTeams] = useState([]);
   const [requests, setRequests] = useState([]);
   const [meetings, setMeetings] = useState([]);
+  const [hackathons, setHackathons] = useState([]);
 
   // Load real API data with robust fallback
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [dashRes, teamsRes, reqsRes, meetingsRes] = await Promise.allSettled([
+      const [dashRes, teamsRes, reqsRes, meetingsRes, hackathonsRes] = await Promise.allSettled([
         fetchMentorDashboard(),
         fetchAssignedTeams(),
         fetchMentorshipRequests('pending'),
         getMentorMeetings(true),
+        fetchMentorHackathons(),
       ]);
 
       if (dashRes.status === 'fulfilled' && dashRes.value) {
@@ -64,6 +67,7 @@ export default function MentorDashboard() {
       const stored = JSON.parse(localStorage.getItem('proeduvate_mentor_sessions') || '[]');
       const loadedMeetings = meetingsRes.status === 'fulfilled' ? meetingsRes.value : null;
       setMeetings(Array.isArray(loadedMeetings) && loadedMeetings.length ? loadedMeetings : stored);
+      setHackathons(hackathonsRes?.status === 'fulfilled' ? (hackathonsRes.value || []) : []);
     } catch (e) {
       console.error('Error loading mentor dashboard:', e);
     } finally {
@@ -83,13 +87,13 @@ export default function MentorDashboard() {
   const handleQuickDecline = async (requestId, teamName) => {
     try {
       await updateMentorshipRequestStatus(requestId, 'reject');
+      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+      addToast('Request Declined', `Declined mentorship request from ${teamName}.`, 'info');
+      triggerRefresh();
     } catch (e) {
+      console.error('Mentorship request update failed:', e);
       addToast('Request Failed', 'Unable to decline this request. Please try again.', 'error');
-      return;
     }
-    setRequests((prev) => prev.filter((r) => r.id !== requestId));
-    addToast('Request Declined', `Declined mentorship request from ${teamName}.`, 'info');
-    triggerRefresh();
   };
 
   // 4 Top Summary Stats
@@ -147,37 +151,13 @@ export default function MentorDashboard() {
     );
   }, [teams, globalSearch]);
 
-  // Recent mentor activities
-  const recentActivities = [
-    {
-      id: 1,
-      text: 'Completed session with Team Alpha',
-      timestamp: '2 hours ago',
-      icon: CheckCircle2,
-      color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30',
-    },
-    {
-      id: 2,
-      text: 'Accepted mentorship request from Team Nova',
-      timestamp: '5 hours ago',
-      icon: CheckCircle2,
-      color: 'text-[#5B45D9] bg-purple-50 dark:bg-purple-950/30',
-    },
-    {
-      id: 3,
-      text: 'Added feedback to Project Phoenix',
-      timestamp: 'Yesterday at 4:15 PM',
-      icon: FileText,
-      color: 'text-blue-500 bg-blue-50 dark:bg-blue-950/30',
-    },
-    {
-      id: 4,
-      text: 'Shared a resource with Team Delta',
-      timestamp: '2 days ago',
-      icon: Share2,
-      color: 'text-amber-500 bg-amber-50 dark:bg-amber-950/30',
-    },
-  ];
+  const recentActivities = useMemo(() => (dashboardData?.todayActivity || []).map((activity) => ({
+    id: activity.id,
+    text: activity.description,
+    timestamp: activity.timestamp ? new Date(activity.timestamp).toLocaleString() : '',
+    icon: activity.type === 'progress' ? TrendingUp : CheckCircle2,
+    color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30',
+  })), [dashboardData]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
@@ -266,7 +246,7 @@ export default function MentorDashboard() {
                             {team.name}
                           </h3>
                           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            {team.hackathon || 'AI Innovation Hackathon'}
+                            {team.hackathon || 'Hackathon not set'}
                           </p>
                         </div>
                         <span
@@ -453,7 +433,7 @@ export default function MentorDashboard() {
 
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                        {session.teamName || session.team || 'Team Alpha'}
+                        {session.teamName || session.team || 'Assigned team'}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {session.topic || session.title || 'Project Architecture Review'}
@@ -553,38 +533,7 @@ export default function MentorDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            {
-              id: 'hack-1',
-              title: 'AI Innovation Hackathon 2025',
-              category: 'Artificial Intelligence',
-              dates: 'Oct 22 - Oct 29, 2025',
-              organizer: 'Stanford AI Student Alliance & Google Cloud',
-              prize: '$45,000 USD',
-              phase: 'Sprint Phase',
-              status: 'Ongoing',
-            },
-            {
-              id: 'hack-3',
-              title: 'NextGen FinTech Challenge',
-              category: 'FinTech',
-              dates: 'Nov 10 - Nov 17, 2025',
-              organizer: 'Open Finance Collective',
-              prize: '$35,000 USD',
-              phase: 'Registration Open',
-              status: 'Upcoming',
-            },
-            {
-              id: 'hack-5',
-              title: 'CyberShield Defense Arena',
-              category: 'Cybersecurity',
-              dates: 'Dec 05 - Dec 12, 2025',
-              organizer: 'MIT Cyber Security Club',
-              prize: '$50,000 USD',
-              phase: 'Team Formation',
-              status: 'Upcoming',
-            },
-          ].map((item) => (
+          {hackathons.filter((item) => item.status === 'Upcoming' || item.status === 'Ongoing').slice(0, 3).map((item) => (
             <div
               key={item.id}
               className="p-4 rounded-xl border border-slate-200/70 dark:border-white/5 bg-[#FAFAFD]/60 dark:bg-navy-950/20 hover:border-[#5B45D9]/40 hover:bg-white dark:hover:bg-navy-900/40 transition-all flex flex-col justify-between group"
@@ -595,7 +544,7 @@ export default function MentorDashboard() {
                     {item.category}
                   </span>
                   <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    {item.prize}
+                    {item.prizePool || item.status}
                   </span>
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#5B45D9] dark:group-hover:text-purple-300 transition-colors">
@@ -606,12 +555,12 @@ export default function MentorDashboard() {
                 </p>
                 <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                   <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{item.dates}</span>
+                  <span>{item.startDate ? new Date(item.startDate).toLocaleDateString() : 'Dates not announced'}</span>
                 </div>
               </div>
               <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
                 <span className="text-[11px] font-medium text-slate-400">
-                  {item.phase}
+                  {item.status}
                 </span>
                 <button
                   onClick={() => navigate('/mentor/hackathons')}

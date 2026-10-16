@@ -13,12 +13,12 @@ from database import get_db
 router = APIRouter()
 
 DEFAULTS = {
-    "legalName": "Dr. Arun Kumar", "institution": "ABC Technologies", "experienceYears": 8,
-    "currentStatus": "Active Mentor", "linkedinUrl": "https://www.linkedin.com/in/arunkumar",
-    "githubUrl": "https://github.com/arunkumar", "contactNumber": "+91 98765 43210",
-    "contactNumberVisibility": "visible",
-    "expertiseDomains": ["Artificial Intelligence", "Machine Learning", "Data Science"],
-    "bio": "Experienced technology mentor specializing in AI, machine learning and software development with experience guiding student hackathon teams.",
+    "legalName": "", "institution": "", "experienceYears": 0,
+    "currentStatus": "Active Mentor", "linkedinUrl": "",
+    "githubUrl": "", "contactNumber": "",
+    "contactNumberVisibility": "Visible to Cohort Leaders",
+    "expertiseDomains": [],
+    "bio": "",
     "availabilityStatus": "Available", "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     "startTime": "18:00", "endTime": "21:00", "maximumActiveTeams": 5,
     "preferredDomains": ["Artificial Intelligence", "Machine Learning", "Web Development"],
@@ -64,16 +64,19 @@ def _validate(payload: Dict[str, Any]) -> Dict[str, Any]:
         result["experienceYears"] = value
     for key, domain in (("linkedinUrl", "linkedin.com"), ("githubUrl", "github.com")):
         if key in payload:
-            if not isinstance(payload[key], str) or not _valid_url(payload[key], domain):
+            if not isinstance(payload[key], str) or (payload[key].strip() and not _valid_url(payload[key], domain)):
                 raise HTTPException(status_code=422, detail=f"Enter a valid {domain} profile URL")
             result[key] = payload[key].strip()
     if "contactNumber" in payload:
         value = payload["contactNumber"]
-        if not isinstance(value, str) or not PHONE_PATTERN.fullmatch(value.strip()):
+        if not isinstance(value, str) or (value.strip() and not PHONE_PATTERN.fullmatch(value.strip())):
             raise HTTPException(status_code=422, detail="Enter a valid contact number")
         result["contactNumber"] = value.strip()
-    if payload.get("contactNumberVisibility") in {"visible", "hidden"}:
-        result["contactNumberVisibility"] = payload["contactNumberVisibility"]
+    contact_visibility = payload.get("contactNumberVisibility")
+    if contact_visibility in {"visible", "Visible to Cohort Leaders"}:
+        result["contactNumberVisibility"] = "Visible to Cohort Leaders"
+    elif contact_visibility in {"hidden", "Hidden"}:
+        result["contactNumberVisibility"] = "Hidden"
     elif "contactNumberVisibility" in payload:
         raise HTTPException(status_code=422, detail="Invalid contact visibility")
     if payload.get("availabilityStatus") in {"Available", "Busy", "Away"}:
@@ -104,7 +107,7 @@ def _validate(payload: Dict[str, Any]) -> Dict[str, Any]:
             raise HTTPException(status_code=422, detail="Maximum active teams must be between 1 and 100")
         result["maximumActiveTeams"] = value
     if "profileVisibility" in payload:
-        if payload["profileVisibility"] not in {"Visible to Assigned Teams", "Private"}:
+        if payload["profileVisibility"] not in {"Visible to Assigned Teams", "Visible to All Hackathon Participants", "Private"}:
             raise HTTPException(status_code=422, detail="Invalid profile visibility")
         result["profileVisibility"] = payload["profileVisibility"]
     if "notifications" in payload:

@@ -37,7 +37,7 @@ export default function MentorshipRequests() {
       setRequests(Array.isArray(res) ? res : []);
       setLoadError('');
     } catch (e) {
-      console.warn('Failed to load mentorship requests:', e);
+      console.error('Could not load mentorship requests:', e);
       setRequests([]);
       setLoadError('Unable to load mentorship requests. Please try again.');
     } finally {
@@ -52,15 +52,13 @@ export default function MentorshipRequests() {
   const handleDecline = async (id, teamName) => {
     try {
       await updateMentorshipRequestStatus(id, 'reject');
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r)));
+      addToast('Request Declined', `You declined the mentorship request from ${teamName}.`, 'info');
+      triggerRefresh();
     } catch (e) {
+      console.error('Could not decline mentorship request:', e);
       addToast('Request Failed', 'Unable to decline this request. Please try again.', 'error');
-      return;
     }
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r))
-    );
-    addToast('Request Declined', `You declined the mentorship request from ${teamName}.`, 'info');
-    triggerRefresh();
   };
 
   const handleAccept = (request) => {
