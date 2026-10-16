@@ -194,7 +194,9 @@ class SettingsService:
                 raise ValueError("User not found")
 
             # Verify current password
-            if not verify_password(password_request.currentPassword, user.get("passwordHash", "")):
+            if not verify_password(
+                password_request.currentPassword, user.get("passwordHash", "")
+            ):
                 raise ValueError("Current password is incorrect")
 
             # Hash new password
@@ -203,7 +205,12 @@ class SettingsService:
             # Update password in database
             await db["users"].find_one_and_update(
                 {"_id": ObjectId(user_id)},
-                {"$set": {"passwordHash": hashed_password, "updatedAt": datetime.utcnow()}},
+                {
+                    "$set": {
+                        "passwordHash": hashed_password,
+                        "updatedAt": datetime.utcnow(),
+                    }
+                },
                 return_document=True,
             )
 

@@ -26,6 +26,7 @@ class MentorInDB(BaseModel):
     companyName: Optional[str] = Field(None, alias="companyName")
     phoneNumber: Optional[str] = Field(None, alias="phoneNumber")
     linkedinUrl: Optional[str] = Field(None, alias="linkedinUrl")
+    githubUrl: Optional[str] = Field(None, alias="githubUrl")
 
     class Config:
         populate_by_name = True

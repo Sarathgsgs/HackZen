@@ -4,6 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from datetime import datetime
+import asyncio
+import os
 from pathlib import Path
 from core.config import settings
 from database import MongoDB
@@ -15,16 +17,42 @@ UPLOADS_DIR = BASE_DIR / "uploads"
 
 # Create uploads directory if it doesn't exist
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
-print(f"📁 Uploads directory: {UPLOADS_DIR}")
+print(f"[Uploads] Directory: {UPLOADS_DIR}")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    await MongoDB.connect()
+    try:
+        await MongoDB.connect()
+    except Exception as exc:
+        print(f"[DB] MongoDB connection unavailable at startup: {exc}")
+    reminder_task = None
+    if MongoDB.db is not None:
+        try:
+            from services.mentor_dashboard_service import MentorDashboardService
+
+            async def meeting_reminder_loop():
+                while True:
+                    try:
+                        await MentorDashboardService.send_due_meeting_reminders()
+                    except Exception as exc:
+                        print(f"Meeting reminder worker error: {exc}")
+                    await asyncio.sleep(60)
+
+            reminder_task = asyncio.create_task(meeting_reminder_loop())
+        except Exception as e:
+            print(f"[Mentor Worker] Initializer note: {e}")
     yield
+    if reminder_task:
+        reminder_task.cancel()
+        try:
+            await reminder_task
+        except asyncio.CancelledError:
+            pass
     # Shutdown
-    await MongoDB.disconnect()
+    if MongoDB.client is not None:
+        await MongoDB.disconnect()
 
 
 app = FastAPI(
@@ -47,16 +75,8 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5174",
-        "http://localhost:5173",
-        "http://localhost:5176",
-        "http://127.0.0.1:5174",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5176",
-        "http://localhost:3000",
-        "http://localhost:8080",
-    ],
+    allow_origins=settings.cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -86,13 +106,17 @@ async def health_check():
     }
 
     # Check MongoDB connection
-    try:
-        await MongoDB.get_db().command("ping")
-        health_status["dependencies"]["mongodb"] = "connected"
-    except Exception as e:
-        health_status["dependencies"]["mongodb"] = "disconnected"
+    if MongoDB.db is not None:
+        try:
+            await MongoDB.get_db().command("ping")
+            health_status["dependencies"]["mongodb"] = "connected"
+        except Exception as e:
+            health_status["dependencies"]["mongodb"] = "disconnected"
+            health_status["status"] = "degraded"
+            health_status["mongodb_error"] = str(e)
+    else:
+        health_status["dependencies"]["mongodb"] = "not-configured"
         health_status["status"] = "degraded"
-        health_status["mongodb_error"] = str(e)
 
     # Check uploads directory
     if UPLOADS_DIR.exists():
@@ -147,11 +171,11 @@ if __name__ == "__main__":
     import uvicorn
 
     print("\n" + "=" * 60)
-    print("🎯 STARTING PROEDUVATE HACKATHON PLATFORM")
+    print("[STARTING] PROEDUVATE HACKATHON PLATFORM")
     print("=" * 60)
-    print(f"📱 App: {settings.APP_NAME}")
-    print(f"🌐 Host: {settings.BACKEND_URL}")
-    print(f"📊 Docs: http://{settings.BACKEND_URL}/docs")
+    print(f"App: {settings.APP_NAME}")
+    print(f"Host: {settings.BACKEND_URL}")
+    print(f"Docs: http://{settings.BACKEND_URL}/docs")
     print("=" * 60)
 
     # Run the server

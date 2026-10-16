@@ -11,14 +11,13 @@ import apiClient from '../../api/api';
  */
 export const fetchDiscoverableTeams = async () => {
     try {
-        const { data: teams } = await apiClient.get('/teams/my-teams');
+        const { data: teams } = await apiClient.get('/teams/discoverable');
 
         return teams
-            .filter(team => !team.mentorId)
             .map(team => ({
                 id: team._id,
                 name: team.teamName,
-                hackathon: team.hackathonId || 'Active Hackathon',
+                hackathon: team.hackathonTitle || 'Untitled Hackathon',
                 domain: team.domain || 'Technology',
                 description: team.description || 'This team is looking for a mentor.',
                 requiredSkills: team.requiredSkills || [],
@@ -31,7 +30,7 @@ export const fetchDiscoverableTeams = async () => {
             }));
     } catch (error) {
         console.error('Failed to fetch discoverable teams:', error);
-        return [];
+        throw error;
     }
 };
 
@@ -41,13 +40,9 @@ export const fetchDiscoverableTeams = async () => {
  */
 export const requestMentorTeam = async (teamId) => {
     try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        await apiClient.post(`/teams/${teamId}/assign-mentor`, {
-            mentorId: user._id || user.id
-        });
-        return { success: true, message: 'Mentorship request sent successfully.' };
+        await apiClient.post(`/teams/${teamId}/request-mentor`);
+        return { success: true, message: 'You are now mentoring this team.' };
     } catch (error) {
-        console.error('Failed to request mentor for team:', error);
         throw error;
     }
 };

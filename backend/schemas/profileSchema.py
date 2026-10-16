@@ -43,11 +43,13 @@ class MentorProfileCreate(BaseModel):
     name: Optional[str] = None
     expertiseDomains: List[str] = Field(default=[], alias="expertiseDomains")
     experienceYears: Optional[int] = Field(None, alias="experienceYears")
-    availability: Literal["Available", "Unavailable"] = "Available"
+    # These values match the choices exposed by the mentor settings screen.
+    availability: Literal["Available", "Busy", "Offline", "Unavailable"] = "Available"
     bio: Optional[str] = None
     companyName: Optional[str] = Field(None, alias="companyName")
     phoneNumber: Optional[str] = Field(None, alias="phoneNumber")
     linkedinUrl: Optional[str] = Field(None, alias="linkedinUrl")
+    githubUrl: Optional[str] = Field(None, alias="githubUrl")
 
     model_config = {"populate_by_name": True, "from_attributes": True}
 
@@ -56,11 +58,12 @@ class MentorProfileUpdate(BaseModel):
     name: Optional[str] = None
     expertiseDomains: Optional[List[str]] = Field(None, alias="expertiseDomains")
     experienceYears: Optional[int] = Field(None, alias="experienceYears")
-    availability: Optional[Literal["Available", "Unavailable"]] = None
+    availability: Optional[Literal["Available", "Busy", "Offline", "Unavailable"]] = None
     bio: Optional[str] = None
     companyName: Optional[str] = Field(None, alias="companyName")
     phoneNumber: Optional[str] = Field(None, alias="phoneNumber")
     linkedinUrl: Optional[str] = Field(None, alias="linkedinUrl")
+    githubUrl: Optional[str] = Field(None, alias="githubUrl")
 
 
 class MentorProfile(MentorProfileCreate):
@@ -77,8 +80,13 @@ class OrganizerProfileCreate(BaseModel):
     institutionName: Optional[str] = Field(None, alias="institutionName")
     institutionType: Optional[str] = Field(None, alias="institutionType")
     designation: Optional[str] = None
+    bio: Optional[str] = None
     phoneNumber: Optional[str] = Field(None, alias="phoneNumber")
     linkedinUrl: Optional[str] = Field(None, alias="linkedinUrl")
+    emailReports: Optional[str] = Field(default="weekly", alias="emailReports")
+    autoApproveMentors: Optional[bool] = Field(
+        default=False, alias="autoApproveMentors"
+    )
 
     model_config = {"populate_by_name": True, "from_attributes": True}
 
@@ -88,8 +96,11 @@ class OrganizerProfileUpdate(BaseModel):
     institutionName: Optional[str] = Field(None, alias="institutionName")
     institutionType: Optional[str] = Field(None, alias="institutionType")
     designation: Optional[str] = None
+    bio: Optional[str] = None
     phoneNumber: Optional[str] = Field(None, alias="phoneNumber")
     linkedinUrl: Optional[str] = Field(None, alias="linkedinUrl")
+    emailReports: Optional[str] = Field(None, alias="emailReports")
+    autoApproveMentors: Optional[bool] = Field(None, alias="autoApproveMentors")
 
 
 class OrganizerProfile(OrganizerProfileCreate):

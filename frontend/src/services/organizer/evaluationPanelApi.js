@@ -15,18 +15,20 @@ export const fetchTeamsForEvaluation = async () => {
     try {
         const { data } = await apiClient.get('/submissions/');
         
-        return data.map(sub => ({
-            id: sub._id,
+        return (data || []).map(sub => ({
+            id: sub._id || sub.id,
+            submissionId: sub._id || sub.id,
             teamId: sub.teamId,
-            name: 'Team ' + sub.teamId.substring(0, 4),
-            project: 'Submission v' + sub.version,
-            status: 'Pending',
-            submitted: new Date(sub.submittedAt).toLocaleTimeString(),
-            score: null,
-            shortlisted: false,
-            members: [],
-            links: { repo: sub.fileUrl, demo: '#', details: '#' },
-            existingScores: null
+            name: sub.teamName || ('Team ' + (sub.teamId ? String(sub.teamId).substring(0, 4) : 'Alpha')),
+            project: sub.title || ('Submission v' + (sub.version || 1)),
+            status: sub.status === 'Evaluated' ? 'Evaluated' : (sub.status || 'Pending'),
+            submitted: sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+            score: sub.score || sub.averageScore || null,
+            shortlisted: sub.status === 'Shortlisted',
+            comment: sub.feedback || sub.reviewComment || '',
+            members: sub.members || [],
+            links: { repo: sub.githubUrl || sub.repoUrl || sub.fileUrl || '#', demo: sub.demoUrl || '#', details: '#' },
+            existingScores: sub.scores || null
         }));
     } catch (error) {
         console.error('Failed to fetch teams for evaluation:', error);
@@ -42,14 +44,23 @@ export const fetchTeamsForEvaluation = async () => {
 export const submitTeamEvaluation = async (teamId, evaluationData) => {
     try {
         const payload = {
+            submissionId: evaluationData.submissionId || teamId,
             teamId: teamId,
-            judgeId: 'mentor_placeholder', // Replaced by backend via auth session
             scores: evaluationData.scores || {},
             feedback: evaluationData.comment || '',
             totalScore: evaluationData.totalScore
         };
 
         const { data } = await apiClient.post('/evaluations/', payload);
+
+        // Synchronize shortlist status if marked
+        if (evaluationData.shortlisted) {
+            try {
+                await updateTeamShortlistStatus(evaluationData.submissionId || teamId, true);
+            } catch (err) {
+                console.warn("Could not sync shortlist status flag:", err);
+            }
+        }
 
         return {
             success: true,
@@ -63,50 +74,31 @@ export const submitTeamEvaluation = async (teamId, evaluationData) => {
 };
 
 /**
- * Toggles or updates the shortlist status of a specific team directly.
- * @param {number|string} teamId The ID of the team.
+ * Toggles or updates the shortlist status of a specific team/submission directly in the backend.
+ * @param {string} teamId The ID of the team or submission.
  * @param {boolean} isShortlisted The new shortlist status.
  * @returns {Promise<Object>} A promise resolving to the update status.
  */
 export const updateTeamShortlistStatus = async (teamId, isShortlisted) => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            try {
-                console.log(`[API MOCK] Updating shortlist status for team ${teamId}:`, isShortlisted);
-                const teams = getTeamsFromStorage();
-                const teamIndex = teams.findIndex((t) => t.id === teamId);
+    try {
+        const newStatus = isShortlisted ? 'Shortlisted' : 'Reviewed';
+        const { data } = await apiClient.post(`/submissions/${teamId}/status`, {
+            status: newStatus,
+            reason: isShortlisted ? 'Team shortlisted during evaluation round' : 'Shortlist status removed'
+        });
 
-                if (teamIndex === -1) {
-                    return reject(new Error('Team not found'));
-                }
-
-                // Update only shortlist status
-                teams[teamIndex].shortlisted = isShortlisted;
-                saveTeamsToStorage(teams);
-
-                resolve({
-                    success: true,
-                    message: `Team ${isShortlisted ? 'added to' : 'removed from'} shortlist`,
-                    shortlisted: isShortlisted
-                });
-            } catch (error) {
-                reject(new Error('Failed to update shortlist status'));
-            }
-        }, MOCK_DELAY);
-    });
+        return {
+            success: true,
+            message: `Team ${isShortlisted ? 'added to' : 'removed from'} shortlist`,
+            shortlisted: isShortlisted,
+            ...data
+        };
+    } catch (error) {
+        console.error('Failed to update shortlist status:', error);
+        throw error;
+    }
 };
 
-/**
- * Resets the teams data to its initial state for testing purposes.
- * @returns {Promise<Object>} A promise resolving when data is reset.
- */
 export const resetEvaluationsData = async () => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            console.log('[API MOCK] evaluations data reset');
-            sessionStorage.removeItem('mock_eval_teams');
-            sessionStorage.setItem('mock_eval_teams', JSON.stringify(INITIAL_TEAMS));
-            resolve({ success: true, message: 'Data reset successfully' });
-        }, 500);
-    });
+    return { success: true, message: 'Live data synced with database.' };
 };

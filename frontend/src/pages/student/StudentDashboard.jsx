@@ -107,6 +107,33 @@ const MetricCard = ({ label, value }) => (
     </div>
 );
 
+const formatRelativeTime = (timestamp) => {
+    if (!timestamp) return 'Recently';
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Recently';
+    const diffSec = Math.floor((new Date() - date) / 1000);
+    if (diffSec < 60) return 'Just now';
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+    if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+    return date.toLocaleDateString();
+};
+
+const getActivityBadge = (type) => {
+    switch (type?.toLowerCase()) {
+        case 'registration':
+            return { icon: '📝', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' };
+        case 'submission':
+            return { icon: '🚀', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' };
+        case 'certificate':
+            return { icon: '🏆', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20' };
+        case 'team':
+            return { icon: '👥', color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' };
+        default:
+            return { icon: '⚡', color: 'bg-violet-500/10 text-violet-600 border-violet-500/20' };
+    }
+};
+
 const StudentDashboard = () => {
     const navigate = useNavigate();
     const [dashboard, setDashboard] = useState(null);
@@ -135,6 +162,7 @@ const StudentDashboard = () => {
 
     const registeredHackathons = dashboard?.registeredHackathons ?? [];
     const upcomingHackathons = dashboard?.upcomingHackathons ?? [];
+    const recentActivity = dashboard?.recentActivity ?? [];
     const studentName = dashboard?.student?.name?.split(' ')[0] || 'Student';
 
     return (
@@ -240,47 +268,86 @@ const StudentDashboard = () => {
                                 )}
                             </div>
 
-                            <aside className="rounded-[22px] border border-[#e5dff0] bg-[#f8f6fb] p-5 shadow-[0_10px_28px_rgba(76,59,183,0.05)] sm:p-6">
-                                <div className="mb-6 flex items-center justify-between gap-3">
-                                    <h2 className="text-[14px] font-bold uppercase tracking-[0.18em] text-[#6f5da7]">Upcoming</h2>
-                                    <button onClick={() => navigate('/student/hackathons')} className="text-sm font-semibold text-[#5c46c7] transition hover:text-[#4331a6]">See all</button>
-                                </div>
-
-                                {upcomingHackathons.length === 0 ? (
-                                    <div className="rounded-[18px] border border-dashed border-[#d6d0e9] bg-white p-8 text-center">
-                                        <p className="text-sm text-slate-500">There are no upcoming hackathons available right now.</p>
+                            <div className="space-y-8">
+                                <aside className="rounded-[22px] border border-[#e5dff0] bg-[#f8f6fb] p-5 shadow-[0_10px_28px_rgba(76,59,183,0.05)] sm:p-6">
+                                    <div className="mb-6 flex items-center justify-between gap-3">
+                                        <h2 className="text-[14px] font-bold uppercase tracking-[0.18em] text-[#6f5da7]">Upcoming</h2>
+                                        <button onClick={() => navigate('/student/hackathons')} className="text-sm font-semibold text-[#5c46c7] transition hover:text-[#4331a6]">See all</button>
                                     </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {upcomingHackathons.map((hackathon) => {
-                                            const prize = prizePool(hackathon.prizes);
-                                            return (
-                                                <article key={hackathon.id} className="rounded-[18px] border border-[#e3dff2] bg-white p-4 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
-                                                    <div className="flex items-start justify-between gap-3">
-                                                        <div>
-                                                            <h3 className="text-[18px] font-bold leading-tight text-[#1d1a2a]">{hackathon.title}</h3>
-                                                            <p className="mt-2 text-sm text-[#5f5a6d]">{formatDateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</p>
+
+                                    {upcomingHackathons.length === 0 ? (
+                                        <div className="rounded-[18px] border border-dashed border-[#d6d0e9] bg-white p-8 text-center">
+                                            <p className="text-sm text-slate-500">There are no upcoming hackathons available right now.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {upcomingHackathons.map((hackathon) => {
+                                                const prize = prizePool(hackathon.prizes);
+                                                return (
+                                                    <article key={hackathon.id} className="rounded-[18px] border border-[#e3dff2] bg-white p-4 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
+                                                        <div className="flex items-start justify-between gap-3">
+                                                            <div>
+                                                                <h3 className="text-[18px] font-bold leading-tight text-[#1d1a2a]">{hackathon.title}</h3>
+                                                                <p className="mt-2 text-sm text-[#5f5a6d]">{formatDateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="mt-5 flex items-end justify-between gap-3 border-t border-[#f1ecf9] pt-4">
+                                                            <div>
+                                                                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#7b748d]">Prize Pool</p>
+                                                                <p className="mt-1 text-base font-bold text-[#3d2d7d]">{prize || 'Not announced'}</p>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => navigate(`/student/hackathons/${hackathon.id}/register`)}
+                                                                className="rounded-xl bg-[#5c46c7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4c3bb7]"
+                                                            >
+                                                                Register Now
+                                                            </button>
+                                                        </div>
+                                                    </article>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </aside>
+
+                                <aside className="rounded-[22px] border border-[#e5dff0] bg-[#f8f6fb] p-5 shadow-[0_10px_28px_rgba(76,59,183,0.05)] sm:p-6">
+                                    <div className="mb-5 flex items-center justify-between gap-3">
+                                        <h2 className="text-[14px] font-bold uppercase tracking-[0.18em] text-[#6f5da7]">Recent Activity</h2>
+                                        <span className="text-xs font-medium text-slate-400">Live feed</span>
+                                    </div>
+
+                                    {recentActivity.length === 0 ? (
+                                        <div className="rounded-[18px] border border-dashed border-[#d6d0e9] bg-white p-6 text-center">
+                                            <p className="text-sm text-slate-500">No recent activity yet. Register for a hackathon or create a team to get started!</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {recentActivity.map((activity) => {
+                                                const badge = getActivityBadge(activity.type);
+                                                return (
+                                                    <div key={activity.id} className="flex items-start gap-3 rounded-[16px] border border-[#ece7f6] bg-white p-3.5 shadow-sm transition hover:shadow-md">
+                                                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${badge.color}`}>
+                                                            {badge.icon}
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <p className="truncate text-sm font-semibold text-[#1d1a2a]">{activity.title}</p>
+                                                                <span className="shrink-0 text-[11px] font-medium text-slate-400">
+                                                                    {formatRelativeTime(activity.timestamp)}
+                                                                </span>
+                                                            </div>
+                                                            {activity.description && (
+                                                                <p className="mt-0.5 line-clamp-1 text-xs text-[#6e6882]">{activity.description}</p>
+                                                            )}
                                                         </div>
                                                     </div>
-
-                                                    <div className="mt-5 flex items-end justify-between gap-3 border-t border-[#f1ecf9] pt-4">
-                                                        <div>
-                                                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#7b748d]">Prize Pool</p>
-                                                            <p className="mt-1 text-base font-bold text-[#3d2d7d]">{prize || 'Not announced'}</p>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => navigate(`/student/hackathons/${hackathon.id}/register`)}
-                                                            className="rounded-xl bg-[#5c46c7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4c3bb7]"
-                                                        >
-                                                            Register Now
-                                                        </button>
-                                                    </div>
-                                                </article>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </aside>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </aside>
+                            </div>
                         </section>
                     </>
                 )}

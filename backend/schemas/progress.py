@@ -49,6 +49,7 @@ class TeamProgressBase(BaseModel):
     teamId: str = Field(..., alias="teamId")
     currentStageId: str = Field(..., alias="currentStageId")
     status: ProgressStatus = ProgressStatus.NOT_STARTED
+    percentage: int = Field(0, ge=0, le=100)
 
 
 class TeamProgressCreate(TeamProgressBase):
@@ -58,11 +59,18 @@ class TeamProgressCreate(TeamProgressBase):
 class TeamProgressUpdate(BaseModel):
     currentStageId: Optional[str] = None
     status: Optional[ProgressStatus] = None
+    percentage: Optional[int] = Field(None, ge=0, le=100)
+
+
+class ProgressHistoryPoint(BaseModel):
+    percentage: int = Field(..., ge=0, le=100)
+    updatedAt: datetime
 
 
 class TeamProgressResponse(TeamProgressBase):
     id: str = Field(..., alias="_id")
     lastUpdated: datetime = Field(..., alias="lastUpdated")
+    progressHistory: List[ProgressHistoryPoint] = Field(default_factory=list, alias="progressHistory")
 
     class Config:
         populate_by_name = True

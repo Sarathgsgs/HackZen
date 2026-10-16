@@ -1,5 +1,74 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import apiClient from '../../api/api';
+
+const formatDate = (value) => {
+    if (!value) return 'TBD';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? 'TBD' : date.toLocaleDateString();
+};
+
+const getDisplayStatus = (value) => {
+    if (!value) return 'Draft';
+    const raw = String(value).toLowerCase();
+    if (raw.includes('draft')) return 'Draft';
+    if (raw.includes('completed') || raw.includes('results')) return 'Past';
+    if (raw.includes('registration')) return 'Registration Open';
+    return 'Active';
+};
+
+const getDisplayRegistrationStatus = (value) => {
+    if (!value) return 'Closed';
+    const raw = String(value).toLowerCase();
+    if (raw.includes('draft')) return 'Closed';
+    if (raw.includes('registration')) return 'Open';
+    return 'Open';
+};
+
+const getCategory = (hackathon) => {
+    if (Array.isArray(hackathon?.themes) && hackathon.themes.length > 0) {
+        return hackathon.themes[0];
+    }
+
+    return hackathon?.category || 'General';
+};
+
+const getBanner = (hackathon) => {
+    return hackathon?.posterUrl || hackathon?.banner || 'https://images.unsplash.com/photo-1504384308090-c54be3852f33?auto=format&fit=crop&q=80&w=1000';
+};
+
+const getMode = (hackathon) => {
+    if (!hackathon?.location) return 'Hybrid';
+    const location = String(hackathon.location).toLowerCase();
+    if (location.includes('online')) return 'Online';
+    return 'Hybrid';
+};
+
+const normalizeHackathonForView = (detail, fallbackId) => {
+    const normalizedStatus = getDisplayStatus(detail?.status);
+    const registrationStatus = getDisplayRegistrationStatus(detail?.status);
+    const registrationOpen = registrationStatus === 'Open' || (detail?.registrationEnd && new Date(detail.registrationEnd) > new Date());
+
+    return {
+        id: detail?._id || detail?.id || fallbackId,
+        title: detail?.title || 'Untitled Hackathon',
+        banner: getBanner(detail),
+        status: normalizedStatus,
+        category: getCategory(detail),
+        mode: getMode(detail),
+        location: detail?.location || 'Online',
+        visibility: detail?.isPublic ?? true,
+        registrationOpen,
+        daysLeft: detail?.hackathonEnd ? Math.max(0, Math.ceil((new Date(detail.hackathonEnd) - new Date()) / (1000 * 60 * 60 * 24))) : null,
+        progress: detail?.hackathonStart && detail?.hackathonEnd ? Math.max(0, Math.min(100, Math.round(((new Date() - new Date(detail.hackathonStart)) / (new Date(detail.hackathonEnd) - new Date(detail.hackathonStart))) * 100))) : 0,
+        registrationStart: detail?.registrationStart,
+        registrationEnd: detail?.registrationEnd,
+        hackathonStart: detail?.hackathonStart,
+        hackathonEnd: detail?.hackathonEnd,
+        rawStatus: detail?.status,
+        rawData: detail
+    };
+};
 
 // --- Stat Card Helper Component (Lifted outside for performance and clarity) ---
 const StatCard = ({ stat }) => (
@@ -21,69 +90,87 @@ const StatCard = ({ stat }) => (
 const ManageHackathon = () => {
     const { hackathonId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
     // --- State Management ---
-    const [hackathon, setHackathon] = useState(null);
+    const [hackathon, setHackathon] = useState(() => {
+        const initialHackathon = location.state?.hackathon;
+        return initialHackathon ? normalizeHackathonForView(initialHackathon, hackathonId) : null;
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Overview');
     const [searchQuery, setSearchQuery] = useState('');
     const [isActionLoading, setIsActionLoading] = useState({});
     const [pageError, setPageError] = useState(null);
-
-    // --- Mock Data ---
-    const [teams, setTeams] = useState([
-        { id: 1, name: "Cyber Knights", members: 4, leader: "John Doe", status: "Approved", registrationDate: "Feb 10, 2026", submissionStatus: "Submitted" },
-        { id: 2, name: "Eco Innovators", members: 3, leader: "Jane Smith", status: "Pending", registrationDate: "Feb 12, 2026", submissionStatus: "Pending" },
-        { id: 3, name: "Pixel Perfect", members: 2, leader: "Mike Ross", status: "Approved", registrationDate: "Feb 14, 2026", submissionStatus: "In Progress" },
-        { id: 4, name: "Dev Dynamos", members: 4, leader: "Sarah Parker", status: "Rejected", registrationDate: "Feb 11, 2026", submissionStatus: "None" },
-    ]);
+    const [registrationCount, setRegistrationCount] = useState(0);
+    const [teams, setTeams] = useState([]);
+    const [recentActivity, setRecentActivity] = useState([]);
 
     const stats = useMemo(() => [
-        { label: "Total Registrations", value: "450", icon: "👥", trend: "+12%", color: "cyan" },
-        { label: "Active Teams", value: "112", icon: "🚀", trend: "+5", color: "purple" },
-        { label: "Submissions", value: "85", icon: "📁", trend: "76%", color: "blue" },
-        { label: "Avg. Team Size", value: "3.2", icon: "📊", trend: "Stable", color: "green" },
-    ], []);
+        { label: 'Total Registrations', value: registrationCount.toString(), icon: '👥', trend: registrationCount > 0 ? '+12%' : '0', color: 'cyan' },
+        { label: 'Active Teams', value: '—', icon: '🚀', trend: 'Live', color: 'purple' },
+        { label: 'Submissions', value: '—', icon: '📁', trend: 'Pending', color: 'blue' },
+        { label: 'Registration', value: hackathon?.registrationOpen ? 'Open' : 'Closed', icon: '📊', trend: hackathon?.registrationOpen ? 'Live' : 'Closed', color: 'green' },
+    ], [hackathon?.registrationOpen, registrationCount]);
 
     const tabs = ['Overview', 'Participants', 'Submissions', 'Mentors', 'Broadcast'];
 
     // --- Data Fetching ---
     useEffect(() => {
         const fetchHackathonDetails = async () => {
-            setIsLoading(true);
-            setPageError(null);
-            try {
-                // Mimic API latency
-                await new Promise(resolve => setTimeout(resolve, 800));
+            if (!hackathonId) {
+                setPageError('Hackathon ID not found.');
+                setIsLoading(false);
+                return;
+            }
 
-                // If it's a valid ID, set mock data
-                if (hackathonId) {
-                    setHackathon({
-                        id: hackathonId,
-                        title: "Future Tech Challenge 2026",
-                        banner: "https://images.unsplash.com/photo-1504384308090-c54be3852f33?auto=format&fit=crop&q=80&w=1000",
-                        status: "Active",
-                        category: "Emerging Tech",
-                        mode: "Hybrid",
-                        location: "San Francisco, CA / Online",
-                        visibility: true,
-                        registrationOpen: true,
-                        daysLeft: 14,
-                        progress: 65
-                    });
-                } else {
-                    setPageError("Hackathon ID not found.");
-                }
+            const initialHackathon = location.state?.hackathon;
+            if (initialHackathon) {
+                setHackathon(normalizeHackathonForView(initialHackathon, hackathonId));
+                setPageError(null);
+                setIsLoading(false);
+            } else {
+                setIsLoading(true);
+            }
+
+            setRegistrationCount(0);
+            setTeams([]);
+            setRecentActivity([]);
+
+            try {
+                const [hackathonResponse, applicationsResponse] = await Promise.all([
+                    apiClient.get(`/hackathons/${hackathonId}`),
+                    apiClient.get(`/applications/hackathon/${hackathonId}`)
+                ]);
+
+                const detail = hackathonResponse.data;
+                const applications = Array.isArray(applicationsResponse.data) ? applicationsResponse.data : [];
+                const normalizedHackathon = normalizeHackathonForView(detail, hackathonId);
+
+                setHackathon(normalizedHackathon);
+                setRegistrationCount(applications.length);
+                setTeams([]);
+                setRecentActivity(
+                    applications.slice(0, 4).map((application, index) => ({
+                        id: application._id || `${hackathonId}-${index}`,
+                        title: `Application ${application.status || 'received'}`,
+                        detail: application.status ? `Current status: ${application.status}` : 'New registration is pending review',
+                        time: application.appliedAt ? formatDate(application.appliedAt) : 'Just now',
+                        icon: index % 2 === 0 ? '🆕' : '📁'
+                    }))
+                );
             } catch (error) {
-                console.error("Error fetching hackathon details:", error);
-                setPageError("Failed to load hackathon details. Please refresh the page.");
+                console.error('Error fetching hackathon details:', error);
+                if (!initialHackathon) {
+                    setPageError('Failed to load hackathon details. Please refresh the page.');
+                }
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchHackathonDetails();
-    }, [hackathonId]);
+    }, [hackathonId, location.state]);
 
     // --- Filter Logic ---
     const filteredTeams = useMemo(() => {
@@ -238,20 +325,22 @@ const ManageHackathon = () => {
                                         Recent Activity
                                     </h3>
                                     <div className="space-y-4">
-                                        {[1, 2, 3, 4].map(i => (
-                                            <div key={i} className="flex gap-4 group cursor-pointer">
+                                        {recentActivity.length > 0 ? recentActivity.map((activity) => (
+                                            <div key={activity.id} className="flex gap-4 group cursor-pointer">
                                                 <div className="w-10 h-10 rounded-full bg-navy-900 border border-white/5 flex items-center justify-center text-lg flex-shrink-0 group-hover:border-cyan-500/50 transition-colors">
-                                                    {i % 2 === 0 ? "🆕" : "📁"}
+                                                    {activity.icon}
                                                 </div>
                                                 <div className="pb-4 border-b border-white/5 flex-1">
                                                     <p className="text-sm text-gray-300">
-                                                        <span className="font-bold text-white">Team Pixel Perfect</span>
-                                                        {i % 2 === 0 ? " just registered." : " submitted their Phase 1 project."}
+                                                        <span className="font-bold text-white">{activity.title}</span>
+                                                        {activity.detail}
                                                     </p>
-                                                    <span className="text-xs text-gray-500 mt-1 block font-medium uppercase tracking-tighter">{i * 12} mins ago</span>
+                                                    <span className="text-xs text-gray-500 mt-1 block font-medium uppercase tracking-tighter">{activity.time}</span>
                                                 </div>
                                             </div>
-                                        ))}
+                                        )) : (
+                                            <div className="text-sm text-gray-400">No recent activity yet.</div>
+                                        )}
                                     </div>
                                     <button className="w-full py-3 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl text-sm font-semibold transition-all active:scale-95">
                                         View All System Logs
@@ -342,7 +431,7 @@ const ManageHackathon = () => {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
-                                            {filteredTeams.map(team => (
+                                            {filteredTeams.length > 0 ? filteredTeams.map(team => (
                                                 <tr key={team.id} className="hover:bg-white/10 transition-colors group">
                                                     <td className="px-6 py-5">
                                                         <div className="flex items-center gap-4">
@@ -390,7 +479,13 @@ const ManageHackathon = () => {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan="5" className="px-6 py-10 text-center text-sm text-gray-400">
+                                                        No registered teams yet for this hackathon.
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

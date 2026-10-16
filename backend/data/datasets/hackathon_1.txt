@@ -1,0 +1,25 @@
+Hackathon 1: Sustainable City Challenge
+
+Theme:
+Build a solution that helps cities reduce waste, improve mobility, or save energy.
+
+Problem statement:
+Urban services often generate fragmented data across transport, utilities, and public services. Teams should design a solution that uses data to improve efficiency and citizen experience.
+
+Success criteria:
+- Clear user value
+- Measurable sustainability impact
+- Realistic technical architecture
+- Strong presentation and demo quality
+
+Hints:
+- Think about one city pain point first.
+- Consider a dashboard, recommendation engine, or workflow automation.
+- Decide early what data you can reliably access.
+
+Judging focus:
+- Innovation
+- Feasibility
+- Social impact
+- Clarity of execution
+

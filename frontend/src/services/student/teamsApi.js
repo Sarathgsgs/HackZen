@@ -1,4 +1,31 @@
 import apiClient from '../../api/api';
+import { updateMilestoneProgress } from '../../api/progressApi';
+
+const currentUserId = () => {
+    const user = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+    return user._id || user.id || '';
+};
+
+const toWorkspaceMessage = (message) => ({
+    id: message._id || message.id,
+    text: message.content,
+    sender: message.senderId === currentUserId() ? 'me' : 'them',
+    user: message.senderName || 'Team member',
+    time: new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    type: message.messageType || 'text',
+});
+
+const toWorkspaceFile = (file) => ({
+    id: file._id || file.id,
+    name: file.name,
+    size: `${(Number(file.size || 0) / (1024 * 1024)).toFixed(1)} MB`,
+    type: (file.name || '').split('.').pop()?.toUpperCase() || 'FILE',
+    uploader: file.uploadedByName || 'Team member',
+    time: new Date(file.createdAt).toLocaleString(),
+    url: file.url,
+    attachmentType: file.attachmentType,
+    attachmentSize: Number(file.size || 0),
+});
 
 /**
  * Student Teams API
@@ -13,11 +40,11 @@ export const fetchMyTeams = async () => {
         const { data } = await apiClient.get('/teams/my-teams');
 
         const mappedTeams = await Promise.all(data.map(async (team, idx) => {
-            let hackathonName = 'Hackathon';
+            let hackathonName = team.hackathonName || 'Hackathon';
             let memberCount = 1;
             let progress = 0;
 
-            if (team.hackathonId) {
+            if (team.hackathonId && !team.hackathonName) {
                 try {
                     const hackathonRes = await apiClient.get(`/hackathon/${team.hackathonId}`);
                     hackathonName = hackathonRes?.data?.title || hackathonName;
@@ -45,6 +72,7 @@ export const fetchMyTeams = async () => {
                 id: team._id,
                 name: team.teamName,
                 hackathon: hackathonName,
+                hackathonId: team.hackathonId,
                 status: 'Active',
                 lastMessage: 'Workspace ready',
                 time: 'Active',
@@ -54,7 +82,7 @@ export const fetchMyTeams = async () => {
                 progress,
                 members: memberCount,
                 domain: 'Technology',
-                roleInTeam: 'Member',
+                roleInTeam: team.leaderId === currentUserId() ? 'Team Lead' : 'Member',
                 activity: []
             };
         }));
@@ -100,19 +128,13 @@ export const fetchStudentTeams = async () => {
  */
 export const fetchTeamWorkspace = async (teamId) => {
     try {
-        const [msgRes, progressRes] = await Promise.all([
+        const [msgRes, progressRes, filesRes] = await Promise.all([
             apiClient.get(`/chat/${teamId}/messages`),
-            apiClient.get(`/progress/team/${teamId}`).catch(() => ({ data: null }))
+            apiClient.get(`/progress/team/${teamId}`).catch(() => ({ data: null })),
+            apiClient.get(`/chat/${teamId}/files`).catch(() => ({ data: [] })),
         ]);
 
-        const messages = (msgRes.data || []).map(m => ({
-            id: m._id,
-            text: m.content,
-            sender: m.senderId === JSON.parse(localStorage.getItem('user') || '{}')._id ? 'me' : 'them',
-            user: m.senderName || 'Teammate',
-            time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            type: m.messageType || 'text'
-        }));
+        const messages = (msgRes.data || []).map(toWorkspaceMessage);
 
         // Fetch milestones if progress exists
         let tasks = [];
@@ -130,7 +152,7 @@ export const fetchTeamWorkspace = async (teamId) => {
         return {
             messages,
             tasks,
-            files: [] // Placeholder for files router
+            files: (filesRes.data || []).map(toWorkspaceFile)
         };
     } catch (error) {
         console.error('Failed to fetch team workspace:', error);
@@ -174,18 +196,57 @@ export const joinTeamByCode = async (inviteCode) => {
 };
 
 /**
+ * Leaves a team
+ */
+export const leaveTeam = async (teamId) => {
+    try {
+        const { data } = await apiClient.delete(`/teams/${teamId}/members/me`);
+        return data;
+    } catch (error) {
+        console.error('Failed to leave team:', error);
+        throw error;
+    }
+};
+
+/**
  * Sends a message in a team workspace
  */
 export const sendMessage = async (teamId, messageData) => {
     try {
-        // Most messaging happens via WebSocket in the component
-        // This is a fallback or for HTTP-based sending
-        const { data } = await apiClient.post(`/chat/${teamId}/send`, messageData);
-        return { success: true, message: data };
+        const { data } = await apiClient.post(`/chat/${teamId}/messages`, {
+            content: messageData.text || messageData.content,
+            messageType: messageData.type || 'text'
+        });
+        return { success: true, message: toWorkspaceMessage(data) };
     } catch (error) {
         console.error('Failed to send message:', error);
         throw error;
     }
+};
+
+export const fetchTeamFiles = async (teamId) => {
+    const { data } = await apiClient.get(`/chat/${teamId}/files`);
+    return data || [];
+};
+
+export const uploadTeamFile = async (teamId, file) => {
+    const form = new FormData();
+    form.append('file', file);
+    const { data } = await apiClient.post(`/chat/${teamId}/files`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return toWorkspaceFile(data);
+};
+
+export const downloadTeamFile = async (file) => {
+    const fileUrl = (file.url || '').replace(/^\/api/, '');
+    const { data } = await apiClient.get(fileUrl, { responseType: 'blob' });
+    const href = URL.createObjectURL(data);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = file.name;
+    link.click();
+    URL.revokeObjectURL(href);
 };
 
 /**
@@ -193,8 +254,7 @@ export const sendMessage = async (teamId, messageData) => {
  */
 export const updateTaskStatus = async (teamId, taskId, newStatus) => {
     try {
-        // This would typically hit a progress/milestone update endpoint
-        await apiClient.put(`/progress/milestones/${taskId}`, { completed: newStatus === 'Done' });
+        await updateMilestoneProgress(taskId, newStatus === 'Done');
         return { success: true, taskId, newStatus };
     } catch (error) {
         console.error('Failed to update task:', error);
@@ -225,7 +285,8 @@ export const fetchTeamsMeta = async () => {
             }
 
             return {
-                id: app._id,
+                id: app._id || app.hackathonId,
+                hackathonId: app.hackathonId,
                 name,
                 date: app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : 'N/A',
                 status: app.status,

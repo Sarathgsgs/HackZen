@@ -1,0 +1,25 @@
+Hackathon 2: Digital Learning Companion
+
+Theme:
+Create a tool that helps students learn faster and stay consistent.
+
+Problem statement:
+Students often struggle with personalized pacing, feedback, and task prioritization. The goal is to build a companion that helps learners understand concepts and plan work without overwhelming them.
+
+Success criteria:
+- Personalization
+- Clear learning support
+- Good accessibility
+- Effective use of AI
+
+Hints:
+- Break the learner journey into discovery, practice, and review.
+- Use short feedback loops.
+- Prioritize the smallest useful improvement over a large feature list.
+
+Judging focus:
+- Educational value
+- Ease of use
+- Responsiveness
+- Technical creativity
+

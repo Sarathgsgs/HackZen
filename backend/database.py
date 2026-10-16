@@ -1,9 +1,11 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from typing import Optional
+import os
 import pymongo
 from pymongo.errors import ConnectionFailure
 from core.config import settings
 import certifi
+from urllib.parse import urlparse
 
 
 class MongoDB:
@@ -13,20 +15,32 @@ class MongoDB:
     @classmethod
     async def connect(cls):
         try:
-            cls.client = AsyncIOMotorClient(
-                settings.MONGO_URI,
-                maxPoolSize=100,
-                minPoolSize=10,
-                serverSelectionTimeoutMS=5000,
+            mongo_uri = settings.MONGO_URI or "mongodb://127.0.0.1:27017"
+            db_name = settings.DB_NAME or "hackzen"
+            parsed = urlparse(mongo_uri)
+
+            connect_kwargs = {
+                "maxPoolSize": 100,
+                "minPoolSize": 10,
+                "serverSelectionTimeoutMS": 5000,
+            }
+
+            tls_enabled = os.getenv("MONGO_TLS", "").lower() in {"1", "true", "yes"} or any(
+                k in mongo_uri.lower() for k in ["mongodb+srv", "ssl=true", "tls=true"]
             )
+            if parsed.scheme == "mongodb+srv" or tls_enabled:
+                connect_kwargs["tls"] = True
+                connect_kwargs["tlsCAFile"] = certifi.where()
+
+            cls.client = AsyncIOMotorClient(mongo_uri, **connect_kwargs)
             await cls.client.admin.command("ping")
-            cls.db = cls.client[settings.DB_NAME]
-            print("✅ Connected to MongoDB")
+            cls.db = cls.client[db_name]
+            print(f"[DB] Connected to MongoDB ({db_name})")
 
             await cls.create_indexes()
 
         except ConnectionFailure as e:
-            print(f"❌ MongoDB connection failed: {e}")
+            print(f"[DB] MongoDB connection failed: {e}")
             raise
 
     @classmethod
@@ -50,6 +64,9 @@ class MongoDB:
         await cls.db.organizers.create_index(
             [("userId", pymongo.ASCENDING)], unique=True
         )
+        await cls.db.user_settings.create_index(
+            [("userId", pymongo.ASCENDING)], unique=True
+        )
 
         # Hackathons collection
         await cls.db.hackathons.create_index([("organizerId", pymongo.ASCENDING)])
@@ -63,11 +80,20 @@ class MongoDB:
             unique=True,
         )
         await cls.db.teams.create_index([("createdBy", pymongo.ASCENDING)])
+        await cls.db.teams.create_index([("mentorId", pymongo.ASCENDING)])
 
         # Team Members
         await cls.db.teamMembers.create_index(
             [("teamId", pymongo.ASCENDING), ("userId", pymongo.ASCENDING)], unique=True
         )
+
+        # Queries run by the reminder worker and the per-user inbox.
+        await cls.db.meetings.create_index([("startTime", pymongo.ASCENDING), ("reminderSentAt", pymongo.ASCENDING)])
+        await cls.db.notifications.create_index([("userId", pymongo.ASCENDING), ("createdAt", pymongo.DESCENDING)])
+        await cls.db.mentorRequests.create_index([("mentorId", pymongo.ASCENDING), ("status", pymongo.ASCENDING), ("createdAt", pymongo.DESCENDING)])
+        await cls.db.feedback.create_index([("mentorId", pymongo.ASCENDING), ("teamId", pymongo.ASCENDING), ("status", pymongo.ASCENDING), ("createdAt", pymongo.DESCENDING)])
+        await cls.db.teamMaterials.create_index([("teamId", pymongo.ASCENDING), ("createdAt", pymongo.DESCENDING)])
+        await cls.db.teamMaterials.create_index([("uploadedBy", pymongo.ASCENDING)])
 
         # Applications
         await cls.db.applications.create_index(
@@ -87,13 +113,13 @@ class MongoDB:
             unique=True,
         )
 
-        print("✅ MongoDB indexes created")
+        print("[DB] MongoDB indexes created")
 
     @classmethod
     async def disconnect(cls):
         if cls.client:
             cls.client.close()
-            print("✅ Disconnected from MongoDB")
+            print("[DB] Disconnected from MongoDB")
 
     @classmethod
     def get_db(cls) -> AsyncIOMotorDatabase:

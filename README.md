@@ -1,2 +1,5 @@
-# HackZen
-Readme
+# HackZen Platform
+
+Enterprise Hackathon Management & Evaluation Platform.
+
+

@@ -132,6 +132,13 @@ class ProfileService:
             m["_id"] = str(m["_id"])
             if "userId" in m:
                 m["userId"] = str(m["userId"])
+                # A hidden contact number is never included in mentor listings
+                # that are consumed by teams and other public-facing pages.
+                preferences = await db.user_settings.find_one(
+                    {"userId": m["userId"]}, {"mentor.contactNumberVisibility": 1}
+                )
+                if (preferences or {}).get("mentor", {}).get("contactNumberVisibility") == "hidden":
+                    m.pop("phoneNumber", None)
                 # Fetch name from user collection
                 user = await db.users.find_one({"_id": ObjectId(m["userId"])})
                 if user:

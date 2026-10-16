@@ -13,14 +13,20 @@ const InviteMentors = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [inviteHistory, setInviteHistory] = useState([]);
     const [activeTab, setActiveTab] = useState('compose'); // compose, history
+    const [statusMessage, setStatusMessage] = useState('');
 
     useEffect(() => {
         loadHistory();
     }, []);
 
     const loadHistory = async () => {
-        const history = await fetchInvitationHistory();
-        setInviteHistory(history);
+        try {
+            const history = await fetchInvitationHistory();
+            setInviteHistory(history);
+        } catch (error) {
+            console.error("Failed to load invitation history:", error);
+            setStatusMessage("Failed to load invitation history.");
+        }
     };
 
     const handleInvite = async () => {
@@ -28,16 +34,19 @@ const InviteMentors = () => {
         if (emailList.length === 0) return alert("Please enter at least one valid email address.");
 
         setIsLoading(true);
+        setStatusMessage('');
         try {
-            await inviteMentors({
+            const result = await inviteMentors({
                 emails: emailList,
                 ...invitationData
             });
+            setStatusMessage(result.message || 'Invitations sent successfully.');
             setEmails('');
             loadHistory();
             setActiveTab('history');
         } catch (error) {
             console.error("Invite failed:", error);
+            setStatusMessage(error.response?.data?.detail || "Failed to send invitations. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -68,6 +77,12 @@ const InviteMentors = () => {
                     </button>
                 </div>
             </div>
+
+            {statusMessage && (
+                <div className="glass rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100">
+                    {statusMessage}
+                </div>
+            )}
 
             {/* Main Content Area */}
             <div className="glass rounded-2xl border border-white/5 overflow-hidden">
@@ -171,16 +186,23 @@ const InviteMentors = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-500">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                            <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
+                                                invite.emailSent ? 'text-green-400' : 'text-amber-500'
+                                            }`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                                    invite.emailSent ? 'bg-green-400' : 'bg-amber-500 animate-pulse'
+                                                }`}></span>
                                                 {invite.status}
                                             </span>
+                                            {invite.notificationSent && (
+                                                <p className="text-[10px] text-cyan-400 mt-1">In-app notification sent</p>
+                                            )}
                                         </td>
                                     </tr>
                                 )) : (
                                     <tr>
                                         <td colSpan="5" className="px-6 py-12 text-center text-gray-500 text-sm italic">
-                                            No invitation transcripts found in memory.
+                                            No mentor invitation history found yet.
                                         </td>
                                     </tr>
                                 )}

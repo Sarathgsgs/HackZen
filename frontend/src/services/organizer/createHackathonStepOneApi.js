@@ -20,6 +20,9 @@ export const saveStepOneData = async (draft, stepData) => {
         startDate: stepData.startDate,
         endDate: stepData.endDate,
         description: stepData.description,
+        location: stepData.location,
+        posterFile: stepData.posterFile,
+        posterPreview: stepData.posterPreview,
     };
 
     await saveHackathonDraft(nextDraft);

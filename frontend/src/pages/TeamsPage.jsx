@@ -7,9 +7,12 @@ import {
     createTeam,
     joinTeamByCode,
     sendMessage,
-    updateTaskStatus
+    updateTaskStatus,
+    uploadTeamFile,
+    downloadTeamFile,
 } from '../services/student/teamsApi';
 import { fetchAssignedTeams } from '../services/mentor/assignedTeamsApi';
+import TeamChat from '../components/TeamChat';
 
 /**
  * My Teams Component
@@ -39,9 +42,10 @@ const MyTeams = () => {
     const [statusFilter, setStatusFilter] = useState('All');
     const [isLoading, setIsLoading] = useState(true);
     const [messageInput, setMessageInput] = useState('');
+    const [messageType, setMessageType] = useState('text');
     const [isTyping, setIsTyping] = useState(false);
     const [modal, setModal] = useState({ type: null, data: null }); // { type: 'create' | 'join' | 'task' | 'delete', data: any }
-    const [newTeamData, setNewTeamData] = useState({ name: '', hackathon: '', domain: '' });
+    const [newTeamData, setNewTeamData] = useState({ name: '', hackathonId: '', domain: '' });
     const [inviteCode, setInviteCode] = useState('');
     const [newTaskData, setNewTaskData] = useState({ title: '', priority: 'Medium', assignedTo: '' });
 
@@ -111,6 +115,21 @@ const MyTeams = () => {
         }
     }, [selectedTeamId]);
 
+    // Keep the central team room current for every member and the assigned mentor.
+    // The API remains the source of truth, so there is no browser-only chat state.
+    useEffect(() => {
+        if (!selectedTeamId || viewMode !== 'workspace') return undefined;
+        const refreshRoom = async () => {
+            try {
+                const data = await fetchTeamWorkspace(selectedTeamId);
+                setMessages(prev => ({ ...prev, [selectedTeamId]: data.messages }));
+                setFiles(prev => ({ ...prev, [selectedTeamId]: data.files }));
+            } catch (error) { console.error('Failed to refresh team room:', error); }
+        };
+        const timer = window.setInterval(refreshRoom, 10000);
+        return () => window.clearInterval(timer);
+    }, [selectedTeamId, viewMode]);
+
     // --- RBAC PERMISSIONS ---
     const canManageTeam = ['admin', 'organizer', 'mentor'].includes(role);
     const canEditWorkspace = ['admin', 'student', 'mentor'].includes(role);
@@ -142,6 +161,7 @@ const MyTeams = () => {
             text: messageInput,
             sender: 'me',
             user: user.name,
+            type: messageType,
         };
 
         try {
@@ -152,26 +172,7 @@ const MyTeams = () => {
                     [selectedTeamId]: [...(prev[selectedTeamId] || []), response.message]
                 }));
                 setMessageInput('');
-
-                // Fake typing indicator from "team"
-                setTimeout(() => {
-                    setIsTyping(true);
-                    setTimeout(() => {
-                        setIsTyping(false);
-                        const reply = {
-                            id: Date.now() + 1,
-                            text: "Got it! Looking into it now.",
-                            sender: 'them',
-                            user: 'Alex',
-                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                            type: 'text'
-                        };
-                        setMessages(prev => ({
-                            ...prev,
-                            [selectedTeamId]: [...(prev[selectedTeamId] || []), reply]
-                        }));
-                    }, 2000);
-                }, 1000);
+                setMessageType('text');
             }
         } catch (error) {
             console.error("Failed to send message:", error);
@@ -191,47 +192,36 @@ const MyTeams = () => {
         });
     };
 
-    const handleFileUpload = (e) => {
+    const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file || !canEditWorkspace) return;
-
-        const newFile = {
-            id: Date.now(),
-            name: file.name,
-            size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-            type: file.name.split('.').pop().toUpperCase(),
-            uploader: user.name,
-            time: 'Just now'
-        };
-
-        setFiles(prev => ({
-            ...prev,
-            [selectedTeamId]: [newFile, ...(prev[selectedTeamId] || [])]
-        }));
-
-        // Log to activity
-        setTeams(prev => prev.map(t =>
-            t.id === selectedTeamId
-                ? { ...t, activity: [{ id: Date.now(), user: user.name, action: 'uploaded', item: file.name, time: 'Just now' }, ...t.activity] }
-                : t
-        ));
+        try {
+            const uploaded = await uploadTeamFile(selectedTeamId, file);
+            setFiles(prev => ({ ...prev, [selectedTeamId]: [uploaded, ...(prev[selectedTeamId] || [])] }));
+        } catch (error) { console.error('Failed to upload file:', error); }
+        finally { e.target.value = ''; }
     };
 
     const handleCreateTeam = async (e) => {
         e.preventDefault();
         try {
-            const response = await createTeam(newTeamData);
+            const response = await createTeam({
+                teamName: newTeamData.name.trim(),
+                hackathonId: newTeamData.hackathonId,
+                domain: newTeamData.domain.trim(),
+            });
             if (response.success) {
                 setTeams([response.team, ...teams]);
                 setMessages(prev => ({ ...prev, [response.team.id]: [] }));
                 setTasks(prev => ({ ...prev, [response.team.id]: [] }));
                 setFiles(prev => ({ ...prev, [response.team.id]: [] }));
                 setModal({ type: null });
-                setNewTeamData({ name: '', hackathon: '', domain: '' });
+                setNewTeamData({ name: '', hackathonId: '', domain: '' });
                 setAlerts([{ id: Date.now(), type: 'success', message: `Team "${response.team.name}" created successfully!` }, ...alerts]);
             }
         } catch (error) {
             console.error("Failed to create team:", error);
+            setAlerts([{ id: Date.now(), type: 'error', message: error.message || 'Failed to create team.' }, ...alerts]);
         }
     };
 
@@ -457,7 +447,7 @@ const MyTeams = () => {
                                     <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">{team.name}</h3>
                                     <span className="text-[10px] text-cyan-300 font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-nowrap">{team.roleInTeam}</span>
                                 </div>
-                                <p className="text-gray-400 text-sm line-clamp-2 mb-6">{team.domain} � {team.lastMessage}</p>
+                                <p className="text-gray-400 text-sm line-clamp-2 mb-6">{team.domain} • {team.lastMessage}</p>
 
                                 <div className="space-y-4 mt-auto">
                                     <div>
@@ -471,11 +461,26 @@ const MyTeams = () => {
                                     </div>
 
                                     <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                                        <div className="flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" /></svg>
-                                            <span className="text-xs text-gray-300">{team.members} members</span>
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                                <span className="text-xs text-gray-300">{team.members} members</span>
+                                            </div>
+                                            {team.teamCode && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (navigator.clipboard) navigator.clipboard.writeText(team.teamCode);
+                                                    }}
+                                                    title="Click to copy invite code"
+                                                    className="flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/25 px-2 py-1 rounded-lg hover:bg-cyan-500/20 transition-colors"
+                                                >
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 8V6a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-2M6 12h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z" /></svg>
+                                                    {team.teamCode}
+                                                </button>
+                                            )}
                                         </div>
-                                        <button className="flex items-center gap-1.5 text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors">
+                                        <button className="flex items-center gap-1.5 text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors shrink-0">
                                             Open Workspace
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                         </button>
@@ -513,8 +518,32 @@ const MyTeams = () => {
                                     <h3 className="text-xl font-bold text-white mb-3">{hack.name}</h3>
                                     <p className="text-gray-400 text-sm mb-6">Set up or join a team before the event begins.</p>
                                     <div className="mt-auto flex gap-3">
-                                        <button className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/5 transition-colors">View Event</button>
-                                        <button className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors">Form Team</button>
+                                        <button
+                                            onClick={() => navigate('/student/hackathons')}
+                                            className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/5 transition-colors"
+                                        >
+                                            View Event
+                                        </button>
+                                        <button
+                                            onClick={() => setModal({ type: 'join' })}
+                                            className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/5 transition-colors"
+                                        >
+                                            Join Team
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setNewTeamData({
+                                                    name: '',
+                                                    hackathon: hack.id,
+                                                    hackathonId: hack.id,
+                                                    domain: hack.domain || 'Technology'
+                                                });
+                                                setModal({ type: 'create' });
+                                            }}
+                                            className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors"
+                                        >
+                                            Form Team
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -571,32 +600,32 @@ const MyTeams = () => {
                 {/* Secure Tactical Environment */}
                 <div className="flex-1 glass border border-white/5 rounded-3xl overflow-hidden flex flex-col shadow-2xl relative bg-black/10 group/env">
                     {/* Header Protocol */}
-                    <div className="px-10 py-8 border-b border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-navy-950/40 relative z-20">
-                        <div className="flex items-center gap-8">
-                            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${currentTeam.gradient || 'from-purple-600 to-blue-700'} flex items-center justify-center text-white text-3xl font-bold shadow-2xl relative overflow-hidden group-hover/env:scale-105 transition-transform duration-700`}>
+                    <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 bg-navy-950/40 relative z-20">
+                        <div className="flex items-center gap-4 sm:gap-8">
+                            <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${currentTeam.gradient || 'from-purple-600 to-blue-700'} flex items-center justify-center text-white text-xl sm:text-3xl font-bold shadow-2xl relative overflow-hidden group-hover/env:scale-105 transition-transform duration-700 shrink-0`}>
                                 <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
                                 <span className="relative z-10 ">{currentTeam.name.charAt(0)}</span>
                             </div>
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-bold text-white leading-none">{currentTeam.name}</h2>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-3">
+                            <div className="space-y-1.5 sm:space-y-2">
+                                <h2 className="text-xl sm:text-3xl font-bold text-white leading-none">{currentTeam.name}</h2>
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                                    <div className="flex items-center gap-2 sm:gap-3">
                                         <span className={`w-2.5 h-2.5 rounded-full ${currentTeam.isOnline ? 'bg-emerald-500 animate-pulse shadow-[0_0_12px_#10b981]' : 'bg-gray-700'}`}></span>
-                                        <span className="text-xs text-gray-500 font-semibold text-gray-400">{currentTeam.isOnline ? 'Real-time Link established' : 'Node Dormant'}</span>
+                                        <span className="text-xs text-gray-400 font-semibold">{currentTeam.isOnline ? 'Real-time Link established' : 'Node Dormant'}</span>
                                     </div>
-                                    <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
-                                    <span className="text-xs text-indigo-400 font-bold tracking-[0.3em] uppercase ">Sector: {currentTeam.domain || 'Tactical'}</span>
+                                    <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/10"></div>
+                                    <span className="text-xs text-indigo-400 font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase">Sector: {currentTeam.domain || 'Tactical'}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Navigation Matrix */}
-                        <div className="flex p-2 bg-black/20 rounded-2xl border border-white/5 shadow-inner backdrop-blur-3xl overflow-x-auto max-w-full custom-scrollbar">
+                        <div className="flex p-1.5 sm:p-2 bg-black/20 rounded-2xl border border-white/5 shadow-inner backdrop-blur-3xl overflow-x-auto max-w-full custom-scrollbar">
                             {['Chat', 'Tasks', 'Files', 'Activity'].map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`px-10 py-3 rounded-full text-xs font-bold uppercase tracking-[0.3em] transition-all  whitespace-nowrap ${activeTab === tab ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/30 translate-y-[-1px]' : 'text-gray-600 hover:text-white hover:bg-white/5'}`}
+                                    className={`px-4 sm:px-8 py-2 sm:py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] transition-all whitespace-nowrap ${activeTab === tab ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/30 translate-y-[-1px]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                                 >
                                     {tab}
                                 </button>
@@ -605,66 +634,9 @@ const MyTeams = () => {
                     </div>
 
                     {/* Content Matrix */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-12 bg-navy-900/10">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5 sm:p-6 lg:p-12 bg-navy-900/10">
                         {activeTab === 'Chat' && (
-                            <div className="h-full flex flex-col">
-                                <div className="flex-1 space-y-10 overflow-y-auto custom-scrollbar pb-8 pr-4">
-                                    <div className="text-center opacity-20 select-none pb-4">
-                                        <span className="px-6 py-2 rounded-full border border-white/10 text-xs font-bold uppercase tracking-[0.6em] ">Encrypted History Stream Initiated</span>
-                                    </div>
-
-                                    {(messages[currentTeam.id] || []).map((msg, i) => (
-                                        <div key={msg.id} className={`flex gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 ${msg.sender === 'me' ? 'flex-row-reverse' : ''}`}>
-                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-xl border border-white/10 shrink-0 relative overflow-hidden transition-transform hover:scale-110 ${msg.sender === 'system' ? 'bg-navy-950 border-white/5' : msg.sender === 'me' ? 'bg-gradient-to-br from-purple-600 to-indigo-700 shadow-purple-900/40' : 'bg-navy-800'}`}>
-                                                <div className="absolute inset-0 bg-white/5 opacity-[0.2]"></div>
-                                                <span className="relative z-10">{msg.user.charAt(0)}</span>
-                                            </div>
-                                            <div className={`max-w-[75%] space-y-3 ${msg.sender === 'me' ? 'items-end' : 'items-start'} flex flex-col`}>
-                                                <div className={`flex items-center gap-4 px-2 ${msg.sender === 'me' ? 'flex-row-reverse' : ''}`}>
-                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-widest ">{msg.user}</span>
-                                                    <span className="text-xs text-gray-700 font-bold font-mono tracking-tighter">{msg.time}</span>
-                                                </div>
-                                                <div className={`p-6 rounded-2xl text-sm font-medium leading-relaxed shadow-2xl relative ${msg.sender === 'system' ? 'bg-navy-950/40 text-gray-600 border border-white/5 ' : msg.sender === 'me' ? 'bg-black/20 text-white border border-purple-500/20 rounded-tr-none' : 'bg-navy-950/60 text-gray-200 border border-white/5 rounded-tl-none'}`}>
-                                                    <div className={`absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full opacity-0 group-hover:opacity-10 pointer-events-none`}></div>
-                                                    {msg.text}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {isTyping && (
-                                        <div className="flex gap-6 animate-pulse px-2">
-                                            <div className="w-12 h-12 rounded-xl bg-navy-950 flex items-center justify-center border border-white/5 shrink-0">
-                                                <div className="flex gap-1.5"><div className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce"></div><div className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce [animation-delay:0.2s]"></div><div className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce [animation-delay:0.4s]"></div></div>
-                                            </div>
-                                            <span className="text-xs text-gray-700 font-semibold text-gray-400 self-center">Personnel communicating...</span>
-                                        </div>
-                                    )}
-                                    <div ref={chatEndRef} />
-                                </div>
-                                
-                                {/* Console Input */}
-                                <form onSubmit={handleSendMessage} className="mt-10 relative">
-                                    <div className="absolute inset-x-0 bottom-full mb-4 px-8 opacity-20">
-                                         <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="TRANSMIT COMMUNIQUE TO SECTOR..."
-                                        value={messageInput}
-                                        onChange={(e) => setMessageInput(e.target.value)}
-                                        className="w-full pl-8 pr-20 py-6 bg-navy-950/90 border border-white/5 rounded-2xl text-sm font-bold uppercase tracking-[0.2em] text-white focus:outline-none focus:border-purple-500/40 transition-all placeholder:text-gray-800 shadow-inner "
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={!messageInput.trim()}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-14 h-14 bg-gradient-to-r from-purple-600 to-indigo-700 hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] text-white rounded-xl flex items-center justify-center transition-all disabled:opacity-20 disabled:grayscale group/send translate-x-1"
-                                    >
-                                        <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 12h14M12 5l7 7-7 7" />
-                                        </svg>
-                                    </button>
-                                </form>
-                            </div>
+                            <TeamChat team={currentTeam} />
                         )}
 
                         {activeTab === 'Files' && (
@@ -712,7 +684,7 @@ const MyTeams = () => {
                                                     <span>Origin: {file.uploader}</span>
                                                     <span>{file.time}</span>
                                                 </div>
-                                                <button className="w-full py-3 mt-4 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-400 text-gray-400 hover:text-white transition-all border border-white/5">Retrieve</button>
+                                                <button onClick={() => downloadTeamFile(file)} className="w-full py-3 mt-4 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-400 text-gray-400 hover:text-white transition-all border border-white/5">Download</button>
                                             </div>
                                         </div>
                                     ))}
@@ -858,13 +830,13 @@ const MyTeams = () => {
                                             <label className="text-xs font-bold text-gray-500 uppercase tracking-widest  ml-1">Assigned Hackathon</label>
                                             <select
                                                 required
-                                                value={newTeamData.hackathon}
-                                                onChange={(e) => setNewTeamData({ ...newTeamData, hackathon: e.target.value })}
+                                                value={newTeamData.hackathonId || newTeamData.hackathon || ''}
+                                                onChange={(e) => setNewTeamData({ ...newTeamData, hackathon: e.target.value, hackathonId: e.target.value })}
                                                 className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-purple-500/40 transition-all uppercase  tracking-widest shadow-inner appearance-none cursor-pointer"
                                             >
                                                 <option value="" className="bg-navy-900">SELECT DEPLOYMENT SECTOR...</option>
                                                 {registeredHackathons.map(h => (
-                                                    <option key={h.id} value={h.name} className="bg-navy-900">{h.name.toUpperCase()}</option>
+                                                    <option key={h.id} value={h.id} className="bg-navy-900">{h.name.toUpperCase()}</option>
                                                 ))}
                                             </select>
                                         </div>

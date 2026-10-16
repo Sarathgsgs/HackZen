@@ -45,6 +45,21 @@ export const assignMentor = async (teamId, mentorData) => {
     return data;
 };
 
+export const requestMentor = async (teamId, mentorId, message = '') => {
+    const { data } = await apiClient.post(`/teams/${teamId}/request-mentor`, { mentorId, message });
+    return data;
+};
+
+export const getMentorRequests = async () => {
+    const { data } = await apiClient.get('/teams/mentor/requests');
+    return data || [];
+};
+
+export const decideMentorRequest = async (requestId, decision, responseMessage = '') => {
+    const { data } = await apiClient.patch(`/teams/mentor/requests/${requestId}`, { decision, responseMessage });
+    return data;
+};
+
 export const removeTeamMember = async (teamId, userId) => {
     const { data } = await apiClient.delete(`/teams/${teamId}/members/${userId}`);
     return data;

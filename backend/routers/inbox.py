@@ -142,6 +142,7 @@ async def send_notification(
     type: str = Body(..., embed=True),
     message: str = Body(..., embed=True),
     hackathon_id: Optional[str] = Body(None, embed=True),
+    team_id: Optional[str] = Body(None, embed=True),
     current_user: dict = Depends(RequireRole(["admin", "organizer", "mentor"])),
 ):
     """Send a notification (Admin/Organizer/Mentor only)"""
@@ -152,6 +153,7 @@ async def send_notification(
     notification_data = {
         "userId": user_id,
         "hackathonId": hackathon_id,
+        "teamId": team_id,
         "type": type,
         "message": message,
         "read": False,

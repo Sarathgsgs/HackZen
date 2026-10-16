@@ -82,7 +82,7 @@ class PasswordChangeRequest(BaseModel):
         has_upper = any(c.isupper() for c in v)
         has_lower = any(c.islower() for c in v)
         has_digit = any(c.isdigit() for c in v)
-        
+
         if not (has_upper and has_lower and has_digit):
             raise ValueError(
                 "Password must contain uppercase, lowercase, and numeric characters"

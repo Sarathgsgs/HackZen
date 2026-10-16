@@ -1,16 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import apiClient from '../../api/api';
+import { fetchMyHackathons } from '../../services/organizer/myHackathonsApi';
 
 const EditTimeline = () => {
     const { hackathonId } = useParams();
     const navigate = useNavigate();
 
     // --- State Management ---
+    const [allHackathons, setAllHackathons] = useState([]);
+    const [selectedHackathonId, setSelectedHackathonId] = useState(hackathonId || '');
     const [hackathon, setHackathon] = useState(null);
     const [phases, setPhases] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
     const [validationErrors, setValidationErrors] = useState({});
 
     // --- Helper: Format Date for Input ---
@@ -18,7 +23,6 @@ const EditTimeline = () => {
         if (!dateString || dateString === 'TBD') return '';
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return '';
-        // Format to YYYY-MM-DDTHH:MM
         return date.toISOString().slice(0, 16);
     };
 
@@ -29,57 +33,85 @@ const EditTimeline = () => {
         const end = new Date(endDate);
 
         if (isNaN(start.getTime()) || isNaN(end.getTime())) return 'Upcoming';
-
         if (now < start) return 'Upcoming';
         if (now >= start && now <= end) return 'Ongoing';
         return 'Completed';
     };
 
-    // --- Initial Data Fetch ---
+    // --- Load Hackathons List ---
     useEffect(() => {
+        const loadHackathons = async () => {
+            try {
+                const list = await fetchMyHackathons();
+                setAllHackathons(list || []);
+                if (!hackathonId && list && list.length > 0) {
+                    setSelectedHackathonId(list[0].id);
+                }
+            } catch (err) {
+                console.warn("Failed to load organizer hackathons list", err);
+            }
+        };
+        loadHackathons();
+    }, [hackathonId]);
+
+    // --- Initial Data Fetch for Selected Hackathon ---
+    useEffect(() => {
+        const currentId = hackathonId || selectedHackathonId;
+        if (!currentId) return;
+
         const fetchData = async () => {
             setIsLoading(true);
+            setError(null);
             try {
-                // In a real app: fetch(`/api/organizer/hackathons/${hackathonId}/timeline`)
-                await new Promise(resolve => setTimeout(resolve, 800));
-
-                // Mock Hackathon Data
-                const mockHackathon = {
-                    id: hackathonId,
-                    title: "Future Tech Challenge 2026",
-                    mode: "Hybrid",
-                    registrations: 450,
-                    status: "Active",
-                    startDate: "2026-02-15T09:00",
-                    endDate: "2026-02-17T18:00",
-                    banner: "https://images.unsplash.com/photo-1504384308090-c54be3852f33?auto=format&fit=crop&q=80&w=1000"
+                const { data } = await apiClient.get(`/hackathon/${currentId}`);
+                
+                const mappedHackathon = {
+                    id: data._id || data.id || currentId,
+                    title: data.title || "Hackathon Event",
+                    mode: data.location?.toLowerCase().includes('online') ? 'Online' : 'Hybrid',
+                    registrations: data.participants_count || data.totalParticipants || 0,
+                    status: data.status || "Active",
+                    startDate: data.registrationStart || data.hackathonStart || new Date().toISOString(),
+                    endDate: data.hackathonEnd || new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+                    banner: data.posterUrl || "https://images.unsplash.com/photo-1504384308090-c54be3852f33?auto=format&fit=crop&q=80&w=1000"
                 };
 
-                // Mock Timeline Data (empty to trigger default phases if needed)
-                let mockPhases = [];
+                let loadedPhases = Array.isArray(data.phases) && data.phases.length > 0 ? data.phases : [];
 
-                // If no timeline exists, auto-generate default phases
-                if (mockPhases.length === 0) {
-                    mockPhases = [
-                        { id: 'p1', name: 'Registration Period', startDate: '2026-02-01T00:00', endDate: '2026-02-14T23:59', isDefault: true },
-                        { id: 'p2', name: 'Submission Period', startDate: '2026-02-15T09:00', endDate: '2026-02-17T18:00', isDefault: true },
-                        { id: 'p3', name: 'Evaluation Period', startDate: '2026-02-18T09:00', endDate: '2026-02-22T23:59', isDefault: true },
-                        { id: 'p4', name: 'Result Announcement', startDate: '2026-02-25T10:00', endDate: '2026-02-25T12:00', isDefault: true }
+                if (loadedPhases.length === 0) {
+                    const regStart = formatDateForInput(data.registrationStart) || formatDateForInput(new Date().toISOString());
+                    const regEnd = formatDateForInput(data.registrationEnd) || formatDateForInput(new Date(Date.now() + 5 * 86400000).toISOString());
+                    const hackStart = formatDateForInput(data.hackathonStart) || formatDateForInput(new Date(Date.now() + 6 * 86400000).toISOString());
+                    const hackEnd = formatDateForInput(data.hackathonEnd) || formatDateForInput(new Date(Date.now() + 8 * 86400000).toISOString());
+                    const evalEnd = formatDateForInput(new Date(Date.now() + 10 * 86400000).toISOString());
+                    const resultDate = formatDateForInput(new Date(Date.now() + 12 * 86400000).toISOString());
+
+                    loadedPhases = [
+                        { id: 'p1', name: 'Registration Period', startDate: regStart, endDate: regEnd, isDefault: true },
+                        { id: 'p2', name: 'Submission Period', startDate: hackStart, endDate: hackEnd, isDefault: true },
+                        { id: 'p3', name: 'Evaluation Period', startDate: hackEnd, endDate: evalEnd, isDefault: true },
+                        { id: 'p4', name: 'Result Announcement', startDate: evalEnd, endDate: resultDate, isDefault: true }
                     ];
+                } else {
+                    loadedPhases = loadedPhases.map(p => ({
+                        ...p,
+                        startDate: formatDateForInput(p.startDate),
+                        endDate: formatDateForInput(p.endDate)
+                    }));
                 }
 
-                setHackathon(mockHackathon);
-                setPhases(mockPhases);
+                setHackathon(mappedHackathon);
+                setPhases(loadedPhases);
             } catch (err) {
-                console.error("Failed to fetch timeline data", err);
-                setError("Failed to load timeline data. Please try again.");
+                console.error("Failed to fetch hackathon timeline", err);
+                setError(err.response?.data?.detail || "Failed to load timeline data. Please check event status.");
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchData();
-    }, [hackathonId]);
+    }, [hackathonId, selectedHackathonId]);
 
     // --- Validation Logic ---
     const validatePhases = (currentPhases) => {
@@ -90,13 +122,16 @@ const EditTimeline = () => {
             const start = new Date(phase.startDate);
             const end = new Date(phase.endDate);
 
-            // End date must be after start date
-            if (start >= end) {
-                errors[phase.id] = "End date must be after start date";
+            if (!phase.name?.trim()) {
+                errors[phase.id] = "Phase name cannot be empty";
                 hasErrors = true;
             }
 
-            // Overlap check (optimized)
+            if (start >= end) {
+                errors[phase.id] = "End date must be strictly after start date";
+                hasErrors = true;
+            }
+
             for (let i = 0; i < currentPhases.length; i++) {
                 if (i === index) continue;
                 const otherPhase = currentPhases[i];
@@ -104,7 +139,7 @@ const EditTimeline = () => {
                 const otherEnd = new Date(otherPhase.endDate);
 
                 if (start < otherEnd && end > otherStart) {
-                    errors[phase.id] = (errors[phase.id] ? errors[phase.id] + ". " : "") + "Phase overlaps with '" + otherPhase.name + "'";
+                    errors[phase.id] = (errors[phase.id] ? errors[phase.id] + ". " : "") + "Overlaps with '" + otherPhase.name + "'";
                     hasErrors = true;
                 }
             }
@@ -114,52 +149,86 @@ const EditTimeline = () => {
         return !hasErrors;
     };
 
-    // --- Action Handlers ---
+    // --- Form Action Handlers ---
     const handleAddPhase = () => {
+        const lastPhase = phases[phases.length - 1];
+        let newStartDate = new Date();
+        let newEndDate = new Date();
+
+        if (lastPhase && lastPhase.endDate) {
+            newStartDate = new Date(lastPhase.endDate);
+            newStartDate.setHours(newStartDate.getHours() + 1);
+            newEndDate = new Date(newStartDate);
+            newEndDate.setDate(newEndDate.getDate() + 2);
+        } else {
+            newEndDate.setDate(newEndDate.getDate() + 2);
+        }
+
         const newPhase = {
-            id: `custom-${Date.now()}`,
-            name: 'New Custom Phase',
-            startDate: '',
-            endDate: '',
+            id: 'p_' + Date.now(),
+            name: `Phase ${phases.length + 1}`,
+            startDate: formatDateForInput(newStartDate),
+            endDate: formatDateForInput(newEndDate),
             isDefault: false
         };
-        setPhases([...phases, newPhase]);
-    };
 
-    const handleDeletePhase = (id) => {
-        setPhases(phases.filter(p => p.id !== id));
-        const newErrors = { ...validationErrors };
-        delete newErrors[id];
-        setValidationErrors(newErrors);
-    };
-
-    const handleUpdatePhase = (id, field, value) => {
-        const updatedPhases = phases.map(p =>
-            p.id === id ? { ...p, [field]: value } : p
-        );
+        const updatedPhases = [...phases, newPhase];
         setPhases(updatedPhases);
+        validatePhases(updatedPhases);
+    };
 
-        // Clear errors for this phase when updated
-        if (validationErrors[id]) {
-            const newErrors = { ...validationErrors };
-            delete newErrors[id];
-            setValidationErrors(newErrors);
-        }
+    const handleRemovePhase = (id) => {
+        const updatedPhases = phases.filter(p => p.id !== id);
+        setPhases(updatedPhases);
+        validatePhases(updatedPhases);
+    };
+
+    const handlePhaseChange = (id, field, value) => {
+        const updatedPhases = phases.map(phase => {
+            if (phase.id === id) {
+                return { ...phase, [field]: value };
+            }
+            return phase;
+        });
+
+        setPhases(updatedPhases);
+        validatePhases(updatedPhases);
     };
 
     const handleSave = async () => {
         if (!validatePhases(phases)) return;
 
-        setIsSaving(true);
-        try {
-            // In a real app: await axios.put(`/api/organizer/hackathons/${hackathonId}/timeline`, { phases })
-            await new Promise(resolve => setTimeout(resolve, 1500));
+        const currentId = hackathonId || selectedHackathonId;
+        if (!currentId) return;
 
-            // Success feedback
-            alert("Timeline updated successfully!");
+        setIsSaving(true);
+        setError(null);
+        setSuccessMessage('');
+
+        try {
+            const regPhase = phases.find(p => p.name.toLowerCase().includes('reg')) || phases[0];
+            const subPhase = phases.find(p => p.name.toLowerCase().includes('sub')) || phases[1] || phases[0];
+
+            const payload = {
+                registrationStart: regPhase ? new Date(regPhase.startDate).toISOString() : undefined,
+                registrationEnd: regPhase ? new Date(regPhase.endDate).toISOString() : undefined,
+                hackathonStart: subPhase ? new Date(subPhase.startDate).toISOString() : undefined,
+                hackathonEnd: subPhase ? new Date(subPhase.endDate).toISOString() : undefined,
+                phases: phases.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    startDate: new Date(p.startDate).toISOString(),
+                    endDate: new Date(p.endDate).toISOString(),
+                    status: calculateStatus(p.startDate, p.endDate)
+                }))
+            };
+
+            await apiClient.put(`/hackathon/${currentId}`, payload);
+            setSuccessMessage("Timeline updated and synchronized with event schedule successfully!");
+            setTimeout(() => setSuccessMessage(''), 5000);
         } catch (err) {
             console.error("Failed to save timeline", err);
-            setError("Failed to save timeline. Please try again.");
+            setError(err.response?.data?.detail || "Failed to save timeline. Please try again.");
         } finally {
             setIsSaving(false);
         }
@@ -169,36 +238,9 @@ const EditTimeline = () => {
         navigate('/organizer/my-hackathons');
     };
 
-    // --- Loading State ---
-    if (isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-400 animate-pulse">
-                <svg className="w-12 h-12 mb-4 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p>Loading timeline details...</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="p-8 text-center flex flex-col items-center space-y-4">
-                <div className="bg-red-500/20 text-red-300 p-4 rounded-xl border border-red-500/30">
-                    {error}
-                </div>
-                <button onClick={handleBack} className="text-cyan-400 hover:text-cyan-300 font-medium">
-                    ← Back to My Hackathons
-                </button>
-            </div>
-        );
-    }
-
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
-
-            {/* Header Section */}
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto pb-12">
+            {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                     <button
@@ -215,190 +257,194 @@ const EditTimeline = () => {
                         Manage phases, dates, and milestones for this hackathon
                     </p>
                 </div>
-                <div className="flex gap-3">
+
+                <div className="flex flex-wrap items-center gap-3">
+                    {allHackathons.length > 1 && (
+                        <select
+                            value={selectedHackathonId || hackathonId}
+                            onChange={(e) => {
+                                setSelectedHackathonId(e.target.value);
+                                navigate(`/organizer/edit-timeline/${e.target.value}`);
+                            }}
+                            className="bg-white/5 border border-white/10 text-white rounded-xl px-3 py-2 text-sm outline-none focus:border-cyan-500"
+                        >
+                            {allHackathons.map(h => (
+                                <option key={h.id} value={h.id} className="bg-gray-900 text-white">
+                                    {h.title}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                     <button
                         onClick={handleSave}
-                        disabled={isSaving}
-                        className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg ${isSaving
-                                ? 'bg-gray-600 cursor-not-allowed opacity-70'
-                                : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:shadow-cyan-500/30'
-                            }`}
+                        disabled={isSaving || Object.keys(validationErrors).length > 0}
+                        className="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium rounded-xl shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSaving ? (
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <>
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Saving...
+                            </>
                         ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                            <>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                Save Changes
+                            </>
                         )}
-                        {isSaving ? 'Saving...' : 'Save Timeline'}
                     </button>
                 </div>
             </div>
 
-            {/* Hackathon Summary Card */}
-            <div className="glass-strong border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center">
-                <div className="w-full md:w-48 h-28 rounded-xl overflow-hidden shadow-inner">
-                    <img src={hackathon?.banner} alt="Hackathon banner" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 space-y-3 w-full">
-                    <div className="flex justify-between items-start">
-                        <h2 className="text-xl font-bold text-white">{hackathon?.title}</h2>
-                        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${hackathon?.status === 'Active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                            }`}>
-                            {hackathon?.status}
-                        </span>
+            {/* Notifications */}
+            {successMessage && (
+                <div className="p-4 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-between animate-in fade-in">
+                    <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>{successMessage}</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                            <p className="text-xs text-gray-500">Mode</p>
-                            <p className="text-sm font-semibold">{hackathon?.mode}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-500">Registrations</p>
-                            <p className="text-sm font-semibold">{hackathon?.registrations}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-500">Starts</p>
-                            <p className="text-sm font-semibold">{new Date(hackathon?.startDate).toLocaleDateString()}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-500">Ends</p>
-                            <p className="text-sm font-semibold">{new Date(hackathon?.endDate).toLocaleDateString()}</p>
-                        </div>
-                    </div>
+                    <button onClick={() => setSuccessMessage('')} className="text-emerald-400 hover:text-emerald-200 text-sm">✕</button>
                 </div>
-            </div>
+            )}
 
-            {/* Timeline Management Section */}
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <span className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </span>
-                        Hackathon Phases
-                    </h3>
-                    <button
-                        onClick={handleAddPhase}
-                        className="px-4 py-2 text-sm font-bold text-cyan-400 hover:bg-cyan-400/10 rounded-lg transition-all flex items-center gap-2 border border-cyan-500/20"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add Phase
-                    </button>
+            {error && (
+                <div className="p-4 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-between animate-in fade-in">
+                    <span>{error}</span>
+                    <button onClick={() => setError('')} className="text-rose-400 hover:text-rose-200 text-sm">✕</button>
                 </div>
+            )}
 
-                <div className="space-y-4">
-                    {phases.map((phase) => {
-                        const status = calculateStatus(phase.startDate, phase.endDate);
-                        return (
-                            <div key={phase.id} className={`glass p-5 rounded-2xl border transition-all ${validationErrors[phase.id] ? 'border-red-500/30' : 'border-white/10'
-                                }`}>
-                                <div className="flex flex-col lg:flex-row gap-6 lg:items-end">
-                                    {/* Phase Info */}
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phase Name</label>
-                                            <div className="flex items-center gap-2">
-                                                <span className={`px-2 py-0.5 text-[10px] font-black rounded uppercase ${status === 'Ongoing' ? 'bg-cyan-500/20 text-cyan-400' :
-                                                        status === 'Completed' ? 'bg-green-500/20 text-green-400' :
-                                                            'bg-yellow-500/20 text-yellow-500'
-                                                    }`}>
-                                                    {status}
+            {isLoading ? (
+                <div className="flex flex-col items-center justify-center min-h-[300px] text-gray-400 animate-pulse">
+                    <svg className="w-10 h-10 mb-4 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p>Loading event timeline details...</p>
+                </div>
+            ) : (
+                <>
+                    {/* Hackathon Overview Card */}
+                    {hackathon && (
+                        <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center gap-6">
+                            <img
+                                src={hackathon.banner}
+                                alt={hackathon.title}
+                                className="w-full md:w-48 h-28 object-cover rounded-xl border border-white/10 shadow-lg"
+                            />
+                            <div className="space-y-2 flex-1 text-center md:text-left">
+                                <span className="px-2.5 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-semibold rounded-full uppercase">
+                                    {hackathon.mode} • {hackathon.status}
+                                </span>
+                                <h2 className="text-2xl font-bold text-white">{hackathon.title}</h2>
+                                <p className="text-sm text-gray-400">
+                                    {hackathon.registrations} registered participants • Timeline configuration controls live submission portals
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Timeline Phases Editor */}
+                    <div className="glass p-6 rounded-2xl border border-white/10 space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-bold text-white">Event Phases</h2>
+                                <p className="text-sm text-gray-400">Configure milestone dates and participant schedules</p>
+                            </div>
+                            <button
+                                onClick={handleAddPhase}
+                                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-400 rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                                Add Phase
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {phases.map((phase, index) => {
+                                const currentStatus = calculateStatus(phase.startDate, phase.endDate);
+                                const isInvalid = !!validationErrors[phase.id];
+
+                                return (
+                                    <div
+                                        key={phase.id}
+                                        className={`p-5 rounded-xl border transition-all ${
+                                            isInvalid
+                                                ? 'bg-rose-500/5 border-rose-500/30'
+                                                : 'bg-white/5 border-white/5 hover:border-white/10'
+                                        }`}
+                                    >
+                                        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                                            {/* Phase Name & Index */}
+                                            <div className="flex items-center gap-3 w-full lg:w-1/3">
+                                                <div className="w-7 h-7 rounded-lg bg-cyan-600/20 text-cyan-400 font-bold text-xs flex items-center justify-center border border-cyan-500/30 shrink-0">
+                                                    {index + 1}
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    value={phase.name}
+                                                    onChange={(e) => handlePhaseChange(phase.id, 'name', e.target.value)}
+                                                    placeholder="Phase Title"
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-medium outline-none focus:border-cyan-500"
+                                                />
+                                            </div>
+
+                                            {/* Start and End Date Inputs */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-1/2">
+                                                <div>
+                                                    <label className="text-xs text-gray-400 block mb-1">Start Time</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={phase.startDate}
+                                                        onChange={(e) => handlePhaseChange(phase.id, 'startDate', e.target.value)}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs text-gray-400 block mb-1">End Time</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={phase.endDate}
+                                                        onChange={(e) => handlePhaseChange(phase.id, 'endDate', e.target.value)}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Status Badge and Delete Action */}
+                                            <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto shrink-0">
+                                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase border ${
+                                                    currentStatus === 'Ongoing'
+                                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                        : currentStatus === 'Upcoming'
+                                                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                                            : 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                                                }`}>
+                                                    {currentStatus}
                                                 </span>
+
+                                                <button
+                                                    onClick={() => handleRemovePhase(phase.id)}
+                                                    className="p-2 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                                                    title="Remove Phase"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             </div>
                                         </div>
-                                        <input
-                                            type="text"
-                                            value={phase.name}
-                                            disabled={phase.isDefault}
-                                            onChange={(e) => handleUpdatePhase(phase.id, 'name', e.target.value)}
-                                            placeholder="e.g. Brainstorming Session"
-                                            className={`w-full px-4 py-2.5 bg-navy-900/50 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 transition-all font-medium ${phase.isDefault ? 'opacity-70 cursor-not-allowed bg-white/5' : ''
-                                                }`}
-                                        />
-                                    </div>
 
-                                    {/* Date Range */}
-                                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Start Date</label>
-                                            <input
-                                                type="datetime-local"
-                                                value={formatDateForInput(phase.startDate)}
-                                                onChange={(e) => handleUpdatePhase(phase.id, 'startDate', e.target.value)}
-                                                className="w-full px-4 py-2.5 bg-navy-900/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 transition-all text-sm [color-scheme:dark]"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">End Date</label>
-                                            <input
-                                                type="datetime-local"
-                                                value={formatDateForInput(phase.endDate)}
-                                                onChange={(e) => handleUpdatePhase(phase.id, 'endDate', e.target.value)}
-                                                className="w-full px-4 py-2.5 bg-navy-900/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 transition-all text-sm [color-scheme:dark]"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Actions */}
-                                    <div className="flex items-center gap-2 pb-1">
-                                        {!phase.isDefault && (
-                                            <button
-                                                onClick={() => handleDeletePhase(phase.id)}
-                                                className="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
-                                                title="Delete Phase"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
+                                        {isInvalid && (
+                                            <p className="text-xs text-rose-400 mt-3 font-medium flex items-center gap-1">
+                                                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                {validationErrors[phase.id]}
+                                            </p>
                                         )}
-                                        <button
-                                            onClick={handleSave}
-                                            className="p-2.5 text-gray-500 hover:text-cyan-400 hover:bg-cyan-400/10 rounded-xl transition-all"
-                                            title="Save Phase"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                                        </button>
                                     </div>
-                                </div>
-
-                                {/* Validation Error Message */}
-                                {validationErrors[phase.id] && (
-                                    <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-red-400 bg-red-400/10 p-3 rounded-lg border border-red-400/20 animate-in fade-in slide-in-from-top-1">
-                                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                        {validationErrors[phase.id]}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {phases.length === 0 && (
-                    <div className="text-center py-20 bg-white/5 border border-dashed border-white/10 rounded-2xl">
-                        <p className="text-gray-500">No phases defined yet.</p>
-                        <button onClick={handleAddPhase} className="mt-4 text-cyan-400 hover:underline">Click here to add the first phase</button>
+                                );
+                            })}
+                        </div>
                     </div>
-                )}
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="pt-8 border-t border-white/10 flex justify-end gap-4">
-                <button
-                    onClick={handleBack}
-                    className="px-6 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all"
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className={`px-8 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg ${isSaving
-                            ? 'bg-gray-600 cursor-not-allowed opacity-70'
-                            : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-blue-500/30'
-                        }`}
-                >
-                    {isSaving ? 'Processing...' : 'Confirm All Changes'}
-                </button>
-            </div>
+                </>
+            )}
         </div>
     );
 };

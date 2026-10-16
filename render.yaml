@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: hackzen-backend
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: APP_NAME
+        value: HackZen Platform
+      - key: DEBUG
+        value: "false"
+      - key: LOG_LEVEL
+        value: INFO
+      # --- Set these in the Render dashboard (do NOT commit real values) ---
+      - key: MONGO_URI
+        sync: false   # fill in Render dashboard
+      - key: DB_NAME
+        value: hackzen
+      - key: SECRET_KEY
+        sync: false   # fill in Render dashboard
+      - key: FRONTEND_URL
+        sync: false   # your Vercel URL e.g. https://hackzen.vercel.app
+      - key: CORS_ORIGINS
+        sync: false   # same as FRONTEND_URL
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: openai/gpt-4o-mini
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        value: no-reply@proeduvate.com
+      - key: MAIL_STARTTLS
+        value: "true"
+      - key: MAIL_SSL_TLS
+        value: "false"
+      - key: OAUTH_REDIRECT_BASE_URL
+        sync: false   # your Render service URL
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false

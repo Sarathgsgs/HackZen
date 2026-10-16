@@ -1,45 +1,74 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { fetchOrganizerSettings } from '../../services/organizer/organizerSettingsApi';
+import { fetchOrganizerProfile } from '../../services/organizer/profileApi';
+import { fetchOrganizerDashboardData } from '../../services/organizer/dashboardApi';
 
 const OrganizerProfile = () => {
     // State management
     const [user, setUser] = React.useState({
-        name: 'Alex Rivera',
-        role: 'SENIOR ORGANIZER',
-        subRole: 'organizer | Operations & Strategy',
+        name: 'Organizer',
+        role: 'ORGANIZER',
+        subRole: 'Organizer | Operations & Strategy',
         stats: {
-            hackathons: 24,
-            participants: '15K+',
-            efficiency: '98%'
+            hackathons: 0,
+            participants: '0',
+            efficiency: '0 Teams'
         },
         competencies: [
             'Event Logistics & Planning',
             'Sponsorship Acquisition',
             'Community Management',
-            'Crisis Management'
+            'Evaluation Oversight'
         ],
         recentActions: [
-            { id: 1, type: 'Launch', title: 'CodeWave 2025', detail: 'Registrations officially opened', time: '4 hours ago' },
-            { id: 2, type: 'Approval', title: 'Venue Partnership', detail: 'Contract signed for Main Arena', time: 'Yesterday' },
-            { id: 3, type: 'Update', title: 'Organizer Policy', detail: 'Refined evaluation criteria', time: '2 days ago' }
+            { id: 1, type: 'Launch', title: 'Live Hackathon', detail: 'Event published and active', time: 'Recently' },
+            { id: 2, type: 'Review', title: 'Submissions Intake', detail: 'Project submissions in review', time: 'Recently' }
         ],
-        initials: 'AR'
+        initials: 'OR'
     });
 
     const fetchUserData = async () => {
         try {
-            const data = await fetchOrganizerSettings();
-            if (data) {
-                const storedUser = JSON.parse(sessionStorage.getItem('user') || '{}');
-                setUser(prev => ({
-                    ...prev,
-                    ...data,
-                    name: storedUser.name || data.name || prev.name,
-                    subRole: `organizer | ${data.institutionName || data.orgName || 'Operations & Strategy'}`,
-                    initials: (storedUser.name || data.name || '').split(' ').map(n => n[0]).join('').toUpperCase() || 'AR'
-                }));
-            }
+            const [profile, dashData] = await Promise.allSettled([
+                fetchOrganizerProfile(),
+                fetchOrganizerDashboardData()
+            ]);
+
+            const profileData = profile.status === 'fulfilled' ? profile.value : {};
+            const statsData = dashData.status === 'fulfilled' ? dashData.value : null;
+
+            const storedUser = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+            const displayName = profileData.name || storedUser.name || 'Organizer';
+            const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'OR';
+
+            const hackathonsCount = statsData?.raw?.totalHackathons ?? statsData?.stats?.find(s => s.id === 'active_h' || s.id === 'active_hackathons')?.value ?? 0;
+            const participantsCount = statsData?.raw?.totalParticipants ?? statsData?.stats?.find(s => s.id === 'total_p' || s.id === 'total_registrations')?.value ?? 0;
+            const teamsCount = statsData?.raw?.totalTeams ?? statsData?.stats?.find(s => s.id === 'total_t' || s.id === 'submissions')?.value ?? 0;
+
+            setUser(prev => ({
+                ...prev,
+                name: displayName,
+                email: profileData.email || storedUser.email || '',
+                institutionName: profileData.institutionName || profileData.organization || 'ProEduvate Partner',
+                designation: profileData.designation || 'Lead Organizer',
+                subRole: `Organizer | ${profileData.institutionName || profileData.organization || 'Operations & Strategy'}`,
+                initials: initials,
+                bio: profileData.bio || 'Platform event organizer and innovation coordinator.',
+                stats: {
+                    hackathons: hackathonsCount,
+                    participants: participantsCount > 1000 ? `${(participantsCount / 1000).toFixed(1)}k+` : participantsCount,
+                    efficiency: `${teamsCount} Teams`
+                },
+                recentActions: statsData?.activity && statsData.activity.length > 0
+                    ? statsData.activity.slice(0, 3).map((act, i) => ({
+                        id: i + 1,
+                        type: act.type || 'Event',
+                        title: act.title || act.action || 'Activity Event',
+                        detail: act.subtitle || 'System event recorded',
+                        time: act.time || 'Recently'
+                    }))
+                    : prev.recentActions
+            }));
         } catch (err) {
             console.error("Organizer profile load failed:", err);
         }

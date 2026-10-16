@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
+import apiClient from '../../api/api';
 import { fetchHackathonById } from '../../services/student/upcomingHackathonsApi';
 import { getRegistrationDraft } from '../../services/student/hackathonRegistrationApi';
 
@@ -31,12 +32,26 @@ const StudentHackathonRegistration = () => {
     const [hackathon, setHackathon] = useState(null);
     const [draft, setDraft] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false);
+    const [isExpired, setIsExpired] = useState(false);
 
     useEffect(() => {
         const loadRegistrationFlow = async () => {
             setIsLoading(true);
 
             try {
+                // Check registration eligibility / duplicate / expired state
+                try {
+                    const checkRes = await apiClient.get(`/applications/check/${hackathonId}`);
+                    if (checkRes.data?.registered) {
+                        setIsAlreadyRegistered(true);
+                    } else if (checkRes.data?.expired) {
+                        setIsExpired(true);
+                    }
+                } catch (checkErr) {
+                    console.log('Eligibility check bypassed:', checkErr);
+                }
+
                 const nextHackathon = await fetchHackathonById(hackathonId);
                 let storedUser = {};
                 try {
@@ -68,6 +83,58 @@ const StudentHackathonRegistration = () => {
         return (
             <div className="animate-in fade-in slide-in-from-bottom-5 duration-500">
                 <div className="glass rounded-2xl border border-white/5 h-[70vh] animate-pulse bg-navy-900/40" />
+            </div>
+        );
+    }
+
+    if (isAlreadyRegistered) {
+        return (
+            <div className="min-h-screen bg-[#f2eef5] dark:bg-navy-950 px-4 py-16 flex items-center justify-center">
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-8 sm:p-12 text-center max-w-lg w-full bg-white dark:bg-navy-900 shadow-xl">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                        ✓
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Already Registered</h1>
+                    <p className="text-slate-600 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+                        You have already submitted an application for <strong>{hackathon?.title || 'this hackathon'}</strong>. Your team workspace is active.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button
+                            onClick={() => navigate('/student/workspace')}
+                            className="px-6 py-3 bg-[#5e4be0] hover:bg-[#4d3ac9] text-white font-semibold rounded-xl transition shadow"
+                        >
+                            Open Workspace
+                        </button>
+                        <button
+                            onClick={() => navigate('/student/hackathons')}
+                            className="px-6 py-3 bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl transition"
+                        >
+                            Browse Hackathons
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isExpired) {
+        return (
+            <div className="min-h-screen bg-[#f2eef5] dark:bg-navy-950 px-4 py-16 flex items-center justify-center">
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-8 sm:p-12 text-center max-w-lg w-full bg-white dark:bg-navy-900 shadow-xl">
+                    <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                        !
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Registration Closed</h1>
+                    <p className="text-slate-600 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+                        The registration period for <strong>{hackathon?.title || 'this hackathon'}</strong> has officially closed.
+                    </p>
+                    <button
+                        onClick={() => navigate('/student/hackathons')}
+                        className="px-6 py-3 bg-[#5e4be0] hover:bg-[#4d3ac9] text-white font-semibold rounded-xl transition shadow"
+                    >
+                        Browse Other Hackathons
+                    </button>
+                </div>
             </div>
         );
     }

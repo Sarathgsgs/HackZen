@@ -29,6 +29,7 @@ const Analytics = () => {
     const [growthData, setGrowthData] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [registrations, setRegistrations] = useState([]);
+    const [loadError, setLoadError] = useState('');
 
     // --- Persistence ---
     useEffect(() => {
@@ -36,42 +37,14 @@ const Analytics = () => {
         sessionStorage.setItem('analytics_growthPeriod', growthPeriod);
     }, [timeRange, growthPeriod]);
 
-    // --- Data Fetching Simulation ---
+    // Analytics endpoints are not connected for this view yet.
     useEffect(() => {
-        const fetchItems = async () => {
-            setIsLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 800));
-
-            const multiplier = timeRange === '7days' ? 0.3 : timeRange === '90days' ? 2.5 : 1;
-
-            setStats([
-                { id: 'users', title: 'Network Entities', value: Math.floor(12450 * multiplier), change: '+8.5%', isPositive: true, icon: '👥' },
-                { id: 'signups', title: 'New Access Nodes', value: Math.floor(432 * multiplier), change: '+12.0%', isPositive: true, icon: '🔗' },
-                { id: 'rating', title: 'System Reliability', value: 4.8, change: '+0.2', isPositive: true, icon: '🛡️', decimals: 1 },
-                { id: 'active', title: 'Operational Hubs', value: 3, change: 'Live State', isPositive: true, icon: '⚙️' }
-            ]);
-
-            setGrowthData(growthPeriod === 'weekly'
-                ? [320, 280, 450, 390, 520, 600, 750].map(v => Math.floor(v * multiplier))
-                : [45, 60, 75, 50, 80, 95, 110].map(v => Math.floor(v * multiplier))
-            );
-
-            setReviews([
-                { id: 1, name: 'Alex Johnson', role: 'Student', rating: 5, feedback: 'Atmospheric UI and robust evaluation protocols.', time: '2h ago' },
-                { id: 2, name: 'Sarah Lee', role: 'Mentor', rating: 4, feedback: 'Management vector is highly optimized for scale.', time: '5h ago' },
-                { id: 3, name: 'Mike Chen', role: 'Dev Lead', rating: 5, feedback: 'Latency is negligible across all dashboard nodes.', time: '1d ago' }
-            ]);
-
-            setRegistrations([
-                { id: 101, name: 'John Doe', role: 'Student', time: '2 mins ago', status: 'verified', theme: 'purple' },
-                { id: 102, name: 'Jane Smith', role: 'Mentor', time: '15 mins ago', status: 'pending', theme: 'amber' },
-                { id: 103, name: 'Robert Brown', role: 'Dev', time: '1 hour ago', status: 'verified', theme: 'blue' },
-                { id: 104, name: 'Emily White', role: 'Student', time: '3 hours ago', status: 'verified', theme: 'purple' }
-            ]);
-
-            setIsLoading(false);
-        };
-        fetchItems();
+        setStats([]);
+        setGrowthData([]);
+        setReviews([]);
+        setRegistrations([]);
+        setLoadError('Analytics data is unavailable from the current service.');
+        setIsLoading(false);
     }, [timeRange, growthPeriod]);
 
     return (
@@ -81,6 +54,7 @@ const Analytics = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">Analytics</h1>
                     <p className="text-sm text-gray-400">Track key metrics and platform growth</p>
+                    {loadError && <p role="status" className="mt-3 text-sm text-amber-300">{loadError}</p>}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -155,19 +129,19 @@ const Analytics = () => {
                         </div>
                     </div>
 
-                    <div className="p-8 flex-1 flex items-end justify-between gap-3 h-64">
+                    <div className="p-8 flex-1 flex items-end justify-between gap-3 h-64" key={`${timeRange}-${growthPeriod}`}>
                         {growthData.map((v, i) => (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-3 group h-full justify-end">
+                            <div key={i} className="flex-1 flex flex-col items-center gap-3 group h-full justify-end animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${i * 80}ms` }}>
                                 <div className="relative w-full flex justify-center items-end h-full">
-                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-gray-900 text-xs font-semibold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 shadow-lg">
+                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-gray-900 text-xs font-semibold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 shadow-lg pointer-events-none">
                                         {v}
                                     </div>
                                     <div
-                                        className="w-full max-w-6 rounded-t-lg transition-all duration-500 cursor-pointer bg-cyan-600/40 hover:bg-cyan-600/60"
+                                        className="w-full max-w-6 rounded-t-lg transition-all duration-700 ease-out cursor-pointer bg-gradient-to-t from-cyan-600/40 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 hover:shadow-lg hover:shadow-cyan-500/30"
                                         style={{ height: `${(v / Math.max(...growthData)) * 100}%` }}
                                     ></div>
                                 </div>
-                                <span className="text-xs text-gray-500 font-medium">
+                                <span className="text-xs text-gray-400 font-medium">
                                     {growthPeriod === 'daily' ? ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i % 7] : `W${i + 1}`}
                                 </span>
                             </div>
@@ -226,7 +200,9 @@ const Analytics = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                            {registrations.map(user => (
+                            {registrations.length === 0 ? (
+                                <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-400">No registration data available.</td></tr>
+                            ) : registrations.map(user => (
                                 <tr key={user.id} className="hover:bg-white/5 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">

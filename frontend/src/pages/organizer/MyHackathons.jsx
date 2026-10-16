@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchMyHackathons, toggleHackathonRegistration, toggleHackathonVisibility } from '../../services/organizer/myHackathonsApi';
 
 const MyHackathons = () => {
     const navigate = useNavigate();
@@ -22,73 +23,14 @@ const MyHackathons = () => {
             window.scrollTo(0, parseInt(savedScroll));
         }
 
-        // Simulate API Fetch
         const fetchHackathons = async () => {
             setIsLoading(true);
             try {
-                // In a real app, this would be an axios/fetch call
-                await new Promise(resolve => setTimeout(resolve, 800));
-                const mockData = [
-                    {
-                        id: 1,
-                        title: "Future Tech Challenge 2026",
-                        banner: "https://images.unsplash.com/photo-1504384308090-c54be3852f33?auto=format&fit=crop&q=80&w=1000",
-                        startDate: "Feb 15, 2026",
-                        endDate: "Feb 17, 2026",
-                        mode: "Hybrid",
-                        registrations: 450,
-                        daysLeft: 40,
-                        status: "Active",
-                        regStatus: "Open",
-                        isVisible: true,
-                        category: "Emerging Tech"
-                    },
-                    {
-                        id: 2,
-                        title: "Green Energy Innovation Hack",
-                        banner: "https://images.unsplash.com/photo-1497436072909-60f360e1d4b0?auto=format&fit=crop&q=80&w=1000",
-                        startDate: "Mar 10, 2026",
-                        endDate: "Mar 12, 2026",
-                        mode: "Online",
-                        registrations: 120,
-                        daysLeft: 63,
-                        status: "Upcoming",
-                        regStatus: "Open",
-                        isVisible: true,
-                        category: "Sustainability"
-                    },
-                    {
-                        id: 3,
-                        title: "Internal Dev Sprint",
-                        banner: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1000",
-                        startDate: "Jan 05, 2026",
-                        endDate: "Jan 07, 2026",
-                        mode: "Online",
-                        registrations: 85,
-                        daysLeft: 0,
-                        status: "Past",
-                        regStatus: "Closed",
-                        isVisible: false,
-                        category: "Software"
-                    },
-                    {
-                        id: 4,
-                        title: "AI for Social Good",
-                        banner: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000",
-                        startDate: "TBD",
-                        endDate: "TBD",
-                        mode: "Hybrid",
-                        registrations: 0,
-                        daysLeft: 0,
-                        status: "Draft",
-                        regStatus: "Closed",
-                        isVisible: false,
-                        category: "AI/ML"
-                    },
-                ];
-                setHackathons(mockData);
+                const data = await fetchMyHackathons();
+                setHackathons(data);
             } catch (error) {
-                console.error("Failed to fetch hackathons", error);
+                console.error('Failed to fetch hackathons', error);
+                setHackathons([]);
             } finally {
                 setIsLoading(false);
             }
@@ -120,8 +62,12 @@ const MyHackathons = () => {
 
     // --- Filtering Logic ---
     const filteredHackathons = useMemo(() => {
-        return hackathons.filter(h => {
-            const matchesTab = activeTab === 'All' ? true : h.status === activeTab;
+        return hackathons.filter((h) => {
+            const matchesTab = activeTab === 'All'
+                ? true
+                : activeTab === 'Drafts'
+                    ? h.status === 'Draft'
+                    : h.status === activeTab;
             const matchesSearch = h.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
                 h.category?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
                 h.mode.toLowerCase().includes(debouncedSearch.toLowerCase());
@@ -131,65 +77,55 @@ const MyHackathons = () => {
 
     // --- Action Handlers ---
     const handleToggleVisibility = async (id) => {
-        const hackathon = hackathons.find(h => h.id === id);
+        const hackathon = hackathons.find((h) => h.id === id);
         if (!hackathon) return;
 
-        // Optimistic Update
         const previousState = [...hackathons];
-        setHackathons(prev => prev.map(h =>
-            h.id === id ? { ...h, isVisible: !h.isVisible } : h
-        ));
-        setActionLoading(prev => ({ ...prev, [`vis-${id}`]: true }));
+        setHackathons((prev) => prev.map((h) => (h.id === id ? { ...h, isVisible: !h.isVisible } : h)));
+        setActionLoading((prev) => ({ ...prev, [`vis-${id}`]: true }));
 
         try {
-            // Simulated API Sync
-            await new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    // Randomly simulate failure for testing rollback (10% chance)
-                    // Math.random() > 0.1 ? resolve() : reject(new Error("API Failed"));
-                    resolve();
-                }, 1000);
-            });
+            const result = await toggleHackathonVisibility(id);
+            setHackathons((prev) => prev.map((h) => (h.id === id ? { ...h, isVisible: result.hackathon.isVisible } : h)));
         } catch (error) {
-            // Rollback on failure
             setHackathons(previousState);
-            alert("Failed to update visibility. Please try again.");
+            alert('Failed to update visibility. Please try again.');
         } finally {
-            setActionLoading(prev => ({ ...prev, [`vis-${id}`]: false }));
+            setActionLoading((prev) => ({ ...prev, [`vis-${id}`]: false }));
         }
     };
 
     const handleToggleRegistrations = async (id) => {
-        const hackathon = hackathons.find(h => h.id === id);
+        const hackathon = hackathons.find((h) => h.id === id);
         if (!hackathon) return;
 
-        const newStatus = hackathon.regStatus === 'Open' ? 'Closed' : 'Open';
-
-        // Optimistic Update
         const previousState = [...hackathons];
-        setHackathons(prev => prev.map(h =>
-            h.id === id ? { ...h, regStatus: newStatus } : h
-        ));
-        setActionLoading(prev => ({ ...prev, [`reg-${id}`]: true }));
+        const nextRegStatus = hackathon.regStatus === 'Open' ? 'Closed' : 'Open';
+        setHackathons((prev) => prev.map((h) => (h.id === id ? { ...h, regStatus: nextRegStatus } : h)));
+        setActionLoading((prev) => ({ ...prev, [`reg-${id}`]: true }));
 
         try {
-            // Simulated API Sync
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const result = await toggleHackathonRegistration(id);
+            const nextStatus = result.hackathon.status === 'Registration Open' ? 'Open' : 'Closed';
+            const nextDisplayStatus = result.hackathon.status === 'Draft' ? 'Draft' : 'Active';
+            setHackathons((prev) => prev.map((h) => (h.id === id ? { ...h, regStatus: nextStatus, status: nextDisplayStatus } : h)));
         } catch (error) {
-            // Rollback on failure
             setHackathons(previousState);
-            alert("Failed to update registration status.");
+            alert('Failed to update registration status.');
         } finally {
-            setActionLoading(prev => ({ ...prev, [`reg-${id}`]: false }));
+            setActionLoading((prev) => ({ ...prev, [`reg-${id}`]: false }));
         }
     };
 
     const handleEditTimeline = (id) => {
-        navigate(`/organizer/hackathons/${id}/edit-timeline`);
+        navigate(`/organizer/edit-timeline/${id}`);
     };
 
     const handleManage = (id) => {
-        navigate(`/organizer/hackathons/${id}/manage`);
+        const selectedHackathon = hackathons.find((h) => h.id === id);
+        navigate(`/organizer/manage-hackathon/${id}`, {
+            state: { hackathon: selectedHackathon }
+        });
     };
 
     const handleCreateNew = () => {
@@ -287,11 +223,14 @@ const MyHackathons = () => {
 
                                 {/* Top Right Badges */}
                                 <div className="absolute top-3 right-3 flex gap-2">
-                                    <span className={`px-2 py-1 text-xs font-semibold rounded-md backdrop-blur-md border shadow-sm ${hackathon.status === 'Active' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                                    <span className={`px-2 py-1 text-xs font-semibold rounded-md backdrop-blur-md border shadow-sm ${
+                                        hackathon.status === 'Active' || hackathon.status === 'Registration Open' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
+                                        hackathon.status === 'Pending' || hackathon.status === 'Changes Requested' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
                                         hackathon.status === 'Draft' ? 'bg-gray-500/20 text-gray-300 border-gray-500/30' :
-                                            hackathon.status === 'Upcoming' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
-                                                'bg-red-500/20 text-red-300 border-red-500/30'
-                                        }`}>
+                                        hackathon.status === 'Upcoming' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
+                                        hackathon.status === 'Rejected' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' :
+                                        'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                                    }`}>
                                         {hackathon.status}
                                     </span>
                                 </div>

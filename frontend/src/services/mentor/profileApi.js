@@ -4,44 +4,23 @@ import apiClient from '../../api/api';
  * Mentor Profile API Integration
  */
 
-const DEFAULT_PROFILE = {
-    name: 'Mentor',
-    role: 'Mentor',
-    institution: 'Not specified',
-    bio: '',
-    avatarGradient: 'from-purple-600 to-indigo-600',
-    expertise: [],
-    links: {
-        scholar: '',
-        linkedin: '',
-        github: ''
-    },
-    stats: {
-        teams: 0,
-        rating: '0/5',
-        sessions: 0
-    },
-    initials: 'M'
-};
-
 export const fetchMentorProfile = async () => {
     try {
         const { data } = await apiClient.get('/profile/me');
         const roleProfile = data.mentor_profile || data.organizer_profile || data.profile || {};
         
         const profileData = {
-            ...DEFAULT_PROFILE,
             ...data,
             ...roleProfile,
-            institution: roleProfile.companyName || DEFAULT_PROFILE.institution,
-            expertise: roleProfile.expertiseDomains || [],
-            availability: roleProfile.availability || 'Available',
+            institution: roleProfile.companyName || roleProfile.institution || '',
+            expertise: Array.isArray(roleProfile.expertiseDomains) ? roleProfile.expertiseDomains : [],
+            availability: roleProfile.availability || '',
             links: {
                 scholar: roleProfile.scholarUrl || '',
                 linkedin: roleProfile.linkedinUrl || '',
                 github: roleProfile.githubUrl || ''
             },
-            initials: (data.name || '').split(' ').map(n => n[0]).join('').toUpperCase() || 'SM'
+            initials: (data.name || '').split(' ').map(n => n[0]).join('').toUpperCase()
         };
         
         // Cache in localStorage for persistence
@@ -81,6 +60,18 @@ export const getCachedMentorProfile = () => {
         console.error('Failed to retrieve cached profile:', error);
         return null;
     }
+};
+
+/** Fetch the mentor-only preferences that are separate from profile details. */
+export const fetchMentorSettings = async () => {
+    const { data } = await apiClient.get('/mentor/settings');
+    return data.settings;
+};
+
+/** Persist mentorship availability, notifications, preferences, and privacy choices. */
+export const updateMentorSettings = async (settings) => {
+    const { data } = await apiClient.put('/mentor/settings', settings);
+    return data.settings;
 };
 
 export const updateMentorProfile = async (updatedFields) => {

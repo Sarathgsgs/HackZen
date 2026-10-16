@@ -1,0 +1,25 @@
+Hackathon 3: Smart Volunteer Coordination
+
+Theme:
+Build a platform that helps organizers manage volunteers and event operations.
+
+Problem statement:
+Hackathons and community events often lose time because people do not know where they should be, what they should do, or whom they should contact. The goal is to reduce confusion through better coordination.
+
+Success criteria:
+- Better coordination
+- Reduced admin overhead
+- Simple and intuitive workflows
+- Strong operational fit
+
+Hints:
+- Focus on assignment, reminders, and live status updates.
+- A clean workflow often beats a feature-heavy one.
+- Map the organizer journey before designing screens.
+
+Judging focus:
+- Operational usefulness
+- Reliability
+- Simplicity
+- Demo clarity
+
