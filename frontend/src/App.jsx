@@ -52,6 +52,8 @@ import CreateHackathonStepOne from './pages/organizer/CreateHackathonStepOne';
 import CreateHackathonStepTwo from './pages/organizer/CreateHackathonStepTwo';
 import CreateHackathonStepThree from './pages/organizer/CreateHackathonStepThree';
 import CreateHackathonStepFour from './pages/organizer/CreateHackathonStepFour';
+import HackathonApprovalStatus from './pages/organizer/HackathonApprovalStatus';
+import HackathonOperations from './pages/organizer/HackathonOperations';
 import Submissions from './pages/organizer/Submissions';
 import EvaluationPanel from './pages/organizer/EvaluationPanel';
 import ResultsCertificates from './pages/organizer/ResultsCertificates';
@@ -248,12 +250,17 @@ function AppContent() {
           <Route path="my-hackathons" element={<MyHackathons />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="teams-mentors" element={<TeamsMentors />} />
+          <Route path="registrations" element={<TeamsMentors />} />
+          <Route path="timeline" element={<TeamsMentors />} />
+          <Route path="approval-status" element={<HackathonApprovalStatus />} />
+          <Route path="approval-status/:hackathonId" element={<HackathonApprovalStatus />} />
           <Route path="create-hackathon" element={<CreateHackathon />}>
             <Route index element={<Navigate to="step-1" replace />} />
             <Route path="step-1" element={<CreateHackathonStepOne />} />
             <Route path="step-2" element={<CreateHackathonStepTwo />} />
             <Route path="step-3" element={<CreateHackathonStepThree />} />
             <Route path="step-4" element={<CreateHackathonStepFour />} />
+            <Route path="status" element={<HackathonApprovalStatus />} />
           </Route>
           <Route path="manage-hackathon" element={<ManageHackathon />}>
             <Route index element={<Navigate to="overview" replace />} />
@@ -268,12 +275,13 @@ function AppContent() {
           <Route path="edit-timeline/:hackathonId" element={<EditTimeline />} />
           <Route path="hackathons/:hackathonId/edit-timeline" element={<EditTimeline />} />
           <Route path="submissions" element={<Submissions />} />
-          <Route path="evaluation" element={<EvaluationPanel />} />
-          <Route path="evaluation-panel" element={<Navigate to="/organizer/evaluation" replace />} />
+          <Route path="operations" element={<HackathonOperations />} />
+          <Route path="evaluation" element={<HackathonOperations />} />
+          <Route path="evaluation-panel" element={<EvaluationPanel />} />
           <Route path="evaluation/criteria" element={<EvaluationCriteria />} />
           <Route path="results" element={<ResultsCertificates />} />
           <Route path="results-certificates" element={<Navigate to="/organizer/results" replace />} />
-          <Route path="invite-mentors" element={<Navigate to="/organizer/teams-mentors" replace />} />
+          <Route path="invite-mentors" element={<Navigate to="/organizer/evaluation" replace />} />
           <Route path="profile" element={<OrganizerProfile />} />
           <Route path="profile/edit" element={<EditOrganizerProfile />} />
           <Route path="settings" element={<OrganizerSettings />} />

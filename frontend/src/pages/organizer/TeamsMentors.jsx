@@ -6,6 +6,7 @@ import {
     updateTeamStatus,
     exportRegistrationsCsv
 } from '../../services/organizer/teamsMentorsApi';
+import { fetchOrganizerRegistrations } from '../../services/organizer/organizerPagesApi';
 
 // Safe string conversion helpers to prevent runtime TypeErrors
 const safeStr = (val, fallback = '') => {
@@ -100,15 +101,29 @@ const TeamsMentors = () => {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            const data = await fetchTeamsMentorsJudges();
-            if (data && Array.isArray(data.teams)) {
-                setTeams(data.teams);
-            }
-            if (data && Array.isArray(data.mentors)) {
-                setMentors(data.mentors);
+            // First fetch full seeded dataset from organizer registrations endpoint
+            const res = await fetchOrganizerRegistrations({ page: 1, limit: 200 });
+            if (res && Array.isArray(res.teams) && res.teams.length > 0) {
+                setTeams(res.teams);
+            } else {
+                const data = await fetchTeamsMentorsJudges();
+                if (data && Array.isArray(data.teams)) {
+                    setTeams(data.teams);
+                }
+                if (data && Array.isArray(data.mentors)) {
+                    setMentors(data.mentors);
+                }
             }
         } catch (error) {
-            console.error('Failed to load registrations data:', error);
+            console.error('Failed to load registrations data, using fallback:', error);
+            try {
+                const data = await fetchTeamsMentorsJudges();
+                if (data && Array.isArray(data.teams)) {
+                    setTeams(data.teams);
+                }
+            } catch (err) {
+                console.error('Fallback failed:', err);
+            }
         } finally {
             setIsLoading(false);
         }

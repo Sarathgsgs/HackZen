@@ -50,6 +50,13 @@ async def lifespan(app: FastAPI):
             print("[Auto-Seeder] Student portal workflow data verified/initialized on startup.")
         except Exception as seeder_err:
             print(f"[Auto-Seeder notice]: {seeder_err}")
+
+        try:
+            from seed_organizer_portal_data import seed_organizer_data_direct
+            await seed_organizer_data_direct(MongoDB.db)
+            print("[Auto-Seeder] Organizer portal workflow data verified/initialized on startup.")
+        except Exception as seeder_err:
+            print(f"[Auto-Seeder notice]: {seeder_err}")
     yield
     if reminder_task:
         reminder_task.cancel()

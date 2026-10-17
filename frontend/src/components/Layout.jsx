@@ -110,9 +110,16 @@ const globalSearchItems = [
     { id: 'p7', title: 'Disputes & Incident Reports', subtitle: 'Resolve team disputes and plagiarism flags', category: 'Pages', path: '/admin/disputes' },
     { id: 'p8', title: 'Analytics & College Rankings', subtitle: 'Participation trends & performance benchmarks', category: 'Pages', path: '/admin/analytics' },
     { id: 'p9', title: 'Platform Security Settings', subtitle: 'Access controls and system preferences', category: 'Pages', path: '/admin/settings' },
+    // Organizer Navigation Pages
+    { id: 'op1', title: 'Organizer Executive Dashboard', subtitle: 'Operational command and KPI analytics', category: 'Organizer', path: '/organizer/dashboard' },
+    { id: 'op2', title: 'Hackathon Approval Status', subtitle: '4-step approval standing & admin feedback', category: 'Organizer', path: '/organizer/approval-status' },
+    { id: 'op3', title: 'Manage Registrations & Timeline', subtitle: '142 registered teams & milestones ledger', category: 'Organizer', path: '/organizer/teams-mentors' },
+    { id: 'op4', title: 'Hackathon Operations Hub', subtitle: 'Mentors, judges, submissions & evaluation', category: 'Organizer', path: '/organizer/evaluation' },
+    { id: 'op5', title: 'Create Hackathon Wizard', subtitle: 'Submit new event proposal for approval', category: 'Organizer', path: '/organizer/create-hackathon' },
+    { id: 'op6', title: 'My Hackathons Portfolio', subtitle: 'Active, upcoming and past organized events', category: 'Organizer', path: '/organizer/my-hackathons' },
+    { id: 'op7', title: 'Organizer Settings', subtitle: 'Profile, notifications, and security preferences', category: 'Organizer', path: '/organizer/settings' },
 
     // Current navigation pages are searchable; dashboard records come from APIs.
-
 ];
 
 
@@ -380,7 +387,7 @@ const DashboardLayout = () => {
         };
     }, []);
 
-    const isTopNavbarMode = isAdmin && adminNavLayout === 'navbar';
+    const isTopNavbarMode = (isAdmin && adminNavLayout === 'navbar') || isOrganizer;
 
     // Role Config
     const roleConfig = {
@@ -394,13 +401,14 @@ const DashboardLayout = () => {
             avatarGradient: 'from-purple-500 to-indigo-500',
         },
         organizer: {
-            name: storedUser?.name?.split(' ')[0] || 'Organizer',
-            fullName: storedUser?.name || 'Organizer User',
+            name: (storedUser?.name && storedUser.name !== 'Guest' && storedUser.name !== 'Organizer User') ? storedUser.name.split(' ')[0] : 'Alex',
+            fullName: (storedUser?.name && storedUser.name !== 'Guest' && storedUser.name !== 'Organizer User') ? storedUser.name : 'Alex Morgan',
             roleName: 'Organizer',
-            email: storedUser?.email || '',
-            theme: 'cyan',
+            email: storedUser?.email || 'alex.morgan@proeduvate.com',
+            theme: 'purple',
             path: 'organizer',
-            avatarGradient: 'from-cyan-500 to-blue-500',
+            avatarGradient: 'from-purple-500 to-indigo-500',
+            avatarUrl: storedUser?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
         },
         mentor: {
             name: storedUser?.name?.split(' ')[0] || 'Mentor',
@@ -545,7 +553,7 @@ const DashboardLayout = () => {
             )
         },
         {
-            name: 'Registration', 
+            name: 'Registrations', 
             path: '/organizer/teams-mentors', 
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -886,7 +894,7 @@ const DashboardLayout = () => {
 
                         {/* Top Navbar Brand Logo (displayed when in Top Navbar mode) */}
                         {(isTopNavbarMode || isStudent) && (
-                            <Link to={isStudent ? '/student/dashboard' : '/admin/dashboard'} className="flex items-center gap-2 select-none shrink-0 pr-1 sm:pr-3">
+                            <Link to={isStudent ? '/student/dashboard' : (isOrganizer ? '/organizer/dashboard' : '/admin/dashboard')} className="flex items-center gap-2 select-none shrink-0 pr-1 sm:pr-3">
                                 <Logo size="sm" showSubtext={false} forceLight={isStudent} />
                             </Link>
                         )}
@@ -991,15 +999,17 @@ const DashboardLayout = () => {
                     {/* Center: In Top Navbar Mode, render horizontal navigation links as in Figma reference */}
                     {isTopNavbarMode && (
                         <nav className="hidden lg:flex items-center h-full gap-0.5 xl:gap-1.5 overflow-x-auto scrollbar-hide px-2">
-                            {adminNav.map((item) => {
-                                const isActive = location.pathname === item.path || (item.path !== '/admin/dashboard' && location.pathname.startsWith(item.path));
+                            {(isOrganizer ? organizerNav : adminNav).map((item) => {
+                                const isActive = location.pathname === item.path || (item.path !== '/admin/dashboard' && item.path !== '/organizer/dashboard' && location.pathname.startsWith(item.path));
                                 return (
                                     <Link
                                         key={item.name}
                                         to={item.path}
                                         className={`h-full flex items-center px-2.5 xl:px-3 text-xs xl:text-[13px] font-semibold transition-all whitespace-nowrap border-b-2 ${
                                             isActive
-                                                ? 'text-[#7C65F6] dark:text-purple-400 font-bold border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20'
+                                                ? (isOrganizer
+                                                    ? 'text-[#7C65F6] dark:text-purple-400 font-bold border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20'
+                                                    : 'text-[#7C65F6] dark:text-purple-400 font-bold border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20')
                                                 : 'text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white border-transparent hover:border-slate-300 dark:hover:border-white/20'
                                         }`}
                                     >
@@ -1059,14 +1069,18 @@ const DashboardLayout = () => {
                                         : isStudent ? 'bg-slate-100 hover:bg-slate-200 border-slate-200' : 'bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border-slate-200 dark:border-white/10'
                                 }`}
                             >
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 shadow-sm ${
+                                <div className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center font-bold text-[10px] shrink-0 shadow-sm ${
                                     isOrganizer
                                         ? 'bg-purple-100 dark:bg-purple-500/20 text-[#7C65F6] border border-purple-200 dark:border-purple-500/30'
                                         : isAdmin
                                             ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/30'
                                             : 'bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30'
                                 }`}>
-                                    {currentRole.name.charAt(0).toUpperCase()}
+                                    {currentRole.avatarUrl ? (
+                                        <img src={currentRole.avatarUrl} alt={currentRole.fullName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        currentRole.name.charAt(0).toUpperCase()
+                                    )}
                                 </div>
                                 <div className="hidden md:flex flex-col text-left leading-none">
                                     <span className={`text-[11px] font-bold text-slate-800 ${isStudent ? '' : 'dark:text-white'} leading-tight`}>
