@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSubmissions } from '../../services/student/submissionsApi';
 
+const statusClasses = (status) => {
+    const normalized = String(status || '').toLowerCase();
+    if (normalized.includes('evaluat') || normalized.includes('approv') || normalized.includes('accept')) {
+        return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    }
+    if (normalized.includes('reject') || normalized.includes('declin')) {
+        return 'border-rose-200 bg-rose-50 text-rose-700';
+    }
+    if (normalized.includes('review') || normalized.includes('pending') || normalized.includes('submit')) {
+        return 'border-amber-200 bg-amber-50 text-amber-700';
+    }
+    return 'border-[#e5dff0] bg-[#f8f6fc] text-[#6e6882]';
+};
+
 const StudentSubmissions = () => {
     const [submissions, setSubmissions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -11,10 +25,13 @@ const StudentSubmissions = () => {
             setIsLoading(true);
             try {
                 const data = await fetchSubmissions();
+                if (!Array.isArray(data)) {
+                    throw new Error('Unexpected submissions response');
+                }
                 setSubmissions(data);
                 setLoadError('');
             } catch (error) {
-                console.error("Failed to fetch submissions:", error);
+                console.error('Failed to fetch submissions:', error);
                 setLoadError('Your submissions could not be loaded. Please try again.');
             } finally {
                 setIsLoading(false);
@@ -23,86 +40,91 @@ const StudentSubmissions = () => {
         loadSubmissions();
     }, []);
 
-    const StatusBadge = ({ status }) => (
-        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border
-            ${status === 'Evaluated'
-                ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                : 'bg-white/5 text-gray-400 border-white/10'}`}>
-            {status}
-        </span>
-    );
-
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-500 pb-20">
-            {/* Header */}
-            <div className="mb-10">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                    My <span className="gradient-text">Submissions</span>
-                </h1>
-                <p className="text-gray-400">Track and manage your hackathon projects and evaluations.</p>
-            </div>
+        <div className="min-h-full space-y-7 bg-[#f3f0f8] px-4 pb-12 pt-6 text-[#181524] sm:px-6 sm:pt-8 lg:px-8">
+            <header>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7a7098]">Your work</p>
+                <h1 className="mt-2 text-3xl font-bold tracking-tight text-[#1d1a2a] sm:text-4xl">My Submissions</h1>
+                <p className="mt-2 text-sm text-[#6e6882]">Track your submitted projects and available evaluation details.</p>
+            </header>
 
             {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[1, 2].map(i => (
-                        <div key={i} className="glass p-6 rounded-2xl border border-white/5 animate-pulse h-64"></div>
+                <div role="status" aria-label="Loading submissions" className="grid gap-5 md:grid-cols-2">
+                    {[0, 1].map((item) => (
+                        <div key={item} className="h-56 animate-pulse rounded-[20px] border border-[#e5dff0] bg-white" />
                     ))}
                 </div>
             ) : loadError ? (
-                <div role="alert" className="rounded-2xl border border-red-200 bg-white p-8 text-red-800">{loadError}</div>
+                <div role="alert" className="rounded-[20px] border border-rose-200 bg-white p-6 text-sm text-rose-700 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
+                    {loadError}
+                </div>
             ) : submissions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center glass rounded-2xl border border-dashed border-white/10">
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
-                        <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <div className="rounded-[20px] border border-dashed border-[#d6d0e9] bg-white p-10 text-center shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f1edfb] text-[#5c46c7]" aria-hidden="true">
+                        <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a2 2 0 0 1 1.414.586l4.414 4.414A2 2 0 0 1 19 9.414V19a2 2 0 0 1-2 2Z" />
+                        </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">No Submissions Yet</h3>
-                    <p className="text-gray-400 text-sm max-w-sm mx-auto">You haven't submitted any projects yet. Start participating in hackathons to build your portfolio.</p>
+                    <h2 className="mt-4 text-xl font-bold text-[#1d1a2a]">No submissions yet</h2>
+                    <p className="mx-auto mt-2 max-w-md text-sm text-[#6e6882]">Submitted projects will appear here when they are available for your teams.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {submissions.map((sub) => (
-                        <div key={sub.id} className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all duration-300 flex flex-col justify-between h-full group">
-                            <div>
-                                <div className="flex justify-between items-start mb-6">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors w-11/12 leading-tight">{sub.project || 'Project title unavailable'}</h3>
-                                        <p className="text-sm text-gray-400 mt-2">{sub.hackathon || 'Hackathon name unavailable'}</p>
+                <div className="grid gap-5 md:grid-cols-2">
+                    {submissions.map((submission) => {
+                        const resources = Array.isArray(submission.resources) ? submission.resources : [];
+                        const status = submission.status || 'Status unavailable';
+                        const hasScore = submission.score !== null && submission.score !== undefined && submission.score !== '';
+
+                        return (
+                            <article key={submission.id} className="flex h-full flex-col rounded-[20px] border border-[#e5dff0] bg-white p-5 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-6">
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <h2 className="break-words text-lg font-bold text-[#242136] sm:text-xl">
+                                            {submission.project || 'Project title unavailable'}
+                                        </h2>
+                                        <p className="mt-1 text-sm text-[#6e6882]">{submission.hackathon || 'Hackathon name unavailable'}</p>
                                     </div>
-                                    <StatusBadge status={sub.status || 'Status unavailable'} />
+                                    <span className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${statusClasses(submission.status)}`}>
+                                        {status}
+                                    </span>
                                 </div>
 
-                                <div className="space-y-6 mb-8">
-                                    <div className="flex flex-wrap gap-2">
-                                        {sub.resources.map((res, i) => (
-                                            <span key={i} className="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-xs font-medium text-gray-400 transition-colors">
-                                                {res}
+                                {submission.desc ? (
+                                    <p className="mt-5 whitespace-pre-wrap text-sm leading-6 text-[#5f5a6d]">{submission.desc}</p>
+                                ) : null}
+
+                                {resources.length > 0 ? (
+                                    <div className="mt-5 flex flex-wrap gap-2">
+                                        {resources.map((resource, index) => (
+                                            <span key={`${resource}-${index}`} className="rounded-lg border border-[#e8e2f2] bg-[#f8f6fc] px-3 py-1.5 text-xs font-medium text-[#5f5a6d]">
+                                                {resource}
                                             </span>
                                         ))}
                                     </div>
+                                ) : null}
 
-                                    {sub.feedback && (
-                                        <div className="p-4 rounded-xl bg-black/20 border border-white/5">
-                                            <p className="text-xs font-semibold text-gray-500 mb-1">Mentor Feedback</p>
-                                            <p className="text-sm text-white leading-relaxed">"{sub.feedback}"</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="pt-4 border-t border-white/5 flex items-center justify-between mt-auto">
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    <span className="text-xs text-gray-400">{sub.submittedAt || 'Submission date unavailable'}</span>
-                                </div>
-                                {sub.score && (
-                                    <div className="text-right">
-                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Score</p>
-                                        <p className="text-lg font-bold text-purple-400">{sub.score}</p>
+                                {submission.feedback ? (
+                                    <div className="mt-5 rounded-xl border border-[#e8e2f2] bg-[#f8f6fc] p-4">
+                                        <p className="text-xs font-semibold text-[#7a7098]">Mentor feedback</p>
+                                        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#373548]">{submission.feedback}</p>
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+                                ) : null}
+
+                                <div className="mt-auto flex items-end justify-between gap-4 border-t border-[#f0ecf6] pt-4">
+                                    <div>
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8a849a]">Submitted</p>
+                                        <p className="mt-1 text-sm text-[#5f5a6d]">{submission.submittedAt || 'Submission date unavailable'}</p>
+                                    </div>
+                                    {hasScore ? (
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8a849a]">Score</p>
+                                            <p className="mt-1 text-lg font-bold text-[#4d3bb5]">{submission.score}</p>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </article>
+                        );
+                    })}
                 </div>
             )}
         </div>

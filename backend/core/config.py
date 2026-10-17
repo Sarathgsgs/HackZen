@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     BACKEND_URL: str = os.getenv("BACKEND_URL")
     APP_NAME: str = os.getenv("APP_NAME")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+    ALLOW_MOCK_AUTH: bool = False
 
     # MongoDB
     MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")

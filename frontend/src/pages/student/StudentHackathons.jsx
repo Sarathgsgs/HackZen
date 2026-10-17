@@ -155,7 +155,7 @@ const StudentHackathons = () => {
         const id = selectedHackathon.id || selectedHackathon._id;
         const registered = registeredIds.has(id);
         return (
-            <div className="-m-6 min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:-m-10 lg:p-10">
+            <div className="min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:p-10">
                 <button onClick={() => setSelectedHackathon(null)} className="mb-8 flex items-center gap-2 font-medium text-[#5740d6] transition hover:text-[#4530bd]"><span aria-hidden="true">←</span> Back to Hackathons</button>
                 <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-[#e5e1ed] bg-white shadow-[0_1px_2px_rgba(31,22,60,0.03)]">
                     <div className="relative h-64 bg-[#eeebf6] sm:h-80">
@@ -179,7 +179,7 @@ const StudentHackathons = () => {
     }
 
     return (
-        <div className="-m-6 min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:-m-10 lg:p-10">
+        <div className="min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:p-10">
             <header className="mb-10">
                 <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Upcoming Hackathons</h1>
                 <p className="mt-3 text-lg text-[#777488]">Discover and register for the latest hackathons across various domains.</p>

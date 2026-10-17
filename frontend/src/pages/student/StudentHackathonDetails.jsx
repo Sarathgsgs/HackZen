@@ -116,10 +116,10 @@ const StudentHackathonDetails = () => {
     navigate(`/student/hackathons/${encodeURIComponent(hackathonId)}/register`);
   };
 
-  if (loading) return <main className="-m-6 min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:-m-10 lg:p-10"><div role="status" className="mx-auto max-w-5xl animate-pulse rounded-2xl border border-[#d8d2e5] bg-white p-10 text-[#777488]">Loading hackathon details...</div></main>;
+  if (loading) return <main className="min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:p-10"><div role="status" className="mx-auto max-w-5xl animate-pulse rounded-2xl border border-[#d8d2e5] bg-white p-10 text-[#777488]">Loading hackathon details...</div></main>;
 
   if (error || !hackathon) return (
-    <main className="-m-6 min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:-m-10 lg:p-10">
+    <main className="min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:p-10">
       <div className="mx-auto max-w-3xl rounded-2xl border border-[#d8d2e5] bg-white p-10 text-center">
         <h1 className="text-2xl font-bold">Hackathon unavailable</h1><p role="alert" className="mt-3 text-[#6d6a7c]">{error || 'This hackathon is unavailable.'}</p>
         <button onClick={() => navigate('/student/hackathons')} className="mt-6 rounded-xl bg-[#5b49dc] px-5 py-3 font-semibold text-white">Back to Hackathons</button>
@@ -133,7 +133,7 @@ const StudentHackathonDetails = () => {
   const rules = Array.isArray(hackathon.rules) ? hackathon.rules : [];
 
   return (
-    <main className="-m-6 min-h-full bg-[#fbf9ff] px-4 py-6 text-[#242334] sm:px-6 lg:-m-10 lg:px-10 lg:py-8">
+    <main className="min-h-full bg-[#fbf9ff] px-4 py-6 text-[#242334] sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
         <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-2 text-sm text-[#777488]"><Link to="/student/hackathons" className="hover:text-[#5740d6]">Hackathons</Link><span>›</span><span className="font-semibold text-[#292738]">{hackathon.title}</span></nav>
 

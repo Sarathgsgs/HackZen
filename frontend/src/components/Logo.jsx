@@ -1,7 +1,7 @@
 import React from 'react';
 import { usePlatformSettings } from '../context/PlatformSettingsContext';
 
-const Logo = ({ size = 'md', className = '', showSubtext = false }) => {
+const Logo = ({ size = 'md', className = '', showSubtext = false, forceLight = false }) => {
     const { platformName } = usePlatformSettings();
 
     const textSizes = {
@@ -22,7 +22,7 @@ const Logo = ({ size = 'md', className = '', showSubtext = false }) => {
         if (name.toLowerCase() === 'proeduvate') {
             return (
                 <>
-                    <span className="text-slate-900 dark:text-white transition-colors duration-300">Pro</span>
+                    <span className={`text-slate-900 ${forceLight ? '' : 'dark:text-white'} transition-colors duration-300`}>Pro</span>
                     <span className="text-[#2563eb]">Eduvate</span>
                 </>
             );
@@ -32,12 +32,12 @@ const Logo = ({ size = 'md', className = '', showSubtext = false }) => {
         if (parts.length > 1) {
             return (
                 <>
-                    <span className="text-slate-900 dark:text-white transition-colors duration-300">{parts[0]} </span>
+                    <span className={`text-slate-900 ${forceLight ? '' : 'dark:text-white'} transition-colors duration-300`}>{parts[0]} </span>
                     <span className="text-[#2563eb]">{parts.slice(1).join(' ')}</span>
                 </>
             );
         }
-        return <span className="text-slate-900 dark:text-white">{name}</span>;
+        return <span className={`text-slate-900 ${forceLight ? '' : 'dark:text-white'}`}>{name}</span>;
     };
 
     return (
@@ -53,7 +53,7 @@ const Logo = ({ size = 'md', className = '', showSubtext = false }) => {
                     {renderBrandName()}
                 </span>
                 {showSubtext && (
-                    <span className="text-[7.5px] uppercase font-black tracking-widest text-slate-500 dark:text-gray-400 mt-1">
+                    <span className={`text-[7.5px] uppercase font-black tracking-widest text-slate-500 ${forceLight ? '' : 'dark:text-gray-400'} mt-1`}>
                         People. Projects and Potential.
                     </span>
                 )}

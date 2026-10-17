@@ -66,6 +66,8 @@ async def chat_with_ai_co_mentor(
             detail="AI service returned no answer. Please try again shortly.",
         )
 
+    print(f"AI generation completed; response_chars={len(response_text)}")
+
     log_data = {
         "userId": user_id,
         "hackathonId": resolved_hackathon_id or "general",
@@ -76,6 +78,7 @@ async def chat_with_ai_co_mentor(
 
     logs_collection = get_ai_logs_collection()
     await logs_collection.insert_one(log_data)
+    print("AI response persisted; returning successful chat response")
 
     return {"response": response_text, "timestamp": log_data["timestamp"]}
 

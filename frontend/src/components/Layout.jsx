@@ -306,10 +306,15 @@ const DashboardLayout = () => {
 
     const handleSearchKeyDown = (e) => {
         if (e.key === 'Enter') {
-            if (searchResults.length > 0) {
-                handleSearchSelect(searchResults[0]);
+            const results = location.pathname.startsWith('/student')
+                ? studentNav.filter(item => item.name.toLowerCase().includes(globalSearchQuery.trim().toLowerCase()))
+                : searchResults;
+            if (results.length > 0) {
+                handleSearchSelect(results[0]);
             } else if (globalSearchQuery.trim()) {
-                navigate(`/admin/users?search=${encodeURIComponent(globalSearchQuery.trim())}`);
+                if (!location.pathname.startsWith('/student')) {
+                    navigate(`/admin/users?search=${encodeURIComponent(globalSearchQuery.trim())}`);
+                }
                 setIsSearchOpen(false);
             }
         } else if (e.key === 'Escape') {
@@ -352,6 +357,7 @@ const DashboardLayout = () => {
 
     // Determine Role based on URL path
     const currentPath = location.pathname;
+    const isStudent = currentPath.startsWith('/student');
     const isAdmin = currentPath.startsWith('/admin');
     const isOrganizer = currentPath.startsWith('/organizer');
     const isMentor = currentPath.startsWith('/mentor');
@@ -610,6 +616,13 @@ const DashboardLayout = () => {
 
     let navItems = isAdmin ? adminNav : (isOrganizer ? organizerNav : (isMentor ? mentorNav : studentNav));
 
+    const displayedSearchResults = isStudent
+        ? studentNav
+            .filter(item => item.name.toLowerCase().includes(globalSearchQuery.trim().toLowerCase()))
+            .map(item => ({ ...item, id: item.path, title: item.name, subtitle: 'Student page', category: 'Navigation' }))
+            .slice(0, 8)
+        : searchResults;
+
     if (isAdminUser && !isAdmin) {
         navItems = [...navItems, {
             name: 'Admin Panel',
@@ -621,7 +634,7 @@ const DashboardLayout = () => {
     }
 
     return (
-        <div className="flex h-screen bg-[#f8fafc] dark:bg-navy-950 text-slate-900 dark:text-white overflow-hidden font-sans transition-colors duration-300">
+        <div className={`flex h-screen bg-[#f8fafc] dark:bg-navy-950 text-slate-900 dark:text-white overflow-hidden font-sans transition-colors duration-300 ${isStudent ? 'flex-col' : ''}`}>
             {/* Mobile Overlay */}
             {sidebarOpen && (
                 <div
@@ -632,7 +645,7 @@ const DashboardLayout = () => {
 
             {/* --- SIDEBAR CONTAINER --- */}
             <div 
-                className={`${isAdmin ? 'bg-white' : 'bg-[#f9f9f9]'} dark:bg-navy-900 border-r border-[#e2e8f0] dark:border-white/10 flex flex-col shrink-0 transition-all duration-300 ease-in-out ${
+                className={`${isStudent ? '!hidden' : ''} ${isAdmin ? 'bg-white' : 'bg-[#f9f9f9]'} dark:bg-navy-900 border-r border-[#e2e8f0] dark:border-white/10 flex flex-col shrink-0 transition-all duration-300 ease-in-out ${
                     isSidebarExpanded ? 'w-64' : 'w-[72px]'
                 } ${isTopNavbarMode ? (sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-40 lg:hidden' : 'hidden') : (sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-40' : '-translate-x-full lg:translate-x-0 fixed lg:relative h-full z-20')}`}
             >
@@ -858,31 +871,31 @@ const DashboardLayout = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+            <div className={`flex-1 flex flex-col relative overflow-hidden ${isStudent ? 'min-h-0' : 'h-full'}`}>
                 {/* --- MAIN CONTENT HEADER --- */}
-                <header className="h-16 bg-[#ffffff] dark:bg-navy-900/80 backdrop-blur-md border-b border-[#e2e8f0] dark:border-white/10 flex items-center justify-between px-3.5 sm:px-6 shrink-0 z-10 transition-colors overflow-visible">
+                <header className={`h-16 ${isStudent ? 'bg-white border-slate-200' : 'bg-[#ffffff] dark:bg-navy-900/80 border-b border-[#e2e8f0] dark:border-white/10'} backdrop-blur-md border-b flex items-center justify-between px-3.5 sm:px-6 shrink-0 z-10 transition-colors overflow-visible`}>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         {/* Mobile Drawer Trigger (when on small screens or when sidebar mode is active) */}
-                        <button
+                        {!isStudent && <button
                             onClick={() => setSidebarOpen(true)}
                             className="p-2 text-[#64748b] dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-[#f1f5f9] dark:hover:bg-white/10 rounded-full lg:hidden transition-colors"
                             aria-label="Toggle Navigation Drawer"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>
+                        </button>}
 
                         {/* Top Navbar Brand Logo (displayed when in Top Navbar mode) */}
-                        {isTopNavbarMode && (
-                            <Link to="/admin/dashboard" className="flex items-center gap-2 select-none shrink-0 pr-1 sm:pr-3">
-                                <Logo size="sm" showSubtext={false} />
+                        {(isTopNavbarMode || isStudent) && (
+                            <Link to={isStudent ? '/student/dashboard' : '/admin/dashboard'} className="flex items-center gap-2 select-none shrink-0 pr-1 sm:pr-3">
+                                <Logo size="sm" showSubtext={false} forceLight={isStudent} />
                             </Link>
                         )}
 
                         {/* Search Bar Container with Live Omnibox Dropdown */}
-                        <div className={`relative hidden ${isTopNavbarMode ? 'xl:block w-48 2xl:w-64' : 'md:block w-80 xl:w-96'}`} ref={searchRef}>
+                        <div className={`relative hidden ${isTopNavbarMode ? 'xl:block w-48 2xl:w-64' : isStudent ? 'lg:block w-48 xl:w-64' : 'md:block w-80 xl:w-96'}`} ref={searchRef}>
                             <div className="relative flex items-center">
                                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <svg className={`w-4 h-4 text-slate-400 dark:text-gray-400 ${isAdmin ? 'group-focus-within:text-indigo-600' : 'group-focus-within:text-[#0ea5e9]'} transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className={`w-4 h-4 text-slate-400 ${isStudent ? '' : 'dark:text-gray-400'} ${isAdmin ? 'group-focus-within:text-indigo-600' : 'group-focus-within:text-[#0ea5e9]'} transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                     </svg>
                                 </div>
@@ -897,13 +910,13 @@ const DashboardLayout = () => {
                                         if (globalSearchQuery.trim().length > 0) setIsSearchOpen(true);
                                     }}
                                     onKeyDown={handleSearchKeyDown}
-                                    placeholder={isOrganizer ? "Search..." : (isAdmin ? "Search..." : "SEARCH...")}
-                                    className={`w-full pl-9 pr-9 py-2 bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none transition-all shadow-sm ${isOrganizer ? 'focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20' : isAdmin ? 'focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20' : 'focus:border-[#0ea5e9] focus:ring-2 focus:ring-sky-500/20'}`}
+                                    placeholder={isStudent ? "Search student pages..." : (isOrganizer ? "Search..." : (isAdmin ? "Search..." : "SEARCH..."))}
+                                    className={`w-full pl-9 pr-9 py-2 ${isStudent ? 'bg-slate-100 border border-slate-200 text-slate-800 placeholder-slate-400' : 'bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500'} rounded-2xl text-[11px] font-bold focus:outline-none transition-all shadow-sm ${isOrganizer ? 'focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20' : isAdmin ? 'focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20' : 'focus:border-[#0ea5e9] focus:ring-2 focus:ring-sky-500/20'}`}
                                 />
                                 {globalSearchQuery && (
                                     <button 
                                         onClick={() => { setGlobalSearchQuery(''); setIsSearchOpen(false); }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
+                                        className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 ${isStudent ? '' : 'dark:hover:text-white'} transition-colors`}
                                         aria-label="Clear search"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -918,15 +931,15 @@ const DashboardLayout = () => {
                             {isSearchOpen && globalSearchQuery.trim().length > 0 && (
                                 <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in duration-150">
                                     <div className="p-2 border-b border-slate-100 dark:border-white/5 flex items-center justify-between text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-gray-400 px-3">
-                                        <span>Quick Jump Results ({searchResults.length})</span>
+                                        <span>Quick Jump Results ({displayedSearchResults.length})</span>
                                         <span>Press ↵ Enter to Open</span>
                                     </div>
 
                                     <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 scrollbar-hide">
-                                        {searchResults.length === 0 ? (
+                                        {displayedSearchResults.length === 0 ? (
                                             <div className="p-4 text-center text-xs text-slate-500 dark:text-gray-400">
                                                 <p className="font-bold">No exact match found for "{globalSearchQuery}"</p>
-                                                <button 
+                                                {!isStudent && <button
                                                     onClick={() => {
                                                         navigate(`/admin/users?search=${encodeURIComponent(globalSearchQuery.trim())}`);
                                                         setIsSearchOpen(false);
@@ -934,10 +947,10 @@ const DashboardLayout = () => {
                                                     className="mt-2 text-[11px] font-bold text-indigo-600 hover:underline"
                                                 >
                                                     Search Directory for "{globalSearchQuery}" →
-                                                </button>
+                                                </button>}
                                             </div>
                                         ) : (
-                                            searchResults.map((item) => (
+                                            displayedSearchResults.map((item) => (
                                                 <div
                                                     key={item.id}
                                                     onClick={() => handleSearchSelect(item)}
@@ -1002,7 +1015,7 @@ const DashboardLayout = () => {
                         
                         {/* Theme Toggle */}
                         <div className="relative flex items-center justify-center">
-                            <ThemeToggle variant="button" />
+                            <ThemeToggle variant="button" forceLightAppearance={isStudent} />
                         </div>
 
                         {/* Help Guide for Organizer */}
@@ -1025,7 +1038,7 @@ const DashboardLayout = () => {
                         <div className="relative flex items-center justify-center">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className="relative w-9 h-9 flex items-center justify-center text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors border border-transparent hover:border-slate-200 dark:hover:border-white/10"
+                                className={`relative w-9 h-9 flex items-center justify-center text-slate-600 ${isStudent ? '' : 'dark:text-gray-300'} hover:text-slate-900 ${isStudent ? '' : 'dark:hover:text-white'} hover:bg-slate-100 ${isStudent ? '' : 'dark:hover:bg-white/10'} rounded-xl transition-colors border border-transparent hover:border-slate-200 ${isStudent ? '' : 'dark:hover:border-white/10'}`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                                 {unreadCount > 0 && (
@@ -1043,7 +1056,7 @@ const DashboardLayout = () => {
                                 className={`flex items-center justify-center gap-1.5 sm:gap-2 p-1 pr-1.5 sm:pr-3 rounded-xl sm:rounded-full transition-colors border cursor-pointer ${
                                     isOrganizer 
                                         ? 'bg-purple-50/50 dark:bg-purple-950/20 hover:bg-purple-100/50 border-purple-200 dark:border-purple-500/20' 
-                                        : 'bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border-slate-200 dark:border-white/10'
+                                        : isStudent ? 'bg-slate-100 hover:bg-slate-200 border-slate-200' : 'bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border-slate-200 dark:border-white/10'
                                 }`}
                             >
                                 <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 shadow-sm ${
@@ -1056,14 +1069,14 @@ const DashboardLayout = () => {
                                     {currentRole.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="hidden md:flex flex-col text-left leading-none">
-                                    <span className="text-[11px] font-bold text-slate-800 dark:text-white leading-tight">
+                                    <span className={`text-[11px] font-bold text-slate-800 ${isStudent ? '' : 'dark:text-white'} leading-tight`}>
                                         {currentRole.fullName}
                                     </span>
                                     <span className="text-[9px] text-[#7C65F6] font-semibold leading-none">
                                         {currentRole.roleName}
                                     </span>
                                 </div>
-                                <svg className={`w-3.5 h-3.5 text-slate-500 dark:text-gray-400 transition-transform duration-200 shrink-0 ${showProfileMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-3.5 h-3.5 text-slate-500 ${isStudent ? '' : 'dark:text-gray-400'} transition-transform duration-200 shrink-0 ${showProfileMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="m6 9 6 6 6-6" />
                                 </svg>
                             </button>
@@ -1138,8 +1151,30 @@ const DashboardLayout = () => {
                     </div>
                 </header>
 
+                {isStudent && (
+                    <nav aria-label="Student navigation" className="flex h-14 shrink-0 items-stretch gap-1 overflow-x-auto border-b border-slate-200 bg-white px-3 shadow-sm scrollbar-hide sm:px-6">
+                        {studentNav.map((item) => {
+                            const isDashboardRoot = item.path === '/student/dashboard';
+                            const isActive = isDashboardRoot
+                                ? location.pathname === item.path
+                                : location.pathname.startsWith(item.path);
+                            return (
+                                <Link
+                                    key={item.name}
+                                    to={item.path}
+                                    aria-current={isActive ? 'page' : undefined}
+                                    className={`flex shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors sm:px-4 ${isActive ? 'border-[#7C65F6] bg-purple-50/50 text-[#684ee8]' : 'border-transparent text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <span className={isActive ? 'text-[#684ee8]' : 'text-slate-500'}>{item.icon}</span>
+                                    <span className="whitespace-nowrap">{item.name}</span>
+                                </Link>
+                            );
+                        })}
+                    </nav>
+                )}
+
                 {/* Main Content from child routes */}
-                <main ref={mainRef} className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-10 scrollbar-hide">
+                <main ref={mainRef} className={`flex-1 overflow-y-auto scrollbar-hide ${isStudent ? 'min-h-0 p-0' : 'p-3.5 sm:p-6 lg:p-10'}`}>
                     <Outlet />
                 </main>
             </div>
