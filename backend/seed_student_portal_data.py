@@ -159,11 +159,55 @@ async def seed_student_data_direct(db):
         await db["hackathons"].update_one({"_id": h["_id"]}, {"$set": h}, upsert=True)
     print(f"[Seeder] Seeded/updated {len(hackathons_data)} core hackathons.")
 
-    # 3. Seed student teams & team members
-    mentor_user = await db["users"].find_one({"email": "ananya.rao@microsoft.com"}) or {
+    # 3. Seed mentor accounts & profiles
+    mentor_user_1 = {
         "_id": ObjectId("6a70c0656425dafef71c73c1"),
-        "name": "Ananya Rao"
+        "name": "Ananya Rao",
+        "email": "ananya.rao@microsoft.com",
+        "role": "mentor",
+        "institution": "Microsoft",
+        "password": "$2b$12$yzZ27NJM4TGAx1JV4KZGjONJ4HFJgYgFPs4XNSnqWXnOf2hGN2xa.",
+        "skills": ["AI/ML", "Cloud Architecture", "Python", "FastAPI"],
+        "createdAt": now - timedelta(days=60),
     }
+    mentor_user_2 = {
+        "_id": ObjectId("6a70c0656425dafef71c73c2"),
+        "name": "Dr. Sarah Chen",
+        "email": "mentor@hackzen.com",
+        "role": "mentor",
+        "institution": "Stanford AI Lab",
+        "password": "$2b$12$yzZ27NJM4TGAx1JV4KZGjONJ4HFJgYgFPs4XNSnqWXnOf2hGN2xa.",
+        "skills": ["System Design", "Distributed Systems", "AI", "Node.js"],
+        "createdAt": now - timedelta(days=60),
+    }
+
+    for mu in [mentor_user_1, mentor_user_2]:
+        await db["users"].update_one(
+            {"email": mu["email"]},
+            {"$set": mu},
+            upsert=True
+        )
+        await db["profiles"].update_one(
+            {"userId": str(mu["_id"])},
+            {"$set": {
+                "userId": str(mu["_id"]),
+                "name": mu["name"],
+                "email": mu["email"],
+                "role": "mentor",
+                "companyName": mu["institution"],
+                "institution": mu["institution"],
+                "expertiseDomains": mu["skills"],
+                "availability": "Available",
+                "availabilityStatus": "Available",
+                "bio": f"Senior technical mentor at {mu['institution']} guiding high-impact student builders.",
+                "linkedinUrl": "https://linkedin.com",
+                "githubUrl": "https://github.com",
+                "updatedAt": now,
+            }},
+            upsert=True
+        )
+
+    mentor_user = mentor_user_1
 
     team_1_id = ObjectId("65e070000000000000000001")
     team_2_id = ObjectId("65e070000000000000000002")
@@ -218,6 +262,159 @@ async def seed_student_data_direct(db):
     for t in teams_data:
         await db["teams"].update_one({"_id": t["_id"]}, {"$set": t}, upsert=True)
     print(f"[Seeder] Seeded/updated {len(teams_data)} student teams.")
+
+    # Seed mentor requests
+    mentor_requests_data = [
+        {
+            "_id": ObjectId("65e080000000000000000001"),
+            "mentorId": str(mentor_user["_id"]),
+            "teamId": str(team_3_id),
+            "teamName": "EcoGrid Solvers",
+            "domain": "Grid Optimization",
+            "message": "We are developing an AI microgrid balancer and would love your guidance on scaling edge inferences and distributed telemetry.",
+            "description": "Seeking architecture and ML model compression review for our smart grid platform.",
+            "status": "pending",
+            "memberCount": 3,
+            "requiredSkills": ["Python", "Edge AI", "IoT"],
+            "createdAt": now - timedelta(days=2),
+            "updatedAt": now - timedelta(days=2),
+        },
+        {
+            "_id": ObjectId("65e080000000000000000002"),
+            "mentorId": str(mentor_user["_id"]),
+            "teamId": str(team_1_id),
+            "teamName": "CyberShield X",
+            "domain": "Cybersecurity & Blockchain",
+            "message": "Requesting mentorship for our smart contract zero-knowledge transaction validator and latency optimization.",
+            "description": "Smart contract vulnerability defense and 50,000 tx/sec throughput testing.",
+            "status": "pending",
+            "memberCount": 4,
+            "requiredSkills": ["Solidity", "Rust", "Zero Knowledge"],
+            "createdAt": now - timedelta(hours=18),
+            "updatedAt": now - timedelta(hours=18),
+        }
+    ]
+    for mr in mentor_requests_data:
+        await db["mentorRequests"].update_one({"_id": mr["_id"]}, {"$set": mr}, upsert=True)
+
+    # Seed mentor meetings
+    meetings_data = [
+        {
+            "_id": ObjectId("65e090000000000000000001"),
+            "mentorId": str(mentor_user["_id"]),
+            "teamId": str(team_1_id),
+            "teamName": "FinTech Velocity",
+            "title": "Architecture & ML Scoring Review",
+            "description": "Deep dive into model quantization and edge inference latency reduction.",
+            "startTime": now + timedelta(days=1, hours=3),
+            "endTime": now + timedelta(days=1, hours=4),
+            "location": "Google Meet",
+            "meetingLink": "https://meet.google.com/pro-mentor-rev",
+            "status": "scheduled",
+            "createdAt": now - timedelta(days=1),
+        },
+        {
+            "_id": ObjectId("65e090000000000000000002"),
+            "mentorId": str(mentor_user["_id"]),
+            "teamId": str(team_2_id),
+            "teamName": "HealthAI NeuralCare",
+            "title": "Dataset & Validation Check-in",
+            "description": "Sprint review for early anomaly detection pipeline and jury pitch.",
+            "startTime": now + timedelta(days=2, hours=5),
+            "endTime": now + timedelta(days=2, hours=6),
+            "location": "Google Meet",
+            "meetingLink": "https://meet.google.com/pro-mentor-diag",
+            "status": "scheduled",
+            "createdAt": now - timedelta(days=1),
+        }
+    ]
+    for mt in meetings_data:
+        await db["meetings"].update_one({"_id": mt["_id"]}, {"$set": mt}, upsert=True)
+
+    # Seed mentor team materials
+    materials_data = [
+        {
+            "_id": ObjectId("65e0a0000000000000000001"),
+            "name": "FastAPI & Microservices Architecture Boilerplate.zip",
+            "originalName": "FastAPI & Microservices Architecture Boilerplate.zip",
+            "uploadedById": str(mentor_user["_id"]),
+            "uploadedByName": "Ananya Rao",
+            "uploadedBy": {
+                "id": str(mentor_user["_id"]),
+                "name": "Ananya Rao",
+                "email": "ananya.rao@microsoft.com"
+            },
+            "category": "Architecture & Boilerplates",
+            "fileType": "archive",
+            "type": "file",
+            "mimeType": "application/zip",
+            "sizeBytes": 15420000,
+            "sizeFormatted": "14.7 MB",
+            "url": "https://github.com/proeduvate-builders/boilerplate-fastapi-microservices",
+            "teamId": str(team_1_id),
+            "teamName": "FinTech Velocity",
+            "uploadedAt": now - timedelta(days=5),
+            "updatedAt": now - timedelta(days=5),
+        },
+        {
+            "_id": ObjectId("65e0a0000000000000000002"),
+            "name": "Production Hackathon Pitch Deck & Demo Guide.pdf",
+            "originalName": "Production Hackathon Pitch Deck & Demo Guide.pdf",
+            "uploadedById": str(mentor_user["_id"]),
+            "uploadedByName": "Ananya Rao",
+            "uploadedBy": {
+                "id": str(mentor_user["_id"]),
+                "name": "Ananya Rao",
+                "email": "ananya.rao@microsoft.com"
+            },
+            "category": "Pitch & Presentations",
+            "fileType": "pdf",
+            "type": "file",
+            "mimeType": "application/pdf",
+            "sizeBytes": 4200000,
+            "sizeFormatted": "4.0 MB",
+            "url": "https://proeduvate.com/guides/pitch-deck-presentation-template.pdf",
+            "teamId": str(team_2_id),
+            "teamName": "HealthAI NeuralCare",
+            "uploadedAt": now - timedelta(days=3),
+            "updatedAt": now - timedelta(days=3),
+        }
+    ]
+    for mat in materials_data:
+        await db["materials"].update_one({"_id": mat["_id"]}, {"$set": mat}, upsert=True)
+
+    # Seed feedback draft
+    feedback_data = [
+        {
+            "_id": ObjectId("65e0b0000000000000000001"),
+            "mentorId": str(mentor_user["_id"]),
+            "mentorName": "Ananya Rao",
+            "teamId": str(team_1_id),
+            "title": "Mid-Sprint Architecture Review",
+            "feedbackType": "Code Quality",
+            "type": "code_quality",
+            "guidance": "Strong architectural separation between scoring pipeline and smart contracts. Ensure exception handlers log sanitized telemetry.",
+            "content": "Strong architectural separation between scoring pipeline and smart contracts. Ensure exception handlers log sanitized telemetry.",
+            "rating": 4.5,
+            "overallScore": 4.5,
+            "status": "draft",
+            "criteriaRatings": {
+                "projectUnderstanding": 5,
+                "technicalApproach": 4,
+                "innovation": 5,
+                "feasibility": 4,
+                "presentationReadiness": 4,
+                "marketPotential": 4,
+                "userExperience": 3,
+                "collaboration": 5
+            },
+            "createdAt": now - timedelta(hours=6),
+            "updatedAt": now - timedelta(hours=6),
+        }
+    ]
+    for fb in feedback_data:
+        await db["feedback"].update_one({"_id": fb["_id"]}, {"$set": fb}, upsert=True)
+
 
     # 4. Link each student account to teams and applications
     for student in students:

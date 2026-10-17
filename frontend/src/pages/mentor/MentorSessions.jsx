@@ -57,7 +57,7 @@ export default function MentorSessions() {
           description: m.description || '',
         };
       });
-      setSessions([...(Array.isArray(stored) ? stored : []), ...mapped]);
+      setSessions(mapped);
     } catch (e) {
       console.error('Meetings load failed:', e);
       setSessions([]);
