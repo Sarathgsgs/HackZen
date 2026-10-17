@@ -167,7 +167,7 @@ export default function MentorLayout() {
     { name: 'Dashboard', path: '/mentor/dashboard', icon: LayoutDashboard },
     { name: 'Hackathons', path: '/mentor/hackathons', icon: Trophy },
     { name: 'My Teams', path: '/mentor/teams', icon: Users },
-    { name: 'Mentorship Requests', path: '/mentor/requests', icon: Inbox, badge: unreadCount || 3 },
+    { name: 'Mentorship Requests', path: '/mentor/requests', icon: Inbox, badge: unreadCount },
     { name: 'Team Chat', path: '/mentor/messages', icon: MessageSquare },
     { name: 'Meetings / Schedule Sessions', path: '/mentor/sessions', icon: Calendar },
     { name: 'Feedback Management', path: '/mentor/feedback', icon: CheckSquare },
@@ -334,7 +334,7 @@ export default function MentorLayout() {
           </Link>
 
           {/* Current Page Title */}
-          <div className="min-w-0 hidden md:block">
+          <div className="min-w-0 hidden md:block xl:hidden">
             <h1 className="text-lg lg:text-xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
               {headerMeta.title}
             </h1>
@@ -343,6 +343,25 @@ export default function MentorLayout() {
             </p>
           </div>
         </div>
+
+        <nav className="hidden xl:flex items-center gap-3 px-2" aria-label="Mentor workspace pages">
+          {[
+            ['Dashboard', '/mentor/dashboard'],
+            ['Mentorship Requests', '/mentor/requests'],
+            ['My Teams', '/mentor/teams'],
+            ['Team Materials', '/mentor/resources'],
+            ['Feedback', '/mentor/feedback'],
+            ['Chat', '/mentor/messages'],
+          ].map(([label, path]) => (
+            <NavLink
+              key={path}
+              to={path}
+              className={({ isActive }) => `whitespace-nowrap border-b-2 px-1 py-2 text-[11px] font-semibold transition-colors ${isActive ? 'border-[#5B45D9] text-[#5B45D9] dark:text-purple-300' : 'border-transparent text-slate-600 hover:text-[#5B45D9] dark:text-slate-300'}`}
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
 
         {/* Right: Search, Notifications, Theme Toggle, Profile, Hamburger Menu */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
