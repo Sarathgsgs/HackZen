@@ -16,18 +16,14 @@ def get_ai_logs_collection():
 
 
 def _require_student(current_user: dict) -> str:
-    if current_user.get("role") != "student":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The AI Assistant is available to students only.",
-        )
     user_id = current_user.get("_id") or current_user.get("id") or current_user.get("sub")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authenticated student identity is missing.",
+            detail="Authenticated identity is missing.",
         )
     return str(user_id)
+
 
 
 @router.post("/chat", response_model=AIChatResponse)

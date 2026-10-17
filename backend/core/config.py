@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     # AI Services
     GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY")
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
+    NVIDIA_API_KEY: Optional[str] = os.getenv("NVIDIA_API_KEY")
+
 
     # Email
     SMTP_HOST: str = os.getenv("SMTP_HOST")

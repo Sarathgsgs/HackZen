@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchInitialMessages, fetchQuickStarters, sendChatMessage } from '../../services/student/aiAssistantApi';
 import { getMyTeams } from '../../api/teamApi';
 import { fetchMyApplications } from '../../api/applicationApi';
-import { fetchHackathonById } from '../../api/hackathonApi';
+import { fetchHackathonById, fetchAllHackathons } from '../../api/hackathonApi';
 
 const suggestionLabels = [
     'Help me understand this problem',
@@ -43,7 +43,17 @@ const StudentAIAssistant = () => {
                 ].filter(Boolean).map(String))];
                 const results = await Promise.allSettled(ids.map((id) => fetchHackathonById(id)));
                 if (!active) return;
-                const loaded = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+                let loaded = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+                if (loaded.length === 0) {
+                    try {
+                        const allHacks = await fetchAllHackathons();
+                        if (Array.isArray(allHacks) && allHacks.length > 0) {
+                            loaded = allHacks;
+                        }
+                    } catch (err) {
+                        // Keep graceful empty list if network is down
+                    }
+                }
                 setHackathons(loaded);
                 let cachedUser = {};
                 try {

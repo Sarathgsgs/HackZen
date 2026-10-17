@@ -219,16 +219,41 @@ const StudentHackathons = () => {
                                 <span className="absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-sm font-medium text-[#5a42d8] shadow-sm">{statusLabel(hackathon, registered)}</span>
                             </div>
                             <div className="flex flex-1 flex-col p-6">
-                                <h2 className="text-2xl font-bold leading-tight tracking-tight text-[#292738]">{hackathon.title}</h2>
-                                {hackathon.organizerName || hackathon.organizer_name ? <p className="mt-2 text-base text-[#777488]">by {hackathon.organizerName || hackathon.organizer_name}</p> : null}
-                                <div className="mt-6 space-y-4 text-base text-[#777488]">
-                                    <p className="flex gap-3"><span aria-hidden="true">▣</span>{dateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</p>
-                                    <p className="flex gap-3"><span aria-hidden="true">◎</span>{modeFor(hackathon.location)}</p>
-                                    <p className="flex gap-3"><span aria-hidden="true">♧</span>Team: {hackathon.minTeamSize || 1} – {hackathon.maxTeamSize || 1} Members</p>
+                                <h2 className="text-xl font-bold leading-snug tracking-tight text-[#292738] dark:text-white line-clamp-2">{hackathon.title}</h2>
+                                {hackathon.organizerName || hackathon.organizer_name ? <p className="mt-1.5 text-sm text-[#777488] dark:text-gray-400">by {hackathon.organizerName || hackathon.organizer_name}</p> : null}
+                                <div className="mt-5 space-y-2.5 text-sm text-[#626071] dark:text-gray-300">
+                                    <p className="flex items-center gap-2.5">
+                                        <svg className="w-4 h-4 text-[#6046dc] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        <span>{dateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</span>
+                                    </p>
+                                    <p className="flex items-center gap-2.5">
+                                        <svg className="w-4 h-4 text-[#6046dc] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        <span>{modeFor(hackathon.location)}</span>
+                                    </p>
+                                    <p className="flex items-center gap-2.5">
+                                        <svg className="w-4 h-4 text-[#6046dc] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                        <span>Team: {hackathon.minTeamSize || 1} – {hackathon.maxTeamSize || 1} Members</span>
+                                    </p>
                                 </div>
-                                <div className="mt-auto flex gap-3">
-                                    <button onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}`)} className={`w-full rounded-lg py-3.5 text-lg font-medium transition ${registered ? 'bg-[#5740d6] text-white hover:bg-[#4530bd]' : 'border-2 border-[#6952e5] bg-white text-[#6149dc] hover:bg-[#f6f4ff]'}`}>View Details</button>
-                                    {!registered && <button onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}/register`)} className="w-full rounded-lg bg-[#5740d6] py-3.5 text-lg font-medium text-white transition hover:bg-[#4530bd]">Register Now</button>}
+                                <div className="mt-auto pt-6 border-t border-[#f0edf7] dark:border-white/10 flex items-center gap-3">
+                                    <button
+                                        onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}`)}
+                                        className={`flex-1 inline-flex items-center justify-center rounded-xl py-2.5 px-4 text-sm font-semibold transition-all duration-150 active:scale-[0.98] ${
+                                            registered
+                                                ? 'bg-[#5740d6] text-white shadow-sm hover:bg-[#4530bd]'
+                                                : 'border border-[#e2deec] dark:border-white/10 bg-white dark:bg-white/5 text-[#4838b0] dark:text-violet-300 shadow-sm hover:bg-[#f8f6fc] dark:hover:bg-white/10 hover:border-[#6046dc]/40'
+                                        }`}
+                                    >
+                                        View Details
+                                    </button>
+                                    {!registered && (
+                                        <button
+                                            onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}/register`)}
+                                            className="flex-1 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#6046dc] to-[#7353f4] py-2.5 px-4 text-sm font-semibold text-white shadow-sm shadow-[#6046dc]/25 hover:from-[#5136cb] hover:to-[#6342e4] hover:shadow-md hover:shadow-[#6046dc]/35 transition-all duration-150 active:scale-[0.98]"
+                                        >
+                                            Register Now
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </article>;
