@@ -203,14 +203,14 @@ const StudentSettings = () => {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-[60vh]">
-                <div className="glass rounded-2xl border border-white/5 p-8 w-full max-w-2xl">
+            <div className="flex min-h-full items-center justify-center bg-[#f3f0f8] px-4 py-8 sm:px-6 lg:px-8">
+                <div className="w-full max-w-2xl rounded-[20px] border border-[#e5dff0] bg-white p-8 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
                     <div className="animate-pulse space-y-4">
-                        <div className="h-8 bg-white/10 rounded-lg w-3/4"></div>
-                        <div className="h-4 bg-white/10 rounded-lg w-1/2"></div>
+                        <div className="h-8 w-3/4 rounded-lg bg-[#eeeaf5]"></div>
+                        <div className="h-4 w-1/2 rounded-lg bg-[#eeeaf5]"></div>
                         <div className="space-y-3 mt-6">
                             {[...Array(4)].map((_, i) => (
-                                <div key={i} className="h-12 bg-white/10 rounded-lg"></div>
+                                <div key={i} className="h-12 rounded-lg bg-[#f3f0f8]"></div>
                             ))}
                         </div>
                     </div>
@@ -234,47 +234,48 @@ const StudentSettings = () => {
                 </div>
             )}
 
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-500 max-w-6xl mx-auto">
-                <div className="mb-10">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                        Account <span className="gradient-text">Settings</span>
+            <div className="min-h-full space-y-7 bg-[#f3f0f8] px-4 pb-12 pt-6 text-[#181524] animate-in fade-in slide-in-from-bottom-5 duration-500 sm:px-6 sm:pt-8 lg:px-8">
+                <div className="mx-auto max-w-6xl">
+                    <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7a7098]">Account</p>
+                    <h1 className="mt-2 text-3xl font-bold tracking-tight text-[#1d1a2a] sm:text-4xl">
+                        Settings
                     </h1>
-                    <p className="text-gray-400">Manage your privacy, notifications, and student workspace preferences in the same clean dashboard style.</p>
+                    <p className="mt-2 text-sm text-[#6e6882]">Manage your privacy, notifications, and student workspace preferences in the same clean dashboard style.</p>
                 </div>
 
                 {/* Settings Overview Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="glass rounded-2xl border border-white/5 p-6">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Profile Mode</p>
-                        <p className="text-2xl font-bold text-white">{settings.profileMode}</p>
+                <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-3">
+                    <div className="rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#7a7098]">Profile Mode</p>
+                        <p className="text-2xl font-bold text-[#242136]">{settings.profileMode}</p>
                     </div>
                     
-                    <div className="glass rounded-2xl border border-white/5 p-6">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Theme</p>
-                        <p className="text-2xl font-bold text-white">{settings.theme}</p>
+                    <div className="rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#7a7098]">Theme</p>
+                        <p className="text-2xl font-bold text-[#242136]">{settings.theme}</p>
                     </div>
-                    <div className="glass rounded-2xl border border-white/5 p-6">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Language</p>
-                        <p className="text-2xl font-bold text-white">{settings.contentLanguage}</p>
+                    <div className="rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#7a7098]">Language</p>
+                        <p className="text-2xl font-bold text-[#242136]">{settings.contentLanguage}</p>
                     </div>
                 </div>
 
                 {/* Privacy & Account Section */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <div className="glass rounded-2xl border border-white/5 p-8 space-y-6">
+                <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 xl:grid-cols-2">
+                    <div className="space-y-6 rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-8">
                         <div>
-                            <h2 className="text-2xl font-bold text-white mb-2">Privacy & Account</h2>
-                            <p className="text-sm text-gray-400">Control visibility, language, and data-sharing preferences.</p>
+                            <h2 className="mb-2 text-xl font-bold text-[#1d1a2a] sm:text-2xl">Privacy & Account</h2>
+                            <p className="text-sm text-[#6e6882]">Control visibility, language, and data-sharing preferences.</p>
                         </div>
 
                         <div className="space-y-5">
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Profile Visibility</label>
+                                <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Profile Visibility</label>
                                 <select
                                     value={settings.profileMode}
                                     onChange={handleProfileModeChange}
                                     disabled={isSaving}
-                                    className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 disabled:opacity-50"
+                                    className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
                                 >
                                     <option>Public</option>
                                     <option>Private</option>
@@ -283,12 +284,12 @@ const StudentSettings = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Notification Frequency</label>
+                                <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Notification Frequency</label>
                                 <select
                                     value={settings.notificationFrequency}
                                     onChange={handleNotificationFrequencyChange}
                                     disabled={isSaving}
-                                    className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 disabled:opacity-50"
+                                    className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
                                 >
                                     <option>Instant</option>
                                     <option>Daily</option>
@@ -305,13 +306,13 @@ const StudentSettings = () => {
                                     key={item.key}
                                     onClick={() => toggleSetting(item.key)}
                                     disabled={isSaving}
-                                    className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all disabled:opacity-50 ${settings[item.key] ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/10'}`}
+                                    className={`w-full flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all disabled:opacity-50 ${settings[item.key] ? 'border-[#cfc5f3] bg-[#f4f0ff]' : 'border-[#e5dff0] bg-[#fbfaff] hover:bg-[#f8f6fc]'}`}
                                 >
                                     <div className="text-left">
-                                        <h3 className="font-bold text-white">{item.title}</h3>
-                                        <p className="text-xs text-gray-400">{item.description}</p>
+                                        <h3 className="font-bold text-[#242136]">{item.title}</h3>
+                                        <p className="text-xs text-[#6e6882]">{item.description}</p>
                                     </div>
-                                    <div className={`w-12 h-6 rounded-full relative transition-colors ${settings[item.key] ? 'bg-purple-600' : 'bg-gray-700'}`}>
+                                    <div className={`relative h-6 w-12 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#5c46c7]' : 'bg-[#cbc6d6]'}`}>
                                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings[item.key] ? 'left-7' : 'left-1'}`} />
                                     </div>
                                 </button>
@@ -320,27 +321,27 @@ const StudentSettings = () => {
                             <button
                                 onClick={() => toggleSetting('twoFactorEnabled')}
                                 disabled={isSaving}
-                                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all disabled:opacity-50 ${settings.twoFactorEnabled ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/10'}`}
+                                className={`w-full flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all disabled:opacity-50 ${settings.twoFactorEnabled ? 'border-[#cfc5f3] bg-[#f4f0ff]' : 'border-[#e5dff0] bg-[#fbfaff] hover:bg-[#f8f6fc]'}`}
                             >
                                 <div className="text-left">
-                                    <h3 className="font-bold text-white">Two-Factor Authentication</h3>
-                                    <p className="text-xs text-gray-400">Add another layer of security to your student account.</p>
+                                    <h3 className="font-bold text-[#242136]">Two-Factor Authentication</h3>
+                                    <p className="text-xs text-[#6e6882]">Add another layer of security to your student account.</p>
                                 </div>
-                                <div className={`w-12 h-6 rounded-full relative transition-colors ${settings.twoFactorEnabled ? 'bg-purple-600' : 'bg-gray-700'}`}>
+                                <div className={`relative h-6 w-12 shrink-0 rounded-full transition-colors ${settings.twoFactorEnabled ? 'bg-[#5c46c7]' : 'bg-[#cbc6d6]'}`}>
                                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings.twoFactorEnabled ? 'left-7' : 'left-1'}`} />
                                 </div>
                             </button>
                         </div>
 
                         {/* Security Section */}
-                        <div className="border-t border-white/5 pt-6 space-y-4">
+                        <div className="space-y-4 border-t border-[#eeeaf5] pt-6">
                             <div>
-                                <h3 className="text-lg font-semibold text-white">Security</h3>
-                                <p className="text-sm text-gray-400">Keep your account protected with a strong password.</p>
+                                <h3 className="text-lg font-semibold text-[#1d1a2a]">Security</h3>
+                                <p className="text-sm text-[#6e6882]">Keep your account protected with a strong password.</p>
                             </div>
-                            <form onSubmit={handlePasswordSubmit} className="glass rounded-2xl border border-white/5 bg-white/5 p-5 space-y-4">
+                            <form onSubmit={handlePasswordSubmit} className="space-y-4 rounded-2xl border border-[#e5dff0] bg-[#f8f6fc] p-5">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Password</label>
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Current Password</label>
                                     <input
                                         type="password"
                                         name="currentPassword"
@@ -348,11 +349,11 @@ const StudentSettings = () => {
                                         onChange={handlePasswordChange}
                                         placeholder="Enter current password"
                                         disabled={isChangingPassword}
-                                        className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 disabled:opacity-50"
+                                        className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] placeholder:text-[#9a93aa] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">New Password</label>
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">New Password</label>
                                     <input
                                         type="password"
                                         name="newPassword"
@@ -360,11 +361,11 @@ const StudentSettings = () => {
                                         onChange={handlePasswordChange}
                                         placeholder="Enter new password (min 8 characters)"
                                         disabled={isChangingPassword}
-                                        className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 disabled:opacity-50"
+                                        className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] placeholder:text-[#9a93aa] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Confirm Password</label>
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Confirm Password</label>
                                     <input
                                         type="password"
                                         name="confirmPassword"
@@ -372,13 +373,13 @@ const StudentSettings = () => {
                                         onChange={handlePasswordChange}
                                         placeholder="Confirm new password"
                                         disabled={isChangingPassword}
-                                        className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 disabled:opacity-50"
+                                        className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] placeholder:text-[#9a93aa] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
                                     />
                                 </div>
                                 <button 
                                     type="submit"
                                     disabled={isChangingPassword}
-                                    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 rounded-xl text-white font-bold transition-all disabled:cursor-not-allowed"
+                                    className="rounded-xl bg-[#5c46c7] px-6 py-3 font-bold text-white transition-colors hover:bg-[#4d3bb1] disabled:cursor-not-allowed disabled:bg-[#5c46c7]/50"
                                 >
                                     {isChangingPassword ? 'Updating...' : 'Change Password'}
                                 </button>
@@ -387,10 +388,10 @@ const StudentSettings = () => {
                     </div>
 
                     {/* Notifications Section */}
-                    <div className="glass rounded-2xl border border-white/5 p-8 space-y-6">
+                    <div className="space-y-6 rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-8">
                         <div>
-                            <h2 className="text-2xl font-bold text-white mb-2">Notifications</h2>
-                            <p className="text-sm text-gray-400">Choose how the platform keeps you updated.</p>
+                            <h2 className="mb-2 text-xl font-bold text-[#1d1a2a] sm:text-2xl">Notifications</h2>
+                            <p className="text-sm text-[#6e6882]">Choose how the platform keeps you updated.</p>
                         </div>
 
                         <div className="space-y-5">
@@ -415,24 +416,24 @@ const StudentSettings = () => {
                                     key={item.key}
                                     onClick={() => toggleSetting(item.key)}
                                     disabled={isSaving}
-                                    className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all disabled:opacity-50 ${settings[item.key] ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/10'}`}
+                                    className={`w-full flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all disabled:opacity-50 ${settings[item.key] ? 'border-[#cfc5f3] bg-[#f4f0ff]' : 'border-[#e5dff0] bg-[#fbfaff] hover:bg-[#f8f6fc]'}`}
                                 >
                                     <div className="text-left">
-                                        <h3 className="font-bold text-white">{item.title}</h3>
-                                        <p className="text-xs text-gray-400">{item.description}</p>
+                                        <h3 className="font-bold text-[#242136]">{item.title}</h3>
+                                        <p className="text-xs text-[#6e6882]">{item.description}</p>
                                     </div>
-                                    <div className={`w-12 h-6 rounded-full relative transition-colors ${settings[item.key] ? 'bg-purple-600' : 'bg-gray-700'}`}>
+                                    <div className={`relative h-6 w-12 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#5c46c7]' : 'bg-[#cbc6d6]'}`}>
                                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings[item.key] ? 'left-7' : 'left-1'}`} />
                                     </div>
                                 </button>
                             ))}
                         </div>
 
-                        <div className="border-t border-white/5 pt-6">
+                        <div className="border-t border-[#eeeaf5] pt-6">
                             <button
                                 onClick={handleResetSettings}
                                 disabled={isSaving}
-                                className="w-full px-6 py-3 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full rounded-xl border border-[#d8d0f1] bg-[#f4f0ff] px-6 py-3 font-bold text-[#5c46c7] transition-colors hover:bg-[#5c46c7] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {isSaving ? 'Resetting...' : 'Reset Settings to Defaults'}
                             </button>
@@ -441,14 +442,14 @@ const StudentSettings = () => {
                 </div>
 
                 {/* Danger Zone */}
-                <div className="glass rounded-2xl border border-red-500/20 bg-red-500/5 p-8 space-y-4">
-                    <h2 className="text-2xl font-bold text-red-400">Danger Zone</h2>
-                    <p className="text-sm text-gray-300">Deactivate your account if you no longer want access to your student profile, teams, and certificates. Your data will be retained for 30 days before permanent deletion.</p>
+                <div className="mx-auto w-full max-w-6xl space-y-4 rounded-[20px] border border-rose-200 bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-8">
+                    <h2 className="text-xl font-bold text-rose-700 sm:text-2xl">Danger Zone</h2>
+                    <p className="text-sm text-[#6e6882]">Deactivate your account if you no longer want access to your student profile, teams, and certificates. Your data will be retained for 30 days before permanent deletion.</p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-start">
                         <button
                             onClick={handleDeactivate}
                             disabled={isDeactivating}
-                            className="px-6 py-3 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-xl border border-rose-200 bg-rose-50 px-6 py-3 font-bold text-rose-700 transition-colors hover:bg-rose-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {isDeactivating ? 'Deactivating...' : 'Deactivate Account'}
                         </button>

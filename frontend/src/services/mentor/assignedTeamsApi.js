@@ -6,8 +6,9 @@ import apiClient from '../../api/api';
  */
 
 export const fetchAssignedTeams = async () => {
+    try {
         const { data: teams } = await apiClient.get('/teams/mentor-teams');
-        const mappedTeams = teams.map(team => ({
+        const mappedTeams = (teams || []).map(team => ({
             id: String(team._id || team.id),
             name: team.teamName || team.name || 'Unnamed team',
             hackathonId: String(team.hackathonId || ''),
@@ -15,7 +16,7 @@ export const fetchAssignedTeams = async () => {
             hackathon: team.hackathonName || team.hackathonTitle || team.hackathon || team.hackathonId || 'Active Hackathon',
             domain: team.domain || 'Technology',
             status: team.status || 'Active',
-            progress: team.progress || 0,
+            progress: team.progress ?? 0,
             nextAction: team.nextAction || 'Check in with team',
             nextActionTime: team.nextActionTime || 'TBD',
             alert: team.alert || null,
@@ -27,6 +28,10 @@ export const fetchAssignedTeams = async () => {
             activeTeams: mappedTeams.filter((_, index) => !isPast(teams[index])),
             pastTeams: mappedTeams.filter((_, index) => isPast(teams[index])),
         };
+    } catch (error) {
+        console.error('Failed to fetch assigned teams:', error);
+        throw error;
+    }
 };
 
 export const joinTeam = async (code) => {
@@ -40,8 +45,8 @@ export const joinTeam = async (code) => {
             team: {
                 id: data._id || data.teamId,
                 name: teamName,
-                hackathon: data.hackathonId || 'Open Challenge',
-                domain: data.domain || 'General',
+                hackathon: data.hackathonTitle || '',
+                domain: data.domain || '',
                 status: 'Active',
                 progress: 0,
                 nextAction: 'Onboarding',
@@ -65,20 +70,20 @@ export const fetchDiscoverableTeams = async () => {
             .map(team => ({
                 id: team._id,
                 name: team.teamName,
-                hackathon: team.hackathonId || 'Active Hackathon',
-                domain: team.domain || 'Technology',
-                description: team.description || 'This team is looking for a mentor.',
+                hackathon: team.hackathonTitle || '',
+                domain: team.domain || '',
+                description: team.description || '',
                 requiredSkills: team.requiredSkills || [],
                 members: team.memberCount || 0,
-                maxSize: team.maxSize || 4,
-                progress: team.progress || 0,
-                status: team.status || 'Active',
+                maxSize: team.maxSize ?? 0,
+                progress: team.progress ?? 0,
+                status: team.status || '',
                 requested: false,
                 icon: (team.teamName || 'T')[0]
             }));
     } catch (error) {
         console.error('Failed to fetch discoverable teams:', error);
-        return [];
+        throw error;
     }
 };
 
@@ -142,7 +147,7 @@ export const fetchMentorshipRequests = async () => {
         }));
     } catch (error) {
         console.error('Failed to fetch mentorship requests:', error);
-        return [];
+        throw error;
     }
 };
 

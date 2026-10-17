@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { fetchAllHackathons, fetchHackathonById } from '../../api/hackathonApi';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { fetchAllHackathons } from '../../api/hackathonApi';
 import { fetchMyApplications } from '../../api/applicationApi';
 
 const formatDate = (value) => {
@@ -14,7 +14,7 @@ const formatDate = (value) => {
 const dateRange = (start, end) => `${formatDate(start)} – ${formatDate(end)}`;
 
 const modeFor = (location) => {
-    if (!location) return 'Online';
+    if (!location) return 'Mode not specified';
     const normalized = location.toLowerCase();
     if (normalized.includes('online') && normalized.length > 'online'.length) return `Hybrid (${location})`;
     if (normalized.includes('online') || normalized.includes('virtual')) return 'Online';
@@ -58,6 +58,30 @@ const statusLabel = (hackathon, registered) => {
     return hackathon.status || 'Available';
 };
 
+const hackathonBanners = [
+    { name: 'ai', src: '/assets/hackathon-ai.svg', keywords: ['artificial intelligence', 'machine learning', 'aiml', 'genai', 'llm', 'data science'] },
+    { name: 'cyber', src: '/assets/hackathon-cyber.svg', keywords: ['cyber', 'security', 'privacy', 'devsecops'] },
+    { name: 'robotics', src: '/assets/hackathon-robotics.svg', keywords: ['robot', 'iot', 'internet of things', 'hardware'] },
+    { name: 'climate', src: '/assets/hackathon-climate.svg', keywords: ['sustain', 'climate', 'environment', 'energy', 'green'] },
+    { name: 'web', src: '/assets/hackathon-web.svg', keywords: ['web', 'blockchain', 'cloud', 'mobile', 'gaming', 'finance'] },
+    { name: 'health', src: '/assets/hackathon-health.svg', keywords: ['health', 'medical', 'social good', 'education'] },
+];
+
+const bannerForHackathon = (hackathon, id) => {
+    const themeText = (Array.isArray(hackathon.themes) ? hackathon.themes : [])
+        .join(' ')
+        .toLowerCase();
+    const themedBanner = hackathonBanners.find(({ name, keywords }) =>
+        (name === 'ai' && /\bai\b/.test(themeText))
+        || keywords.some((keyword) => themeText.includes(keyword))
+    );
+    if (themedBanner) return themedBanner.src;
+
+    const stableKey = String(id || hackathon.title || 'hackathon');
+    const stableHash = [...stableKey].reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 7);
+    return hackathonBanners[stableHash % hackathonBanners.length].src;
+};
+
 const Select = ({ label, value, onChange, children }) => (
     <label className="relative block min-w-0">
         <span className="sr-only">{label}</span>
@@ -70,26 +94,24 @@ const Select = ({ label, value, onChange, children }) => (
 
 const StudentHackathons = () => {
     const navigate = useNavigate();
-    const { hackathonId } = useParams();
+    const location = useLocation();
     const [hackathons, setHackathons] = useState([]);
     const [registeredIds, setRegisteredIds] = useState(new Set());
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [category, setCategory] = useState('all');
     const [dateFilter, setDateFilter] = useState('anytime');
     const [mode, setMode] = useState('all');
     const [sort, setSort] = useState('newest');
     const [selectedHackathon, setSelectedHackathon] = useState(null);
 
-    // Debounce search input by 300ms
     useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearch(search);
-        }, 300);
-        return () => clearTimeout(handler);
-    }, [search]);
+        const selectedId = location.state?.hackathonId;
+        if (selectedId) {
+            navigate(`/student/hackathons/${encodeURIComponent(selectedId)}`, { replace: true, state: null });
+        }
+    }, [location.state, navigate]);
 
     const loadHackathons = async () => {
         setIsLoading(true);
@@ -101,21 +123,6 @@ const StudentHackathons = () => {
             ]);
             setHackathons(events);
             setRegisteredIds(new Set(applications.map((application) => application.hackathonId)));
-
-            if (hackathonId) {
-                const found = events.find((h) => String(h.id || h._id) === String(hackathonId));
-                if (found) {
-                    setSelectedHackathon(found);
-                } else {
-                    // Try direct fetch if not in the list
-                    try {
-                        const direct = await fetchHackathonById(hackathonId);
-                        if (direct) setSelectedHackathon(direct);
-                    } catch {
-                        // Ignore not found
-                    }
-                }
-            }
         } catch (requestError) {
             console.error('Failed to load student hackathons:', requestError);
             setError('We could not load hackathons right now. Please try again.');
@@ -124,11 +131,11 @@ const StudentHackathons = () => {
         }
     };
 
-    useEffect(() => { loadHackathons(); }, [hackathonId]);
+    useEffect(() => { loadHackathons(); }, []);
 
     const categories = useMemo(() => [...new Set(hackathons.flatMap((hackathon) => hackathon.themes || []))].sort(), [hackathons]);
     const visibleHackathons = useMemo(() => {
-        const query = debouncedSearch.trim().toLowerCase();
+        const query = search.trim().toLowerCase();
         const result = hackathons.filter((hackathon) => {
             const titleAndDescription = `${hackathon.title || ''} ${hackathon.description || ''}`.toLowerCase();
             const hackathonMode = modeFor(hackathon.location);
@@ -142,109 +149,28 @@ const StudentHackathons = () => {
             if (sort === 'soonest') return new Date(first.hackathonStart) - new Date(second.hackathonStart);
             return new Date(second.createdAt) - new Date(first.createdAt);
         });
-    }, [hackathons, debouncedSearch, category, dateFilter, mode, sort]);
+    }, [hackathons, search, category, dateFilter, mode, sort]);
 
     if (selectedHackathon) {
         const id = selectedHackathon.id || selectedHackathon._id;
         const registered = registeredIds.has(id);
-        const prizes = selectedHackathon.prizes || [];
-        const themes = selectedHackathon.themes || [];
-
         return (
-            <div className="-m-6 min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:-m-10 lg:p-10">
-                <button
-                    onClick={() => {
-                        setSelectedHackathon(null);
-                        if (hackathonId) navigate('/student/hackathons');
-                    }}
-                    className="mb-8 flex items-center gap-2 font-semibold text-[#5740d6] transition hover:text-[#4530bd]"
-                >
-                    <span aria-hidden="true">←</span> Back to Hackathons
-                </button>
+            <div className="min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:p-10">
+                <button onClick={() => setSelectedHackathon(null)} className="mb-8 flex items-center gap-2 font-medium text-[#5740d6] transition hover:text-[#4530bd]"><span aria-hidden="true">←</span> Back to Hackathons</button>
                 <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-[#e5e1ed] bg-white shadow-[0_1px_2px_rgba(31,22,60,0.03)]">
                     <div className="relative h-64 bg-[#eeebf6] sm:h-80">
-                        {selectedHackathon.posterUrl ? (
-                            <img src={selectedHackathon.posterUrl} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                            <div className="flex h-full items-center justify-center px-8 text-center text-3xl font-bold text-[#777488]">
-                                {selectedHackathon.title}
-                            </div>
-                        )}
-                        <span className="absolute right-6 top-6 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-semibold text-[#5a42d8] shadow-sm">
-                            {statusLabel(selectedHackathon, registered)}
-                        </span>
+                        {selectedHackathon.posterUrl ? <img src={selectedHackathon.posterUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center px-8 text-center text-3xl font-bold text-[#777488]">{selectedHackathon.title}</div>}
                     </div>
-                    <div className="grid gap-8 p-7 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
-                        <div className="space-y-6">
-                            <div>
-                                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1d1a2a]">
-                                    {selectedHackathon.title}
-                                </h1>
-                                {(selectedHackathon.organizerName || selectedHackathon.organizer_name) && (
-                                    <p className="mt-2 text-[#777488]">
-                                        Organized by <span className="font-medium text-[#4f3ec7]">{selectedHackathon.organizerName || selectedHackathon.organizer_name}</span>
-                                    </p>
-                                )}
-                            </div>
-
-                            {themes.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                    {themes.map((theme, idx) => (
-                                        <span key={idx} className="rounded-full bg-[#f1edfc] px-3 py-1 text-xs font-semibold text-[#5740d6]">
-                                            {theme}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div>
-                                <h2 className="text-xl font-bold text-[#1d1a2a]">About this hackathon</h2>
-                                <p className="mt-3 whitespace-pre-wrap leading-7 text-[#626071]">
-                                    {selectedHackathon.description || 'No description has been provided yet.'}
-                                </p>
-                            </div>
-
-                            {prizes.length > 0 && (
-                                <div>
-                                    <h2 className="text-xl font-bold text-[#1d1a2a]">Prizes</h2>
-                                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                                        {prizes.map((p, idx) => (
-                                            <div key={idx} className="rounded-xl border border-[#ece7f6] bg-[#fdfcff] p-4">
-                                                <div className="text-xs font-bold uppercase tracking-wider text-[#7a7098]">
-                                                    {typeof p === 'object' ? (p.title || `Prize #${idx + 1}`) : `Prize #${idx + 1}`}
-                                                </div>
-                                                <div className="mt-1 text-lg font-bold text-[#4f3ec7]">
-                                                    {typeof p === 'object' ? (p.amount || p.value || p.prize || 'Reward') : p}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                    <div className="grid gap-8 p-7 lg:grid-cols-[minmax(0,1fr)_280px] lg:p-10">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{selectedHackathon.title}</h1>
+                            {selectedHackathon.organizerName || selectedHackathon.organizer_name ? <p className="mt-2 text-[#777488]">by {selectedHackathon.organizerName || selectedHackathon.organizer_name}</p> : null}
+                            <h2 className="mt-8 text-xl font-bold">About this hackathon</h2>
+                            <p className="mt-3 whitespace-pre-wrap leading-7 text-[#626071]">{selectedHackathon.description || 'No description has been provided yet.'}</p>
                         </div>
-
-                        <aside className="rounded-2xl border border-[#ece7f6] bg-[#f8f6fc] p-6 h-fit space-y-6">
-                            <dl className="space-y-5 text-sm">
-                                <div>
-                                    <dt className="text-xs font-bold uppercase tracking-wider text-[#777488]">Schedule</dt>
-                                    <dd className="mt-1 font-semibold text-[#292738]">{dateRange(selectedHackathon.hackathonStart, selectedHackathon.hackathonEnd)}</dd>
-                                </div>
-                                <div>
-                                    <dt className="text-xs font-bold uppercase tracking-wider text-[#777488]">Format / Mode</dt>
-                                    <dd className="mt-1 font-semibold text-[#292738]">{modeFor(selectedHackathon.location)}</dd>
-                                </div>
-                                <div>
-                                    <dt className="text-xs font-bold uppercase tracking-wider text-[#777488]">Team size</dt>
-                                    <dd className="mt-1 font-semibold text-[#292738]">{selectedHackathon.minTeamSize || 1} – {selectedHackathon.maxTeamSize || 1} members</dd>
-                                </div>
-                            </dl>
-
-                            <button
-                                onClick={() => registered ? navigate('/student/dashboard') : navigate(`/student/hackathons/${id}/register`)}
-                                className="w-full rounded-xl bg-[#5740d6] py-3.5 font-semibold text-white shadow-sm transition hover:bg-[#4530bd]"
-                            >
-                                {registered ? 'View Dashboard / Workspace' : 'Register for Hackathon'}
-                            </button>
+                        <aside className="rounded-xl bg-[#f8f6fc] p-6">
+                            <dl className="space-y-5 text-sm"><div><dt className="text-[#777488]">Schedule</dt><dd className="mt-1 font-semibold text-[#292738]">{dateRange(selectedHackathon.hackathonStart, selectedHackathon.hackathonEnd)}</dd></div><div><dt className="text-[#777488]">Mode</dt><dd className="mt-1 font-semibold text-[#292738]">{modeFor(selectedHackathon.location)}</dd></div><div><dt className="text-[#777488]">Team size</dt><dd className="mt-1 font-semibold text-[#292738]">{selectedHackathon.minTeamSize || 1} – {selectedHackathon.maxTeamSize || 1} members</dd></div></dl>
+                            <button onClick={() => registered ? navigate('/student/dashboard') : navigate(`/student/hackathons/${id}/register`)} className="mt-8 w-full rounded-lg bg-[#5740d6] py-3 font-medium text-white transition hover:bg-[#4530bd]">{registered ? 'Go to Dashboard' : 'Register Now'}</button>
                         </aside>
                     </div>
                 </div>
@@ -253,7 +179,7 @@ const StudentHackathons = () => {
     }
 
     return (
-        <div className="-m-6 min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:-m-10 lg:p-10">
+        <div className="min-h-full bg-[#fbf9ff] p-6 text-[#242334] lg:p-10">
             <header className="mb-10">
                 <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Upcoming Hackathons</h1>
                 <p className="mt-3 text-lg text-[#777488]">Discover and register for the latest hackathons across various domains.</p>
@@ -281,20 +207,54 @@ const StudentHackathons = () => {
                         const id = hackathon.id || hackathon._id;
                         const registered = registeredIds.has(id);
                         const poster = hackathon.posterUrl;
+                        const fallbackBanner = bannerForHackathon(hackathon, id);
                         return <article key={id} className="flex min-h-[500px] flex-col overflow-hidden rounded-2xl border border-[#e5e1ed] bg-white shadow-[0_1px_2px_rgba(31,22,60,0.03)]">
-                            <div className="relative h-52 shrink-0 bg-[#eeebf6]">
-                                {poster ? <img src={poster} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center px-6 text-center text-lg font-semibold text-[#777488]">{hackathon.title}</div>}
+                            <div className="relative aspect-video w-full shrink-0 bg-[#eeebf6]">
+                                <img
+                                    src={poster || fallbackBanner}
+                                    alt={`${hackathon.title} banner`}
+                                    onError={poster ? (event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackBanner; } : undefined}
+                                    className="h-full w-full object-cover"
+                                />
                                 <span className="absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-sm font-medium text-[#5a42d8] shadow-sm">{statusLabel(hackathon, registered)}</span>
                             </div>
                             <div className="flex flex-1 flex-col p-6">
-                                <h2 className="text-2xl font-bold leading-tight tracking-tight text-[#292738]">{hackathon.title}</h2>
-                                {hackathon.organizerName || hackathon.organizer_name ? <p className="mt-2 text-base text-[#777488]">by {hackathon.organizerName || hackathon.organizer_name}</p> : null}
-                                <div className="mt-6 space-y-4 text-base text-[#777488]">
-                                    <p className="flex gap-3"><span aria-hidden="true">▣</span>{dateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</p>
-                                    <p className="flex gap-3"><span aria-hidden="true">◎</span>{modeFor(hackathon.location)}</p>
-                                    <p className="flex gap-3"><span aria-hidden="true">♧</span>Team: {hackathon.minTeamSize || 1} – {hackathon.maxTeamSize || 1} Members</p>
+                                <h2 className="text-xl font-bold leading-snug tracking-tight text-[#292738] dark:text-white line-clamp-2">{hackathon.title}</h2>
+                                {hackathon.organizerName || hackathon.organizer_name ? <p className="mt-1.5 text-sm text-[#777488] dark:text-gray-400">by {hackathon.organizerName || hackathon.organizer_name}</p> : null}
+                                <div className="mt-5 space-y-2.5 text-sm text-[#626071] dark:text-gray-300">
+                                    <p className="flex items-center gap-2.5">
+                                        <svg className="w-4 h-4 text-[#6046dc] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        <span>{dateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</span>
+                                    </p>
+                                    <p className="flex items-center gap-2.5">
+                                        <svg className="w-4 h-4 text-[#6046dc] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        <span>{modeFor(hackathon.location)}</span>
+                                    </p>
+                                    <p className="flex items-center gap-2.5">
+                                        <svg className="w-4 h-4 text-[#6046dc] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                        <span>Team: {hackathon.minTeamSize || 1} – {hackathon.maxTeamSize || 1} Members</span>
+                                    </p>
                                 </div>
-                                <button onClick={() => registered ? setSelectedHackathon(hackathon) : navigate(`/student/hackathons/${id}/register`)} className={`mt-auto w-full rounded-lg py-3.5 text-lg font-medium transition ${registered ? 'bg-[#5740d6] text-white hover:bg-[#4530bd]' : 'border-2 border-[#6952e5] bg-white text-[#6149dc] hover:bg-[#f6f4ff]'}`}>{registered ? 'View Details' : 'Register Now'}</button>
+                                <div className="mt-auto pt-6 border-t border-[#f0edf7] dark:border-white/10 flex items-center gap-3">
+                                    <button
+                                        onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}`)}
+                                        className={`flex-1 inline-flex items-center justify-center rounded-xl py-2.5 px-4 text-sm font-semibold transition-all duration-150 active:scale-[0.98] ${
+                                            registered
+                                                ? 'bg-[#5740d6] text-white shadow-sm hover:bg-[#4530bd]'
+                                                : 'border border-[#e2deec] dark:border-white/10 bg-white dark:bg-white/5 text-[#4838b0] dark:text-violet-300 shadow-sm hover:bg-[#f8f6fc] dark:hover:bg-white/10 hover:border-[#6046dc]/40'
+                                        }`}
+                                    >
+                                        View Details
+                                    </button>
+                                    {!registered && (
+                                        <button
+                                            onClick={() => navigate(`/student/hackathons/${encodeURIComponent(id)}/register`)}
+                                            className="flex-1 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#6046dc] to-[#7353f4] py-2.5 px-4 text-sm font-semibold text-white shadow-sm shadow-[#6046dc]/25 hover:from-[#5136cb] hover:to-[#6342e4] hover:shadow-md hover:shadow-[#6046dc]/35 transition-all duration-150 active:scale-[0.98]"
+                                        >
+                                            Register Now
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </article>;
                     })}

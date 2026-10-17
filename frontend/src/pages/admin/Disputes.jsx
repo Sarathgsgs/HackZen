@@ -133,6 +133,10 @@ const AIDisputeAssessmentModal = ({ isOpen, onClose, assessment, isLoading, onAp
                         label="Performing AI Dispute Assessment..." 
                         subtext="Analyzing repository similarity, commit timeline signatures, and submitted evidence..." 
                     />
+                ) : assessment?.errorMessage ? (
+                    <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+                        {assessment.errorMessage}
+                    </p>
                 ) : assessment ? (
                     <div className="space-y-4 text-xs mt-4">
                         {/* Executive Summary */}
@@ -254,42 +258,11 @@ const Disputes = () => {
             if (data && (data.executiveSummary || data.recommendedDecision)) {
                 setAiAssessment(data);
             } else {
-                // Instant intelligent fallback assessment
-                const sim = selectedDispute.similarityAnalysis?.overallSimilarity || 94;
-                const teamName = selectedDispute.reportedTeam?.name || 'Reported Team';
-                const hackTitle = selectedDispute.hackathonTitle || 'the competition';
-                setAiAssessment({
-                    executiveSummary: `Plagiarism and similarity analysis for ${teamName} flagged high duplication (${sim}%) against existing public model code.`,
-                    severity: sim > 90 ? 'CRITICAL' : 'HIGH',
-                    confidenceScore: selectedDispute.assessment?.aiConfidence || 96,
-                    keyFindings: [
-                        `Repository source code exhibits an overall similarity score of ${sim}%.`,
-                        "Model architecture and preprocessing pipelines mirror external baseline implementations.",
-                        "Commit timeline exhibits clustered bulk-code additions without staged commits."
-                    ],
-                    recommendedDecision: sim > 90 ? 'DISQUALIFICATION' : 'REQUEST_EXPLANATION',
-                    recommendationReason: `Direct source logic replication (${sim}%) exceeds acceptable hackathon thresholds, compromising originality criteria for ${hackTitle}.`,
-                    suggestedCommunication: `Official Notice: Your submission for ${hackTitle} has been flagged for algorithmic similarity. Please provide author commit logs and original source proof within 24 hours.`
-                });
+                setAiAssessment({ errorMessage: 'The assessment service returned no assessment. Please retry.' });
             }
         } catch (error) {
             console.error("AI Dispute assessment failed:", error);
-            const sim = selectedDispute.similarityAnalysis?.overallSimilarity || 94;
-            const teamName = selectedDispute.reportedTeam?.name || 'Reported Team';
-            const hackTitle = selectedDispute.hackathonTitle || 'the competition';
-            setAiAssessment({
-                executiveSummary: `Plagiarism and similarity analysis for ${teamName} flagged high duplication (${sim}%) against existing public model code.`,
-                severity: sim > 90 ? 'CRITICAL' : 'HIGH',
-                confidenceScore: selectedDispute.assessment?.aiConfidence || 96,
-                keyFindings: [
-                    `Repository source code exhibits an overall similarity score of ${sim}%.`,
-                    "Model architecture and preprocessing pipelines mirror external baseline implementations.",
-                    "Commit timeline exhibits clustered bulk-code additions without staged commits."
-                ],
-                recommendedDecision: sim > 90 ? 'DISQUALIFICATION' : 'REQUEST_EXPLANATION',
-                recommendationReason: `Direct source logic replication (${sim}%) exceeds acceptable hackathon thresholds, compromising originality criteria for ${hackTitle}.`,
-                suggestedCommunication: `Official Notice: Your submission for ${hackTitle} has been flagged for algorithmic similarity. Please provide author commit logs and original source proof within 24 hours.`
-            });
+            setAiAssessment({ errorMessage: 'Unable to complete the assessment. Please retry.' });
         } finally {
             setIsAiLoading(false);
         }

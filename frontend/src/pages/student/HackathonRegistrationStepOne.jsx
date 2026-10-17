@@ -17,9 +17,12 @@ const HackathonRegistrationStepOne = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        const storedUser = JSON.parse(
-            sessionStorage.getItem('user') || localStorage.getItem('user') || '{"name":"Student","email":""}'
-        );
+        let storedUser = {};
+        try {
+            storedUser = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+        } catch {
+            storedUser = {};
+        }
 
         getStepOneConfig(hackathon, storedUser).then(setConfig);
     }, [hackathon]);

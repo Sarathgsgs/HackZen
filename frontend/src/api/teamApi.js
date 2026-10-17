@@ -25,13 +25,18 @@ export const getTeamById = async (teamId) => {
     return data;
 };
 
+export const lookupTeamByCode = async (teamCode) => {
+    const { data } = await apiClient.get(`/teams/lookup/${encodeURIComponent(teamCode)}`);
+    return data;
+};
+
 export const getTeamMembers = async (teamId) => {
     const { data } = await apiClient.get(`/teams/${teamId}/members`);
     return data || [];
 };
 
 export const joinTeamByCode = async (teamIdOrCode) => {
-    const { data } = await apiClient.post(`/teams/join/${teamIdOrCode}`);
+    const { data } = await apiClient.post(`/teams/join/${encodeURIComponent(teamIdOrCode)}`);
     return data;
 };
 

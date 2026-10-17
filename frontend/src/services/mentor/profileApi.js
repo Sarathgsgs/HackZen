@@ -29,11 +29,10 @@ export const fetchMentorProfile = async () => {
     const roleProfile = data.mentor_profile || data.profile || {};
         
         const profileData = {
-            ...DEFAULT_PROFILE,
             ...data,
             ...roleProfile,
-            institution: roleProfile.companyName || '',
-            expertise: roleProfile.expertiseDomains || [],
+            institution: roleProfile.companyName || roleProfile.institution || '',
+            expertise: Array.isArray(roleProfile.expertiseDomains) ? roleProfile.expertiseDomains : (roleProfile.expertise || []),
             availability: roleProfile.availability || 'Available',
             links: {
                 scholar: roleProfile.scholarUrl || '',

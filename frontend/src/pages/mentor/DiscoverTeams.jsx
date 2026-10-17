@@ -17,15 +17,19 @@ const DiscoverTeams = () => {
     });
     const [requesting, setRequesting] = useState({});
     const [teams, setTeams] = useState([]);
+    const [loadError, setLoadError] = useState('');
 
     useEffect(() => {
         const loadTeams = async () => {
             try {
                 setIsLoading(true);
                 const data = await fetchDiscoverableTeams();
-                setTeams(data || []);
+                setTeams(Array.isArray(data) ? data : []);
+                setLoadError('');
             } catch (err) {
                 console.error("Failed to load discoverable teams:", err);
+                setTeams([]);
+                setLoadError("Unable to load discoverable teams. Please try again.");
             } finally {
                 setIsLoading(false);
             }
@@ -214,7 +218,7 @@ const DiscoverTeams = () => {
                 ) : (
                     <div className="col-span-full py-16 text-center bg-white dark:bg-[#111625] rounded-2xl border border-dashed border-slate-200 dark:border-white/10 shadow-xs">
                         <div className="w-14 h-14 bg-slate-100 dark:bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl opacity-60">🔍</div>
-                        <h3 className="text-base font-bold text-slate-800 dark:text-white mb-1">No teams found</h3>
+                        <h3 className="text-base font-bold text-slate-800 dark:text-white mb-1">{loadError ? "Teams unavailable" : "No teams found"}</h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400">Try adjusting your search query or filters.</p>
                     </div>
                 )}

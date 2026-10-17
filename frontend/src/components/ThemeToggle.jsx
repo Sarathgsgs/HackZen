@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 
-const ThemeToggle = ({ className = '', showLabel = false, variant = 'switch' }) => {
+const ThemeToggle = ({ className = '', showLabel = false, variant = 'switch', forceLightAppearance = false }) => {
     const { theme, toggleTheme } = useTheme();
     const isDark = theme === 'dark';
     const isLight = theme === 'light';
@@ -12,7 +12,9 @@ const ThemeToggle = ({ className = '', showLabel = false, variant = 'switch' }) 
                 type="button"
                 onClick={toggleTheme}
                 className={`relative inline-flex items-center justify-center w-9 h-9 shrink-0 rounded-xl border transition-all duration-300 focus:outline-none shadow-sm cursor-pointer ${
-                    isLight
+                    forceLightAppearance
+                        ? 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                        : isLight
                         ? 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                         : 'bg-navy-800/80 hover:bg-navy-800 text-amber-300 border-white/10'
                 } ${className}`}

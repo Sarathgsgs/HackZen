@@ -94,6 +94,35 @@ export const fetchMyTeams = async () => {
     }
 };
 
+/** Fetch the authenticated student's teams using only backend-confirmed fields. */
+export const fetchStudentTeams = async () => {
+    const { data } = await apiClient.get('/teams/my-teams');
+    if (!Array.isArray(data)) return [];
+
+    return Promise.all(data.map(async (team) => {
+        let progress = null;
+        const teamId = team._id || team.id;
+        if (teamId) {
+            try {
+                const { data: progressData } = await apiClient.get(`/progress/team/${teamId}`);
+                const value = progressData?.percentage ?? progressData?.progress;
+                progress = value !== null && value !== undefined && Number.isFinite(Number(value)) ? Number(value) : null;
+            } catch {
+                // A missing progress record is represented as unavailable.
+            }
+        }
+
+        return {
+            id: teamId,
+            name: team.teamName || null,
+            hackathon: team.hackathonName || null,
+            members: team.memberCount !== null && team.memberCount !== undefined && Number.isFinite(Number(team.memberCount)) ? Number(team.memberCount) : null,
+            progress,
+            roleInTeam: team.myRole || null,
+        };
+    }));
+};
+
 /**
  * Fetches workspace data for a specific team (messages, tasks, files)
  */

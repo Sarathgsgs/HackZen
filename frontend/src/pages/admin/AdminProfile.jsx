@@ -529,19 +529,28 @@ const AdminProfile = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {securityActivity.map((sec, idx) => (
-                                <div key={idx} className={`p-4 rounded-2xl border bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl flex items-center justify-between text-xs`}>
-                                    <div className="flex items-center gap-3">
-                                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                                        <div>
-                                            <p className="font-bold text-slate-900 dark:text-white">{sec.event}</p>
-                                            <p className="text-[10px] text-slate-500 dark:text-gray-400 font-medium">IP: {sec.ip}</p>
+                                <div 
+                                    key={idx} 
+                                    className="p-3.5 sm:p-4 rounded-xl border bg-slate-50/70 dark:bg-black/20 border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.03]"
+                                >
+                                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                                        <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-1.5"></span>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-bold text-xs text-slate-900 dark:text-white leading-snug break-words">{sec.event}</p>
+                                            <p className="text-[11px] text-slate-500 dark:text-gray-400 font-mono mt-0.5">IP: {sec.ip}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="text-[10px] font-bold text-slate-500 dark:text-gray-400">{sec.time}</span>
-                                        <span className="ml-3 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[9px] font-black uppercase">{sec.status}</span>
+                                    <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-white/5 pl-5 sm:pl-0">
+                                        <span className="text-[11px] font-medium text-slate-400 dark:text-gray-400">{sec.time}</span>
+                                        <span className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider ${
+                                            sec.status?.toLowerCase() === 'warning' 
+                                                ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
+                                                : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
+                                        }`}>
+                                            {sec.status}
+                                        </span>
                                     </div>
                                 </div>
                             ))}

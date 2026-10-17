@@ -26,6 +26,7 @@ export default function MentorshipRequests() {
   const [selectedTrack, setSelectedTrack] = useState('All');
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   // Load requests
   const loadRequests = useCallback(async () => {
@@ -33,10 +34,12 @@ export default function MentorshipRequests() {
     try {
       const apiStatus = activeTab === 'All' ? undefined : activeTab.toLowerCase() === 'accepted' ? 'approved' : activeTab.toLowerCase();
       const res = await fetchMentorshipRequests(apiStatus);
-      setRequests(res || []);
+      setRequests(Array.isArray(res) ? res : []);
+      setLoadError('');
     } catch (e) {
       console.error('Could not load mentorship requests:', e);
       setRequests([]);
+      setLoadError('Unable to load mentorship requests. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -54,7 +57,7 @@ export default function MentorshipRequests() {
       triggerRefresh();
     } catch (e) {
       console.error('Could not decline mentorship request:', e);
-      addToast('Unable to decline request', 'The database did not save this change.', 'error');
+      addToast('Request Failed', 'Unable to decline this request. Please try again.', 'error');
     }
   };
 
@@ -157,6 +160,10 @@ export default function MentorshipRequests() {
       {/* Requests List */}
       {loading ? (
         <div className="py-12 text-center text-slate-400 text-sm">Loading requests...</div>
+      ) : loadError ? (
+        <div role="alert" className="p-12 text-center bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 text-rose-500 text-sm">
+          {loadError}
+        </div>
       ) : filteredRequests.length === 0 ? (
         <div className="p-12 text-center bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 text-slate-400 text-sm">
           No {activeTab.toLowerCase()} mentorship requests found.

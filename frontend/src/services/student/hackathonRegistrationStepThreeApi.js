@@ -1,12 +1,9 @@
 import { submitHackathonRegistration } from './hackathonRegistrationApi';
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const getStepThreeReview = async (hackathon, draft) => {
-    await delay(250);
     return {
         hackathonTitle: hackathon.title,
-        organizer: hackathon.organizer,
+        organizer: hackathon.organizerName || null,
         teamName: draft.teamName,
         teamSize: draft.teamSize,
         leaderName: draft.leaderName,

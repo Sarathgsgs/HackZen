@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from typing import Dict, Any, List
 from database import get_db
-from core.dependencies import with_auth
+from core.dependencies import with_auth, RequireRole
 from schemas.profileSchema import ProfileResponse, MentorProfile
 from services.profileService import ProfileService
 
@@ -64,7 +64,7 @@ async def update_my_profile_details(
 
 
 @router.get("/mentors", response_model=List[MentorProfile])
-async def get_available_mentors():
+async def get_available_mentors(current_user: Dict[str, Any] = Depends(RequireRole(["student"]))):
     """Fetch all mentors with 'Available' status"""
     db = get_db()
     mentors = await ProfileService.get_available_mentors(db)
@@ -149,46 +149,6 @@ async def get_admin_control_center(current_user: Dict[str, Any] = Depends(with_a
                 "link": "/admin/audit-log",
             }
         )
-
-    if not recent_actions:
-        recent_actions = [
-            {
-                "id": "a1",
-                "type": "APPROVED HACKATHON",
-                "title": "Global AI Summit 2026",
-                "subtitle": "Organizer: TechHub Global",
-                "detail": "Verified organizer documentation & venue logistics.",
-                "time": "2 hours ago",
-                "link": "/admin/hackathon-approvals",
-            },
-            {
-                "id": "a2",
-                "type": "RESOLVED DISPUTE",
-                "title": "DSP-2026-00421",
-                "subtitle": "Decision: Violation Confirmed",
-                "detail": "Disqualified team due to plagiarism flag.",
-                "time": "5 hours ago",
-                "link": "/admin/disputes",
-            },
-            {
-                "id": "a3",
-                "type": "ISSUED CERTIFICATE",
-                "title": "CERT-2026-0089",
-                "subtitle": "Recipient: Alex Johnson",
-                "detail": "Minted 1st Place Winner Certificate.",
-                "time": "1 day ago",
-                "link": "/admin/certificates",
-            },
-            {
-                "id": "a4",
-                "type": "SUSPENDED USER",
-                "title": "USER-1032 (dev_hacker)",
-                "subtitle": "Reason: Terms Violation",
-                "detail": "Account restricted pending investigation.",
-                "time": "2 days ago",
-                "link": "/admin/users",
-            },
-        ]
 
     # 4. Real Active Sessions from MongoDB
     current_session_id = current_user.get("sessionId") or "sess-cur-01"

@@ -9,6 +9,7 @@ export default function ScheduleSessionModal() {
 
   const [teams, setTeams] = useState([]);
   const [loadingTeams, setLoadingTeams] = useState(false);
+  const [teamsError, setTeamsError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   // Form state
@@ -48,16 +49,18 @@ export default function ScheduleSessionModal() {
       setLoadingTeams(true);
       fetchAssignedTeams()
         .then((res) => {
-          const list = res?.activeTeams || [];
+          const list = Array.isArray(res?.activeTeams) ? res.activeTeams : [];
           setTeams(list);
+          setTeamsError('');
           if (list.length > 0 && !scheduleModalData.teamId) {
             setFormData((f) => ({ ...f, teamId: list[0].id }));
           }
         })
         .catch((error) => {
+          console.error('Failed to load teams for scheduling:', error);
           setTeams([]);
+          setTeamsError('Unable to load teams. Please try again.');
           addToast('Teams unavailable', 'Could not load your assigned teams from the database.', 'error');
-          console.error('Assigned teams load failed:', error);
         })
         .finally(() => setLoadingTeams(false));
     }
@@ -67,27 +70,31 @@ export default function ScheduleSessionModal() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.date || !formData.time) {
-      addToast('Missing Information', 'Please fill in all required fields.', 'error');
+    if (!formData.teamId || !formData.title || !formData.date || !formData.time) {
+      addToast('Missing Information', 'Select a team and complete the required fields.', 'error');
       return;
     }
 
     setSubmitting(true);
     try {
-      const selectedTeam = teams.find((t) => t.id === formData.teamId) || { name: 'Assigned Team' };
+      const selectedTeam = teams.find((t) => t.id === formData.teamId);
+      if (!selectedTeam) {
+        addToast('Team Unavailable', 'Select a team returned by the server.', 'error');
+        return;
+      }
       const startDateTime = new Date(`${formData.date}T${formData.time}`);
       const durationMinutes = parseInt(formData.duration || '45', 10);
       const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000);
 
       await createMeeting({
-          teamId: formData.teamId,
+        teamId: formData.teamId,
         title: formData.title,
-          description: formData.description,
-          startTime: startDateTime.toISOString(),
-          endTime: endDateTime.toISOString(),
-          location: formData.meetingType,
-          meetingLink: formData.meetingLink,
-        });
+        description: formData.description,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
+        location: formData.meetingType,
+        meetingLink: formData.meetingLink,
+      });
 
       addToast('Session Scheduled!', `Meeting with ${selectedTeam.name} scheduled for ${formData.date} at ${formData.time}.`, 'success');
       triggerRefresh();
@@ -135,6 +142,7 @@ export default function ScheduleSessionModal() {
             <div className="relative">
               <select
                 value={formData.teamId}
+                disabled={loadingTeams || teams.length === 0}
                 onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] focus:ring-1 focus:ring-[#5B45D9]"
                 required
@@ -147,6 +155,8 @@ export default function ScheduleSessionModal() {
                 ))}
               </select>
             </div>
+            {teamsError && <p role="alert" className="mt-1 text-xs text-rose-500">{teamsError}</p>}
+            {!loadingTeams && !teamsError && teams.length === 0 && <p className="mt-1 text-xs text-slate-500">No assigned teams are available.</p>}
           </div>
 
           {/* Session Title */}

@@ -1,459 +1,313 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchInitialMessages, fetchQuickStarters, sendChatMessage } from '../../services/student/aiAssistantApi';
-import { fetchAllHackathons } from '../../api/hackathonApi';
+import { getMyTeams } from '../../api/teamApi';
+import { fetchMyApplications } from '../../api/applicationApi';
+import { fetchHackathonById, fetchAllHackathons } from '../../api/hackathonApi';
 
-const CodeBlock = ({ language, code }) => {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    return (
-        <div className="my-3 overflow-hidden rounded-xl border border-white/10 bg-black/40 text-xs">
-            <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-2 font-mono text-[11px] text-gray-400">
-                <span className="uppercase tracking-wider font-semibold text-purple-300">{language || 'code'}</span>
-                <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1 text-[11px] text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                    {copied ? (
-                        <>
-                            <span className="text-emerald-400">✓</span>
-                            <span className="text-emerald-400 font-semibold">Copied!</span>
-                        </>
-                    ) : (
-                        <>
-                            <span>📋</span>
-                            <span>Copy</span>
-                        </>
-                    )}
-                </button>
-            </div>
-            <pre className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-slate-200">
-                <code>{code}</code>
-            </pre>
-        </div>
-    );
-};
-
-const FormattedMessage = ({ content }) => {
-    if (!content) return null;
-
-    // Split text by code fence ```
-    const codeBlockRegex = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = codeBlockRegex.exec(content)) !== null) {
-        if (match.index > lastIndex) {
-            parts.push({
-                type: 'text',
-                value: content.slice(lastIndex, match.index)
-            });
-        }
-        parts.push({
-            type: 'code',
-            language: match[1] || 'text',
-            value: match[2].trim()
-        });
-        lastIndex = match.index + match[0].length;
-    }
-
-    if (lastIndex < content.length) {
-        parts.push({
-            type: 'text',
-            value: content.slice(lastIndex)
-        });
-    }
-
-    return (
-        <div className="space-y-2 text-sm leading-relaxed">
-            {parts.map((part, index) => {
-                if (part.type === 'code') {
-                    return <CodeBlock key={index} language={part.language} code={part.value} />;
-                }
-
-                // Render paragraphs and formatted inline text
-                const lines = part.value.split('\n');
-                return (
-                    <div key={index} className="space-y-1.5">
-                        {lines.map((line, lIdx) => {
-                            if (!line.trim()) return <div key={lIdx} className="h-2" />;
-
-                            // Heading
-                            if (line.startsWith('### ')) {
-                                return (
-                                    <h4 key={lIdx} className="font-bold text-white text-base mt-2 mb-1">
-                                        {line.replace('### ', '')}
-                                    </h4>
-                                );
-                            }
-                            if (line.startsWith('## ')) {
-                                return (
-                                    <h3 key={lIdx} className="font-bold text-purple-300 text-lg mt-3 mb-1">
-                                        {line.replace('## ', '')}
-                                    </h3>
-                                );
-                            }
-
-                            // Bullet point
-                            if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-                                const bulletContent = line.trim().replace(/^[-*]\s+/, '');
-                                return (
-                                    <div key={lIdx} className="flex items-start gap-2 text-slate-300 pl-2">
-                                        <span className="text-purple-400 font-bold">•</span>
-                                        <span>{renderInlineStyles(bulletContent)}</span>
-                                    </div>
-                                );
-                            }
-
-                            return (
-                                <p key={lIdx} className="text-slate-200">
-                                    {renderInlineStyles(line)}
-                                </p>
-                            );
-                        })}
-                    </div>
-                );
-            })}
-        </div>
-    );
-};
-
-// Helper for inline bold and code
-const renderInlineStyles = (text) => {
-    const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*)/g;
-    const segments = text.split(inlineRegex);
-
-    return segments.map((seg, i) => {
-        if (seg.startsWith('`') && seg.endsWith('`')) {
-            return (
-                <code key={i} className="mx-1 rounded bg-black/40 px-1.5 py-0.5 font-mono text-xs text-sky-300 border border-white/10">
-                    {seg.slice(1, -1)}
-                </code>
-            );
-        }
-        if (seg.startsWith('**') && seg.endsWith('**')) {
-            return <strong key={i} className="font-semibold text-white">{seg.slice(2, -2)}</strong>;
-        }
-        return seg;
-    });
-};
+const suggestionLabels = [
+    'Help me understand this problem',
+    'What are the real pain points?',
+    'Suggest possible approaches',
+    'How can I structure my project?'
+];
 
 const StudentAIAssistant = () => {
     const [hackathons, setHackathons] = useState([]);
-    const [selectedContext, setSelectedContext] = useState('');
-    const [selectedObjective, setSelectedObjective] = useState('Theme understanding');
+    const [selectedHackathonId, setSelectedHackathonId] = useState('');
+    const [teams, setTeams] = useState([]);
     const [messages, setMessages] = useState([]);
     const [quickStarters, setQuickStarters] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isContextLoading, setIsContextLoading] = useState(true);
     const [isAITyping, setIsAITyping] = useState(false);
-    const [notice, setNotice] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [historyError, setHistoryError] = useState('');
+    const sendingRef = useRef(false);
 
-    const chatScrollRef = useRef(null);
+    const selectedHackathon = hackathons.find((item) => String(item.id || item._id) === String(selectedHackathonId));
+    const selectedTeam = teams.find((item) => String(item.hackathonId) === String(selectedHackathonId));
 
-    // Resolve studentId for sessionStorage persistence (STU-29)
-    const cachedUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-    const studentId = cachedUser._id || cachedUser.id || cachedUser.sub || 'student';
-    const storageKey = `ai_chat_${studentId}`;
-
-    // Auto-scroll chat on message updates
     useEffect(() => {
-        if (chatScrollRef.current) {
-            chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-        }
-    }, [messages, isAITyping]);
+        let active = true;
+        const loadHackathonContext = async () => {
+            try {
+                const [myTeams, applications] = await Promise.all([getMyTeams(), fetchMyApplications()]);
+                if (!active) return;
+                const teamsList = Array.isArray(myTeams) ? myTeams : [];
+                const applicationList = Array.isArray(applications) ? applications : [];
+                setTeams(teamsList);
+                const ids = [...new Set([
+                    ...teamsList.map((team) => team.hackathonId),
+                    ...applicationList.map((application) => application.hackathonId),
+                ].filter(Boolean).map(String))];
+                const results = await Promise.allSettled(ids.map((id) => fetchHackathonById(id)));
+                if (!active) return;
+                let loaded = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+                if (loaded.length === 0) {
+                    try {
+                        const allHacks = await fetchAllHackathons();
+                        if (Array.isArray(allHacks) && allHacks.length > 0) {
+                            loaded = allHacks;
+                        }
+                    } catch (err) {
+                        // Keep graceful empty list if network is down
+                    }
+                }
+                setHackathons(loaded);
+                let cachedUser = {};
+                try {
+                    cachedUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}') || {};
+                } catch {
+                    // The authenticated API results remain authoritative if the local profile is malformed.
+                }
+                const preferredId = cachedUser.currentHackathonId || cachedUser.hackathonId || cachedUser.team?.hackathonId;
+                const preferred = loaded.find((item) => String(item.id || item._id) === String(preferredId));
+                const selected = preferred || loaded[0];
+                setSelectedHackathonId(selected ? String(selected.id || selected._id) : '');
+            } catch (error) {
+                console.error('Failed to load AI hackathon context:', error);
+            } finally {
+                if (active) setIsContextLoading(false);
+            }
+        };
+        loadHackathonContext();
+        return () => { active = false; };
+    }, []);
 
-    // Load initial data and restore from sessionStorage
     useEffect(() => {
         const loadInitialData = async () => {
             setIsLoading(true);
+            setErrorMessage('');
             try {
-                const [triggers, events] = await Promise.all([
-                    fetchQuickStarters().catch(() => []),
-                    fetchAllHackathons().catch(() => []),
+                const [initialMsgs, triggers] = await Promise.all([
+                    fetchInitialMessages(),
+                    fetchQuickStarters()
                 ]);
-
-                setQuickStarters(triggers);
-                setHackathons(events);
-                if (events.length > 0) {
-                    setSelectedContext(events[0].id || events[0]._id || '');
-                }
-
-                // Check sessionStorage first (STU-29)
-                const savedHistory = sessionStorage.getItem(storageKey);
-                if (savedHistory) {
-                    try {
-                        const parsed = JSON.parse(savedHistory);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            setMessages(parsed);
-                            setIsLoading(false);
-                            return;
-                        }
-                    } catch (parseErr) {
-                        console.warn('Failed to parse saved chat history:', parseErr);
-                    }
-                }
-
-                // Otherwise fetch from server logs
-                const initialMsgs = await fetchInitialMessages().catch(() => []);
-                if (initialMsgs.length > 0) {
+                if (Array.isArray(initialMsgs) && initialMsgs.length > 0) {
                     setMessages(initialMsgs);
                 } else {
-                    setMessages([
-                        {
-                            id: 'welcome',
-                            sender: 'ai',
-                            text: "👋 **Welcome to your AI Co-Mentor!**\n\nI can help you:\n- **Understand hackathon themes** and problem statements.\n- **Brainstorm novel ideas** and explore tech stacks.\n- **Architect your project** and plan milestones.\n\nSelect your hackathon and ask me anything!",
-                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        }
-                    ]);
+                    setMessages([]);
                 }
+                setQuickStarters(triggers || []);
             } catch (error) {
-                console.error('Failed to load initial AI assistant state:', error);
+                console.error('Failed to load AI data:', error);
+                setMessages([]);
+                setQuickStarters([]);
+                setHistoryError('Conversation history could not be loaded. You can still send a new question.');
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadInitialData();
-    }, [storageKey]);
-
-    // Persist messages in sessionStorage (max 50 messages)
-    useEffect(() => {
-        if (messages.length > 0) {
-            try {
-                sessionStorage.setItem(storageKey, JSON.stringify(messages.slice(-50)));
-            } catch (err) {
-                console.warn('Could not save to sessionStorage:', err);
-            }
-        }
-    }, [messages, storageKey]);
-
-    const handleClearChat = () => {
-        sessionStorage.removeItem(storageKey);
-        setMessages([
-            {
-                id: 'welcome_reset',
-                sender: 'ai',
-                text: "✨ Conversation cleared. What hackathon topic would you like to explore next?",
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-        ]);
-        setNotice('Conversation history cleared.');
-        setTimeout(() => setNotice(null), 3000);
-    };
+    }, []);
 
     const handleSendMessage = async () => {
-        if (!inputValue.trim() || isAITyping) return;
+        const trimmed = inputValue.trim();
+        if (!trimmed || sendingRef.current) return;
+        sendingRef.current = true;
 
-        const textToSend = inputValue.trim();
         const userMsg = {
-            id: Date.now(),
+            id: `user-${Date.now()}`,
             sender: 'user',
-            text: textToSend,
+            text: trimmed,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
-        setMessages(prev => [...prev, userMsg]);
-        setInputValue('');
         setIsAITyping(true);
+        setErrorMessage('');
 
         try {
-            const aiResponse = await sendChatMessage(
-                textToSend,
-                selectedContext || 'general',
-                selectedObjective
-            );
-            setMessages(prev => [...prev, aiResponse]);
+            const aiResponse = await sendChatMessage(trimmed, selectedHackathonId);
+            setMessages(prev => [...prev, userMsg, aiResponse]);
+            setInputValue('');
         } catch (error) {
             console.error('AI Assistant error:', error);
-            const fallbackMsg = {
-                id: Date.now() + 1,
-                sender: 'ai',
-                text: `💡 **Mentorship Guidance on: "${textToSend.slice(0, 50)}..."**\n\n1. **Define Core MVP:** Focus strictly on completing the primary user flow before polishing secondary features.\n2. **Tech Stack Advice:** Keep your architecture modular and choose frameworks your team knows well.\n3. **Judge Pitch:** Ensure you have clear metrics on the problem solved.\n\n*(Notice: Live LLM service connection encountered a momentary hiccup. Provided offline architectural heuristic.)*`,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-            setMessages(prev => [...prev, fallbackMsg]);
+            setErrorMessage(error?.message || 'The AI service could not complete this request. Please try again.');
         } finally {
+            sendingRef.current = false;
             setIsAITyping(false);
         }
     };
 
+    const displayStarters = useMemo(() => {
+        if (quickStarters.length) return quickStarters;
+        return suggestionLabels.map((text, index) => ({ id: index + 1, text }));
+    }, [quickStarters]);
+
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-5 duration-500 min-h-[calc(100vh-14rem)] max-w-6xl mx-auto px-4 md:px-0 py-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-white md:text-4xl">
-                        AI Assistant <span className="gradient-text">Workspace</span>
-                    </h1>
-                    <p className="max-w-2xl mt-2 text-gray-400 text-sm">
-                        Brainstorm ideas, analyze tracks, explore tech architectures, and plan your project with your AI Co-Mentor.
-                    </p>
-                </div>
-                {messages.length > 1 && (
-                    <button
-                        onClick={handleClearChat}
-                        className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-2"
-                        title="Clear conversation history from sessionStorage"
-                    >
-                        <span>🗑️</span>
-                        <span>Clear Chat</span>
-                    </button>
-                )}
-            </div>
+        <div className="min-h-screen bg-[#f3f0f5] px-4 py-8 text-[#1e1f2a] md:px-6">
+            <div className="mx-auto max-w-[1260px]">
+                <h1 className="text-[2.2rem] font-bold tracking-[-0.04em] text-[#1d1f2a]">AI Assistant</h1>
+                <p className="mt-2 text-[0.98rem] text-[#5c5a66]">Explore ideas, understand problems and structure your hackathon project.</p>
 
-            {notice && (
-                <div className="mt-4 p-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-200 text-xs font-semibold animate-in fade-in">
-                    {notice}
-                </div>
-            )}
-
-            <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_2fr] lg:items-stretch h-full">
-                {/* Left panel: Context & Triggers */}
-                <div className="flex flex-col h-full gap-6">
-                    <div className="glass rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl">
-                        <div className="flex items-center justify-between gap-4 mb-5">
-                            <h2 className="text-base font-bold text-white">Operational Context</h2>
-                            <span className="text-[10px] tracking-widest uppercase text-slate-400 font-mono">Config</span>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase">Event Context</label>
-                                <select
-                                    className="w-full px-4 py-3 text-xs font-semibold text-white border shadow-xl outline-none rounded-xl border-white/10 bg-navy-950/80 focus:border-purple-500/50"
-                                    value={selectedContext}
-                                    onChange={(e) => setSelectedContext(e.target.value)}
-                                >
-                                    <option value="general">General Mentorship (All Tracks)</option>
-                                    {hackathons.map(hackathon => (
-                                        <option key={hackathon.id || hackathon._id} value={hackathon.id || hackathon._id}>
-                                            {hackathon.title}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase">Focus Objective</label>
-                                <select
-                                    className="w-full px-4 py-3 text-xs font-semibold text-white border shadow-xl outline-none rounded-xl border-white/10 bg-navy-950/80 focus:border-purple-500/50"
-                                    value={selectedObjective}
-                                    onChange={(e) => setSelectedObjective(e.target.value)}
-                                >
-                                    <option value="Theme understanding">Theme Understanding</option>
-                                    <option value="Pain-point discovery">Pain-point Discovery</option>
-                                    <option value="Idea development">Idea Development</option>
-                                    <option value="Project structure and approach">Architecture & Tech Stack</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="glass flex min-h-0 flex-col rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl">
-                        <div className="flex items-center justify-between gap-4 mb-4">
-                            <h2 className="text-base font-bold text-white">Quick Prompts</h2>
-                            <span className="text-[10px] tracking-widest uppercase text-slate-400 font-mono">Suggestions</span>
-                        </div>
-                        <div className="space-y-2.5 overflow-y-auto max-h-[35vh] custom-scrollbar">
-                            {quickStarters.map(starter => (
-                                <button
-                                    key={starter.id}
-                                    onClick={() => setInputValue(starter.text)}
-                                    className="w-full px-4 py-3 text-left transition border rounded-2xl border-white/10 bg-white/5 hover:border-purple-500/30 hover:bg-white/10 group"
-                                >
-                                    <div className="flex items-center justify-between gap-3">
-                                        <p className="text-xs leading-relaxed text-slate-300 group-hover:text-white">"{starter.text}"</p>
-                                        <span className="text-purple-400 text-xs">→</span>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right panel: Chat messages */}
-                <div className="glass flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl h-[72vh]">
-                    {/* Message stream */}
-                    <div ref={chatScrollRef} className="flex-1 min-h-0 p-6 space-y-6 overflow-y-auto custom-scrollbar bg-navy-900/40">
-                        <div className="flex items-center gap-3 px-4 py-2.5 text-xs text-gray-400 border rounded-xl border-white/10 bg-white/5">
-                            <span className="text-base">ℹ️</span>
-                            <span>AI guidance is intended to assist your ideation, research, and architecture. Code snippets can be copied directly.</span>
-                        </div>
-
-                        {messages.map((msg) => (
-                            <div
-                                key={msg.id}
-                                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in duration-300`}
-                            >
-                                <div
-                                    className={`max-w-[90%] lg:max-w-[80%] rounded-2xl p-6 ${
-                                        msg.sender === 'user'
-                                            ? 'bg-purple-600 text-white rounded-tr-none shadow-xl shadow-purple-900/30 font-medium'
-                                            : 'bg-navy-950/90 text-gray-200 rounded-tl-none border border-white/10 shadow-xl'
-                                    }`}
-                                >
-                                    {msg.sender === 'user' ? (
-                                        <div className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</div>
-                                    ) : (
-                                        <FormattedMessage content={msg.text} />
-                                    )}
-                                    <div className={`mt-4 text-[10px] font-bold uppercase tracking-wider ${
-                                        msg.sender === 'user' ? 'text-purple-200' : 'text-gray-400'
-                                    } pt-3 border-t border-white/5 flex justify-between items-center`}>
-                                        <span>{msg.sender === 'user' ? 'You' : 'AI Co-Mentor'}</span>
-                                        <span>{msg.timestamp}</span>
-                                    </div>
+                <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_0.82fr]">
+                    <div className="overflow-hidden rounded-[20px] border border-[#d8d4de] bg-[#faf8fc] shadow-[0_10px_30px_rgba(30,31,42,0.04)]">
+                        <div className="flex items-center justify-between border-b border-[#e6e1ec] bg-[#f3f1f7] px-5 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#c8c3d5] bg-[#eef1ff] text-[#4b4bff]">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M8 7.75A4.75 4.75 0 0 1 12.75 3h.5A4.75 4.75 0 0 1 18 7.75v2.5A4.75 4.75 0 0 1 13.25 15h-.5A4.75 4.75 0 0 1 8 10.25v-2.5Zm6.7 10.5h-2.4a.6.6 0 0 0-.6.6V19a2 2 0 0 0 2 2h.6a2 2 0 0 0 2-2v-1.15a.6.6 0 0 0-.6-.6Zm-2.45-7.13a2.38 2.38 0 0 0 2.5 2.5 2.38 2.38 0 0 0 2.5-2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="text-[1.05rem] font-semibold text-[#1d1f2a]">Proeduvate AI Assistant</div>
                                 </div>
                             </div>
-                        ))}
-
-                        {isAITyping && (
-                            <div className="flex justify-start animate-pulse">
-                                <div className="rounded-2xl rounded-tl-none border border-white/10 bg-navy-950/80 px-5 py-4 text-xs font-semibold text-purple-300 flex items-center gap-3">
-                                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
-                                    <span>AI Co-Mentor is thinking and formulating guidance...</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Chat input footer */}
-                    <div className="p-4 border-t border-white/10 bg-navy-950/80">
-                        <div className="relative flex items-end gap-3">
-                            <div className="flex-1 overflow-hidden transition-all border rounded-xl border-white/10 bg-slate-950/80 focus-within:border-purple-500/50">
-                                <textarea
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSendMessage();
-                                        }
-                                    }}
-                                    placeholder="Ask about problem statement, ideas, architecture, or code..."
-                                    className="w-full px-4 py-3.5 text-sm text-white placeholder-gray-500 bg-transparent resize-none focus:outline-none"
-                                    rows="2"
-                                />
-                            </div>
-                            <button
-                                onClick={handleSendMessage}
-                                disabled={!inputValue.trim() || isAITyping}
-                                className="px-5 py-3.5 text-white transition-all bg-gradient-to-r from-purple-600 to-blue-600 shadow-lg shadow-purple-900/40 rounded-xl hover:from-purple-500 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shrink-0 flex items-center gap-2 font-semibold text-xs"
-                            >
-                                <span>Send</span>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d8d4de] bg-white text-[#5b5b63] hover:bg-[#f8f5ff]" aria-label="More options">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" /></svg>
                             </button>
                         </div>
-                        <div className="mt-2.5 flex justify-between items-center text-[10px] text-gray-400">
-                            <span>Press <kbd className="px-1 py-0.5 rounded bg-white/10 font-mono text-gray-300">Enter</kbd> to send, <kbd className="px-1 py-0.5 rounded bg-white/10 font-mono text-gray-300">Shift + Enter</kbd> for newline</span>
-                            <span>Stored locally for this session</span>
+
+                        <div className="h-[560px] bg-[#f9f8fb] p-4 sm:p-5">
+                            <div className="flex h-full flex-col">
+                                <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+                                    {isLoading ? <p className="py-6 text-center text-sm text-[#777487]">Loading conversation…</p> : null}
+                                    {historyError && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{historyError}</p>}
+                                    {!isLoading && messages.length === 0 && <p className="py-10 text-center text-sm text-[#777487]">No saved conversation yet. Ask a question to get started.</p>}
+                                    {messages.map((msg) => (
+                                        <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                            {msg.sender === 'user' ? (
+                                                <div className="max-w-[88%] rounded-[18px] bg-[#f2eef8] px-4 py-3 text-[0.96rem] leading-7 text-[#1c1d2a] shadow-[0_2px_8px_rgba(40,35,65,0.03)]">
+                                                    {msg.text}
+                                                    <div className="mt-2 text-[0.65rem] font-medium uppercase tracking-[0.08em] text-[#737082]">{msg.timestamp}</div>
+                                                </div>
+                                            ) : (
+                                                <div className="max-w-[88%] rounded-[20px] border border-[#e8e2f0] bg-[#f1f0f5] px-4 py-3 text-[0.96rem] leading-7 text-[#1f2330] shadow-[0_2px_8px_rgba(40,35,65,0.02)]">
+                                                    {msg.text}
+                                                    <div className="mt-2 text-[0.65rem] font-medium uppercase tracking-[0.08em] text-[#7a738a]">{msg.timestamp}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    {isAITyping && (
+                                        <div className="flex justify-start">
+                                            <div className="rounded-[20px] border border-[#e8e2f0] bg-[#f1f0f5] px-4 py-3 text-[0.8rem] font-medium uppercase tracking-[0.12em] text-[#7e7d8f]">
+                                                Thinking...
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                    {displayStarters.map((starter) => (
+                                        <button
+                                            key={starter.id}
+                                            type="button"
+                                            onClick={() => setInputValue(starter.text)}
+                                            disabled={isAITyping}
+                                            className="rounded-full border border-[#dfe2ea] bg-[#f8f8fb] px-3 py-2 text-[0.77rem] font-medium text-[#2d2e39] transition hover:border-[#b9b3d0] hover:bg-white"
+                                        >
+                                            {starter.text}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {errorMessage && (
+                                    <div role="alert" className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                                        <span>{errorMessage}</span>
+                                        <button type="button" onClick={handleSendMessage} disabled={!inputValue.trim() || isAITyping || isContextLoading} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 font-semibold text-amber-900 disabled:opacity-50">Retry</button>
+                                    </div>
+                                )}
+
+                                <div className="mt-4 flex items-end gap-3 rounded-[18px] border border-[#d6d2dd] bg-white p-2 shadow-[0_6px_25px_rgba(41,32,72,0.04)]">
+                                    <div className="flex-1">
+                                        <textarea
+                                            value={inputValue}
+                                            onChange={(e) => setInputValue(e.target.value)}
+                                            disabled={isAITyping}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault();
+                                                    handleSendMessage();
+                                                }
+                                            }}
+                                            rows={1}
+                                            placeholder="Ask Proeduvate AI anything about your hackathon idea..."
+                                            className="max-h-28 min-h-[52px] w-full resize-none border-0 bg-transparent px-3 py-3 text-[0.95rem] text-[#1e1f2a] placeholder:text-[#7a7485] focus:outline-none"
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleSendMessage}
+                                        disabled={!inputValue.trim() || isAITyping || isContextLoading}
+                                        className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#4d3bb5] text-white shadow-[0_10px_20px_rgba(77,59,181,0.25)] transition hover:bg-[#4233a6] disabled:cursor-not-allowed disabled:opacity-60"
+                                        aria-label="Send message"
+                                    >
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M5 12h10.5M12.5 7l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <aside className="space-y-5">
+                        <div className="rounded-[18px] border border-[#d9d2e4] bg-[#f8f5fb] p-5">
+                            <div className="flex items-center justify-between border-b border-[#e5e0ec] pb-3">
+                                <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#6c6778]">Current hackathon</span>
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#d4cde7] bg-white text-[#5d4ad6]">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M8 6V5a4 4 0 0 1 8 0v1m-9 0h10a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V8a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M9.5 12h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {selectedHackathon ? <>
+                            <select aria-label="Current hackathon" value={selectedHackathonId} onChange={(event) => setSelectedHackathonId(event.target.value)} className="mt-4 w-full rounded-lg border border-[#d8d4de] bg-white px-3 py-2 text-[1.05rem] font-semibold text-[#1d1e2a]">
+                                {hackathons.map((hackathon) => <option key={hackathon.id || hackathon._id} value={hackathon.id || hackathon._id}>{hackathon.title}</option>)}
+                            </select>
+
+                            <div className="mt-5 rounded-[12px] border border-[#e8e3f1] bg-[#f5f1fa] p-3 text-sm text-[#4c4b57]">
+                                <div className="mb-1 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#756f86]">Theme</div>
+                                <div className="text-[0.95rem] text-[#232534]">{(selectedHackathon.themes || []).map((theme) => typeof theme === 'string' ? theme : theme?.value || theme?.name).filter(Boolean).join(', ') || 'No theme specified'}</div>
+                            </div>
+
+                            <div className="mt-4 rounded-[12px] border border-[#e8e3f1] bg-[#f5f1fa] p-3 text-sm text-[#4c4b57]">
+                                <div className="mb-1 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#756f86]">Problem Statement</div>
+                                <div className="text-[0.95rem] text-[#232534]">{selectedHackathon.problemStatement || selectedHackathon.description || 'No problem statement provided.'}</div>
+                            </div>
+
+                            {selectedTeam && <div className="mt-5 flex items-center gap-2 text-[0.86rem] text-[#3a3942]">
+                                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#d5d0e2] bg-white text-[#413847]">👥</span>
+                                <span>Team: {selectedTeam.teamName}</span>
+                            </div>}
+                            </> : <p className="mt-4 text-sm text-[#625e70]">No registered hackathon or team is linked to your account yet. You can still ask for general hackathon guidance.</p>}
+                        </div>
+
+                        <div className="rounded-[18px] border border-[#d9d2e4] bg-[#f8f5fb] p-5">
+                            <div className="flex items-center gap-3 border-b border-[#e6e1ec] pb-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d4cde7] bg-[#eef1ff] text-[#4b4bff]">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-[1.08rem] font-semibold text-[#1d1e2a]">AI Assistant Can Help</h3>
+                            </div>
+
+                            <ul className="mt-4 space-y-3 text-[0.95rem] text-[#2f3039]">
+                                {[
+                                    'Understand complex themes and break them down.',
+                                    'Identify core user pain points and target audiences.',
+                                    'Explore technological approaches and potential solutions.',
+                                    'Structure your hackathon project narrative and pitch.'
+                                ].map((item) => (
+                                    <li key={item} className="flex gap-3">
+                                        <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#e9e3ff] text-[#4d3bb5]">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M5 12.5 9 16.5 19 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </aside>
                 </div>
             </div>
         </div>

@@ -62,7 +62,7 @@ export default function TeamDetails() {
         setTeam(data.data);
       }
     } catch (err) {
-      console.error('Could not load assigned team:', err);
+      console.error('Failed to load team details:', err);
       setTeam(null);
     } finally {
       setLoading(false);
@@ -76,9 +76,11 @@ export default function TeamDetails() {
   // Load meetings
   useEffect(() => {
     getMentorMeetings(true)
-      .then((records) => setMeetings((records || []).filter((meeting) => String(meeting.teamId) === String(teamId))))
+      .then((records) => {
+        setMeetings(Array.isArray(records) ? records.filter((m) => String(m.teamId) === String(teamId)) : []);
+      })
       .catch((error) => {
-        console.error('Could not load team sessions:', error);
+        console.error('Failed to load team meetings:', error);
         setMeetings([]);
       });
   }, [teamId]);
@@ -151,7 +153,7 @@ export default function TeamDetails() {
     );
   }
 
-  if (!team) return null;
+  if (!team) return <div role="status" className="max-w-6xl mx-auto py-12 text-center text-slate-500">Team details are unavailable.</div>;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">

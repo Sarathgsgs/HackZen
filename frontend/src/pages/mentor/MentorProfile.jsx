@@ -21,10 +21,13 @@ export default function MentorProfile() {
 
   const [user, setUser] = useState({
     name: '', fullName: '', role: 'Mentor', institution: '', location: '', avatar: '',
-    bio: '', email: '', availabilityStatus: '', availableSlots: [], mentorshipActiveSince: '',
+    bio: '', email: '', phoneNumber: '', availabilityStatus: '', availableSlots: [], mentorshipActiveSince: '',
     skills: [], technicalStrengths: [], mentorshipStyle: [], experiences: [],
+    stats: {}, competencies: [], recentActions: [],
     social: { linkedin: '', github: '' }
   });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   const [imageError, setImageError] = useState(false);
 
@@ -55,8 +58,10 @@ export default function MentorProfile() {
         }
       })
       .catch((err) => {
-        console.warn('Profile fetch notice:', err);
-      });
+        console.warn('Profile fetch failed:', err);
+        setLoadError('Unable to load your mentor profile. Please try again.');
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const initials = (user.fullName || user.name || 'M')
@@ -96,6 +101,9 @@ export default function MentorProfile() {
     }
   };
 
+  if (loading) return <div className="py-12 text-center text-sm text-slate-400">Loading profile...</div>;
+  if (loadError) return <div role="alert" className="py-12 text-center text-sm text-rose-500">{loadError}</div>;
+
   return (
     <div className="max-w-6xl mx-auto space-y-5 pb-12 animate-in fade-in duration-300 font-sans">
       {/* Top Header & Breadcrumb */}
@@ -127,6 +135,35 @@ export default function MentorProfile() {
             <Edit3 className="w-3.5 h-3.5" />
             Edit Profile
           </Link>
+        </div>
+      </div>
+
+      {/* 4 Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
+          <span className="text-xs font-semibold text-slate-400">Teams Mentoring</span>
+          <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
+            {user.stats?.teams ?? 0}
+          </p>
+        </div>
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
+          <span className="text-xs font-semibold text-slate-400">Mentor Rating</span>
+          <p className="text-2xl font-extrabold text-amber-500 mt-1 flex items-center justify-center gap-1">
+            <Star className="w-5 h-5 fill-amber-400" />
+            {user.stats?.rating ?? '4.9'}
+          </p>
+        </div>
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
+          <span className="text-xs font-semibold text-slate-400">Sessions Completed</span>
+          <p className="text-2xl font-extrabold text-[#5B45D9] mt-1">
+            {user.stats?.sessions ?? 0}
+          </p>
+        </div>
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
+          <span className="text-xs font-semibold text-slate-400">Alumni Cohorts</span>
+          <p className="text-2xl font-extrabold text-emerald-600 mt-1">
+            {user.stats?.completedMentorships ?? 0}
+          </p>
         </div>
       </div>
 
@@ -322,26 +359,30 @@ export default function MentorProfile() {
 
             {/* Vertical Timeline */}
             <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/10">
-              {user.experiences.map((exp) => (
-                <div key={exp.id} className="relative group">
-                  <span
-                    className={`absolute -left-[22px] top-1.5 w-2.5 h-2.5 rounded-full ${exp.dotColor} ring-4 ring-white dark:ring-[#111625]`}
-                  />
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                      {exp.title}
-                    </h4>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">
-                      {exp.meta}
-                    </p>
-                    {exp.description && (
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-normal">
-                        {exp.description}
+              {Array.isArray(user.experiences) && user.experiences.length > 0 ? (
+                user.experiences.map((exp) => (
+                  <div key={exp.id || exp.title} className="relative group">
+                    <span
+                      className={`absolute -left-[22px] top-1.5 w-2.5 h-2.5 rounded-full ${exp.dotColor || 'bg-[#5B45D9]'} ring-4 ring-white dark:ring-[#111625]`}
+                    />
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                        {exp.title}
+                      </h4>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">
+                        {exp.meta}
                       </p>
-                    )}
+                      {exp.description && (
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-normal">
+                          {exp.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="py-5 text-center text-xs text-slate-400">No mentoring experience listed.</p>
+              )}
             </div>
           </div>
         </div>

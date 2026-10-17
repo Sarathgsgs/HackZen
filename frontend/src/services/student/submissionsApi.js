@@ -7,114 +7,66 @@ import apiClient from '../../api/api';
 export const fetchSubmissions = async (teamId) => {
     try {
         if (!teamId) {
-            try {
-                const { data } = await apiClient.get('/submissions/my');
-                if (Array.isArray(data) && data.length > 0) {
-                    return data.map((sub) => ({
-                        id: sub.id || sub._id,
-                        project: sub.title || sub.project || `Project Submission v${sub.version || 1}`,
-                        hackathon: sub.hackathon || sub.hackathonTitle || 'Current Hackathon',
-                        team: sub.team || 'My Team',
-                        teamId: sub.teamId,
-                        submittedAt: sub.time || (sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : 'Recently'),
-                        status: sub.status || 'Pending Review',
-                        score: sub.score ?? null,
-                        feedback: sub.feedback ?? null,
-                        desc: sub.description || sub.desc || '',
-                        githubUrl: sub.githubUrl || '',
-                        liveDemoUrl: sub.liveDemoUrl || '',
-                        fileUrl: sub.fileUrl || '',
-                        resources: sub.fileUrl ? ['Download Project'] : ['Submission File']
-                    }));
-                }
-            } catch (myErr) {
-                console.log('/submissions/my fallback to team query:', myErr);
-            }
-
-            const { data: teams } = await apiClient.get('/teams/my-teams').catch(() => ({ data: [] }));
+            const { data: teams } = await apiClient.get('/teams/my-teams');
             if (!teams || teams.length === 0) return [];
 
             const results = await Promise.all(
-                teams.map((team) => apiClient.get(`/submissions/team/${team._id || team.id}`).catch(() => ({ data: [] })))
+                teams.map((team) => apiClient.get(`/submissions/team/${team._id || team.id}`))
             );
 
             return results
                 .flatMap((response) => response.data || [])
                 .map((sub) => ({
                     id: sub._id,
-                    project: sub.project || sub.title || `Project Submission v${sub.version || 1}`,
-                    hackathon: sub.hackathonTitle || sub.hackathon || 'Current Hackathon',
-                    submittedAt: sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : 'Recently',
-                    status: sub.status || 'Pending Review',
+                    stageId: sub.stageId || null,
+                    project: sub.project || null,
+                    hackathon: sub.hackathonTitle || null,
+                    submittedAt: sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : null,
+                    status: sub.status || null,
+                    desc: sub.desc || '',
+                    fileUrl: sub.fileUrl || null,
+                    version: sub.version ?? null,
                     score: sub.score ?? null,
                     feedback: sub.feedback ?? null,
-                    desc: sub.desc || sub.description || '',
-                    githubUrl: sub.githubUrl || '',
-                    liveDemoUrl: sub.liveDemoUrl || '',
-                    fileUrl: sub.fileUrl || '',
-                    resources: sub.fileUrl ? ['Download Project'] : ['Submission File']
+                    resources: sub.fileUrl ? ['Download Project'] : []
                 }));
         }
 
         const { data } = await apiClient.get(`/submissions/team/${teamId}`);
-        return (data || []).map((sub) => ({
+        return data.map((sub) => ({
             id: sub._id,
-            project: sub.project || sub.title || `Project Submission v${sub.version || 1}`,
-            hackathon: sub.hackathonTitle || sub.hackathon || 'Current Hackathon',
-            submittedAt: sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : 'Recently',
-            status: sub.status || 'Pending Review',
+            stageId: sub.stageId || null,
+            project: sub.project || null,
+            hackathon: sub.hackathonTitle || null,
+            submittedAt: sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : null,
+            status: sub.status || null,
+            desc: sub.desc || '',
+            fileUrl: sub.fileUrl || null,
+            version: sub.version ?? null,
             score: sub.score ?? null,
             feedback: sub.feedback ?? null,
-            desc: sub.desc || sub.description || '',
-            githubUrl: sub.githubUrl || '',
-            liveDemoUrl: sub.liveDemoUrl || '',
-            fileUrl: sub.fileUrl || '',
-            resources: sub.fileUrl ? ['Download Project'] : ['Submission File']
+            resources: sub.fileUrl ? ['Download Project'] : []
         }));
     } catch (error) {
         console.error('Failed to fetch student submissions:', error);
-        return [];
+        throw error;
     }
 };
 
 export const submitProject = async (submissionData) => {
     try {
-        let uploadedFileUrl = submissionData.fileUrl || '';
-
-        // If a real file deliverable is provided, upload it first
-        if (submissionData.file instanceof File) {
-            const formData = new FormData();
-            formData.append('file', submissionData.file);
-            const uploadRes = await apiClient.post('/submissions/upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            if (uploadRes.data?.fileUrl) {
-                uploadedFileUrl = uploadRes.data.fileUrl;
-            }
+        if (!submissionData?.teamId || !submissionData?.stageId || !submissionData?.fileUrl) {
+            throw new Error('A team, current stage, and project file URL are required.');
         }
-
-        let nextVersion = 1;
-        if (submissionData.teamId) {
-            try {
-                const { data: teamSubs } = await apiClient.get(`/submissions/team/${submissionData.teamId}`);
-                if (Array.isArray(teamSubs)) {
-                    nextVersion = teamSubs.length + 1;
-                }
-            } catch {
-                nextVersion = 1;
-            }
-        }
+        const { data: teamSubs } = await apiClient.get(`/submissions/team/${submissionData.teamId}`);
+        const nextVersion = teamSubs.filter((submission) => submission.stageId === submissionData.stageId).length + 1;
 
         const payload = {
             teamId: submissionData.teamId,
-            stageId: submissionData.stageId || 'initial_stage',
-            fileUrl: uploadedFileUrl || submissionData.fileUrl || '',
-            project: submissionData.project || 'Untitled Project',
+            stageId: submissionData.stageId,
+            fileUrl: submissionData.fileUrl,
+            project: submissionData.project,
             desc: submissionData.desc || '',
-            category: submissionData.category || 'General',
-            githubUrl: submissionData.githubUrl || '',
-            liveDemoUrl: submissionData.liveDemoUrl || '',
-            status: submissionData.status || 'Pending Review',
             version: nextVersion
         };
 
@@ -123,5 +75,16 @@ export const submitProject = async (submissionData) => {
     } catch (error) {
         console.error('Project submission failed:', error);
         throw error;
+    }
+};
+
+export const fetchSubmissionEvaluations = async (submissionId) => {
+    try {
+        if (!submissionId) return [];
+        const { data } = await apiClient.get(`/evaluations/submission/${submissionId}`);
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error('Failed to fetch submission evaluations:', error);
+        return [];
     }
 };

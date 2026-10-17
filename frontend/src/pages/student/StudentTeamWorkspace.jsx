@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import apiClient from '../../api/api';
 import { getMyTeams, getTeamById, getTeamMembers } from '../../api/teamApi';
+import { downloadTeamFile, getTeamFiles } from '../../api/teamFilesApi';
 
 const workspaceTabs = ['Overview', 'Tasks', 'Files', 'Chat', 'Mentor', 'Activity'];
 
@@ -35,6 +36,21 @@ const statusBadgeClass = (status) => {
   return 'bg-violet-500/10 text-violet-700';
 };
 
+const readableFileSize = (bytes) => {
+  const size = Number(bytes);
+  if (!Number.isFinite(size) || size < 0) return 'Unknown size';
+  if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const fileErrorMessage = (error) => error?.response?.data?.detail || error?.response?.data?.error?.message || 'Team files could not be loaded. Please try again.';
+const workspaceErrorMessage = (error, fallback) => error?.response?.data?.detail || error?.response?.data?.error?.message || fallback;
+const formatDate = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+};
+
 const StudentTeamWorkspace = () => {
   const navigate = useNavigate();
   const { teamId } = useParams();
@@ -42,42 +58,115 @@ const StudentTeamWorkspace = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [team, setTeam] = useState(null);
   const [members, setMembers] = useState([]);
+  const [membersError, setMembersError] = useState('');
+  const [messagesError, setMessagesError] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [taskProgressId, setTaskProgressId] = useState('');
+  const [tasksLoading, setTasksLoading] = useState(true);
+  const [tasksError, setTasksError] = useState('');
+  const [taskActionError, setTaskActionError] = useState('');
+  const [taskTitle, setTaskTitle] = useState('');
+  const [creatingTask, setCreatingTask] = useState(false);
+  const [updatingTaskId, setUpdatingTaskId] = useState('');
   const [files, setFiles] = useState([]);
+  const [filesLoading, setFilesLoading] = useState(true);
+  const [filesError, setFilesError] = useState('');
+  const [fileActionError, setFileActionError] = useState('');
+  const [downloadingFileId, setDownloadingFileId] = useState('');
   const [messages, setMessages] = useState([]);
   const [activity, setActivity] = useState([]);
-  const [progress, setProgress] = useState({ percentage: 45, status: 'Active', label: 'Ideation' });
+  const [activityLoading, setActivityLoading] = useState(true);
+  const [activityError, setActivityError] = useState('');
+  const [progress, setProgress] = useState({ percentage: null, status: null, label: null });
   const [loading, setLoading] = useState(true);
+  const [workspaceError, setWorkspaceError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
   const [draftMessage, setDraftMessage] = useState('');
 
   const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
   const userId = currentUser._id || currentUser.id || 'guest';
   const userName = currentUser.name || 'You';
 
+  const refreshTasks = useCallback(async (selectedTeamId = teamId) => {
+    setTasksLoading(true);
+    setTasksError('');
+    try {
+      const progressResponse = await apiClient.get(`/progress/team/${selectedTeamId}`);
+      const progressData = progressResponse?.data || {};
+      const progressId = progressData._id || progressData.id;
+      setTaskProgressId(progressId || '');
+      setProgress((current) => ({
+        ...current,
+        percentage: Number.isFinite(Number(progressData.percentage ?? progressData.progress))
+          ? Number(progressData.percentage ?? progressData.progress)
+          : null,
+        status: progressData.status || null,
+        label: progressData.status === 'completed' ? 'Completed' : (progressData.status === 'not-started' ? 'Ideation' : (progressData.status ? 'In Progress' : null)),
+      }));
+      if (!progressId) {
+        setTasks([]);
+        return;
+      }
+      const milestoneResponse = await apiClient.get(`/progress/milestones/${progressId}`);
+      setTasks((Array.isArray(milestoneResponse?.data) ? milestoneResponse.data : []).map((task, index) => ({
+        ...task,
+        id: task._id || task.id || `${task.milestoneId}-${index}`,
+        title: task.title || (task.milestoneId || 'Untitled task').replace(/^m_/, '').replace(/[_-]+/g, ' '),
+        status: task.completed ? 'Completed' : 'Open',
+        assignee: task.assigneeName || 'Team',
+      })));
+    } catch (error) {
+      setTasksError(workspaceErrorMessage(error, 'Team tasks could not be loaded. Please try again.'));
+    } finally {
+      setTasksLoading(false);
+    }
+  }, [teamId]);
+
+  const refreshActivity = useCallback(async (selectedTeamId = teamId) => {
+    setActivityLoading(true);
+    setActivityError('');
+    try {
+      const response = await apiClient.get(`/progress/activity/team/${selectedTeamId}`);
+      setActivity((Array.isArray(response?.data) ? response.data : []).map((item) => ({
+        ...item,
+        time: formatTime(item.createdAt),
+      })));
+    } catch (error) {
+      setActivityError(workspaceErrorMessage(error, 'Team activity could not be loaded. Please try again.'));
+    } finally {
+      setActivityLoading(false);
+    }
+  }, [teamId]);
+
   useEffect(() => {
     const loadWorkspace = async () => {
       setLoading(true);
+      setWorkspaceError('');
+        setMembersError('');
+        setMessagesError('');
       try {
         const myTeams = await getMyTeams();
-        const selectedTeam = myTeams.find((item) => String(item.id || item._id) === String(teamId)) || myTeams[0];
+        const selectedTeam = myTeams.find((item) => String(item.id || item._id) === String(teamId));
 
         if (!selectedTeam) {
+          if (teamId) {
+            setTeam(null);
+            setMembers([]);
+            setTasks([]);
+            setFiles([]);
+            setMessages([]);
+            setActivity([]);
+          }
           setLoading(false);
           return;
         }
 
         const teamIdValue = selectedTeam.id || selectedTeam._id;
-
-        const [teamData, memberData, progressResult, chatResult, milestoneResult] = await Promise.all([
+        const [teamData, memberData, chatResult] = await Promise.all([
           getTeamById(teamIdValue).catch(() => selectedTeam),
-          getTeamMembers(teamIdValue).catch(() => []),
-          apiClient.get(`/progress/team/${teamIdValue}`).catch(() => ({ data: null })),
-          apiClient.get(`/chat/${teamIdValue}/messages`).catch(() => ({ data: [] })),
-          apiClient.get(`/progress/team/${teamIdValue}`).catch(() => ({ data: null }))
+          getTeamMembers(teamIdValue).catch((error) => { setMembersError(workspaceErrorMessage(error, 'Team members could not be loaded.')); return []; }),
+          apiClient.get(`/chat/${teamIdValue}/messages`).catch((error) => { setMessagesError(workspaceErrorMessage(error, 'Team messages could not be loaded.')); return { data: [] }; })
         ]);
-
-        const progressData = progressResult?.data || {};
-        const milestoneData = progressData?._id ? await apiClient.get(`/progress/milestones/${progressData._id}`).catch(() => ({ data: [] })) : { data: [] };
 
         const normalizedTeam = {
           ...selectedTeam,
@@ -96,21 +185,6 @@ const StudentTeamWorkspace = () => {
           initials: getInitials(member.name || member.userName || 'Team Member')
         })));
 
-        const percentage = Number(progressData?.percentage ?? progressData?.progress ?? selectedTeam.progress ?? 0) || 0;
-        const phase = progressData?.status || selectedTeam.status || 'Active';
-        setProgress({
-          percentage,
-          status: phase,
-          label: phase === 'completed' ? 'Completed' : (phase === 'pending' ? 'Pending' : 'Ideation')
-        });
-
-        setTasks((milestoneData?.data || []).map((step, index) => ({
-          id: step._id || `${step.milestoneId || 'task'}-${index}`,
-          title: step.milestoneId || step.title || `Milestone ${index + 1}`,
-          status: step.completed ? 'Done' : (index === 0 ? 'In Progress' : 'Upcoming'),
-          assignee: step.assignee || 'Team'
-        })));
-
         const messageList = (chatResult?.data || []).map((msg) => ({
           id: msg._id || `${msg.senderId || 'msg'}-${Date.now()}`,
           sender: msg.senderId === userId ? 'You' : (msg.senderName || 'Team Member'),
@@ -120,21 +194,183 @@ const StudentTeamWorkspace = () => {
         }));
 
         setMessages(messageList);
-        setFiles(Array.isArray(selectedTeam.files) ? selectedTeam.files.map((file, index) => ({
-          id: file.id || `${file.name || 'file'}-${index}`,
-          name: file.name || 'workspace_file',
-          type: file.type || 'DOC',
-          size: file.size || 'Unknown size'
-        })) : []);
-        setActivity(Array.isArray(selectedTeam.activity) ? selectedTeam.activity : []);
+        await Promise.all([refreshTasks(teamIdValue), refreshActivity(teamIdValue)]);
       } catch (error) {
         console.error('Failed to load team workspace:', error);
+        setWorkspaceError(workspaceErrorMessage(error, 'The team workspace could not be loaded. Please try again.'));
       } finally {
         setLoading(false);
       }
     };
 
     loadWorkspace();
+  }, [teamId, userId, refreshTasks, refreshActivity, reloadKey]);
+
+  const handleCreateTask = async (event) => {
+    event.preventDefault();
+    const title = taskTitle.trim();
+    if (!title || !taskProgressId || creatingTask) return;
+    setCreatingTask(true);
+    setTaskActionError('');
+    try {
+      const generatedId = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? `task_${crypto.randomUUID()}`
+        : `task_${Date.now()}`;
+      await apiClient.post('/progress/milestone', {
+        progressId: taskProgressId,
+        milestoneId: generatedId,
+        title,
+        completed: false,
+      });
+      setTaskTitle('');
+      await Promise.all([refreshTasks(), refreshActivity()]);
+    } catch (error) {
+      setTaskActionError(workspaceErrorMessage(error, 'The task could not be saved. Please try again.'));
+    } finally {
+      setCreatingTask(false);
+    }
+  };
+
+  const handleToggleTask = async (task) => {
+    if (!task.id || updatingTaskId) return;
+    setUpdatingTaskId(task.id);
+    setTaskActionError('');
+    try {
+      await apiClient.put(`/progress/milestone/${task.id}`, { completed: !task.completed });
+      await Promise.all([refreshTasks(), refreshActivity()]);
+    } catch (error) {
+      setTaskActionError(workspaceErrorMessage(error, 'The task status could not be updated. Please try again.'));
+    } finally {
+      setUpdatingTaskId('');
+    }
+  };
+
+  useEffect(() => {
+    if (!teamId) {
+      setFiles([]);
+      setFilesLoading(false);
+      setFilesError('');
+      return undefined;
+    }
+    let active = true;
+    const refreshFiles = async () => {
+      try {
+        const sharedFiles = await getTeamFiles(teamId);
+        if (!active) return;
+        setFiles(sharedFiles);
+        setFilesError('');
+      } catch (error) {
+        if (!active) return;
+        setFilesError(fileErrorMessage(error));
+      } finally {
+        if (active) setFilesLoading(false);
+      }
+    };
+    setFilesLoading(true);
+    refreshFiles();
+    const refreshOnFocus = () => refreshFiles();
+    window.addEventListener('focus', refreshOnFocus);
+    const timer = window.setInterval(refreshFiles, 30000);
+    return () => {
+      active = false;
+      window.removeEventListener('focus', refreshOnFocus);
+      window.clearInterval(timer);
+    };
+  }, [teamId]);
+
+  const handleDownloadFile = async (file) => {
+    setDownloadingFileId(file.id);
+    setFileActionError('');
+    try {
+      const { blob } = await downloadTeamFile(file.id);
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = file.fileName || 'team-file';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+      setFileActionError(fileErrorMessage(error));
+    } finally {
+      setDownloadingFileId('');
+    }
+  };
+
+  useEffect(() => {
+    if (!teamId) return undefined;
+    let active = true;
+    const refreshTeamConversation = async () => {
+      try {
+        const ownTeams = await getMyTeams();
+        const currentTeam = ownTeams.find((item) => String(item.id || item._id) === String(teamId));
+        if (!active) return;
+        if (!currentTeam) {
+          setTeam(null);
+          setMembers([]);
+          setMessages([]);
+          return;
+        }
+        const [roster, chatResult] = await Promise.all([
+          getTeamMembers(teamId),
+          apiClient.get(`/chat/${teamId}/messages`, { params: { limit: 100 } }),
+        ]);
+        if (!active) return;
+        setMembers(roster || []);
+        const persistedMessages = (chatResult.data || []).map((msg) => ({
+          id: msg._id || msg.id,
+          sender: String(msg.senderId) === String(userId) ? 'You' : (msg.senderName || 'Team Member'),
+          text: msg.content || '',
+          createdAt: msg.createdAt,
+          time: formatTime(msg.createdAt),
+          mine: String(msg.senderId) === String(userId),
+        }));
+        setMessages((current) => {
+          const byId = new Map(current.map((message) => [String(message.id), message]));
+          persistedMessages.forEach((message) => byId.set(String(message.id), message));
+          return [...byId.values()].sort((first, second) => new Date(first.createdAt || 0) - new Date(second.createdAt || 0));
+        });
+      } catch {
+        // Keep the last confirmed roster and conversation visible during transient refresh failures.
+      }
+    };
+    const refreshOnFocus = () => refreshTeamConversation();
+    window.addEventListener('focus', refreshOnFocus);
+    const refreshTimer = window.setInterval(refreshTeamConversation, 30000);
+    return () => {
+      active = false;
+      window.removeEventListener('focus', refreshOnFocus);
+      window.clearInterval(refreshTimer);
+    };
+  }, [teamId, userId]);
+
+  useEffect(() => {
+    if (!teamId) return undefined;
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) return undefined;
+    const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+    const socketUrl = `${backendBase.replace(/^http/, 'ws')}/api/chat/ws/${teamId}/${encodeURIComponent(userId)}?token=${encodeURIComponent(token)}`;
+    const socket = new WebSocket(socketUrl);
+    socket.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        const message = payload?.message;
+        const messageId = message?._id || message?.id;
+        if (!message || !messageId) return;
+        setMessages((current) => current.some((item) => String(item.id) === String(messageId)) ? current : [...current, {
+          id: messageId,
+          sender: String(message.senderId) === String(userId) ? 'You' : (message.senderName || 'Team Member'),
+          text: message.content || '',
+          createdAt: message.createdAt,
+          time: formatTime(message.createdAt),
+          mine: String(message.senderId) === String(userId),
+        }]);
+      } catch {
+        // Ignore malformed events; persisted history remains available through the API.
+      }
+    };
+    return () => socket.close();
   }, [teamId, userId]);
 
   useEffect(() => {
@@ -177,8 +413,9 @@ const StudentTeamWorkspace = () => {
 
   const currentTeam = team || { teamName: 'Team Workspace', hackathonName: 'Hackathon', problemStatement: 'No problem statement available yet.' };
   const teamName = currentTeam.teamName || currentTeam.name || 'Team Workspace';
-  const hackathonName = currentTeam.hackathonName || currentTeam.hackathon || 'Hackathon';
-  const statusText = `${progress.status || 'Active'} - ${progress.label || 'Ideation'}`;
+  const hackathonName = currentTeam.hackathonName || currentTeam.hackathon || 'Hackathon not provided';
+  const statusText = progress.status ? `${progress.status}${progress.label ? ` - ${progress.label}` : ''}` : 'Progress unavailable';
+  const selectedTeamId = team?.id || team?._id || teamId;
 
   if (loading) {
     return (
@@ -189,42 +426,93 @@ const StudentTeamWorkspace = () => {
     );
   }
 
+  if (!team && teamId) {
+    return (
+      <div className="mx-auto max-w-3xl rounded-[24px] border border-[#e4dff1] bg-[#f7f4fb] p-10 text-center shadow-[0_12px_30px_rgba(76,59,183,0.04)]">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#efe7ff] text-2xl text-[#4d3bb5]">!</div>
+        <h2 className="text-3xl font-bold text-[#1d1a2a]">{workspaceError ? 'Workspace unavailable' : 'This team is no longer available'}</h2>
+        <p role={workspaceError ? 'alert' : undefined} className="mt-3 text-base text-slate-500">{workspaceError || 'The selected workspace may have been removed or you may no longer have access to it.'}</p>
+        {workspaceError && <button onClick={() => setReloadKey((key) => key + 1)} className="mt-4 rounded-xl border border-[#d8d0ed] bg-white px-5 py-3 text-sm font-semibold text-[#4d3bb5]">Try again</button>}
+        <button onClick={() => navigate('/student/teams')} className="mt-6 rounded-xl bg-[#4d3bb5] px-5 py-3 text-sm font-semibold text-white">
+          Back to My Teams
+        </button>
+      </div>
+    );
+  }
+
   const content = (() => {
     switch (activeTab) {
       case 'Tasks':
         return (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {tasks.length ? tasks.map((task) => (
-              <div key={task.id} className="rounded-[20px] border border-[#e6dff4] bg-white p-5 shadow-[0_8px_20px_rgba(79,52,181,0.04)]">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${statusBadgeClass(task.status)}`}>
-                    {task.status}
-                  </span>
-                  <span className="text-[11px] font-medium text-slate-500">{task.assignee}</span>
-                </div>
-                <h3 className="text-lg font-bold text-[#1f1a2d]">{task.title}</h3>
+          <div className="space-y-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div><h2 className="text-xl font-bold text-[#1f1a2d]">Team tasks</h2><p className="mt-1 text-sm text-slate-500">Tasks are shared with everyone on this team.</p></div>
+              {currentUser.role === 'student' && <form onSubmit={handleCreateTask} className="flex w-full gap-2 sm:w-auto">
+                <input value={taskTitle} onChange={(event) => setTaskTitle(event.target.value)} maxLength={160} placeholder="Add a task title" aria-label="New task title" className="min-w-0 flex-1 rounded-xl border border-[#e4dff1] bg-white px-3 py-2.5 text-sm text-[#1f1a2d] placeholder:text-slate-400 focus:border-[#5f4bc8] focus:outline-none sm:w-64" />
+                <button type="submit" disabled={!taskTitle.trim() || !taskProgressId || creatingTask} className="shrink-0 rounded-xl bg-[#4d3bb5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4133a1] disabled:cursor-not-allowed disabled:opacity-50">{creatingTask ? 'Saving…' : 'Add task'}</button>
+              </form>}
+            </div>
+            {taskActionError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{taskActionError}</div>}
+            {tasksLoading ? (
+              <div role="status" className="rounded-[20px] border border-[#e6dff4] bg-white p-8 text-center text-sm text-slate-500">Loading team tasks…</div>
+            ) : tasksError ? (
+              <div role="alert" className="rounded-[20px] border border-red-200 bg-white p-8 text-center">
+                <p className="text-sm text-red-700">{tasksError}</p>
+                <button type="button" onClick={() => refreshTasks()} className="mt-3 rounded-lg border border-[#d8d0ed] px-4 py-2 text-sm font-semibold text-[#4d3bb5]">Retry</button>
               </div>
-            )) : (
-              <div className="col-span-full rounded-[20px] border border-dashed border-[#e6dff4] bg-white p-8 text-center text-slate-500">No milestones have been added for this team yet.</div>
+            ) : tasks.length ? (
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {tasks.map((task) => (
+                  <article key={task.id} className="rounded-[20px] border border-[#e6dff4] bg-white p-5 shadow-[0_8px_20px_rgba(79,52,181,0.04)]">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${statusBadgeClass(task.status)}`}>{task.status}</span>
+                      {task.priority && <span className="text-[11px] font-semibold text-slate-500">{task.priority} priority</span>}
+                    </div>
+                    <h3 className="text-lg font-bold text-[#1f1a2d]">{task.title}</h3>
+                    {task.description && <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">{task.description}</p>}
+                    <p className="mt-3 text-xs text-slate-500">Assigned to {task.assignee}</p>
+                    {(task.dueDate || task.createdAt) && <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                      {task.dueDate && <span>Due {formatDate(task.dueDate)}</span>}
+                      {task.createdAt && <span>Created {formatDate(task.createdAt)}</span>}
+                    </div>}
+                    <button type="button" onClick={() => handleToggleTask(task)} disabled={updatingTaskId === task.id || Boolean(updatingTaskId)} className="mt-5 rounded-lg border border-[#d8d0ed] px-3 py-2 text-sm font-semibold text-[#4d3bb5] transition hover:bg-[#f4f0ff] disabled:opacity-50">{updatingTaskId === task.id ? 'Saving…' : task.completed ? 'Reopen task' : 'Mark complete'}</button>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[20px] border border-dashed border-[#e6dff4] bg-white p-8 text-center">
+                <h3 className="font-semibold text-[#1f1a2d]">No tasks yet</h3>
+                <p className="mt-2 text-sm text-slate-500">Add a task to give your team a shared next step.</p>
+              </div>
             )}
           </div>
         );
       case 'Files':
         return (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {files.length ? files.map((file) => (
-              <div key={file.id || file.name} className="rounded-[20px] border border-[#e6dff4] bg-white p-5 shadow-[0_8px_20px_rgba(79,52,181,0.04)]">
-                <div className="mb-4 text-3xl">📄</div>
-                <h3 className="text-base font-bold text-[#1f1a2d]">{file.name}</h3>
-                <p className="mt-2 text-sm text-slate-500">{file.type || 'FILE'} • {file.size || 'Unknown size'}</p>
-                <button onClick={() => navigate('/student/files')} className="mt-4 rounded-xl bg-[#f3eefc] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#4d3bb5]">
-                  Open
-                </button>
+          <section className="rounded-[20px] border border-[#e6dff4] bg-white shadow-[0_8px_20px_rgba(79,52,181,0.04)]">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e6dff4] px-5 py-4">
+              <div><h2 className="text-lg font-bold text-[#1f1a2d]">Shared files</h2><p className="mt-1 text-sm text-slate-500">{files.length} {files.length === 1 ? 'file' : 'files'} shared with this team</p></div>
+              <button onClick={() => navigate(`/student/files?teamId=${encodeURIComponent(selectedTeamId || teamId)}`)} className="rounded-xl bg-[#4d3bb5] px-4 py-2.5 text-sm font-semibold text-white">Open File Sharing</button>
+            </div>
+            {filesError && <div role="alert" className="mx-5 mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{filesError}</div>}
+            {fileActionError && <div role="alert" className="mx-5 mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{fileActionError}</div>}
+            {filesLoading ? (
+              <div role="status" className="p-8 text-center text-sm text-slate-500">Loading shared files...</div>
+            ) : filesError ? (
+              <div className="p-5 text-sm text-slate-500">Your team files could not be confirmed. Use Open File Sharing to retry.</div>
+            ) : files.length ? (
+              <div className="divide-y divide-[#e6dff4]">
+                {files.map((file) => (
+                  <article key={file.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+                    <div className="min-w-0"><h3 className="truncate font-semibold text-[#1f1a2d]">{file.fileName}</h3><p className="mt-1 text-sm text-slate-500">{String(file.extension || 'FILE').toUpperCase()} | {readableFileSize(file.size)} | Shared by {file.uploadedBy || 'Team member'}</p></div>
+                    <button type="button" onClick={() => handleDownloadFile(file)} disabled={downloadingFileId === file.id} className="shrink-0 rounded-xl bg-[#f3eefc] px-3 py-2 text-sm font-semibold text-[#4d3bb5] disabled:opacity-50">{downloadingFileId === file.id ? 'Downloading...' : 'Download'}</button>
+                  </article>
+                ))}
               </div>
-            )) : (
-              <div className="col-span-full rounded-[20px] border border-dashed border-[#e6dff4] bg-white p-8 text-center text-slate-500">No files have been shared in this workspace yet.</div>
+            ) : (
+              <div className="rounded-b-[20px] border-t border-dashed border-[#e6dff4] p-8 text-center text-slate-500">No files have been shared in this workspace yet.</div>
             )}
-          </div>
+          </section>
         );
       case 'Chat':
         return (
@@ -240,7 +528,7 @@ const StudentTeamWorkspace = () => {
                   </div>
                 </div>
               )) : (
-                <div className="rounded-[20px] border border-dashed border-[#e6dff4] bg-white p-8 text-center text-slate-500">No messages yet. Start the conversation with your team.</div>
+                <div role={messagesError ? 'alert' : undefined} className="rounded-[20px] border border-dashed border-[#e6dff4] bg-white p-8 text-center text-slate-500">{messagesError || 'No messages yet. Start the conversation with your team.'}</div>
               )}
               <div ref={chatEndRef} />
             </div>
@@ -261,16 +549,23 @@ const StudentTeamWorkspace = () => {
       case 'Mentor':
         return (
           <div className="rounded-[22px] border border-[#e6dff4] bg-[#f9f6fc] p-6">
-            <p className="text-sm text-slate-600">Mentor support remains available through the existing workspace flow.</p>
-            <button onClick={() => navigate('/student/mentor-profile')} className="mt-5 rounded-xl bg-[#4d3bb5] px-5 py-3 text-sm font-semibold text-white">
-              View mentor profile
+            <p className="text-sm text-slate-600">Browse available mentors or review your team’s mentor assignment.</p>
+            <button onClick={() => navigate('/student/mentor-request')} className="mt-5 rounded-xl bg-[#4d3bb5] px-5 py-3 text-sm font-semibold text-white">
+              Find a mentor
             </button>
           </div>
         );
       case 'Activity':
         return (
           <div className="space-y-4">
-            {activity.length ? activity.map((item) => (
+            {activityLoading ? (
+              <div role="status" className="rounded-[18px] border border-[#e6dff4] bg-white p-8 text-center text-sm text-slate-500">Loading team activity…</div>
+            ) : activityError ? (
+              <div role="alert" className="rounded-[18px] border border-red-200 bg-white p-8 text-center">
+                <p className="text-sm text-red-700">{activityError}</p>
+                <button type="button" onClick={() => refreshActivity()} className="mt-3 rounded-lg border border-[#d8d0ed] px-4 py-2 text-sm font-semibold text-[#4d3bb5]">Retry</button>
+              </div>
+            ) : activity.length ? activity.map((item) => (
               <div key={item.id || `${item.user}-${item.time}`} className="flex items-center justify-between rounded-[18px] border border-[#e6dff4] bg-white px-4 py-4 shadow-[0_8px_20px_rgba(79,52,181,0.03)]">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f2ecff] text-sm font-bold text-[#4d3bb5]">
@@ -278,7 +573,7 @@ const StudentTeamWorkspace = () => {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[#1f1a2d]">{item.user}</p>
-                    <p className="text-sm text-slate-500">{item.action} “{item.item || 'workspace artifact'}”</p>
+                    <p className="text-sm text-slate-500">{item.action}{item.item ? " - " + item.item : ""}</p>
                   </div>
                 </div>
                 <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{item.time}</span>
@@ -296,7 +591,7 @@ const StudentTeamWorkspace = () => {
               <div className="rounded-[22px] border border-[#e6dff4] bg-white p-6 shadow-[0_10px_30px_rgba(76,59,183,0.04)]">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 className="text-[28px] font-bold leading-none text-[#1d1a2a]">Problem Statement</h2>
-                  <button onClick={() => navigate('/student/project-info')} className="rounded-lg border border-[#e7def7] bg-[#f8f3ff] p-2 text-[#5b44c9] transition hover:bg-[#f1eaff]">
+                  <button onClick={() => navigate(`/student/project-info?teamId=${teamId || currentTeam.id}`)} className="rounded-lg border border-[#e7def7] bg-[#f8f3ff] p-2 text-[#5b44c9] transition hover:bg-[#f1eaff]">
                     ✎
                   </button>
                 </div>
@@ -323,7 +618,7 @@ const StudentTeamWorkspace = () => {
                       </div>
                     </div>
                   )) : (
-                    <div className="col-span-full rounded-[16px] border border-dashed border-[#e6dff4] bg-[#f9f7fb] p-6 text-sm text-slate-500">No members have been added to this team yet.</div>
+                    <div role={membersError ? 'alert' : undefined} className="col-span-full rounded-[16px] border border-dashed border-[#e6dff4] bg-[#f9f7fb] p-6 text-sm text-slate-500">{membersError || 'No members have been added to this team yet.'}</div>
                   )}
                 </div>
               </div>
@@ -359,16 +654,16 @@ const StudentTeamWorkspace = () => {
               <div className="rounded-[22px] border border-[#e6dff4] bg-white p-5 shadow-[0_10px_30px_rgba(76,59,183,0.04)]">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 className="text-[28px] font-bold text-[#1d1a2a]">Team Progress</h2>
-                  <div className="text-sm font-semibold text-[#4d3bb5]">{progress.percentage}%</div>
+                  <div className="text-sm font-semibold text-[#4d3bb5]">{progress.percentage === null ? 'Unavailable' : `${progress.percentage}%`}</div>
                 </div>
                 <div className="mb-4 h-2.5 overflow-hidden rounded-full bg-[#f0eafb]">
-                  <div className="h-full rounded-full bg-[#4d3bb5]" style={{ width: `${Math.max(0, Math.min(100, progress.percentage))}%` }} />
+                  {progress.percentage !== null && <div className="h-full rounded-full bg-[#4d3bb5]" style={{ width: `${Math.max(0, Math.min(100, progress.percentage))}%` }} />}
                 </div>
 
                 <ul className="space-y-4">
                   {['Ideation', 'Design', 'Development', 'Submission'].map((step, index) => {
-                    const current = progress.label === step || (progress.label === 'Ideation' && step === 'Ideation');
-                    const state = current ? 'In Progress' : (index < 1 ? 'Pending' : 'Pending');
+                    const current = progress.label === step;
+                    const state = current ? 'In Progress' : progress.status === 'completed' ? 'Completed' : 'Not provided';
                     return (
                       <li key={step} className="flex items-start gap-3">
                         <div className={`mt-1 h-3 w-3 rounded-full ${current ? 'bg-[#4d3bb5]' : 'bg-[#d9d0ee]'}`} />
@@ -413,14 +708,31 @@ const StudentTeamWorkspace = () => {
             <span>Overall Progress</span>
             <div className="w-40">
               <div className="h-2 overflow-hidden rounded-full bg-[#e8def8]">
-                <div className="h-full rounded-full bg-[#4d3bb5]" style={{ width: `${Math.max(0, Math.min(100, progress.percentage))}%` }} />
+                {progress.percentage !== null && <div className="h-full rounded-full bg-[#4d3bb5]" style={{ width: `${Math.max(0, Math.min(100, progress.percentage))}%` }} />}
               </div>
             </div>
-            <span>{progress.percentage}%</span>
+            <span>{progress.percentage === null ? 'Unavailable' : `${progress.percentage}%`}</span>
           </div>
         </div>
 
         <h1 className="mb-6 text-[38px] font-bold leading-none tracking-[-0.05em] text-[#1d1a2a] md:text-[52px]">{teamName} Workspace</h1>
+
+        <div className="mb-6 flex flex-wrap gap-3">
+          {[
+            { label: 'Project Information', path: '/student/project-info' },
+            { label: 'Project Submission', path: '/student/submission' },
+            { label: 'Submission Status', path: '/student/submission-status' },
+            { label: 'Feedback', path: '/student/feedback' }
+          ].map(({ label, path }) => (
+            <button
+              key={label}
+              onClick={() => navigate(`${path}${selectedTeamId ? `?teamId=${selectedTeamId}` : ''}`)}
+              className="rounded-xl border border-[#d8d0ed] bg-white px-4 py-2 text-sm font-semibold text-[#4d3bb5] shadow-[0_8px_20px_rgba(77,59,181,0.04)] transition hover:bg-[#f4f0ff]"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         <div className="overflow-hidden rounded-[22px] border border-[#e6dff4] bg-[#f8f5fc] shadow-[0_10px_28px_rgba(76,59,183,0.04)]">
           <div className="flex flex-wrap gap-6 border-b border-[#e6dff4] bg-[#f8f5fc] px-5 pt-4 sm:px-6">

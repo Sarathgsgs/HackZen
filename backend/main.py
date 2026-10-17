@@ -43,6 +43,13 @@ async def lifespan(app: FastAPI):
             reminder_task = asyncio.create_task(meeting_reminder_loop())
         except Exception as e:
             print(f"[Mentor Worker] Initializer note: {e}")
+
+        try:
+            from seed_student_portal_data import seed_student_data_direct
+            await seed_student_data_direct(MongoDB.db)
+            print("[Auto-Seeder] Student portal workflow data verified/initialized on startup.")
+        except Exception as seeder_err:
+            print(f"[Auto-Seeder notice]: {seeder_err}")
     yield
     if reminder_task:
         reminder_task.cancel()

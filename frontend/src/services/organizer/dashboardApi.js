@@ -18,56 +18,38 @@ export const fetchOrganizerDashboardData = async (dateFilter = '30days') => {
                 { 
                     id: 'active_hackathons', 
                     title: 'ACTIVE HACKATHONS', 
-                    value: data.totalHackathons || 3, 
-                    change: '+2', 
+                    value: data.totalHackathons ?? 0,
                     isPositive: true, 
                     type: 'hackathons'
                 },
                 { 
                     id: 'total_registrations', 
                     title: 'TOTAL REGISTRATIONS', 
-                    value: data.totalParticipants || 1240, 
-                    change: '+12%', 
+                    value: data.totalParticipants ?? 0,
                     isPositive: true, 
                     type: 'registrations'
                 },
                 { 
                     id: 'submissions', 
                     title: 'SUBMISSIONS', 
-                    value: data.totalSubmissions || 458, 
-                    change: '+8%', 
+                    value: data.totalSubmissions ?? 0,
                     isPositive: true, 
                     type: 'submissions'
                 },
                 { 
                     id: 'mentors_judges', 
                     title: 'MENTORS & JUDGES', 
-                    value: data.stats?.find(s => s.id === 'mentorsJudges')?.value || 86, 
-                    change: 'Verified', 
+                    value: data.stats?.find(s => s.id === 'mentorsJudges')?.value ?? 0,
                     isPositive: true, 
                     type: 'mentors'
                 }
             ],
             // Active Events Table
-            activeHackathons: data.activeHackathons && data.activeHackathons.length > 0 ? data.activeHackathons : [
-                { id: '1', title: 'Global Fintech Hackathon 2024', participants: '342 Participants', status: 'Active', timeline: 'Oct 12 - Oct 15', category: 'FinTech' },
-                { id: '2', title: 'AI for Good: Global Challenge', participants: '128 Participants', status: 'Active', timeline: 'Oct 20 - Oct 22', category: 'AI & ML' },
-                { id: '3', title: 'Eco-Innovation Sprint', participants: '86 Participants', status: 'Pending Review', timeline: 'Nov 01 - Nov 03', category: 'Sustainability' },
-                { id: '4', title: 'Web3 & Decentralized Future', participants: '512 Participants', status: 'Approved', timeline: 'Nov 15 - Nov 18', category: 'Blockchain' }
-            ],
+            activeHackathons: Array.isArray(data.activeHackathons) ? data.activeHackathons : [],
             // Recent Registrations Feed
-            recentRegistrations: data.recentRegistrations && data.recentRegistrations.length > 0 ? data.recentRegistrations : [
-                { id: 'r1', name: 'Sarah Jenkins', initials: 'SJ', hackathon: 'Global Fintech Hack', roleOrMembers: 'Developer', timeAgo: '2 mins ago', color: 'purple' },
-                { id: 'r2', name: 'Team Mavericks', initials: 'TM', hackathon: 'Global Fintech Hack', roleOrMembers: '4 Members', timeAgo: '15 mins ago', color: 'slate' },
-                { id: 'r3', name: 'David Chen', initials: 'DC', hackathon: 'AI for Good', roleOrMembers: 'UI/UX Designer', timeAgo: '1 hour ago', color: 'indigo' },
-                { id: 'r4', name: 'CyberPulse Team', initials: 'CP', hackathon: 'Global Fintech Hack', roleOrMembers: '3 Members', timeAgo: '3 hours ago', color: 'teal' }
-            ],
+            recentRegistrations: Array.isArray(data.recentRegistrations) ? data.recentRegistrations : [],
             // Upcoming Deadlines Feed
-            upcomingDeadlines: data.upcomingDeadlines && data.upcomingDeadlines.length > 0 ? data.upcomingDeadlines : [
-                { id: 'd1', color: 'red', time: 'Today, 11:59 PM', label: 'Registration Closes', hackathon: 'Global Fintech Hack' },
-                { id: 'd2', color: 'purple', time: 'Tomorrow, 9:00 AM', label: 'Judging Commences', hackathon: 'Global Fintech Hack' },
-                { id: 'd3', color: 'grey', time: 'Oct 25, 5:00 PM', label: 'Submission Deadline', hackathon: 'Eco-Innovation Sprint' }
-            ],
+            upcomingDeadlines: Array.isArray(data.upcomingDeadlines) ? data.upcomingDeadlines : [],
             // Backward-compatible structures
             hackathons: {
                 active: (data.hackathonBreakdown || []).filter(h => h.status !== 'completed' && h.status !== 'draft').map(h => ({
@@ -98,16 +80,14 @@ export const fetchOrganizerDashboardData = async (dateFilter = '30days') => {
                     progress: 100
                 }))
             },
-            activity: (data.activityStream && data.activityStream.length > 0) ? data.activityStream.map(a => ({
+            activity: (Array.isArray(data.activityStream)) ? data.activityStream.map(a => ({
                 id: a.id,
                 action: `${a.name} registered for`,
                 target: a.hackathon,
                 time: a.time,
                 type: 'registration'
-            })) : [
-                { id: 1, action: 'Platform Sync', target: 'Live Operational Feed', time: 'Just now', type: 'update' }
-            ],
-            funnelData: data.funnelData || { accepted: 14, inReview: 6, rejected: 2 }
+            })) : [],
+            funnelData: data.funnelData || { accepted: 0, inReview: 0, rejected: 0 }
         };
     } catch (error) {
         console.error("Error fetching organizer dashboard data:", error);

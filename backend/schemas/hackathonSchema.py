@@ -71,5 +71,9 @@ class HackathonResponse(HackathonBase):
     createdAt: Optional[Union[datetime, str]] = Field(None, alias="createdAt")
     updatedAt: Optional[Union[datetime, str]] = Field(None, alias="updatedAt")
     participants_count: int = Field(default=0, alias="participants_count")
+    organizerName: Optional[str] = None
+    maxTeams: Optional[int] = None
+    resources: List[Dict[str, Any]] = []
+    prizes: List[Dict[str, Any]] = []
 
     model_config = {"populate_by_name": True, "from_attributes": True, "extra": "allow"}

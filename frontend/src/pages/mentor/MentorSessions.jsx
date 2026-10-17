@@ -42,21 +42,22 @@ export default function MentorSessions() {
           .map((team) => [String(team.id), team.name])
       );
 
-      if (records && records.length) {
-        const mapped = records.map((m) => ({
+      const mapped = (Array.isArray(records) ? records : []).map((m) => {
+        const startTime = m.startTime ? new Date(m.startTime) : null;
+        return {
           id: m._id || m.id,
           teamName: m.teamName || teamsById.get(String(m.teamId)) || 'Assigned team',
           topic: m.title || 'Technical Guidance',
-          date: new Date(m.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          rawDate: new Date(m.startTime),
-          time: new Date(m.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: startTime ? startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date unavailable',
+          rawDate: startTime,
+          time: startTime ? startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
           meetingType: m.location || 'Google Meet',
           meetingLink: m.meetingLink || '',
-          status: new Date(m.startTime) < new Date() ? 'Completed' : 'Upcoming',
-          description: m.description,
-        }));
-        setSessions(mapped);
-      } else setSessions([]);
+          status: m.status || (startTime && startTime < new Date() ? 'Completed' : 'Upcoming'),
+          description: m.description || '',
+        };
+      });
+      setSessions([...(Array.isArray(stored) ? stored : []), ...mapped]);
     } catch (e) {
       console.error('Meetings load failed:', e);
       setSessions([]);

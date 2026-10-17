@@ -175,7 +175,12 @@ export default function MentorResources() {
 
       {/* Resources Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredResources.map((res) => (
+        {loading ? (
+          <p className="col-span-full py-10 text-center text-sm text-slate-400">Loading resources...</p>
+        ) : filteredResources.length === 0 ? (
+          <p className="col-span-full py-10 text-center text-sm text-slate-400">No shared resources are available.</p>
+        ) : (
+          filteredResources.map((res) => (
           <div
             key={res.id}
             className="p-5 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-[#5B45D9]/40 transition-all flex flex-col justify-between group"
@@ -218,7 +223,7 @@ export default function MentorResources() {
               </div>
             </div>
           </div>
-        ))}
+        )))}
       </div>
 
       {/* Share Resource Modal */}

@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getMyTeams } from '../../api/teamApi';
 import { fetchSubmissions } from '../../services/student/submissionsApi';
 
 const StudentMaterials = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const teamQuery = searchParams.get('teamId') ? `?teamId=${searchParams.get('teamId')}` : '';
 
   useEffect(() => {
     const loadMaterials = async () => {
       setLoading(true);
       try {
         const teams = await getMyTeams();
-        const activeTeam = teams?.[0] || null;
+        const requestedTeamId = searchParams.get('teamId');
+        const activeTeam = requestedTeamId
+          ? teams.find((team) => String(team.id || team._id) === String(requestedTeamId)) || teams[0] || null
+          : teams[0] || null;
+
         if (!activeTeam) {
           setMaterials([]);
           return;
@@ -39,7 +45,7 @@ const StudentMaterials = () => {
     };
 
     loadMaterials();
-  }, []);
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -56,7 +62,7 @@ const StudentMaterials = () => {
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-violet-300">Resources</p>
           <h1 className="mt-2 text-3xl font-bold text-white">Team Materials</h1>
         </div>
-        <button onClick={() => navigate('/student/files')} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white">
+        <button onClick={() => navigate(`/student/files${teamQuery}`)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white">
           File sharing
         </button>
       </div>

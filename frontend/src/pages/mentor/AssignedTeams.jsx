@@ -24,15 +24,18 @@ export default function AssignedTeams() {
   const [selectedDomain, setSelectedDomain] = useState('All');
   const [loading, setLoading] = useState(true);
   const [teams, setTeams] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const loadTeams = async () => {
       try {
         setLoading(true);
         const data = await fetchAssignedTeams();
-        setTeams(data?.activeTeams || []);
+        setTeams(Array.isArray(data?.activeTeams) ? data.activeTeams : []);
       } catch (err) {
         console.error('Failed to load teams:', err);
+        setTeams([]);
+        setLoadError('Unable to load teams. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -95,6 +98,8 @@ export default function AssignedTeams() {
       {/* Teams Grid */}
       {loading ? (
         <div className="py-12 text-center text-slate-400 text-sm">Loading teams...</div>
+      ) : loadError ? (
+        <div role="alert" className="p-12 text-center bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 text-rose-500 text-sm">{loadError}</div>
       ) : filteredTeams.length === 0 ? (
         <div className="p-12 text-center bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 text-slate-400 text-sm">
           No teams matching your search.
