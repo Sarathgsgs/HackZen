@@ -25,16 +25,22 @@ STUDENT_EMAILS = [
     "sailesh.m@vitstudent.ac.in",
 ]
 
-async def seed_student_data():
-    client = AsyncIOMotorClient(MONGO_URI)
-    db = client[DB_NAME]
-    print(f"[Seeder] Connected to MongoDB ({DB_NAME})")
+async def seed_student_data_direct(db):
+    print(f"[Seeder] Running seed_student_data_direct on database: {db.name}")
 
     # 1. Fetch student users
-    students = await db["users"].find({"email": {"$in": STUDENT_EMAILS}}).to_list(10)
-    if not students:
-        print("[Seeder] No existing student users found matching target emails! Creating fallback students...")
-        default_student = {
+    students = await db["users"].find({
+        "$or": [
+            {"role": {"$in": ["student", "Student", "STUDENT"]}},
+            {"email": {"$in": STUDENT_EMAILS}},
+            {"email": {"$regex": "sailesh|sarath", "$options": "i"}},
+            {"name": {"$regex": "Sailesh", "$options": "i"}}
+        ]
+    }).to_list(50)
+
+    # Ensure key student accounts exist
+    known_seed_users = [
+        {
             "_id": ObjectId("6a70c0666425dafef71c73c3"),
             "name": "M Sailesh",
             "email": "msailesh@gmail.com",
@@ -44,11 +50,36 @@ async def seed_student_data():
             "year": "3rd Year",
             "skills": ["React", "Node.js", "Python", "FastAPI", "MongoDB", "AI/ML"],
             "createdAt": datetime.utcnow()
+        },
+        {
+            "_id": ObjectId("6a70c0666425dafef71c73c4"),
+            "name": "M Sailesh",
+            "email": "sailesh.m@vitstudent.ac.in",
+            "role": "student",
+            "college": "Vellore Institute of Technology",
+            "degree": "B.Tech Computer Science",
+            "year": "3rd Year",
+            "skills": ["React", "Node.js", "Python", "FastAPI", "MongoDB", "AI/ML"],
+            "createdAt": datetime.utcnow()
         }
-        await db["users"].update_one({"email": default_student["email"]}, {"$set": default_student}, upsert=True)
-        students = [default_student]
+    ]
+
+    existing_emails = {s.get("email") for s in students if s.get("email")}
+    for seed_u in known_seed_users:
+        if seed_u["email"] not in existing_emails:
+            await db["users"].update_one(
+                {"email": seed_u["email"]},
+                {"$setOnInsert": seed_u},
+                upsert=True
+            )
+            # Re-fetch the inserted/existing user
+            found = await db["users"].find_one({"email": seed_u["email"]})
+            if found:
+                students.append(found)
+                existing_emails.add(seed_u["email"])
 
     print(f"[Seeder] Found {len(students)} student accounts to seed data for.")
+
 
     # 2. Ensure high-quality hackathons exist
     now = datetime.utcnow()
@@ -400,7 +431,21 @@ async def seed_student_data():
         await db["progress"].update_one({"teamId": str(team_2_id)}, {"$set": progress_2}, upsert=True)
 
     print(f"[Seeder] Successfully seeded complete workflow data for {len(students)} students across all collections!")
-    client.close()
+    return {
+        "status": "success",
+        "students_count": len(students),
+        "hackathons_count": len(hackathons_data),
+        "teams_count": len(teams_data)
+    }
+
+async def seed_student_data():
+    client = AsyncIOMotorClient(MONGO_URI)
+    db = client[DB_NAME]
+    try:
+        await seed_student_data_direct(db)
+    finally:
+        client.close()
 
 if __name__ == "__main__":
     asyncio.run(seed_student_data())
+

@@ -183,28 +183,47 @@ async def create_team(
 async def get_my_teams(current_user: dict = Depends(with_auth)):
     """Get all teams where the current user is a member"""
     user_id = _authenticated_user_id(current_user)
+    user_email = current_user.get("email")
     members_collection = get_team_members_collection()
-    cursor = members_collection.find({"userId": user_id})
+
+    user_query = [{"userId": user_id}]
+    if user_email:
+        user_query.append({"userEmail": user_email})
+        user_query.append({"email": user_email})
+    cursor = members_collection.find({"$or": user_query})
     memberships = await cursor.to_list(100)
 
     membership_by_id = {str(item.get("teamId")): item for item in memberships if item.get("teamId")}
     team_ids = [ObjectId(team_id) for team_id in membership_by_id if ObjectId.is_valid(team_id)]
 
-    if not team_ids:
+    teams_collection = get_team_collection()
+    team_conditions = []
+    if team_ids:
+        team_conditions.append({"_id": {"$in": team_ids}})
+    if user_id:
+        team_conditions.append({"createdBy": user_id})
+        team_conditions.append({"leaderId": user_id})
+        team_conditions.append({"members.userId": user_id})
+    if user_email:
+        team_conditions.append({"members.email": user_email})
+
+    if not team_conditions:
         return []
 
-    teams_collection = get_team_collection()
-    cursor = teams_collection.find({"_id": {"$in": team_ids}})
+    cursor = teams_collection.find({"$or": team_conditions})
     teams = await cursor.to_list(100)
 
     for team in teams:
         team["_id"] = str(team["_id"])
         membership = membership_by_id.get(team["_id"], {})
-        role = membership.get("role", TeamMemberRole.MEMBER.value)
+        role = membership.get("role")
+        if not role:
+            role = TeamMemberRole.LEADER.value if (team.get("leaderId") == user_id or team.get("createdBy") == user_id) else TeamMemberRole.MEMBER.value
         team["myRole"] = role
         if role != TeamMemberRole.LEADER.value:
             team["teamCode"] = None
-        team["memberCount"] = await members_collection.count_documents({"teamId": team["_id"]})
+        team["memberCount"] = len(team.get("members") or []) or await members_collection.count_documents({"teamId": team["_id"]}) or 1
+
         hackathon = None
         hackathon_id = team.get("hackathonId")
         if hackathon_id and ObjectId.is_valid(str(hackathon_id)):
