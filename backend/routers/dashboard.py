@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Body
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 from bson import ObjectId
@@ -9,7 +9,9 @@ import csv
 import io
 
 from core.dependencies import RequireRole, with_auth
+from core.security import get_current_user_optional
 from database import get_db
+
 
 router = APIRouter()
 
@@ -1773,7 +1775,61 @@ async def get_organizer_registrations_teams(
     }
 
 
+@router.patch("/organizer-registrations-teams/{team_id}/status")
+@router.put("/organizer-registrations-teams/{team_id}/status")
+async def update_organizer_registration_team_status(
+    team_id: str,
+    payload: Dict[str, Any] = Body(...),
+    current_user: Optional[Dict[str, Any]] = Depends(get_current_user_optional),
+):
+    """Update team registration status for organizer registrations table."""
+    db = get_db()
+    new_status = payload.get("status") or payload.get("newStatus")
+    if not new_status:
+        raise HTTPException(status_code=400, detail="Status is required")
+
+    raw = str(new_status).strip().lower()
+    if raw == "approved":
+        formatted_status = "Approved"
+    elif raw == "rejected":
+        formatted_status = "Rejected"
+    elif raw == "pending":
+        formatted_status = "Pending"
+    else:
+        formatted_status = str(new_status).strip().capitalize()
+
+    now = datetime.utcnow()
+
+    # Update in organizer_teams_registry
+    await db["organizer_teams_registry"].update_many(
+        {"$or": [{"id": team_id}, {"_id": team_id}, {"teamId": team_id}, {"name": team_id}]},
+        {"$set": {"status": formatted_status, "updatedAt": now}}
+    )
+
+    # Update in teams
+    team_query = []
+    if ObjectId.is_valid(team_id):
+        team_query.append({"_id": ObjectId(team_id)})
+    team_query.extend([
+        {"id": team_id},
+        {"teamId": team_id},
+        {"name": team_id}
+    ])
+    await db["teams"].update_many(
+        {"$or": team_query},
+        {"$set": {"status": formatted_status, "updatedAt": now}}
+    )
+
+    return {
+        "success": True,
+        "teamId": team_id,
+        "status": formatted_status,
+        "message": f"Status updated to {formatted_status}"
+    }
+
+
 # --- ORGANIZER OPERATIONS DIRECTORY ENDPOINT ---
+
 @router.get("/organizer-operations-directory")
 async def get_organizer_operations_directory(
     role: Optional[str] = "all", # 'all' | 'mentor' | 'judge'

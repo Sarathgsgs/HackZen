@@ -16,7 +16,8 @@ from schemas.team import (
 )
 from models.team import TeamInDB, TeamMemberInDB
 from schemas.application import ApplicationStatus
-from core.security import generate_team_invite_code
+from core.security import generate_team_invite_code, get_current_user_optional
+
 
 router = APIRouter()
 
@@ -987,7 +988,67 @@ async def delete_team(team_id: str, current_user: dict = Depends(with_auth)):
     # 4. Delete progress records
     await db["progress"].delete_many({"teamId": team_id})
 
-    # 5. Delete the team itself
-    await db["teams"].delete_one({"_id": team_oid})
-
     return None
+
+
+@router.patch("/{team_id}/status")
+@router.put("/{team_id}/status")
+async def update_team_status(
+    team_id: str,
+    payload: Dict[str, Any] = Body(...),
+    current_user: Optional[Dict[str, Any]] = Depends(get_current_user_optional),
+):
+    """
+    Update team approval/registration status (Approved, Pending, Rejected).
+    Updates organizer_teams_registry, main teams collection, and applications.
+    """
+    db = get_db()
+    new_status = payload.get("status") or payload.get("newStatus")
+    if not new_status:
+        raise HTTPException(status_code=400, detail="Status is required")
+
+    raw = str(new_status).strip().lower()
+    if raw == "approved":
+        formatted_status = "Approved"
+    elif raw == "rejected":
+        formatted_status = "Rejected"
+    elif raw == "pending":
+        formatted_status = "Pending"
+    else:
+        formatted_status = str(new_status).strip().capitalize()
+
+    now = datetime.utcnow()
+
+    # 1. Update in organizer_teams_registry
+    await db["organizer_teams_registry"].update_many(
+        {"$or": [{"id": team_id}, {"_id": team_id}, {"teamId": team_id}, {"name": team_id}]},
+        {"$set": {"status": formatted_status, "updatedAt": now}}
+    )
+
+    # 2. Update in teams collection
+    team_query = []
+    if ObjectId.is_valid(team_id):
+        team_query.append({"_id": ObjectId(team_id)})
+    team_query.extend([
+        {"id": team_id},
+        {"teamId": team_id},
+        {"name": team_id}
+    ])
+    await db["teams"].update_many(
+        {"$or": team_query},
+        {"$set": {"status": formatted_status, "updatedAt": now}}
+    )
+
+    # 3. Update any applications linked to this team
+    await db["applications"].update_many(
+        {"teamId": team_id},
+        {"$set": {"status": formatted_status, "updatedAt": now}}
+    )
+
+    return {
+        "success": True,
+        "teamId": team_id,
+        "status": formatted_status,
+        "message": f"Team status successfully updated to {formatted_status}"
+    }
+

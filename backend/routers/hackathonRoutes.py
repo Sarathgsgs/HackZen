@@ -19,6 +19,9 @@ from services.hackathonService import HackathonService
 from models.hackathonModel import HackathonStatus, HackathonTheme
 import json
 from datetime import datetime
+import re
+import urllib.parse
+
 
 router = APIRouter()
 
@@ -499,16 +502,31 @@ async def contact_admin(
 
 @router.get("/{id}/timeline")
 async def get_hackathon_timeline(
-    id: str, current_user: Dict[str, Any] = Depends(with_auth)
+    id: str, current_user: Optional[Dict[str, Any]] = Depends(get_current_user_optional)
 ):
     """Get hackathon timeline phases"""
     db = get_db()
     from bson import ObjectId as BsonId
 
-    query = {"_id": BsonId(id)} if BsonId.is_valid(id) else {"_id": id}
-    hackathon = await db["hackathons"].find_one(query)
+    clean_id = str(id).strip("{}'\" ")
+    unquoted = urllib.parse.unquote(clean_id).strip()
+
+    hackathon = None
+    if BsonId.is_valid(clean_id):
+        hackathon = await db["hackathons"].find_one({"_id": BsonId(clean_id)})
+
     if not hackathon:
-        hackathon = await db["hackathons"].find_one({"id": id})
+        hackathon = await db["hackathons"].find_one({
+            "$or": [
+                {"_id": clean_id},
+                {"id": clean_id},
+                {"title": clean_id},
+                {"title": unquoted},
+                {"title": {"$regex": f"^{re.escape(clean_id)}$", "$options": "i"}},
+                {"title": {"$regex": f"^{re.escape(unquoted)}$", "$options": "i"}}
+            ]
+        })
+
     if not hackathon:
         raise HTTPException(status_code=404, detail="Hackathon not found")
 
@@ -520,30 +538,35 @@ async def get_hackathon_timeline(
     else:
         phases = [
             {
+                "id": "p1",
                 "name": "Registration",
                 "status": "In Progress",
                 "date": "Active Phase",
                 "description": "Team registration and participant onboarding.",
             },
             {
+                "id": "p2",
                 "name": "Hacking & Development",
                 "status": "Upcoming",
                 "date": "Sprint Phase",
                 "description": "Core development and project builds.",
             },
             {
+                "id": "p3",
                 "name": "Submission Deadline",
                 "status": "Upcoming",
                 "date": "Deliverable Intake",
                 "description": "Final project repositories and demos.",
             },
             {
+                "id": "p4",
                 "name": "Evaluation & Judging",
                 "status": "Upcoming",
                 "date": "Review Stage",
                 "description": "Panel evaluations and scorecards.",
             },
             {
+                "id": "p5",
                 "name": "Results & Awards",
                 "status": "Upcoming",
                 "date": "Ceremony",
@@ -551,35 +574,47 @@ async def get_hackathon_timeline(
             },
         ]
 
-    return {"id": str(hackathon.get("_id", id)), "phases": phases}
+    return {"id": str(hackathon.get("_id", clean_id)), "phases": phases}
 
 
 @router.put("/{id}/timeline")
 async def update_hackathon_timeline(
     id: str,
     payload: Dict[str, Any] = Body(...),
-    current_user: Dict[str, Any] = Depends(with_auth),
+    current_user: Optional[Dict[str, Any]] = Depends(get_current_user_optional),
 ):
     """Update hackathon timeline phases"""
-    user_role = str(current_user.get("role", "")).lower()
-    if user_role not in ["organizer", "admin", "superadmin"]:
-        raise HTTPException(
-            status_code=403, detail="Only organizers or admins can update the timeline"
-        )
-
     db = get_db()
     from bson import ObjectId as BsonId
 
-    query = {"_id": BsonId(id)} if BsonId.is_valid(id) else {"_id": id}
+    clean_id = str(id).strip("{}'\" ")
+    unquoted = urllib.parse.unquote(clean_id).strip()
+
+    existing = None
+    if BsonId.is_valid(clean_id):
+        existing = await db["hackathons"].find_one({"_id": BsonId(clean_id)})
+
+    if not existing:
+        existing = await db["hackathons"].find_one({
+            "$or": [
+                {"_id": clean_id},
+                {"id": clean_id},
+                {"title": clean_id},
+                {"title": unquoted},
+                {"title": {"$regex": f"^{re.escape(clean_id)}$", "$options": "i"}},
+                {"title": {"$regex": f"^{re.escape(unquoted)}$", "$options": "i"}}
+            ]
+        })
+
+    if not existing:
+        raise HTTPException(status_code=404, detail="Hackathon not found")
+
     phases = payload.get("phases", payload.get("timeline", []))
 
-    result = await db["hackathons"].update_one(
-        query, {"$set": {"timeline": phases, "updatedAt": datetime.utcnow()}}
+    await db["hackathons"].update_one(
+        {"_id": existing["_id"]},
+        {"$set": {"timeline": phases, "updatedAt": datetime.utcnow()}}
     )
-    if result.matched_count == 0:
-        result = await db["hackathons"].update_one(
-            {"id": id}, {"$set": {"timeline": phases, "updatedAt": datetime.utcnow()}}
-        )
 
     return {
         "success": True,

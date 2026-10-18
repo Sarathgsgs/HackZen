@@ -2,10 +2,13 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from bson import ObjectId
 import uuid
+import re
+import urllib.parse
 from database import get_hackathon_collection
 from models.hackathonModel import HackathonStatus, HackathonTheme
 from schemas.hackathonSchema import HackathonCreate, HackathonUpdate
 from services.file_upload import file_upload_service
+
 
 
 class HackathonService:
@@ -136,9 +139,27 @@ class HackathonService:
     @staticmethod
     async def get_hackathon_by_id(hid: str, db) -> Optional[Dict[str, Any]]:
         coll = db.hackathons
-        if not ObjectId.is_valid(hid):
+        if not hid:
             return None
-        hackathon = await coll.find_one({"_id": ObjectId(hid)})
+        clean_id = str(hid).strip("{}'\" ")
+        unquoted = urllib.parse.unquote(clean_id).strip()
+
+        hackathon = None
+        if ObjectId.is_valid(clean_id):
+            hackathon = await coll.find_one({"_id": ObjectId(clean_id)})
+
+        if not hackathon:
+            hackathon = await coll.find_one({
+                "$or": [
+                    {"_id": clean_id},
+                    {"id": clean_id},
+                    {"title": clean_id},
+                    {"title": unquoted},
+                    {"title": {"$regex": f"^{re.escape(clean_id)}$", "$options": "i"}},
+                    {"title": {"$regex": f"^{re.escape(unquoted)}$", "$options": "i"}}
+                ]
+            })
+
         if hackathon:
             return HackathonService._normalize_hackathon(hackathon)
         return None
@@ -199,19 +220,34 @@ class HackathonService:
         template: Optional[Any] = None,
     ) -> Optional[Dict[str, Any]]:
         coll = db.hackathons
-
-        if not ObjectId.is_valid(hid):
+        if not hid:
             return None
+        clean_id = str(hid).strip("{}'\" ")
+        unquoted = urllib.parse.unquote(clean_id).strip()
 
-        query = {"_id": ObjectId(hid)}
+        existing = None
+        if ObjectId.is_valid(clean_id):
+            existing = await coll.find_one({"_id": ObjectId(clean_id)})
 
-        # Verify ownership
-        existing = await coll.find_one(query)
+        if not existing:
+            existing = await coll.find_one({
+                "$or": [
+                    {"_id": clean_id},
+                    {"id": clean_id},
+                    {"title": clean_id},
+                    {"title": unquoted},
+                    {"title": {"$regex": f"^{re.escape(clean_id)}$", "$options": "i"}},
+                    {"title": {"$regex": f"^{re.escape(unquoted)}$", "$options": "i"}}
+                ]
+            })
+
         if not existing:
             return None
 
+        query = {"_id": existing["_id"]}
+
         # Allow if it's the owner OR an admin
-        if existing["organizerId"] != organizer_id and user_role != "admin":
+        if str(existing.get("organizerId", "")) != str(organizer_id) and user_role != "admin":
             raise PermissionError("Not authorized to update this hackathon")
 
         update_data = data.model_dump(exclude_unset=True, by_alias=True)
@@ -248,23 +284,39 @@ class HackathonService:
         update_data["updatedAt"] = datetime.utcnow()
 
         await coll.update_one(query, {"$set": update_data})
-        return await HackathonService.get_hackathon_by_id(hid, db)
+        return await HackathonService.get_hackathon_by_id(str(existing["_id"]), db)
 
     @staticmethod
     async def delete_hackathon(hid: str, organizer_id: str, user_role: str, db) -> bool:
         coll = db.hackathons
-
-        if not ObjectId.is_valid(hid):
+        if not hid:
             return False
+        clean_id = str(hid).strip("{}'\" ")
+        unquoted = urllib.parse.unquote(clean_id).strip()
 
-        query = {"_id": ObjectId(hid)}
+        existing = None
+        if ObjectId.is_valid(clean_id):
+            existing = await coll.find_one({"_id": ObjectId(clean_id)})
 
-        existing = await coll.find_one(query)
+        if not existing:
+            existing = await coll.find_one({
+                "$or": [
+                    {"_id": clean_id},
+                    {"id": clean_id},
+                    {"title": clean_id},
+                    {"title": unquoted},
+                    {"title": {"$regex": f"^{re.escape(clean_id)}$", "$options": "i"}},
+                    {"title": {"$regex": f"^{re.escape(unquoted)}$", "$options": "i"}}
+                ]
+            })
+
         if not existing:
             return False
 
+        query = {"_id": existing["_id"]}
+
         # Allow if it's the owner OR an admin
-        if existing["organizerId"] != organizer_id and user_role != "admin":
+        if str(existing.get("organizerId", "")) != str(organizer_id) and user_role != "admin":
             raise PermissionError("Not authorized to delete this hackathon")
 
         await coll.delete_one(query)
@@ -273,9 +325,13 @@ class HackathonService:
     @staticmethod
     async def get_organizer_hackathons(organizer_id: str, db) -> List[Dict[str, Any]]:
         coll = db.hackathons
-        cursor = coll.find({"organizerId": organizer_id}).sort("createdAt", -1)
+        org_query = {"organizerId": organizer_id}
+        if ObjectId.is_valid(organizer_id):
+            org_query = {"$or": [{"organizerId": organizer_id}, {"organizerId": ObjectId(organizer_id)}]}
+        cursor = coll.find(org_query).sort("createdAt", -1)
         hackathons = await cursor.to_list(100)
 
         for h in hackathons:
             HackathonService._normalize_hackathon(h)
         return hackathons
+

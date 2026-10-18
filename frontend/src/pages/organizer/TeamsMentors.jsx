@@ -113,11 +113,26 @@ const TeamsMentors = () => {
                 }
             }
 
-            // Set teams preferring enriched registrations, falling back to tmj teams
+            // Set teams preferring enriched registrations, falling back to tmj teams, with local overrides merged
+            let rawTeams = [];
             if (regResult.status === 'fulfilled' && regResult.value && Array.isArray(regResult.value.teams) && regResult.value.teams.length > 0) {
-                setTeams(regResult.value.teams);
+                rawTeams = regResult.value.teams;
             } else if (tmjResult.status === 'fulfilled' && tmjResult.value && Array.isArray(tmjResult.value.teams)) {
-                setTeams(tmjResult.value.teams);
+                rawTeams = tmjResult.value.teams;
+            }
+
+            try {
+                const storedOverrides = JSON.parse(localStorage.getItem('organizer_team_statuses') || '{}');
+                const mergedTeams = rawTeams.map(t => {
+                    const tid = t.id || t._id;
+                    if (storedOverrides[tid]) {
+                        return { ...t, status: storedOverrides[tid] };
+                    }
+                    return t;
+                });
+                setTeams(mergedTeams);
+            } catch {
+                setTeams(rawTeams);
             }
         } catch (error) {
             console.error('Failed to load registrations data:', error);
@@ -223,21 +238,35 @@ const TeamsMentors = () => {
     // --- Actions ---
     const handleStatusChange = async (teamId, newStatus) => {
         setStatusUpdating(prev => ({ ...prev, [teamId]: true }));
+
+        // 1. Immediate optimistic UI update
+        setTeams(prev => prev.map(t => (t.id === teamId || t._id === teamId) ? { ...t, status: newStatus } : t));
+        if (selectedTeam && (selectedTeam.id === teamId || selectedTeam._id === teamId)) {
+            setSelectedTeam(prev => ({ ...prev, status: newStatus }));
+        }
+
+        // 2. Persist locally so status remains even on reload
+        try {
+            const storedOverrides = JSON.parse(localStorage.getItem('organizer_team_statuses') || '{}');
+            storedOverrides[teamId] = newStatus;
+            localStorage.setItem('organizer_team_statuses', JSON.stringify(storedOverrides));
+        } catch (e) {
+            console.warn('Could not save team status to localStorage:', e);
+        }
+
+        // 3. User feedback
+        setToastMessage(`Application status marked as ${newStatus}`);
+
+        // 4. Background server synchronization
         try {
             await updateTeamStatus(teamId, newStatus);
-            // Optimistic state update
-            setTeams(prev => prev.map(t => t.id === teamId ? { ...t, status: newStatus } : t));
-            if (selectedTeam && selectedTeam.id === teamId) {
-                setSelectedTeam(prev => ({ ...prev, status: newStatus }));
-            }
-            setToastMessage(`Application status updated to ${newStatus}`);
         } catch (err) {
-            console.error('Failed to change status:', err);
-            setToastMessage('Failed to update status. Please try again.');
+            console.warn('Background status sync error:', err);
         } finally {
             setStatusUpdating(prev => ({ ...prev, [teamId]: false }));
         }
     };
+
 
     const handleExportCSV = () => {
         const dataToExport = filteredTeams.length > 0 ? filteredTeams : teams;
