@@ -405,3 +405,57 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover,
     stroke-dashoffset: -440;
   }
 }
+
+/* ==========================================================================
+   STANDARDIZED ADMIN-REFERENCE DESIGN SYSTEM UTILITY CLASSES
+   ========================================================================== */
+@layer components {
+  /* Page Layout */
+  .standard-page-container {
+    @apply space-y-6 pb-16 max-w-7xl mx-auto w-full animate-in fade-in duration-300;
+  }
+  .standard-page-header {
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4;
+  }
+  .standard-page-title {
+    @apply text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight;
+  }
+  .standard-page-subtitle {
+    @apply text-sm text-slate-500 dark:text-slate-400 mt-1;
+  }
+
+  /* Card Surfaces */
+  .standard-card {
+    @apply rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-xs transition-all;
+  }
+  .standard-card-header {
+    @apply p-4 sm:p-5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between gap-3;
+  }
+  .standard-card-title {
+    @apply text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight;
+  }
+
+  /* KPI Stat Card */
+  .standard-kpi-card {
+    @apply rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-xs p-5 flex flex-col justify-between;
+  }
+  .standard-kpi-label {
+    @apply text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider;
+  }
+  .standard-kpi-value {
+    @apply text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1.5;
+  }
+
+  /* Standard Buttons */
+  .standard-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6D28D9] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .standard-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Standard Inputs */
+  .standard-input {
+    @apply w-full px-3.5 py-2.5 bg-slate-50 dark:bg-navy-800 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/40 transition-all;
+  }
+}

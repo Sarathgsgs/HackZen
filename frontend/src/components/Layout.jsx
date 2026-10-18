@@ -881,7 +881,7 @@ const DashboardLayout = () => {
             {/* Main Content Area */}
             <div className={`flex-1 flex flex-col relative overflow-hidden ${isStudent ? 'min-h-0' : 'h-full'}`}>
                 {/* --- MAIN CONTENT HEADER --- */}
-                <header className={`h-16 ${isStudent ? 'bg-white border-slate-200' : 'bg-[#ffffff] dark:bg-navy-900/80 border-b border-[#e2e8f0] dark:border-white/10'} backdrop-blur-md border-b flex items-center justify-between px-3.5 sm:px-6 shrink-0 z-10 transition-colors overflow-visible`}>
+                <header className="h-16 bg-white dark:bg-navy-900/90 border-b border-slate-200/80 dark:border-white/10 backdrop-blur-md flex items-center justify-between px-3.5 sm:px-6 shrink-0 z-10 transition-colors overflow-visible">
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         {/* Mobile Drawer Trigger (when on small screens or when sidebar mode is active) */}
                         {!isStudent && <button
@@ -895,7 +895,7 @@ const DashboardLayout = () => {
                         {/* Top Navbar Brand Logo (displayed when in Top Navbar mode) */}
                         {(isTopNavbarMode || isStudent) && (
                             <Link to={isStudent ? '/student/dashboard' : (isOrganizer ? '/organizer/dashboard' : '/admin/dashboard')} className="flex items-center gap-2 select-none shrink-0 pr-1 sm:pr-3">
-                                <Logo size="sm" showSubtext={false} forceLight={isStudent} />
+                                <Logo size="sm" showSubtext={false} />
                             </Link>
                         )}
 
@@ -1025,7 +1025,7 @@ const DashboardLayout = () => {
                         
                         {/* Theme Toggle */}
                         <div className="relative flex items-center justify-center">
-                            <ThemeToggle variant="button" forceLightAppearance={isStudent} />
+                            <ThemeToggle variant="button" />
                         </div>
 
                         {/* Help Guide for Organizer */}
@@ -1166,7 +1166,7 @@ const DashboardLayout = () => {
                 </header>
 
                 {isStudent && (
-                    <nav aria-label="Student navigation" className="flex h-14 shrink-0 items-stretch gap-1 overflow-x-auto border-b border-slate-200 bg-white px-3 shadow-sm scrollbar-hide sm:px-6">
+                    <nav aria-label="Student navigation" className="flex h-14 shrink-0 items-stretch gap-1 overflow-x-auto border-b border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3 shadow-xs scrollbar-hide sm:px-6">
                         {studentNav.map((item) => {
                             const isDashboardRoot = item.path === '/student/dashboard';
                             const isActive = isDashboardRoot
@@ -1177,9 +1177,13 @@ const DashboardLayout = () => {
                                     key={item.name}
                                     to={item.path}
                                     aria-current={isActive ? 'page' : undefined}
-                                    className={`flex shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors sm:px-4 ${isActive ? 'border-[#7C65F6] bg-purple-50/50 text-[#684ee8]' : 'border-transparent text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'}`}
+                                    className={`flex shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors sm:px-4 ${
+                                        isActive
+                                            ? 'border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20 text-[#7C65F6] dark:text-purple-300 font-bold'
+                                            : 'border-transparent text-slate-600 dark:text-gray-300 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
                                 >
-                                    <span className={isActive ? 'text-[#684ee8]' : 'text-slate-500'}>{item.icon}</span>
+                                    <span className={isActive ? 'text-[#7C65F6] dark:text-purple-300' : 'text-slate-500 dark:text-gray-400'}>{item.icon}</span>
                                     <span className="whitespace-nowrap">{item.name}</span>
                                 </Link>
                             );

@@ -3,11 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import { fetchDashboardData } from '../../services/student/dashboardApi';
 
 const metricDefinitions = [
-    { key: 'registeredHackathons', label: 'REGISTERED HACKATHONS' },
-    { key: 'activeTeams', label: 'ACTIVE TEAMS' },
-    { key: 'submissions', label: 'SUBMISSIONS' },
-    { key: 'certificates', label: 'CERTIFICATES' },
+    { key: 'registeredHackathons', label: 'Registered Hackathons' },
+    { key: 'activeTeams', label: 'Active Teams' },
+    { key: 'submissions', label: 'Submissions' },
+    { key: 'certificates', label: 'Certificates' },
 ];
+
+const metricIcons = {
+    registeredHackathons: (
+        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+        </svg>
+    ),
+    activeTeams: (
+        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+    ),
+    submissions: (
+        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    ),
+    certificates: (
+        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        </svg>
+    ),
+};
 
 const formatDate = (value) => {
     if (!value) return 'Date to be announced';
@@ -68,42 +91,49 @@ const bannerForDashboardHackathon = (hackathon) => {
 const getStatusClasses = (status) => {
     const normalized = `${status || ''}`.toLowerCase();
     if (normalized.includes('accepted') || normalized.includes('active') || normalized.includes('approved')) {
-        return 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600';
+        return 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
     }
     if (normalized.includes('pending') || normalized.includes('in review') || normalized.includes('review')) {
-        return 'border-amber-500/20 bg-amber-500/10 text-amber-700';
+        return 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400';
     }
     if (normalized.includes('rejected') || normalized.includes('declined')) {
-        return 'border-rose-500/20 bg-rose-500/10 text-rose-600';
+        return 'border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400';
     }
-    return 'border-violet-500/20 bg-violet-500/10 text-violet-700';
+    return 'border-purple-500/20 bg-purple-500/10 text-purple-700 dark:text-purple-400';
 };
 
 const DashboardSkeleton = () => (
-    <div className="space-y-8 animate-pulse">
-        <div className="h-12 w-72 rounded-xl bg-[#ece5f5]" />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-6 animate-pulse">
+        <div className="h-10 w-72 rounded-xl bg-slate-200 dark:bg-navy-800" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[0, 1, 2, 3].map((item) => (
-                <div key={item} className="h-28 rounded-[18px] border border-[#e6e0f0] bg-white" />
+                <div key={item} className="h-28 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900" />
             ))}
         </div>
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,2fr)_minmax(360px,1fr)]">
-            <div className="space-y-6 rounded-[22px] border border-[#e6e0f0] bg-[#f7f4fb] p-6">
-                <div className="h-8 w-52 rounded bg-[#efe9f8]" />
-                <div className="h-56 rounded-[18px] bg-white" />
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(340px,1fr)]">
+            <div className="space-y-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-6">
+                <div className="h-6 w-40 rounded bg-slate-200 dark:bg-navy-800" />
+                <div className="h-56 rounded-xl bg-slate-100 dark:bg-navy-950" />
             </div>
-            <div className="space-y-6 rounded-[22px] border border-[#e6e0f0] bg-[#f7f4fb] p-6">
-                <div className="h-8 w-40 rounded bg-[#efe9f8]" />
-                <div className="h-48 rounded-[18px] bg-white" />
+            <div className="space-y-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-6">
+                <div className="h-6 w-36 rounded bg-slate-200 dark:bg-navy-800" />
+                <div className="h-48 rounded-xl bg-slate-100 dark:bg-navy-950" />
             </div>
         </div>
     </div>
 );
 
-const MetricCard = ({ label, value }) => (
-    <div className="rounded-[18px] border border-[#e6e0f0] bg-[#f9f7fb] p-5 shadow-[0_12px_30px_rgba(76,59,183,0.04)]">
-        <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#7a7098]">{label}</div>
-        <div className="mt-4 text-[42px] font-bold leading-none tracking-[-0.05em] text-[#4d3bb5]">{value}</div>
+const MetricCard = ({ label, value, metricKey }) => (
+    <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between transition-all hover:shadow-md">
+        <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
+            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
+                {metricIcons[metricKey]}
+            </div>
+        </div>
+        <div className="mt-3">
+            <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{value}</div>
+        </div>
     </div>
 );
 
@@ -122,15 +152,15 @@ const formatRelativeTime = (timestamp) => {
 const getActivityBadge = (type) => {
     switch (type?.toLowerCase()) {
         case 'registration':
-            return { icon: '📝', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' };
+            return { icon: '📝', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' };
         case 'submission':
-            return { icon: '🚀', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' };
+            return { icon: '🚀', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' };
         case 'certificate':
-            return { icon: '🏆', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20' };
+            return { icon: '🏆', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' };
         case 'team':
-            return { icon: '👥', color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' };
+            return { icon: '👥', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' };
         default:
-            return { icon: '⚡', color: 'bg-violet-500/10 text-violet-600 border-violet-500/20' };
+            return { icon: '⚡', color: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20' };
     }
 };
 
@@ -166,48 +196,77 @@ const StudentDashboard = () => {
     const studentName = dashboard?.student?.name?.split(' ')[0] || 'Student';
 
     return (
-        <div className="min-h-screen bg-[#f3f0f8] px-4 py-6 md:px-6 lg:px-8">
-            <div className="mx-auto max-w-[1400px]">
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-navy-950 px-4 py-6 md:px-8 text-slate-900 dark:text-white transition-colors duration-200">
+            <div className="mx-auto max-w-7xl space-y-6">
                 {isLoading ? (
                     <DashboardSkeleton />
                 ) : error ? (
-                    <div className="mx-auto flex min-h-[420px] max-w-lg flex-col items-center justify-center rounded-[22px] border border-red-200 bg-white p-8 text-center shadow-[0_12px_35px_rgba(116,82,196,0.08)]">
-                        <h1 className="text-2xl font-bold text-[#1d1a2a]">Dashboard unavailable</h1>
-                        <p className="mt-3 text-sm text-slate-500">{error}</p>
-                        <button onClick={loadDashboard} className="mt-6 rounded-xl bg-[#5c46c7] px-5 py-3 font-semibold text-white transition hover:bg-[#4c3bb7]">Try again</button>
+                    <div className="mx-auto flex min-h-[380px] max-w-lg flex-col items-center justify-center rounded-2xl border border-red-200 dark:border-red-900/40 bg-white dark:bg-navy-900 p-8 text-center shadow-xs">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Dashboard unavailable</h2>
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{error}</p>
+                        <button
+                            onClick={loadDashboard}
+                            className="mt-6 rounded-xl bg-[#7C65F6] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95"
+                        >
+                            Try again
+                        </button>
                     </div>
                 ) : (
                     <>
-                        <header className="mb-8">
-                            <h1 className="text-[40px] font-bold tracking-[-0.05em] text-[#1d1a2a] md:text-[52px]">
-                                Welcome back, <span className="text-[#4f3ec7]">{studentName}</span>!
-                            </h1>
+                        {/* 1. Page Header (Admin Benchmark) */}
+                        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                                    Welcome back, <span className="text-[#7C65F6] dark:text-purple-400">{studentName}</span>!
+                                </h1>
+                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    Track your active hackathon registrations, squad milestones, submissions, and credentials.
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => navigate('/student/hackathons')}
+                                    className="inline-flex items-center gap-2 rounded-xl bg-[#7C65F6] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
+                                >
+                                    Explore Hackathons
+                                </button>
+                            </div>
                         </header>
 
-                        <section aria-label="Dashboard metrics" className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                        {/* 2. KPI Metrics Grid (Admin Benchmark) */}
+                        <section aria-label="Dashboard metrics" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                             {metricDefinitions.map((metric) => (
                                 <MetricCard
                                     key={metric.key}
+                                    metricKey={metric.key}
                                     label={metric.label}
-                                    value={dashboard?.metrics?.[metric.key] ?? '—'}
+                                    value={dashboard?.metrics?.[metric.key] ?? '0'}
                                 />
                             ))}
                         </section>
 
-                        <section className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,2fr)_minmax(320px,0.92fr)]">
-                            <div className="rounded-[22px] border border-[#e5dff0] bg-[#f8f6fb] p-5 shadow-[0_10px_28px_rgba(76,59,183,0.05)] sm:p-6">
-                                <div className="mb-6 flex items-center justify-between gap-3">
-                                    <h2 className="text-[14px] font-bold uppercase tracking-[0.18em] text-[#6f5da7]">My Hackathons</h2>
+                        {/* 3. Main Workspace Split: My Hackathons & Feed */}
+                        <section className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(340px,1fr)]">
+                            {/* My Hackathons */}
+                            <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
+                                <div className="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-white/5 pb-3">
+                                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">My Hackathons</h2>
+                                    <span className="text-xs font-semibold text-slate-400">{registeredHackathons.length} Enrolled</span>
                                 </div>
 
                                 {registeredHackathons.length === 0 ? (
-                                    <div className="rounded-[18px] border border-dashed border-[#d6d0e9] bg-white p-8 text-center">
-                                        <h3 className="text-lg font-bold text-[#1d1a2a]">No registered hackathons yet</h3>
-                                        <p className="mt-2 text-sm text-slate-500">Explore upcoming events and register for a hackathon to see it here.</p>
-                                        <button onClick={() => navigate('/student/hackathons')} className="mt-5 rounded-xl bg-[#5c46c7] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#4c3bb7]">Explore Hackathons</button>
+                                    <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-navy-950/40 p-8 text-center">
+                                        <h3 className="text-base font-bold text-slate-900 dark:text-white">No registered hackathons yet</h3>
+                                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Explore upcoming events and register for a hackathon to see it here.</p>
+                                        <button
+                                            onClick={() => navigate('/student/hackathons')}
+                                            className="mt-4 rounded-xl bg-[#7C65F6] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95"
+                                        >
+                                            Explore Hackathons
+                                        </button>
                                     </div>
                                 ) : (
-                                    <div className="space-y-5">
+                                    <div className="space-y-4">
                                         {registeredHackathons.map((hackathon) => {
                                             const rawProgress = hackathon.team?.progress?.percentage ?? hackathon.progress;
                                             const progressValue = rawProgress !== null && rawProgress !== undefined && Number.isFinite(Number(rawProgress))
@@ -219,9 +278,12 @@ const StudentDashboard = () => {
                                             const fallbackBanner = bannerForDashboardHackathon(hackathon);
 
                                             return (
-                                                <article key={hackathon.id} className="rounded-[20px] border border-[#e3dff0] bg-white p-4 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-5">
+                                                <article
+                                                    key={hackathon.id}
+                                                    className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-4 sm:p-5 transition-all hover:border-purple-300 dark:hover:border-purple-700/50"
+                                                >
                                                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                                                        <div className="aspect-video w-full shrink-0 overflow-hidden rounded-[16px] border border-[#eae3f6] bg-[#eeebf6] sm:w-[142px]">
+                                                        <div className="aspect-video w-full shrink-0 overflow-hidden rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-navy-900 sm:w-[140px]">
                                                             <img
                                                                 src={hackathon.posterUrl || fallbackBanner}
                                                                 alt={`${hackathon.title || 'Hackathon'} banner`}
@@ -231,32 +293,34 @@ const StudentDashboard = () => {
                                                         </div>
 
                                                         <div className="min-w-0 flex-1">
-                                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                                                 <div className="min-w-0">
-                                                                    <h3 className="truncate text-[18px] font-bold text-[#1d1a2a]">{hackathon.title}</h3>
-                                                                    <p className="mt-1 text-sm text-[#5f5a6d]">Team: {teamName}</p>
+                                                                    <h3 className="truncate text-base font-bold text-slate-900 dark:text-white">{hackathon.title}</h3>
+                                                                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Team: <span className="font-semibold text-slate-700 dark:text-slate-300">{teamName}</span></p>
                                                                 </div>
-                                                                <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${getStatusClasses(status)}`}>
+                                                                <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getStatusClasses(status)}`}>
                                                                     {formatStatus(status)}
                                                                 </span>
                                                             </div>
 
-                                                            <div className="mt-5">
-                                                                <div className="mb-2 flex items-center justify-between text-[12px] font-medium text-[#6a647c]">
+                                                            <div className="mt-4">
+                                                                <div className="mb-1.5 flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
                                                                     <span>Progress</span>
-                                                                    <span className="font-semibold text-[#3b2d63]">{progressValue === null ? 'Unavailable' : `${progressValue}%`}</span>
+                                                                    <span className="font-bold text-slate-900 dark:text-white">{progressValue === null ? '0%' : `${progressValue}%`}</span>
                                                                 </div>
-                                                                <div className="h-2.5 overflow-hidden rounded-full bg-[#efe9fb]">
-                                                                    {progressValue !== null && <div className="h-full rounded-full bg-gradient-to-r from-[#4b3bc0] to-[#6f5bd4]" style={{ width: `${progressValue}%` }} />}
+                                                                <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-navy-800">
+                                                                    {progressValue !== null && (
+                                                                        <div className="h-full rounded-full bg-[#7C65F6] transition-all duration-500" style={{ width: `${progressValue}%` }} />
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-4 flex items-center justify-end">
+                                                    <div className="mt-4 flex items-center justify-end border-t border-slate-200/60 dark:border-white/5 pt-3">
                                                         <button
                                                             onClick={() => navigate(workspaceRoute)}
-                                                            className="rounded-xl bg-[#5c46c7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4c3bb7]"
+                                                            className="rounded-xl bg-[#7C65F6] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
                                                         >
                                                             View Workspace
                                                         </button>
@@ -268,40 +332,46 @@ const StudentDashboard = () => {
                                 )}
                             </div>
 
-                            <div className="space-y-8">
-                                <aside className="rounded-[22px] border border-[#e5dff0] bg-[#f8f6fb] p-5 shadow-[0_10px_28px_rgba(76,59,183,0.05)] sm:p-6">
-                                    <div className="mb-6 flex items-center justify-between gap-3">
-                                        <h2 className="text-[14px] font-bold uppercase tracking-[0.18em] text-[#6f5da7]">Upcoming</h2>
-                                        <button onClick={() => navigate('/student/hackathons')} className="text-sm font-semibold text-[#5c46c7] transition hover:text-[#4331a6]">See all</button>
+                            {/* Right Column: Upcoming Hackathons & Recent Activity */}
+                            <div className="space-y-6">
+                                {/* Upcoming Hackathons */}
+                                <aside className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
+                                    <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-white/5 pb-3">
+                                        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Upcoming Events</h2>
+                                        <button
+                                            onClick={() => navigate('/student/hackathons')}
+                                            className="text-xs font-bold text-[#7C65F6] dark:text-purple-400 hover:underline cursor-pointer"
+                                        >
+                                            See all
+                                        </button>
                                     </div>
 
                                     {upcomingHackathons.length === 0 ? (
-                                        <div className="rounded-[18px] border border-dashed border-[#d6d0e9] bg-white p-8 text-center">
-                                            <p className="text-sm text-slate-500">There are no upcoming hackathons available right now.</p>
+                                        <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-navy-950/40 p-6 text-center">
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">There are no upcoming hackathons available right now.</p>
                                         </div>
                                     ) : (
-                                        <div className="space-y-4">
+                                        <div className="space-y-3">
                                             {upcomingHackathons.map((hackathon) => {
                                                 const prize = prizePool(hackathon.prizes);
                                                 return (
-                                                    <article key={hackathon.id} className="rounded-[18px] border border-[#e3dff2] bg-white p-4 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
-                                                        <div className="flex items-start justify-between gap-3">
-                                                            <div>
-                                                                <h3 className="text-[18px] font-bold leading-tight text-[#1d1a2a]">{hackathon.title}</h3>
-                                                                <p className="mt-2 text-sm text-[#5f5a6d]">{formatDateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</p>
-                                                            </div>
-                                                        </div>
+                                                    <article
+                                                        key={hackathon.id}
+                                                        className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-3.5 transition-all hover:border-purple-300 dark:hover:border-purple-700/50"
+                                                    >
+                                                        <h3 className="text-sm font-bold leading-tight text-slate-900 dark:text-white truncate">{hackathon.title}</h3>
+                                                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{formatDateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</p>
 
-                                                        <div className="mt-5 flex items-end justify-between gap-3 border-t border-[#f1ecf9] pt-4">
+                                                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-200/60 dark:border-white/5 pt-2.5">
                                                             <div>
-                                                                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#7b748d]">Prize Pool</p>
-                                                                <p className="mt-1 text-base font-bold text-[#3d2d7d]">{prize || 'Not announced'}</p>
+                                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Prize Pool</p>
+                                                                <p className="text-xs font-bold text-slate-900 dark:text-white">{prize || 'TBA'}</p>
                                                             </div>
                                                             <button
                                                                 onClick={() => navigate(`/student/hackathons/${hackathon.id}/register`)}
-                                                                className="rounded-xl bg-[#5c46c7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4c3bb7]"
+                                                                className="rounded-lg bg-[#7C65F6] px-3 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
                                                             >
-                                                                Register Now
+                                                                Register
                                                             </button>
                                                         </div>
                                                     </article>
@@ -311,34 +381,38 @@ const StudentDashboard = () => {
                                     )}
                                 </aside>
 
-                                <aside className="rounded-[22px] border border-[#e5dff0] bg-[#f8f6fb] p-5 shadow-[0_10px_28px_rgba(76,59,183,0.05)] sm:p-6">
-                                    <div className="mb-5 flex items-center justify-between gap-3">
-                                        <h2 className="text-[14px] font-bold uppercase tracking-[0.18em] text-[#6f5da7]">Recent Activity</h2>
-                                        <span className="text-xs font-medium text-slate-400">Live feed</span>
+                                {/* Live Activity Feed */}
+                                <aside className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
+                                    <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-white/5 pb-3">
+                                        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Recent Activity</h2>
+                                        <span className="text-[11px] font-medium text-slate-400">Live feed</span>
                                     </div>
 
                                     {recentActivity.length === 0 ? (
-                                        <div className="rounded-[18px] border border-dashed border-[#d6d0e9] bg-white p-6 text-center">
-                                            <p className="text-sm text-slate-500">No recent activity yet. Register for a hackathon or create a team to get started!</p>
+                                        <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-navy-950/40 p-6 text-center">
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">No recent activity yet. Register for a hackathon or create a team to get started!</p>
                                         </div>
                                     ) : (
-                                        <div className="space-y-3">
+                                        <div className="space-y-2.5">
                                             {recentActivity.map((activity) => {
                                                 const badge = getActivityBadge(activity.type);
                                                 return (
-                                                    <div key={activity.id} className="flex items-start gap-3 rounded-[16px] border border-[#ece7f6] bg-white p-3.5 shadow-sm transition hover:shadow-md">
-                                                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${badge.color}`}>
+                                                    <div
+                                                        key={activity.id}
+                                                        className="flex items-start gap-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-3 transition-all hover:bg-white dark:hover:bg-navy-800/60"
+                                                    >
+                                                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-bold ${badge.color}`}>
                                                             {badge.icon}
                                                         </div>
                                                         <div className="min-w-0 flex-1">
                                                             <div className="flex items-center justify-between gap-2">
-                                                                <p className="truncate text-sm font-semibold text-[#1d1a2a]">{activity.title}</p>
-                                                                <span className="shrink-0 text-[11px] font-medium text-slate-400">
+                                                                <p className="truncate text-xs font-semibold text-slate-900 dark:text-white">{activity.title}</p>
+                                                                <span className="shrink-0 text-[10px] font-medium text-slate-400">
                                                                     {formatRelativeTime(activity.timestamp)}
                                                                 </span>
                                                             </div>
                                                             {activity.description && (
-                                                                <p className="mt-0.5 line-clamp-1 text-xs text-[#6e6882]">{activity.description}</p>
+                                                                <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500 dark:text-slate-400">{activity.description}</p>
                                                             )}
                                                         </div>
                                                     </div>

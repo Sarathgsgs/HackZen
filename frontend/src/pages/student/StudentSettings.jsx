@@ -81,7 +81,7 @@ const StudentSettings = () => {
             await updateStudentSettings({ profileMode: newValue });
             showToast('Profile visibility updated successfully', 'success');
         } catch (error) {
-            console.error('Failed to update profile mode:', error);
+            console.error('Failed to update profile visibility:', error);
             setSettings((prev) => ({ ...prev, profileMode: oldValue }));
             showToast(error.message || 'Failed to update profile visibility', 'error');
         } finally {
@@ -108,27 +108,17 @@ const StudentSettings = () => {
         }
     };
 
-    // Handle password form input
+    // Handle password change form
     const handlePasswordChange = (e) => {
         const { name, value } = e.target;
-        setPasswordForm((prev) => ({
-            ...prev,
-            [name]: value
-        }));
+        setPasswordForm((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Submit password change
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
-        
-        // Validate form
-        if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-            showToast('Please fill in all password fields', 'error');
-            return;
-        }
 
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            showToast('New passwords do not match', 'error');
+        if (!passwordForm.currentPassword) {
+            showToast('Current password is required', 'error');
             return;
         }
 
@@ -137,19 +127,19 @@ const StudentSettings = () => {
             return;
         }
 
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            showToast('Passwords do not match', 'error');
+            return;
+        }
+
         setIsChangingPassword(true);
 
         try {
-            const result = await changePassword({
-                currentPassword: passwordForm.currentPassword,
-                newPassword: passwordForm.newPassword,
-                confirmPassword: passwordForm.confirmPassword
-            });
-
-            showToast(result.message || 'Password changed successfully', 'success');
+            await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
+            showToast('Password updated successfully', 'success');
             setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
         } catch (error) {
-            console.error('Password change failed:', error);
+            console.error('Failed to change password:', error);
             showToast(error.message || 'Failed to change password', 'error');
         } finally {
             setIsChangingPassword(false);
@@ -158,43 +148,39 @@ const StudentSettings = () => {
 
     // Handle account deactivation
     const handleDeactivate = async () => {
-        const confirmed = window.confirm(
-            'Are you absolutely sure you want to deactivate your account? This action cannot be undone immediately. Your account will be scheduled for deletion after 30 days.'
-        );
-
-        if (!confirmed) return;
+        if (!window.confirm('Are you sure you want to deactivate your student account? This action will schedule your profile for deletion in 30 days.')) {
+            return;
+        }
 
         setIsDeactivating(true);
 
         try {
-            const response = await deactivateStudentAccount();
-            showToast(response.message || 'Account deactivated successfully', 'success');
-            
-            // Redirect to home after short delay
+            await deactivateStudentAccount();
+            showToast('Account deactivated successfully. You will be redirected...', 'success');
             setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/login';
             }, 2000);
         } catch (error) {
-            console.error('Deactivation failed:', error);
+            console.error('Failed to deactivate account:', error);
             showToast(error.message || 'Failed to deactivate account', 'error');
             setIsDeactivating(false);
         }
     };
 
-    // Handle reset settings
+    // Reset settings to defaults
     const handleResetSettings = async () => {
-        const confirmed = window.confirm('Are you sure you want to reset all settings to defaults?');
-        
-        if (!confirmed) return;
+        if (!window.confirm('Reset all settings to defaults?')) {
+            return;
+        }
 
         setIsSaving(true);
 
         try {
-            const result = await resetStudentSettings();
-            setSettings(result.data);
-            showToast('Settings reset to defaults successfully', 'success');
+            const defaultSettings = await resetStudentSettings();
+            setSettings(defaultSettings);
+            showToast('Settings restored to defaults', 'success');
         } catch (error) {
-            console.error('Reset settings failed:', error);
+            console.error('Failed to reset settings:', error);
             showToast(error.message || 'Failed to reset settings', 'error');
         } finally {
             setIsSaving(false);
@@ -203,14 +189,14 @@ const StudentSettings = () => {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-full items-center justify-center bg-[#f3f0f8] px-4 py-8 sm:px-6 lg:px-8">
-                <div className="w-full max-w-2xl rounded-[20px] border border-[#e5dff0] bg-white p-8 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
+            <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] dark:bg-navy-950 px-4 py-8">
+                <div className="w-full max-w-2xl rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-8 shadow-xs">
                     <div className="animate-pulse space-y-4">
-                        <div className="h-8 w-3/4 rounded-lg bg-[#eeeaf5]"></div>
-                        <div className="h-4 w-1/2 rounded-lg bg-[#eeeaf5]"></div>
+                        <div className="h-8 w-3/4 rounded-xl bg-slate-200 dark:bg-navy-800"></div>
+                        <div className="h-4 w-1/2 rounded-xl bg-slate-200 dark:bg-navy-800"></div>
                         <div className="space-y-3 mt-6">
                             {[...Array(4)].map((_, i) => (
-                                <div key={i} className="h-12 rounded-lg bg-[#f3f0f8]"></div>
+                                <div key={i} className="h-12 rounded-xl bg-slate-100 dark:bg-navy-950"></div>
                             ))}
                         </div>
                     </div>
@@ -220,62 +206,66 @@ const StudentSettings = () => {
     }
 
     return (
-        <>
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-navy-950 px-4 py-6 md:px-8 text-slate-900 dark:text-white transition-colors duration-200">
             {/* Toast Notification */}
             {toast.show && (
-                <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg font-semibold text-white z-50 animate-in fade-in slide-in-from-top-2 transition-all ${
+                <div className={`fixed top-4 right-4 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white z-50 shadow-xl transition-all ${
                     toast.type === 'success' 
-                        ? 'bg-green-500/90' 
+                        ? 'bg-emerald-600' 
                         : toast.type === 'error' 
-                        ? 'bg-red-500/90' 
-                        : 'bg-blue-500/90'
+                        ? 'bg-rose-600' 
+                        : 'bg-indigo-600'
                 }`}>
                     {toast.message}
                 </div>
             )}
 
-            <div className="min-h-full space-y-7 bg-[#f3f0f8] px-4 pb-12 pt-6 text-[#181524] animate-in fade-in slide-in-from-bottom-5 duration-500 sm:px-6 sm:pt-8 lg:px-8">
-                <div className="mx-auto max-w-6xl">
-                    <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7a7098]">Account</p>
-                    <h1 className="mt-2 text-3xl font-bold tracking-tight text-[#1d1a2a] sm:text-4xl">
-                        Settings
-                    </h1>
-                    <p className="mt-2 text-sm text-[#6e6882]">Manage your privacy, notifications, and student workspace preferences in the same clean dashboard style.</p>
+            <div className="mx-auto max-w-7xl space-y-6">
+                {/* 1. Header (Admin Standard) */}
+                <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                            Settings
+                        </h1>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            Manage your privacy visibility, security credentials, and alert notification preferences.
+                        </p>
+                    </div>
+                </header>
+
+                {/* 2. Overview Stat Cards */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 shadow-xs">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Profile Mode</span>
+                        <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">{settings.profileMode}</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 shadow-xs">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Theme Preference</span>
+                        <p className="mt-2 text-2xl font-extrabold text-[#7C65F6] dark:text-purple-400">{settings.theme}</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 shadow-xs">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Content Language</span>
+                        <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">{settings.contentLanguage}</p>
+                    </div>
                 </div>
 
-                {/* Settings Overview Cards */}
-                <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-3">
-                    <div className="rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#7a7098]">Profile Mode</p>
-                        <p className="text-2xl font-bold text-[#242136]">{settings.profileMode}</p>
-                    </div>
-                    
-                    <div className="rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#7a7098]">Theme</p>
-                        <p className="text-2xl font-bold text-[#242136]">{settings.theme}</p>
-                    </div>
-                    <div className="rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)]">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#7a7098]">Language</p>
-                        <p className="text-2xl font-bold text-[#242136]">{settings.contentLanguage}</p>
-                    </div>
-                </div>
-
-                {/* Privacy & Account Section */}
-                <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 xl:grid-cols-2">
-                    <div className="space-y-6 rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-8">
-                        <div>
-                            <h2 className="mb-2 text-xl font-bold text-[#1d1a2a] sm:text-2xl">Privacy & Account</h2>
-                            <p className="text-sm text-[#6e6882]">Control visibility, language, and data-sharing preferences.</p>
+                {/* 3. Settings Split: Privacy & Security | Notifications */}
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                    {/* Privacy & Account */}
+                    <div className="space-y-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
+                        <div className="border-b border-slate-100 dark:border-white/5 pb-3">
+                            <h2 className="text-base font-bold text-slate-900 dark:text-white">Privacy & Visibility</h2>
+                            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Control who can see your portfolio and send invitations.</p>
                         </div>
 
-                        <div className="space-y-5">
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Profile Visibility</label>
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Profile Visibility</label>
                                 <select
                                     value={settings.profileMode}
                                     onChange={handleProfileModeChange}
                                     disabled={isSaving}
-                                    className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
+                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none focus:border-[#7C65F6] disabled:opacity-50"
                                 >
                                     <option>Public</option>
                                     <option>Private</option>
@@ -283,13 +273,13 @@ const StudentSettings = () => {
                                 </select>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Notification Frequency</label>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notification Frequency</label>
                                 <select
                                     value={settings.notificationFrequency}
                                     onChange={handleNotificationFrequencyChange}
                                     disabled={isSaving}
-                                    className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
+                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none focus:border-[#7C65F6] disabled:opacity-50"
                                 >
                                     <option>Instant</option>
                                     <option>Daily</option>
@@ -299,73 +289,64 @@ const StudentSettings = () => {
                             </div>
 
                             {[
-                                { key: 'dataSharing', title: 'Data Sharing', description: 'Allow product insights to improve recommendations.' },
-                                { key: 'allowTeamInvitations', title: 'Allow Team Invitations', description: 'Let other students invite you to their teams.' }
+                                { key: 'dataSharing', title: 'Data Sharing', description: 'Allow anonymized platform telemetry to improve team matching.' },
+                                { key: 'allowTeamInvitations', title: 'Allow Team Invitations', description: 'Allow participants from your hackathons to invite you to teams.' }
                             ].map((item) => (
                                 <button
                                     key={item.key}
+                                    type="button"
                                     onClick={() => toggleSetting(item.key)}
                                     disabled={isSaving}
-                                    className={`w-full flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all disabled:opacity-50 ${settings[item.key] ? 'border-[#cfc5f3] bg-[#f4f0ff]' : 'border-[#e5dff0] bg-[#fbfaff] hover:bg-[#f8f6fc]'}`}
+                                    className={`w-full flex items-center justify-between gap-4 rounded-xl border p-3.5 text-left transition-all disabled:opacity-50 cursor-pointer ${
+                                        settings[item.key]
+                                            ? 'border-purple-300 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/20'
+                                            : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-navy-950/40 hover:bg-slate-100/60 dark:hover:bg-navy-900'
+                                    }`}
                                 >
-                                    <div className="text-left">
-                                        <h3 className="font-bold text-[#242136]">{item.title}</h3>
-                                        <p className="text-xs text-[#6e6882]">{item.description}</p>
+                                    <div>
+                                        <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{item.title}</h3>
+                                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{item.description}</p>
                                     </div>
-                                    <div className={`relative h-6 w-12 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#5c46c7]' : 'bg-[#cbc6d6]'}`}>
-                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings[item.key] ? 'left-7' : 'left-1'}`} />
+                                    <div className={`relative h-5 w-10 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#7C65F6]' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                                        <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${settings[item.key] ? 'left-5' : 'left-0.5'}`} />
                                     </div>
                                 </button>
                             ))}
-
-                            <button
-                                onClick={() => toggleSetting('twoFactorEnabled')}
-                                disabled={isSaving}
-                                className={`w-full flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all disabled:opacity-50 ${settings.twoFactorEnabled ? 'border-[#cfc5f3] bg-[#f4f0ff]' : 'border-[#e5dff0] bg-[#fbfaff] hover:bg-[#f8f6fc]'}`}
-                            >
-                                <div className="text-left">
-                                    <h3 className="font-bold text-[#242136]">Two-Factor Authentication</h3>
-                                    <p className="text-xs text-[#6e6882]">Add another layer of security to your student account.</p>
-                                </div>
-                                <div className={`relative h-6 w-12 shrink-0 rounded-full transition-colors ${settings.twoFactorEnabled ? 'bg-[#5c46c7]' : 'bg-[#cbc6d6]'}`}>
-                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings.twoFactorEnabled ? 'left-7' : 'left-1'}`} />
-                                </div>
-                            </button>
                         </div>
 
-                        {/* Security Section */}
-                        <div className="space-y-4 border-t border-[#eeeaf5] pt-6">
+                        {/* Security Sub-section */}
+                        <div className="space-y-4 border-t border-slate-100 dark:border-white/5 pt-5">
                             <div>
-                                <h3 className="text-lg font-semibold text-[#1d1a2a]">Security</h3>
-                                <p className="text-sm text-[#6e6882]">Keep your account protected with a strong password.</p>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Account Password</h3>
+                                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Update your access password regularly to keep your credentials safe.</p>
                             </div>
-                            <form onSubmit={handlePasswordSubmit} className="space-y-4 rounded-2xl border border-[#e5dff0] bg-[#f8f6fc] p-5">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Current Password</label>
+                            <form onSubmit={handlePasswordSubmit} className="space-y-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-4">
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Current Password</label>
                                     <input
                                         type="password"
                                         name="currentPassword"
                                         value={passwordForm.currentPassword}
                                         onChange={handlePasswordChange}
-                                        placeholder="Enter current password"
+                                        placeholder="••••••••"
                                         disabled={isChangingPassword}
-                                        className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] placeholder:text-[#9a93aa] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
+                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] disabled:opacity-50"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">New Password</label>
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">New Password</label>
                                     <input
                                         type="password"
                                         name="newPassword"
                                         value={passwordForm.newPassword}
                                         onChange={handlePasswordChange}
-                                        placeholder="Enter new password (min 8 characters)"
+                                        placeholder="At least 8 characters"
                                         disabled={isChangingPassword}
-                                        className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] placeholder:text-[#9a93aa] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
+                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] disabled:opacity-50"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-[#6e6882]">Confirm Password</label>
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Confirm Password</label>
                                     <input
                                         type="password"
                                         name="confirmPassword"
@@ -373,90 +354,106 @@ const StudentSettings = () => {
                                         onChange={handlePasswordChange}
                                         placeholder="Confirm new password"
                                         disabled={isChangingPassword}
-                                        className="w-full rounded-xl border border-[#ded8eb] bg-white px-4 py-3 text-[#242136] placeholder:text-[#9a93aa] focus:border-[#5c46c7] focus:outline-none focus:ring-2 focus:ring-[#5c46c7]/15 disabled:opacity-50"
+                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] disabled:opacity-50"
                                     />
                                 </div>
-                                <button 
-                                    type="submit"
-                                    disabled={isChangingPassword}
-                                    className="rounded-xl bg-[#5c46c7] px-6 py-3 font-bold text-white transition-colors hover:bg-[#4d3bb1] disabled:cursor-not-allowed disabled:bg-[#5c46c7]/50"
-                                >
-                                    {isChangingPassword ? 'Updating...' : 'Change Password'}
-                                </button>
+                                <div className="pt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={isChangingPassword}
+                                        className="rounded-xl bg-[#7C65F6] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 disabled:opacity-50 cursor-pointer"
+                                    >
+                                        {isChangingPassword ? 'Updating...' : 'Update Password'}
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>
 
-                    {/* Notifications Section */}
-                    <div className="space-y-6 rounded-[20px] border border-[#e5dff0] bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-8">
+                    {/* Notifications & System Preferences */}
+                    <div className="space-y-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs flex flex-col justify-between">
                         <div>
-                            <h2 className="mb-2 text-xl font-bold text-[#1d1a2a] sm:text-2xl">Notifications</h2>
-                            <p className="text-sm text-[#6e6882]">Choose how the platform keeps you updated.</p>
+                            <div className="border-b border-slate-100 dark:border-white/5 pb-3 mb-5">
+                                <h2 className="text-base font-bold text-slate-900 dark:text-white">Alerts & System Preferences</h2>
+                                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Manage device push channels and visual options.</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                {[
+                                    {
+                                        key: 'emailNotifications',
+                                        title: 'Email Notifications',
+                                        description: 'Receive event announcements and mentor review alerts via email.'
+                                    },
+                                    {
+                                        key: 'pushNotifications',
+                                        title: 'Browser Push Alerts',
+                                        description: 'Real-time desktop alerts when milestones or submission reviews complete.'
+                                    },
+                                    {
+                                        key: 'twoFactorEnabled',
+                                        title: 'Two-Factor Authentication (2FA)',
+                                        description: 'Require cryptographic verification code on login.'
+                                    },
+                                    {
+                                        key: 'accessibilityMode',
+                                        title: 'High Contrast Mode',
+                                        description: 'Amplify borders and contrast for enhanced visibility.'
+                                    }
+                                ].map((item) => (
+                                    <button
+                                        key={item.key}
+                                        type="button"
+                                        onClick={() => toggleSetting(item.key)}
+                                        disabled={isSaving}
+                                        className={`w-full flex items-center justify-between gap-4 rounded-xl border p-3.5 text-left transition-all disabled:opacity-50 cursor-pointer ${
+                                            settings[item.key]
+                                                ? 'border-purple-300 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/20'
+                                                : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-navy-950/40 hover:bg-slate-100/60 dark:hover:bg-navy-900'
+                                        }`}
+                                    >
+                                        <div>
+                                            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{item.title}</h3>
+                                            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{item.description}</p>
+                                        </div>
+                                        <div className={`relative h-5 w-10 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#7C65F6]' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                                            <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${settings[item.key] ? 'left-5' : 'left-0.5'}`} />
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
-                        <div className="space-y-5">
-                            {[
-                                {
-                                    key: 'emailNotifications',
-                                    title: 'Email Notifications',
-                                    description: 'Receive hackathon updates and team requests by email.'
-                                },
-                                {
-                                    key: 'pushNotifications',
-                                    title: 'Browser Push Notifications',
-                                    description: 'Get real-time alerts for submissions, invites, and reminders.'
-                                },
-                                {
-                                    key: 'accessibilityMode',
-                                    title: 'Accessibility Mode',
-                                    description: 'Enable easier-to-read preferences and reduced visual complexity.'
-                                }
-                            ].map((item) => (
-                                <button
-                                    key={item.key}
-                                    onClick={() => toggleSetting(item.key)}
-                                    disabled={isSaving}
-                                    className={`w-full flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all disabled:opacity-50 ${settings[item.key] ? 'border-[#cfc5f3] bg-[#f4f0ff]' : 'border-[#e5dff0] bg-[#fbfaff] hover:bg-[#f8f6fc]'}`}
-                                >
-                                    <div className="text-left">
-                                        <h3 className="font-bold text-[#242136]">{item.title}</h3>
-                                        <p className="text-xs text-[#6e6882]">{item.description}</p>
-                                    </div>
-                                    <div className={`relative h-6 w-12 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#5c46c7]' : 'bg-[#cbc6d6]'}`}>
-                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings[item.key] ? 'left-7' : 'left-1'}`} />
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="border-t border-[#eeeaf5] pt-6">
+                        <div className="pt-5 border-t border-slate-100 dark:border-white/5">
                             <button
                                 onClick={handleResetSettings}
                                 disabled={isSaving}
-                                className="w-full rounded-xl border border-[#d8d0f1] bg-[#f4f0ff] px-6 py-3 font-bold text-[#5c46c7] transition-colors hover:bg-[#5c46c7] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-navy-800 transition active:scale-95 cursor-pointer disabled:opacity-50"
                             >
-                                {isSaving ? 'Resetting...' : 'Reset Settings to Defaults'}
+                                {isSaving ? 'Resetting...' : 'Restore Default Settings'}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Danger Zone */}
-                <div className="mx-auto w-full max-w-6xl space-y-4 rounded-[20px] border border-rose-200 bg-white p-6 shadow-[0_8px_20px_rgba(33,22,58,0.03)] sm:p-8">
-                    <h2 className="text-xl font-bold text-rose-700 sm:text-2xl">Danger Zone</h2>
-                    <p className="text-sm text-[#6e6882]">Deactivate your account if you no longer want access to your student profile, teams, and certificates. Your data will be retained for 30 days before permanent deletion.</p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-start">
+                {/* 4. Danger Zone */}
+                <div className="rounded-2xl border border-rose-200 dark:border-rose-900/40 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
+                    <h2 className="text-base font-bold text-rose-600 dark:text-rose-400">Danger Zone</h2>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        Deactivate your student account. Your submissions and active registrations will be scheduled for permanent removal after a 30-day grace period.
+                    </p>
+                    <div className="mt-4 flex">
                         <button
                             onClick={handleDeactivate}
                             disabled={isDeactivating}
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-6 py-3 font-bold text-rose-700 transition-colors hover:bg-rose-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/30 px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white transition active:scale-95 cursor-pointer disabled:opacity-50"
                         >
                             {isDeactivating ? 'Deactivating...' : 'Deactivate Account'}
                         </button>
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 
