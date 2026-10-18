@@ -12,8 +12,15 @@ const InviteMentors = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [inviteHistory, setInviteHistory] = useState([]);
-    const [activeTab, setActiveTab] = useState('compose'); // compose, history
-    const [statusMessage, setStatusMessage] = useState('');
+    const [activeTab, setActiveTab] = useState('compose');
+    const [toastMessage, setToastMessage] = useState(null);
+
+    // Toast auto-dismiss
+    useEffect(() => {
+        if (!toastMessage) return;
+        const timer = setTimeout(() => setToastMessage(null), 3500);
+        return () => clearTimeout(timer);
+    }, [toastMessage]);
 
     useEffect(() => {
         loadHistory();
@@ -25,131 +32,146 @@ const InviteMentors = () => {
             setInviteHistory(history);
         } catch (error) {
             console.error("Failed to load invitation history:", error);
-            setStatusMessage("Failed to load invitation history.");
         }
     };
 
     const handleInvite = async () => {
         const emailList = emails.split(',').map(e => e.trim()).filter(e => e !== '');
-        if (emailList.length === 0) return alert("Please enter at least one valid email address.");
+        if (emailList.length === 0) {
+            setToastMessage({ type: 'error', text: 'Please enter at least one valid email address.' });
+            return;
+        }
 
         setIsLoading(true);
-        setStatusMessage('');
         try {
             const result = await inviteMentors({
                 emails: emailList,
                 ...invitationData
             });
-            setStatusMessage(result.message || 'Invitations sent successfully.');
+            setToastMessage({ type: 'success', text: result.message || 'Invitations dispatched successfully!' });
             setEmails('');
             loadHistory();
             setActiveTab('history');
         } catch (error) {
             console.error("Invite failed:", error);
-            setStatusMessage(error.response?.data?.detail || "Failed to send invitations. Please try again.");
+            setToastMessage({ 
+                type: 'error', 
+                text: error.response?.data?.detail || "Failed to dispatch invitations. Please try again." 
+            });
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10 relative">
+
+            {/* Floating Toast Notification */}
+            {toastMessage && (
+                <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border text-sm font-semibold transition-all animate-bounce ${
+                    toastMessage.type === 'success' 
+                        ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/30' 
+                        : 'bg-rose-950/90 text-rose-300 border-rose-500/30'
+                }`}>
+                    <span>{toastMessage.type === 'success' ? '✓' : '⚠️'}</span>
+                    <span>{toastMessage.text}</span>
+                </div>
+            )}
+
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="title-primary">Recruit Mentors</h1>
-                    <p className="description-primary">Invite industry experts and technical advisors to your event</p>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Recruit Mentors</h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Invite industry experts and technical advisors to your hackathon</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={() => navigate(-1)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl text-sm font-semibold transition-all active:scale-95"
+                        className="px-4 py-2.5 bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl text-sm font-semibold transition-all active:scale-95 shadow-xs"
                     >
-                        Back to Terminal
+                        ← Back
                     </button>
                     <button 
                         onClick={handleInvite}
                         disabled={isLoading || activeTab === 'history'}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-cyan-500/20 active:scale-95 disabled:opacity-50"
+                        className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#7C65F6]/20 active:scale-95 disabled:opacity-50"
                     >
                         {isLoading ? "Dispatching..." : "Send Invitations"}
                     </button>
                 </div>
             </div>
 
-            {statusMessage && (
-                <div className="glass rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100">
-                    {statusMessage}
-                </div>
-            )}
-
-            {/* Main Content Area */}
-            <div className="glass rounded-2xl border border-white/5 overflow-hidden">
-                <div className="flex justify-between items-center p-6 border-b border-white/5">
+            {/* Main Content Card */}
+            <div className="bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
+                <div className="flex justify-between items-center p-5 border-b border-slate-200/80 dark:border-white/5">
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-white/5 p-1 rounded-xl">
+                        <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/5">
                             <button 
                                 onClick={() => setActiveTab('compose')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'compose' ? 'bg-cyan-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'compose' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 COMPOSE
                             </button>
                             <button 
                                 onClick={() => setActiveTab('history')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'history' ? 'bg-cyan-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'history' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
-                                LOGS
+                                INVITATION LOGS ({inviteHistory.length})
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {activeTab === 'compose' ? (
-                    <div className="p-8 space-y-8">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <label className="label-protocol ml-1">Mentor Email Targets</label>
+                    <div className="p-6 md:p-8 space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Mentor Email Addresses</label>
                                     <textarea 
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all min-h-[150px] resize-none"
-                                        placeholder="Enter emails separated by commas..."
+                                        className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all min-h-[140px] resize-none"
+                                        placeholder="Enter recipient emails separated by commas (e.g. mentor1@tech.com, advisor@ai.org)..."
                                         value={emails}
                                         onChange={(e) => setEmails(e.target.value)}
                                     />
                                 </div>
+
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-3">
-                                        <label className="label-protocol ml-1">Strategic Role</label>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Role</label>
                                         <select 
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+                                            className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] cursor-pointer"
                                             value={invitationData.role}
                                             onChange={(e) => setInvitationData(prev => ({ ...prev, role: e.target.value }))}
                                         >
                                             <option value="Mentor">Expert Mentor</option>
                                             <option value="Lead Mentor">Lead Mentor</option>
+                                            <option value="Technical Advisor">Technical Advisor</option>
                                         </select>
                                     </div>
-                                    <div className="space-y-3">
-                                        <label className="label-protocol ml-1">Focus Domain</label>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Focus Track / Domain</label>
                                         <select 
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+                                            className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] cursor-pointer"
                                             value={invitationData.domain}
                                             onChange={(e) => setInvitationData(prev => ({ ...prev, domain: e.target.value }))}
                                         >
-                                            <option value="AI & Machine Learning">AI & ML</option>
-                                            <option value="Cybersecurity">Security</option>
+                                            <option value="AI & Machine Learning">AI & Machine Learning</option>
+                                            <option value="Cybersecurity">Cybersecurity</option>
                                             <option value="FinTech">FinTech</option>
+                                            <option value="Web3 & Blockchain">Web3 & Blockchain</option>
+                                            <option value="Cloud & DevOps">Cloud & DevOps</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
-                                <label className="label-protocol ml-1">Invitation Transmission</label>
+                            <div className="space-y-2 flex flex-col">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Custom Invitation Message</label>
                                 <textarea 
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all h-full min-h-[150px] resize-none"
-                                    placeholder="Message to mentors..."
+                                    className="w-full flex-1 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all min-h-[140px] resize-none"
+                                    placeholder="Write a custom welcome note..."
                                     value={invitationData.message}
                                     onChange={(e) => setInvitationData(prev => ({ ...prev, message: e.target.value }))}
                                 />
@@ -160,49 +182,46 @@ const InviteMentors = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/5 label-protocol uppercase font-medium">
-                                    <th className="px-6 py-4">Destination</th>
-                                    <th className="px-6 py-4">Protocol Role</th>
-                                    <th className="px-6 py-4">Expertise</th>
-                                    <th className="px-6 py-4">Timestamp</th>
+                                <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-200/80 dark:border-white/5 text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <th className="px-6 py-4">Recipient</th>
+                                    <th className="px-6 py-4">Role</th>
+                                    <th className="px-6 py-4">Specialization</th>
+                                    <th className="px-6 py-4">Sent At</th>
                                     <th className="px-6 py-4 text-right">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody className="divide-y divide-slate-200/80 dark:divide-white/5">
                                 {inviteHistory.length > 0 ? inviteHistory.map(invite => (
-                                    <tr key={invite.id} className="hover:bg-white/5 transition-colors group">
+                                    <tr key={invite.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                                         <td className="px-6 py-4">
-                                            <span className="text-sm font-semibold text-white">{invite.email}</span>
+                                            <span className="text-sm font-semibold text-slate-900 dark:text-white">{invite.email}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-xs text-gray-400">{invite.role}</span>
+                                            <span className="text-xs text-slate-500 dark:text-gray-400">{invite.role}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-xs text-cyan-400 font-bold">{invite.domain}</span>
+                                            <span className="text-xs text-[#7C65F6] font-semibold">{invite.domain}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-[10px] text-gray-500 font-mono">
+                                            <span className="text-xs text-slate-500 dark:text-gray-400">
                                                 {new Date(invite.sentAt).toLocaleDateString()}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
-                                                invite.emailSent ? 'text-green-400' : 'text-amber-500'
+                                            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
+                                                invite.emailSent ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                                             }`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${
-                                                    invite.emailSent ? 'bg-green-400' : 'bg-amber-500 animate-pulse'
+                                                    invite.emailSent ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
                                                 }`}></span>
                                                 {invite.status}
                                             </span>
-                                            {invite.notificationSent && (
-                                                <p className="text-[10px] text-cyan-400 mt-1">In-app notification sent</p>
-                                            )}
                                         </td>
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500 text-sm italic">
-                                            No mentor invitation history found yet.
+                                        <td colSpan="5" className="px-6 py-12 text-center text-slate-400 dark:text-gray-500 text-sm">
+                                            No mentor invitations have been sent yet.
                                         </td>
                                     </tr>
                                 )}

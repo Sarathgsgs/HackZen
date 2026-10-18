@@ -101,29 +101,26 @@ const TeamsMentors = () => {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            // First fetch full seeded dataset from organizer registrations endpoint
-            const res = await fetchOrganizerRegistrations({ page: 1, limit: 200 });
-            if (res && Array.isArray(res.teams) && res.teams.length > 0) {
-                setTeams(res.teams);
-            } else {
-                const data = await fetchTeamsMentorsJudges();
-                if (data && Array.isArray(data.teams)) {
-                    setTeams(data.teams);
+            const [regResult, tmjResult] = await Promise.allSettled([
+                fetchOrganizerRegistrations({ page: 1, limit: 200 }),
+                fetchTeamsMentorsJudges()
+            ]);
+
+            // Always set mentors from fetchTeamsMentorsJudges
+            if (tmjResult.status === 'fulfilled' && tmjResult.value) {
+                if (Array.isArray(tmjResult.value.mentors)) {
+                    setMentors(tmjResult.value.mentors);
                 }
-                if (data && Array.isArray(data.mentors)) {
-                    setMentors(data.mentors);
-                }
+            }
+
+            // Set teams preferring enriched registrations, falling back to tmj teams
+            if (regResult.status === 'fulfilled' && regResult.value && Array.isArray(regResult.value.teams) && regResult.value.teams.length > 0) {
+                setTeams(regResult.value.teams);
+            } else if (tmjResult.status === 'fulfilled' && tmjResult.value && Array.isArray(tmjResult.value.teams)) {
+                setTeams(tmjResult.value.teams);
             }
         } catch (error) {
-            console.error('Failed to load registrations data, using fallback:', error);
-            try {
-                const data = await fetchTeamsMentorsJudges();
-                if (data && Array.isArray(data.teams)) {
-                    setTeams(data.teams);
-                }
-            } catch (err) {
-                console.error('Fallback failed:', err);
-            }
+            console.error('Failed to load registrations data:', error);
         } finally {
             setIsLoading(false);
         }

@@ -63,7 +63,11 @@ export default function HackathonApprovalStatus() {
     };
 
     const handleEditAndResubmit = () => {
-        navigate('/organizer/create-hackathon/step-1');
+        if (hackathonId) {
+            navigate('/organizer/create-hackathon/step-1', { state: { hackathonId, editMode: true } });
+        } else {
+            navigate('/organizer/create-hackathon/step-1');
+        }
     };
 
     if (loading && !data) {

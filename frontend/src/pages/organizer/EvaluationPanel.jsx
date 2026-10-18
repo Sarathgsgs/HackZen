@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCriteria, submitEvaluation, fetchSubmissionsForEvaluation } from '../../services/organizer/evaluationApi';
 import { updateTeamShortlistStatus } from '../../services/organizer/evaluationPanelApi';
 
-
 const EvaluationPanel = () => {
     const navigate = useNavigate();
+
     // --- State Management ---
     const [selectedTeamId, setSelectedTeamId] = useState(() => {
         return sessionStorage.getItem('eval_selectedTeamId') || null;
@@ -24,13 +24,20 @@ const EvaluationPanel = () => {
     const [criteria, setCriteria] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [toastMessage, setToastMessage] = useState(null);
+
+    // Toast auto-dismiss
+    useEffect(() => {
+        if (!toastMessage) return;
+        const timer = setTimeout(() => setToastMessage(null), 3500);
+        return () => clearTimeout(timer);
+    }, [toastMessage]);
 
     // --- Backend Data Initialization ---
     useEffect(() => {
         const loadInitialData = async () => {
             setIsLoading(true);
             try {
-                // Fetch criteria and real submissions
                 const [backendCriteria, backendSubmissions] = await Promise.all([
                     fetchCriteria(),
                     fetchSubmissionsForEvaluation()
@@ -50,6 +57,7 @@ const EvaluationPanel = () => {
                 }
             } catch (error) {
                 console.error("Failed to load evaluation data", error);
+                setToastMessage({ type: 'error', text: 'Failed to load evaluation submissions.' });
             } finally {
                 setIsLoading(false);
             }
@@ -75,7 +83,15 @@ const EvaluationPanel = () => {
 
     useEffect(() => {
         if (activeTeam) {
-            if (activeTeam.existingScores) {
+            // Check if draft exists in localStorage
+            const savedDrafts = JSON.parse(localStorage.getItem('evaluation_drafts') || '{}');
+            const teamDraft = savedDrafts[activeTeam.id];
+
+            if (teamDraft) {
+                setScores(teamDraft.scores || {});
+                setComment(teamDraft.comment || '');
+                setIsShortlisted(teamDraft.isShortlisted || false);
+            } else if (activeTeam.existingScores) {
                 setScores(activeTeam.existingScores);
                 setComment(activeTeam.comment || '');
                 setIsShortlisted(activeTeam.shortlisted || false);
@@ -92,8 +108,8 @@ const EvaluationPanel = () => {
     // --- Filtering Logic ---
     const filteredTeams = useMemo(() => {
         return teams.filter(t => {
-            const matchesSearch = t.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-                t.project.toLowerCase().includes(debouncedSearch.toLowerCase());
+            const matchesSearch = (t.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                (t.project || '').toLowerCase().includes(debouncedSearch.toLowerCase());
             const matchesTab = activeTab === 'pending'
                 ? t.status !== 'Evaluated'
                 : t.status === 'Evaluated';
@@ -107,7 +123,6 @@ const EvaluationPanel = () => {
     const handleSubmitScore = async () => {
         if (!activeTeam) return;
 
-        // Optimistic Update
         const previousTeams = [...teams];
         setTeams(prev => prev.map(t =>
             t.id === activeTeam.id
@@ -126,7 +141,13 @@ const EvaluationPanel = () => {
             };
 
             await submitEvaluation(payload);
-            
+            setToastMessage({ type: 'success', text: `Evaluation submitted for ${activeTeam.name}!` });
+
+            // Remove any draft for this team
+            const savedDrafts = JSON.parse(localStorage.getItem('evaluation_drafts') || '{}');
+            delete savedDrafts[activeTeam.id];
+            localStorage.setItem('evaluation_drafts', JSON.stringify(savedDrafts));
+
             // Move to next pending team if any
             const nextPending = teams.find(t => t.id !== activeTeam.id && t.status !== 'Evaluated');
             if (nextPending && activeTab === 'pending') {
@@ -134,11 +155,23 @@ const EvaluationPanel = () => {
             }
         } catch (error) {
             setTeams(previousTeams);
-            alert("Failed to synchronize evaluation with backend. Data rolled back.");
+            setToastMessage({ type: 'error', text: 'Failed to submit evaluation. Changes rolled back.' });
         } finally {
             setIsSubmitting(false);
         }
+    };
 
+    const handleSaveDraft = () => {
+        if (!activeTeam) return;
+        const savedDrafts = JSON.parse(localStorage.getItem('evaluation_drafts') || '{}');
+        savedDrafts[activeTeam.id] = {
+            scores,
+            comment,
+            isShortlisted,
+            updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('evaluation_drafts', JSON.stringify(savedDrafts));
+        setToastMessage({ type: 'success', text: `Draft saved locally for ${activeTeam.name}.` });
     };
 
     const handleShortlistToggle = async () => {
@@ -149,9 +182,41 @@ const EvaluationPanel = () => {
         try {
             await updateTeamShortlistStatus(subId, nextState);
             setTeams(prev => prev.map(t => t.id === activeTeam.id ? { ...t, shortlisted: nextState } : t));
+            setToastMessage({ 
+                type: 'success', 
+                text: nextState ? `${activeTeam.name} added to shortlist.` : `${activeTeam.name} removed from shortlist.` 
+            });
         } catch (err) {
             console.error("Failed to toggle shortlist:", err);
             setIsShortlisted(!nextState);
+            setToastMessage({ type: 'error', text: 'Failed to update shortlist status.' });
+        }
+    };
+
+    const handleQuickLink = (type) => {
+        if (!activeTeam) return;
+
+        let targetUrl = '';
+        let label = '';
+
+        if (type === 'repo') {
+            targetUrl = activeTeam.repoUrl;
+            label = 'Repository';
+        } else if (type === 'demo') {
+            targetUrl = activeTeam.demoUrl;
+            label = 'Demo Video';
+        } else if (type === 'details') {
+            targetUrl = activeTeam.projectUrl;
+            label = 'Project Details';
+        }
+
+        if (targetUrl && (targetUrl.startsWith('http://') || targetUrl.startsWith('https://'))) {
+            window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        } else {
+            setToastMessage({ 
+                type: 'error', 
+                text: `No external link available for ${label} on this submission.` 
+            });
         }
     };
 
@@ -176,23 +241,39 @@ const EvaluationPanel = () => {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100vh-140px)] flex flex-col pb-6">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-140px)] flex flex-col pb-6 relative">
+
+            {/* Floating Toast Notification */}
+            {toastMessage && (
+                <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border text-sm font-semibold transition-all animate-bounce ${
+                    toastMessage.type === 'success' 
+                        ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/30' 
+                        : 'bg-rose-950/90 text-rose-300 border-rose-500/30'
+                }`}>
+                    <span>{toastMessage.type === 'success' ? '✓' : '⚠️'}</span>
+                    <span>{toastMessage.text}</span>
+                </div>
+            )}
+
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 shrink-0">
                 <div>
-                    <h1 className="title-primary">Evaluation Panel</h1>
-                    <p className="description-primary">Score submissions, add comments, and shortlist top teams</p>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Evaluation Panel</h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Score submissions, add comments, and shortlist top teams</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={() => navigate('/organizer/evaluation/criteria')}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl text-sm font-semibold transition-all active:scale-95"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl text-sm font-semibold transition-all active:scale-95"
                     >
                         <Icon name="Settings" className="w-4 h-4" />
                         Criteria Settings
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
+                    <button 
+                        onClick={() => navigate('/organizer/results')}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#7C65F6]/20 active:scale-95"
+                    >
                         <Icon name="Check" className="w-4 h-4" />
                         Finalize Shortlist
                     </button>
@@ -200,79 +281,80 @@ const EvaluationPanel = () => {
             </div>
 
             {/* Main Content Two-Column Layout */}
-            <div className="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
+            <div className="flex flex-col lg:flex-row gap-6 flex-1">
 
                 {/* Left Panel: Team List */}
-                <div className="w-full lg:w-1/3 flex flex-col gap-4 glass rounded-2xl border border-white/5 p-4 h-full relative">
+                <div className="w-full lg:w-1/3 flex flex-col gap-4 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 p-4 shadow-xs relative min-h-[550px]">
                     {isLoading && (
-                        <div className="absolute inset-0 bg-navy-900/40 backdrop-blur-[2px] z-10 rounded-2xl flex items-center justify-center">
-                            <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-0 bg-white/70 dark:bg-navy-900/60 backdrop-blur-[2px] z-10 rounded-2xl flex items-center justify-center">
+                            <div className="w-8 h-8 border-2 border-[#7C65F6] border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     )}
                     {/* Search & Tabs */}
                     <div className="space-y-3 shrink-0">
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Icon name="Search" className="w-4 h-4 text-gray-400 group-focus-within:text-cyan-400 transition-colors" />
+                                <Icon name="Search" className="w-4 h-4 text-slate-400 dark:text-gray-400 group-focus-within:text-[#7C65F6] transition-colors" />
                             </div>
                             <input
                                 type="text"
                                 placeholder="Filter teams..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2.5 bg-navy-900/50 border border-white/10 rounded-xl text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+                                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all"
                             />
                         </div>
-                        <div className="flex p-1 bg-white/5 rounded-lg border border-white/5">
+                        <div className="flex p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5">
                             <button
                                 onClick={() => setActiveTab('pending')}
-                                className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all ${activeTab === 'pending' ? 'bg-cyan-500/20 text-cyan-400 shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'pending' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 Pending ({teams.filter(t => t.status !== 'Evaluated').length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('done')}
-                                className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all ${activeTab === 'done' ? 'bg-cyan-500/20 text-cyan-400 shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'done' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
-                                Done ({teams.filter(t => t.status === 'Evaluated').length})
+                                Evaluated ({teams.filter(t => t.status === 'Evaluated').length})
                             </button>
                         </div>
                     </div>
 
                     {/* Scrollable List */}
-                    <div className="flex-1 overflow-y-auto pr-1 space-y-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                    <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[600px] custom-scrollbar">
                         {filteredTeams.length > 0 ? (
                             filteredTeams.map((team) => (
                                 <div
                                     key={team.id}
                                     onClick={() => setSelectedTeamId(team.id)}
-                                    className={`p-3 rounded-xl border cursor-pointer transition-all hover:bg-white/5 group relative
-                                        ${selectedTeamId === team.id
-                                            ? 'bg-gradient-to-r from-cyan-600/20 to-blue-600/10 border-cyan-500/30 shadow-indigo-500/5'
-                                            : 'bg-white/5 border-white/5 hover:border-white/10'}
-                                    `}
+                                    className={`p-3.5 rounded-xl border cursor-pointer transition-all group relative ${
+                                        selectedTeamId === team.id
+                                            ? 'bg-[#7C65F6]/10 border-[#7C65F6] dark:border-[#7C65F6]'
+                                            : 'bg-slate-50 dark:bg-white/5 border-slate-200/80 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/15'
+                                    }`}
                                 >
                                     {selectedTeamId === team.id && (
-                                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-cyan-400 rounded-r-full shadow-[0_0_8px_rgba(34,211,238,0.5)]"></div>
+                                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-[#7C65F6] rounded-r-full shadow-[0_0_8px_rgba(124,101,246,0.5)]"></div>
                                     )}
                                     <div className="flex justify-between items-start mb-1 pl-2">
-                                        <h3 className={`font-semibold text-sm transition-colors group-hover:text-cyan-400 ${selectedTeamId === team.id ? 'text-white' : 'text-gray-200'}`}>
+                                        <h3 className={`font-semibold text-sm transition-colors group-hover:text-[#7C65F6] ${selectedTeamId === team.id ? 'text-[#7C65F6] dark:text-purple-300' : 'text-slate-800 dark:text-gray-200'}`}>
                                             {team.name}
                                         </h3>
-                                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold tracking-tighter uppercase border 
-                                            ${team.status === 'Evaluated' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                team.status === 'Reviewing' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                                                    'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase border ${
+                                            team.status === 'Evaluated' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
+                                            team.status === 'Reviewing' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
+                                            'bg-purple-500/10 text-[#7C65F6] border-purple-500/20'
+                                        }`}>
                                             {team.status}
                                         </span>
                                     </div>
-                                    <p className="text-[11px] text-gray-500 pl-2 mb-2 line-clamp-1">{team.project}</p>
+                                    <p className="text-xs text-slate-500 dark:text-gray-400 pl-2 mb-2 line-clamp-1">{team.project}</p>
                                     <div className="flex justify-between items-center pl-2">
-                                        <span className="text-[10px] text-gray-600 font-medium uppercase tracking-tight">{team.submitted}</span>
+                                        <span className="text-[10px] text-slate-400 dark:text-gray-500 font-medium">{team.submitted}</span>
                                         {team.score !== null && (
                                             <div className="flex items-center gap-1">
-                                                <span className="text-[10px] font-bold text-cyan-400">{team.score}</span>
-                                                <span className="text-[8px] text-gray-600 font-bold">PTS</span>
+                                                <span className="text-xs font-bold text-[#7C65F6]">{team.score}</span>
+                                                <span className="text-[9px] text-slate-400 dark:text-gray-500 font-bold">PTS</span>
                                             </div>
                                         )}
                                     </div>
@@ -280,83 +362,89 @@ const EvaluationPanel = () => {
                             ))
                         ) : !isLoading && (
                             <div className="text-center py-20 flex flex-col items-center">
-                                <svg className="w-12 h-12 text-gray-700 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                <p className="text-gray-500 text-xs uppercase tracking-widest font-bold">No teams found</p>
-                                <button onClick={() => { setSearchTerm(''); setActiveTab('pending'); }} className="mt-2 text-cyan-400 text-[10px] font-bold uppercase hover:underline">Reset filters</button>
+                                <p className="text-slate-400 dark:text-gray-500 text-xs uppercase tracking-widest font-bold">No submissions found</p>
+                                <button onClick={() => { setSearchTerm(''); setActiveTab('pending'); }} className="mt-2 text-[#7C65F6] text-xs font-bold uppercase hover:underline">Reset filters</button>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Right Panel: Evaluation Form */}
-                <div className="w-full lg:w-2/3 glass rounded-2xl border border-white/5 flex flex-col h-full overflow-hidden relative">
+                <div className="w-full lg:w-2/3 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 flex flex-col shadow-xs overflow-hidden relative min-h-[550px]">
                     {!activeTeam ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-10 text-center">
-                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/10 shadow-inner">
-                                <Icon name="Check" className="w-8 h-8 text-gray-700" />
+                        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-gray-500 p-10 text-center">
+                            <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 border border-slate-200 dark:border-white/10 shadow-inner">
+                                <Icon name="Check" className="w-8 h-8 text-slate-400 dark:text-gray-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-wide">Select a team</h3>
-                            <p className="max-w-[300px] text-sm text-gray-500 leading-relaxed uppercase tracking-tighter font-medium">Select a team from the left sidebar to begin evaluating their project submission.</p>
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2 uppercase tracking-wide">Select a team</h3>
+                            <p className="max-w-[320px] text-sm text-slate-500 dark:text-gray-400 leading-relaxed">Select a submission from the list on the left to review and evaluate their work.</p>
                         </div>
                     ) : (
                         <>
                             {/* Form Header / Team Details */}
-                            <div className="p-6 border-b border-white/10 shrink-0 bg-white/[0.02] relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-8 opacity-5">
-                                    <Icon name="Star" className="w-32 h-32 text-white" />
-                                </div>
+                            <div className="p-6 border-b border-slate-200/80 dark:border-white/10 shrink-0 bg-slate-50/50 dark:bg-white/[0.02] relative">
                                 <div className="flex justify-between items-start relative z-10">
                                     <div>
-                                        <h2 className="text-2xl font-bold text-white mb-1 uppercase tracking-tight">{activeTeam.name}</h2>
-                                        <h3 className="text-lg font-medium text-cyan-400 mb-2 truncate max-w-md">{activeTeam.project}</h3>
-                                        <div className="flex items-center gap-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                                            <span>{activeTeam.members?.length > 0 ? activeTeam.members.join(', ') : 'Member details in Teams & Mentors'}</span>
-                                            <span className="w-1.5 h-1.5 bg-gray-700 rounded-full animate-pulse"></span>
-                                            <span className="text-gray-400">{activeTeam.submitted}</span>
+                                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">{activeTeam.name}</h2>
+                                        <h3 className="text-lg font-medium text-[#7C65F6] dark:text-purple-300 mb-2 truncate max-w-md">{activeTeam.project}</h3>
+                                        <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-gray-400">
+                                            <span>{activeTeam.members?.length > 0 ? activeTeam.members.join(', ') : 'Team submission'}</span>
+                                            <span>•</span>
+                                            <span>{activeTeam.submitted}</span>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Global Score</div>
-                                        <div className="text-4xl font-black text-white bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500 tracking-tighter">
-                                            {totalScore}<span className="text-[15px] text-gray-600 font-bold ml-1 uppercase">/ {criteria.reduce((a, b) => a + b.maxScore, 0)}</span>
+                                        <div className="text-[10px] font-bold text-slate-400 dark:text-gray-400 mb-1 uppercase tracking-widest">Total Score</div>
+                                        <div className="text-4xl font-black text-[#7C65F6] dark:text-purple-300 tracking-tighter">
+                                            {totalScore}<span className="text-base text-slate-400 dark:text-gray-500 font-bold ml-1 uppercase">/ {criteria.reduce((a, b) => a + (b.maxScore || 10), 0)}</span>
                                         </div>
                                     </div>
                                 </div>
                                 {/* Quick Links */}
                                 <div className="flex items-center gap-3 mt-5 relative z-10">
-                                    {[
-                                        { id: 'details', label: 'Project Details', icon: 'FileText' },
-                                        { id: 'repo', label: 'Repository', icon: 'GitHub' },
-                                        { id: 'demo', label: 'Demo Video', icon: 'Video' }
-                                    ].map(btn => (
-                                        <button key={btn.id} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/10 transition-all shadow-sm active:scale-95">
-                                            <Icon name={btn.icon} className="w-3.5 h-3.5" />
-                                            {btn.label}
-                                        </button>
-                                    ))}
+                                    <button 
+                                        onClick={() => handleQuickLink('details')}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-semibold text-slate-700 dark:text-gray-300 transition-all active:scale-95"
+                                    >
+                                        <Icon name="FileText" className="w-3.5 h-3.5" />
+                                        Project Details
+                                    </button>
+                                    <button 
+                                        onClick={() => handleQuickLink('repo')}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-semibold text-slate-700 dark:text-gray-300 transition-all active:scale-95"
+                                    >
+                                        <Icon name="GitHub" className="w-3.5 h-3.5" />
+                                        Repository
+                                    </button>
+                                    <button 
+                                        onClick={() => handleQuickLink('demo')}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-semibold text-slate-700 dark:text-gray-300 transition-all active:scale-95"
+                                    >
+                                        <Icon name="Video" className="w-3.5 h-3.5" />
+                                        Demo Video
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Scrollable Form Content */}
-                            <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-thin scrollbar-thumb-white/10">
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
                                 {/* Scorecard */}
                                 <div>
-                                    <h3 className="section-header-panel">
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-6 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-[#7C65F6]"></span>
                                         Evaluation Matrix
                                     </h3>
-                                    <div className="space-y-8">
+                                    <div className="space-y-6">
                                         {criteria.map((c) => (
                                             <div key={c.id} className="group/criteria">
-                                                <div className="flex justify-between items-end mb-3">
+                                                <div className="flex justify-between items-end mb-2">
                                                     <div>
-                                                        <label className="text-[11px] font-black text-white block uppercase tracking-wide group-hover/criteria:text-cyan-400 transition-colors">{c.label}</label>
-                                                        <span className="text-[10px] text-gray-600 font-bold uppercase tracking-tighter">{c.description}</span>
+                                                        <label className="text-sm font-bold text-slate-800 dark:text-white block group-hover/criteria:text-[#7C65F6] transition-colors">{c.label}</label>
+                                                        <span className="text-xs text-slate-500 dark:text-gray-400">{c.description}</span>
                                                     </div>
                                                     <div className="flex items-end gap-1">
-                                                        <span className="text-xl font-black text-cyan-400 leading-none">{scores[c.id] || 0}</span>
-                                                        <span className="text-[9px] text-gray-700 font-black tracking-tighter mb-0.5">/ {c.maxScore}</span>
+                                                        <span className="text-xl font-bold text-[#7C65F6] leading-none">{scores[c.id] || 0}</span>
+                                                        <span className="text-xs text-slate-400 dark:text-gray-500 font-semibold mb-0.5">/ {c.maxScore}</span>
                                                     </div>
                                                 </div>
                                                 <div className="relative flex items-center h-4">
@@ -367,13 +455,8 @@ const EvaluationPanel = () => {
                                                         step="1"
                                                         value={scores[c.id] || 0}
                                                         onChange={(e) => setScores({ ...scores, [c.id]: parseInt(e.target.value) })}
-                                                        className="w-full h-1.5 bg-navy-900 rounded-lg appearance-none cursor-pointer accent-cyan-500 hover:accent-cyan-400 transition-all border border-white/5 z-20"
+                                                        className="w-full h-2 bg-slate-200 dark:bg-navy-950 rounded-lg appearance-none cursor-pointer accent-[#7C65F6] hover:accent-[#6851ec] transition-all z-20"
                                                     />
-                                                    <div className="absolute inset-0 flex justify-between items-center px-1 pointer-events-none opacity-20 transition-opacity group-hover/criteria:opacity-40">
-                                                        {[...Array(c.maxScore + 1)].map((_, i) => (
-                                                            <div key={i} className={`w-0.5 h-2 ${i % 5 === 0 ? 'h-3 bg-white' : 'bg-gray-500'}`}></div>
-                                                        ))}
-                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -382,43 +465,45 @@ const EvaluationPanel = () => {
 
                                 {/* Comments */}
                                 <div>
-                                    <h3 className="section-header-panel mb-4">Critique & Feedback</h3>
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-[#7C65F6]"></span>
+                                        Critique & Feedback
+                                    </h3>
                                     <div className="relative">
                                         <textarea
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
-                                            placeholder="Enter detailed feedback for the team..."
-                                            className="w-full h-32 px-4 py-4 bg-navy-900/50 border border-white/10 rounded-2xl text-[13px] text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all resize-none shadow-inner"
+                                            placeholder="Enter comprehensive feedback, strengths, and areas for improvement..."
+                                            className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all resize-none shadow-xs"
                                         ></textarea>
-                                        <div className="absolute bottom-3 right-4 px-2 py-0.5 bg-white/5 rounded text-[8px] font-black text-gray-600 uppercase tracking-widest border border-white/5">
-                                            MD Support
-                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Form Footer Actions */}
-                            <div className="p-6 border-t border-white/10 bg-white/[0.02] flex justify-between items-center shrink-0">
-                                <button className="text-gray-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white/5 px-4 py-2 rounded-lg">
+                            <div className="p-6 border-t border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] flex justify-between items-center shrink-0">
+                                <button 
+                                    onClick={handleSaveDraft}
+                                    className="text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+                                >
                                     Save Draft
                                 </button>
-                                <div className="flex gap-4">
+                                <div className="flex gap-3">
                                     <button
                                         onClick={handleShortlistToggle}
-                                        className={`px-5 py-2.5 border rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-sm
-                                            ${isShortlisted
-                                                ? 'bg-amber-500/10 border-amber-500/40 text-amber-500'
-                                                : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'}`}
+                                        className={`px-4 py-2.5 border rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 ${
+                                            isShortlisted
+                                                ? 'bg-amber-500/10 border-amber-500/40 text-amber-600 dark:text-amber-400'
+                                                : 'bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/10'
+                                        }`}
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <Icon name="Star" className={`w-3.5 h-3.5 ${isShortlisted ? 'fill-amber-500' : ''}`} />
-                                            {isShortlisted ? 'Shortlisted' : 'Shortlist'}
-                                        </div>
+                                        <Icon name="Star" className={`w-3.5 h-3.5 ${isShortlisted ? 'fill-amber-500 text-amber-500' : ''}`} />
+                                        {isShortlisted ? 'Shortlisted' : 'Shortlist'}
                                     </button>
                                     <button
                                         onClick={handleSubmitScore}
                                         disabled={isSubmitting}
-                                        className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all shadow-lg shadow-cyan-500/20 active:scale-95 flex items-center gap-2 min-w-[180px] justify-center disabled:opacity-50"
+                                        className="px-6 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-[#7C65F6]/20 active:scale-95 flex items-center gap-2 justify-center disabled:opacity-50"
                                     >
                                         {isSubmitting ? (
                                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -440,4 +525,3 @@ const EvaluationPanel = () => {
 };
 
 export default EvaluationPanel;
-
