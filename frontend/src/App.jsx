@@ -225,6 +225,9 @@ function AppContent() {
           <Route path="file-sharing" element={<StudentFileSharing />} />
           <Route path="files" element={<StudentFileSharing />} />
           <Route path="ai-assistant" element={<StudentAIAssistant />} />
+          <Route path="ai assistant" element={<Navigate to="/student/ai-assistant" replace />} />
+          <Route path="ai_assistant" element={<Navigate to="/student/ai-assistant" replace />} />
+          <Route path="ai" element={<Navigate to="/student/ai-assistant" replace />} />
           <Route path="certificates">
             <Route index element={<StudentCertificates />} />
             <Route path="verify" element={<StudentCertificateVerification />} />
