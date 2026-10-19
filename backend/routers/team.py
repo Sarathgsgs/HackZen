@@ -51,6 +51,7 @@ def _team_size_limit(hackathon: Optional[dict]) -> int:
         return 4
 
 
+@router.post("", response_model=TeamResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=TeamResponse, status_code=status.HTTP_201_CREATED)
 async def create_team(
     team_data: TeamCreate, current_user: dict = Depends(RequireRole(["student"]))
@@ -180,6 +181,7 @@ async def create_team(
 # Otherwise FastAPI treats "my-teams" as a team_id parameter
 
 
+@router.get("/my", response_model=List[TeamResponse])
 @router.get("/my-teams", response_model=List[TeamResponse])
 async def get_my_teams(current_user: dict = Depends(with_auth)):
     """Get all teams where the current user is a member"""

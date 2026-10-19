@@ -279,7 +279,9 @@ export const PlatformSettingsProvider = ({ children }) => {
         window.dispatchEvent(new CustomEvent('platform-settings-updated', { detail: updatedSettings }));
         try {
             localStorage.setItem('platformSettingsTimestamp', Date.now().toString());
-        } catch {}
+        } catch {
+            // LocalStorage might be disabled or full in private browsing
+        }
     }, [mergeAndApplySettings]);
 
     // Real-time Date Formatter based on admin configured dateFormat

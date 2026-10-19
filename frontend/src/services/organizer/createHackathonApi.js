@@ -149,7 +149,9 @@ export const getHackathonDraft = async () => {
     try {
         const remote = await getUIDataset('organizer-hackathon-draft', null);
         if (remote) return remote;
-    } catch {}
+    } catch {
+        // Fallback to local session storage draft if remote draft is unavailable
+    }
     const saved = sessionStorage.getItem('hackathonDraft');
     return saved ? JSON.parse(saved) : null;
 };

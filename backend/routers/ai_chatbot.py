@@ -36,16 +36,19 @@ async def chat_with_ai_co_mentor(
     hackathon_id = request.hackathon_id
 
     resolved_hackathon_id = hackathon_id
-    if resolved_hackathon_id:
+    if resolved_hackathon_id and str(resolved_hackathon_id).lower() not in {"general", "none", "null", "all", ""}:
         hackathons_collection = get_db()["hackathons"]
         hackathon = None
-        if ObjectId.is_valid(resolved_hackathon_id):
-            hackathon = await hackathons_collection.find_one({"_id": ObjectId(resolved_hackathon_id)})
+        if ObjectId.is_valid(str(resolved_hackathon_id)):
+            hackathon = await hackathons_collection.find_one({"_id": ObjectId(str(resolved_hackathon_id))})
         if not hackathon:
             hackathon = await hackathons_collection.find_one({"hackathonId": resolved_hackathon_id})
-        if not hackathon:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hackathon context was not found.")
-        resolved_hackathon_id = str(hackathon.get("_id") or resolved_hackathon_id)
+        if hackathon:
+            resolved_hackathon_id = str(hackathon.get("_id") or resolved_hackathon_id)
+        else:
+            resolved_hackathon_id = None
+    else:
+        resolved_hackathon_id = None
 
     print(
         f"AI chat request received context={'hackathon' if resolved_hackathon_id else 'general'} "

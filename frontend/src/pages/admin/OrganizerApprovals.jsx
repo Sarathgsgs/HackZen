@@ -831,9 +831,11 @@ const OrganizerApprovals = () => {
                                                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-gray-300 mb-3.5">
                                                         Identified Risk Factors
                                                     </h4>
-                                                    {(currentAiReview?.riskFactors || selectedApp.risk?.factors) && (currentAiReview?.riskFactors || selectedApp.risk?.factors).length > 0 ? (
-                                                        <div className="space-y-2">
-                                                            {(currentAiReview?.riskFactors || selectedApp.risk?.factors).map((f, i) => (
+                                                    {(() => {
+                                                        const riskFactors = currentAiReview?.riskFactors || selectedApp?.risk?.factors || [];
+                                                        return riskFactors.length > 0 ? (
+                                                            <div className="space-y-2">
+                                                                {riskFactors.map((f, i) => (
                                                                 <div key={i} className="p-3 rounded-xl bg-white dark:bg-black/20 border border-slate-200/60 dark:border-white/5 flex items-center justify-between text-xs">
                                                                     <span className="font-bold text-slate-800 dark:text-gray-200">{f.factor || f}</span>
                                                                     <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${
@@ -848,7 +850,8 @@ const OrganizerApprovals = () => {
                                                         </div>
                                                     ) : (
                                                         <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">✓ Zero adverse risk factors detected for this organizer account.</p>
-                                                    )}
+                                                    );
+                                                })()}
                                                 </div>
 
                                                 {/* Quick Apply AI Recommendation Banner */}

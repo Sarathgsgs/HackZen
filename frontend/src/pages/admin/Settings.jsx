@@ -1675,7 +1675,7 @@ const Settings = () => {
                                             type="text" 
                                             value={config.certificates.prefix}
                                             onChange={(e) => {
-                                                const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+                                                const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
                                                 handleInputChange('certificates', 'prefix', sanitized);
                                             }}
                                             placeholder="PROEDU"

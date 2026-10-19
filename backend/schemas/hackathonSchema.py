@@ -31,7 +31,22 @@ class HackathonBase(BaseModel):
     posterUrl: Optional[str] = Field(None, alias="posterUrl")
     templateUrl: Optional[str] = Field(None, alias="templateUrl")
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_fields(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            rules = data.get("rules")
+            if isinstance(rules, str):
+                if "\n" in rules:
+                    data["rules"] = [r.strip() for r in rules.split("\n") if r.strip()]
+                else:
+                    data["rules"] = [rules.strip()] if rules.strip() else []
+            elif rules is None:
+                data["rules"] = []
+        return data
+
     model_config = {"populate_by_name": True, "from_attributes": True, "extra": "allow"}
+
 
 
 class HackathonCreate(HackathonBase):

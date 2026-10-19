@@ -30,7 +30,7 @@ const ForgotPassword = () => {
         hasUpper: /[A-Z]/.test(newPassword),
         hasLower: /[a-z]/.test(newPassword),
         hasNumber: /\d/.test(newPassword),
-        hasSpecial: /[@$!%*?&#^()_\-+=\[\]{}|:;<>,.~]/.test(newPassword),
+        hasSpecial: /[@$!%*?&#^()_\-+=[\\]{}|:;<>,.~]/.test(newPassword),
     };
 
     const isPasswordStrong = Object.values(passwordChecks).every(Boolean);

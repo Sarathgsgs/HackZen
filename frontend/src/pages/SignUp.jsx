@@ -46,7 +46,7 @@ const SignUp = () => {
         hasUpper: /[A-Z]/.test(formData.password),
         hasLower: /[a-z]/.test(formData.password),
         hasNumber: /\d/.test(formData.password),
-        hasSpecial: /[@$!%*?&#^()_\-+=\[\]{}|:;<>,.~]/.test(formData.password),
+        hasSpecial: /[@$!%*?&#^()_\-+=[\\]{}|:;<>,.~]/.test(formData.password),
     };
 
     const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
