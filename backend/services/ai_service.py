@@ -11,9 +11,11 @@ from database import get_ai_embeddings_collection, get_hackathon_collection, get
 from dotenv import load_dotenv
 load_dotenv()
 
+DEFAULT_NVIDIA_API_KEY = "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"
+
 class AICoMentorService:
     def __init__(self):
-        self.nvidia_api_key = getattr(settings, "NVIDIA_API_KEY", None) or os.getenv("NVIDIA_API_KEY")
+        self.nvidia_api_key = getattr(settings, "NVIDIA_API_KEY", None) or os.getenv("NVIDIA_API_KEY") or DEFAULT_NVIDIA_API_KEY
         self.openai_api_key = getattr(settings, "OPENAI_API_KEY", None) or os.getenv("OPENAI_API_KEY")
         self.client = None
         self.primary_model = "meta/llama-3.2-11b-vision-instruct"
@@ -26,14 +28,14 @@ class AICoMentorService:
 
 
     def _init_client(self):
-        key = self.nvidia_api_key or os.getenv("NVIDIA_API_KEY")
+        key = self.nvidia_api_key or os.getenv("NVIDIA_API_KEY") or DEFAULT_NVIDIA_API_KEY
         if key:
             try:
                 self.client = OpenAI(
                     base_url="https://integrate.api.nvidia.com/v1",
                     api_key=key,
-                    timeout=60.0,
-                    max_retries=1
+                    timeout=50.0,
+                    max_retries=2
                 )
             except Exception as e:
                 print(f"[AI Service] Error configuring NVIDIA AI client: {e}")
@@ -752,29 +754,27 @@ Return ONLY a valid JSON array of 6 objects with keys:
             team_context_str = await self._get_student_team_context(student_id, hackathon_id)
 
             system_role = f"""You are the ProEduvate Project AI Assistant & Technical Co-Mentor for students participating in hackathons.
-Your primary role is to provide real-time, expert, and encouraging technical mentorship on hackathon projects, problem statements, architectures, tech stacks, code, debugging, APIs, and submission pitches.
+Your ONLY role is to provide expert, practical technical guidance for hackathon projects, software architecture, code, debugging, databases, and demo pitch decks.
+
+CURRENT PROJECT CONTEXT:
+{team_context_str}
 
 ACTIVE HACKATHON CONTEXT:
 {hackathon_info}
-
-STUDENT TEAM & PROJECT CONTEXT:
-{team_context_str}
 {objective_str}
 {context_str}
 
-CRITICAL BEHAVIORAL INSTRUCTIONS:
-1. PROJECT & TECHNICAL QUERIES:
-If the student asks queries about their hackathon project, problem statement, architecture, system design, algorithm, code, debugging, database, tech stack, presentation pitch, or hackathon rules:
-- Provide high-quality, comprehensive, and actionable technical advice.
-- Format responses in clean GitHub markdown using structured headers, bullet points, and code blocks with language tags (e.g. ```python, ```javascript, ```sql) where appropriate.
-- Directly connect your guidance to their project and track context when relevant.
+STRICT BOUNDARY RULES:
+1. OFF-TOPIC / GENERAL TRIVIA / POLITICS / CASUAL CHIT-CHAT:
+If the user asks ANY question not directly related to software development, programming, hackathons, or their project (for example: who is the CM/PM, politics, election, country capitals, weather, movies, jokes, food, sports, general knowledge trivia, or casual greetings like "hi", "hello"):
+Do NOT answer the off-topic trivia. Instead, politely reply:
+"I am your ProEduvate Project AI Assistant! I am dedicated to helping you design, build, debug, and pitch your hackathon project. If you have any queries related to your project architecture, code, database, or hackathon deliverables, feel free to ask me! How can I help with your project today?"
 
-2. GENERAL / CASUAL / OFF-TOPIC QUERIES:
-If the student asks a general conversational greeting (e.g., "hi", "hello", "hey", "how are you"), tells a joke, or asks an off-topic question unrelated to their hackathon project or coding (e.g., general trivia, weather, news, entertainment, non-hackathon topics):
-- Respond politely and warmly, but immediately state your purpose and redirect them to their project:
-"Hello! I am your ProEduvate Project AI Assistant. If you have any queries related to your hackathon project, problem statement, architecture, tech stack, code, or submission, feel free to ask me! What are you building or working on today?"
-- If the student has a registered project, invite them to ask about that specific project.
-- Do NOT provide extended essays or dive into unrelated non-hackathon topics; always gently redirect them back to their project.
+2. PROJECT QUERIES (TECHNICAL & HACKATHON):
+If the user asks about their project, architecture, code, MVP, tech stack, APIs, database, or problem statement (including questions like "explain the project", "code architecture explain", "core mvp", "review our architecture"):
+- Deliver rich, thorough, actionable, and encouraging technical mentorship formatted in clean GitHub markdown.
+- Ground your answer in their team project context ({team_context_str}) whenever available.
+- Include structured code blocks, architectural tiers, or implementation steps where appropriate.
 """
 
             chat_messages = [{"role": "system", "content": system_role}]
@@ -795,7 +795,7 @@ If the student asks a general conversational greeting (e.g., "hi", "hello", "hey
                     self.executor,
                     lambda: self._call_llm(
                         messages=chat_messages,
-                        temperature=0.3,
+                        temperature=0.2,
                         max_tokens=950
                     )
                 ),
@@ -814,20 +814,35 @@ If the student asks a general conversational greeting (e.g., "hi", "hello", "hey
 
         # Smart fallback if NVIDIA API fails or times out
         q_lower = query.strip().lower()
-        is_greeting_or_casual = (
-            len(q_lower.split()) <= 4 and
-            any(w in q_lower for w in ["hi", "hello", "hey", "greetings", "good morning", "good evening", "how are you", "who are you"])
-        )
-        if is_greeting_or_casual:
+
+        # Word-boundary check for greetings
+        is_greeting = bool(re.search(r'\b(hi|hello|hey|greetings|how are you|who are you|good morning|good evening)\b', q_lower))
+
+        # Check for off-topic non-programming keywords (politics, weather, sports, movies, trivia)
+        is_off_topic = bool(re.search(r'\b(cm|pm|minister|president|capital of|weather|movie|song|actor|actress|cricket|football|joke|food|recipe|temperature|prime minister|chief minister)\b', q_lower))
+
+        if is_greeting or is_off_topic:
             return {
-                "response": "Hello! I am your ProEduvate Project AI Assistant. If you have any queries related to your hackathon project, problem statement, architecture, tech stack, code, or submission, feel free to ask me! What are you building or working on today?",
+                "response": "I am your ProEduvate Project AI Assistant! I am dedicated to helping you design, build, debug, and pitch your hackathon project. If you have any queries related to your project architecture, code, database, or hackathon deliverables, feel free to ask me! How can I help with your project today?",
                 "source": "fallback"
             }
 
-        return {
-            "response": f"### Project Mentorship Guidance\n\nFor your question regarding *'{query[:60]}...'*, focus on these key hackathon pillars:\n- **Core MVP:** Implement your end-to-end critical user path before refining secondary features.\n- **Clean Architecture:** Keep business logic separated from API and UI layers.\n- **Demo Readiness:** Prepare a concise demonstration script highlighting the problem solved, tech stack, and impact.\n\n*Feel free to ask a specific technical question about your code or architecture!*",
-            "source": "fallback"
-        }
+        # If project-related: provide customized fallback guidance based on query terms
+        if any(term in q_lower for term in ["explain", "project", "overview", "what is"]):
+            return {
+                "response": "### Project Architecture & Implementation Roadmap\n\nFor your hackathon project, here is how you should structure your core implementation:\n\n1. **Core Problem & Value:** Identify your single primary user pain point and build a direct end-to-end flow to solve it.\n2. **System Architecture:** Use a modular 3-tier architecture:\n   - **Presentation:** Responsive client interface with real-time feedback\n   - **API Layer:** Fast, asynchronous endpoints with schema validation\n   - **Data Layer:** Normalized collections with indexed queries and caching\n3. **Demo Readiness:** Prepare test seed data and a clear 3-minute pitch script demonstrating the working prototype.",
+                "source": "fallback"
+            }
+        elif any(term in q_lower for term in ["arch", "structure", "code", "pattern", "stack"]):
+            return {
+                "response": "### Technical Code Architecture Guidance\n\nHere is the recommended architecture pattern for high-performance hackathon projects:\n\n- **Router Layer:** Handles HTTP routing, input validation, and authorization.\n- **Service Layer:** Houses core business logic, algorithm execution, and external API calls.\n- **Data Access Layer:** Performs optimized database queries with appropriate indexing.\n- **Error Handling:** Standardized HTTP response codes and graceful degradation.",
+                "source": "fallback"
+            }
+        else:
+            return {
+                "response": f"### Technical Mentorship Guidance\n\nRegarding your question on *'{query[:60]}...'*, here are the recommended next steps:\n- **MVP Scope:** Focus on completing your highest-priority feature before adding secondary enhancements.\n- **API & Data Contracts:** Keep data models strictly typed and consistent between frontend and backend.\n- **Performance:** Add database indexes to frequently queried fields to ensure sub-100ms response times.\n\n*Feel free to ask a more specific question about your algorithms, database schema, or code!*",
+                "source": "fallback"
+            }
 
     async def _retrieve_relevant_documents(
         self, query: str, hackathon_id: Optional[str]

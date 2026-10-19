@@ -28,6 +28,8 @@ services:
         sync: false   # your Vercel URL e.g. https://hackzen.vercel.app
       - key: CORS_ORIGINS
         sync: false   # same as FRONTEND_URL
+      - key: NVIDIA_API_KEY
+        value: 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
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENROUTER_MODEL
