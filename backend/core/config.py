@@ -57,6 +57,22 @@ class Settings(BaseSettings):
         "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"
     )
 
+    # OAuth Provider Configurations
+    GOOGLE_CLIENT_ID: Optional[str] = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: Optional[str] = os.getenv("GOOGLE_CLIENT_SECRET")
+    GITHUB_CLIENT_ID: Optional[str] = os.getenv("GITHUB_CLIENT_ID")
+    GITHUB_CLIENT_SECRET: Optional[str] = os.getenv("GITHUB_CLIENT_SECRET")
+    LINKEDIN_CLIENT_ID: Optional[str] = os.getenv("LINKEDIN_CLIENT_ID")
+    LINKEDIN_CLIENT_SECRET: Optional[str] = os.getenv("LINKEDIN_CLIENT_SECRET")
+
+    # Application URLs
+    BACKEND_URL: Optional[str] = os.getenv("BACKEND_URL", "http://localhost:8000")
+    FRONTEND_URL: Optional[str] = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    OAUTH_REDIRECT_BASE_URL: Optional[str] = os.getenv(
+        "OAUTH_REDIRECT_BASE_URL",
+        "https://hackzen-backend.onrender.com"
+    )
+
     # Email
     SMTP_HOST: Optional[str] = os.getenv("SMTP_HOST")
     SMTP_PORT: Optional[int] = 587

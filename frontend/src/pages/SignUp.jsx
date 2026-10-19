@@ -34,11 +34,13 @@ const SignUp = () => {
     };
 
     const handleGoogleSignUp = () => {
-        window.location.href = `${backendUrl}/api/auth/oauth/google`;
+        const originParam = encodeURIComponent(window.location.origin);
+        window.location.href = `${backendUrl}/api/auth/oauth/google?origin=${originParam}`;
     };
 
     const handleGithubSignUp = () => {
-        window.location.href = `${backendUrl}/api/auth/oauth/github`;
+        const originParam = encodeURIComponent(window.location.origin);
+        window.location.href = `${backendUrl}/api/auth/oauth/github?origin=${originParam}`;
     };
 
     const passwordChecks = {

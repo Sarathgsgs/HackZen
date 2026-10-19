@@ -22,15 +22,44 @@ GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
 GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize"
 GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 GITHUB_USER_URL = "https://api.github.com/user"
+import json
+import base64
+
 GITHUB_EMAILS_URL = "https://api.github.com/user/emails"
 
 
+def encode_oauth_state(frontend_origin: Optional[str] = None) -> str:
+    """Encode the frontend origin and a nonce into the OAuth state parameter."""
+    origin = (frontend_origin or settings.FRONTEND_URL or "http://localhost:5173").rstrip("/")
+    if origin:
+        from urllib.parse import urlparse
+        p = urlparse(origin)
+        if p.scheme and p.netloc:
+            origin = f"{p.scheme}://{p.netloc}".rstrip("/")
+    payload = {"origin": origin, "nonce": uuid4().hex}
+    return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode()
+
+
+def decode_oauth_state(state: Optional[str]) -> str:
+    """Decode the frontend origin from OAuth state parameter or fall back to FRONTEND_URL."""
+    if not state:
+        return (settings.FRONTEND_URL or "http://localhost:5173").rstrip("/")
+    try:
+        data = json.loads(base64.urlsafe_b64decode(state.encode()).decode())
+        origin = data.get("origin")
+        if origin and (origin.startswith("http://") or origin.startswith("https://")):
+            return origin.rstrip("/")
+    except Exception:
+        pass
+    return (settings.FRONTEND_URL or "http://localhost:5173").rstrip("/")
+
+
 def get_backend_base_url() -> str:
-    url = (settings.BACKEND_URL or settings.OAUTH_REDIRECT_BASE_URL or "http://localhost:8000").rstrip("/")
-    if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
-        if settings.OAUTH_REDIRECT_BASE_URL and not (settings.OAUTH_REDIRECT_BASE_URL.startswith("http://localhost") or settings.OAUTH_REDIRECT_BASE_URL.startswith("http://127.0.0.1")):
-            url = settings.OAUTH_REDIRECT_BASE_URL.rstrip("/")
-    return url
+    if settings.OAUTH_REDIRECT_BASE_URL:
+        return settings.OAUTH_REDIRECT_BASE_URL.rstrip("/")
+    if settings.BACKEND_URL and not (settings.BACKEND_URL.startswith("http://localhost") or settings.BACKEND_URL.startswith("http://127.0.0.1")):
+        return settings.BACKEND_URL.rstrip("/")
+    return "https://hackzen-backend.onrender.com"
 
 
 def get_frontend_base_url() -> str:
@@ -38,7 +67,7 @@ def get_frontend_base_url() -> str:
 
 
 @router.get("/oauth/google")
-async def login_google():
+async def login_google(request: Request):
     """Initiate Google OAuth 2.0 flow."""
     if not settings.GOOGLE_CLIENT_ID:
         raise HTTPException(
@@ -46,7 +75,9 @@ async def login_google():
             detail="Google Client ID is not configured on the server.",
         )
 
+    origin = request.query_params.get("origin")
     redirect_uri = f"{get_backend_base_url()}/api/auth/oauth/google/callback"
+    state = encode_oauth_state(origin or request.headers.get("referer"))
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
         "redirect_uri": redirect_uri,
@@ -54,15 +85,20 @@ async def login_google():
         "scope": "openid email profile",
         "access_type": "offline",
         "prompt": "select_account",
+        "state": state,
     }
     auth_url = f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
     return RedirectResponse(url=auth_url)
 
 
 @router.get("/oauth/google/callback")
-async def google_callback(code: str = None, error: str = None, request: Request = None):
+async def google_callback(request: Request):
     """Google OAuth 2.0 callback handler."""
-    frontend_callback = f"{get_frontend_base_url()}/oauth/callback"
+    code = request.query_params.get("code")
+    error = request.query_params.get("error")
+    state = request.query_params.get("state")
+    frontend_base_url = decode_oauth_state(state)
+    frontend_callback = f"{frontend_base_url}/oauth/callback"
 
     if error or not code:
         err_msg = error or "Authorization code not received from Google."
@@ -165,7 +201,7 @@ async def google_callback(code: str = None, error: str = None, request: Request 
 
 
 @router.get("/oauth/github")
-async def login_github():
+async def login_github(request: Request):
     """Initiate GitHub OAuth flow."""
     if not settings.GITHUB_CLIENT_ID:
         raise HTTPException(
@@ -173,20 +209,27 @@ async def login_github():
             detail="GitHub Client ID is not configured on the server.",
         )
 
+    origin = request.query_params.get("origin")
     redirect_uri = f"{get_backend_base_url()}/api/auth/oauth/github/callback"
+    state = encode_oauth_state(origin or request.headers.get("referer"))
     params = {
         "client_id": settings.GITHUB_CLIENT_ID,
         "redirect_uri": redirect_uri,
         "scope": "read:user user:email",
+        "state": state,
     }
     auth_url = f"{GITHUB_AUTH_URL}?{urlencode(params)}"
     return RedirectResponse(url=auth_url)
 
 
 @router.get("/oauth/github/callback")
-async def github_callback(code: str = None, error: str = None, request: Request = None):
+async def github_callback(request: Request):
     """GitHub OAuth callback handler."""
-    frontend_callback = f"{get_frontend_base_url()}/oauth/callback"
+    code = request.query_params.get("code")
+    error = request.query_params.get("error")
+    state = request.query_params.get("state")
+    frontend_base_url = decode_oauth_state(state)
+    frontend_callback = f"{frontend_base_url}/oauth/callback"
 
     if error or not code:
         err_msg = error or "Authorization code not received from GitHub."

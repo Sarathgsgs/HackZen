@@ -32,11 +32,13 @@ const Login = () => {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = `${backendUrl}/api/auth/oauth/google`;
+        const originParam = encodeURIComponent(window.location.origin);
+        window.location.href = `${backendUrl}/api/auth/oauth/google?origin=${originParam}`;
     };
 
     const handleGithubLogin = () => {
-        window.location.href = `${backendUrl}/api/auth/oauth/github`;
+        const originParam = encodeURIComponent(window.location.origin);
+        window.location.href = `${backendUrl}/api/auth/oauth/github?origin=${originParam}`;
     };
 
     const handleSubmit = async (e) => {
