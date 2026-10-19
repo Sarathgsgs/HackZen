@@ -1,15 +1,19 @@
-from fastapi import APIRouter, HTTPException, status, Request
-from fastapi.responses import RedirectResponse
-from urllib.parse import urlencode, quote
+import base64
 from datetime import datetime, timedelta
-from uuid import uuid4
-import httpx
+import json
 import logging
+from typing import Optional
+from urllib.parse import quote, urlencode, urlparse
+from uuid import uuid4
+
+from fastapi import APIRouter, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
+import httpx
 
 from core.config import settings
 from core.security import create_access_token
-from services.userService import UserService
 from database import get_db
+from services.userService import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +26,6 @@ GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
 GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize"
 GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 GITHUB_USER_URL = "https://api.github.com/user"
-import json
-import base64
-
 GITHUB_EMAILS_URL = "https://api.github.com/user/emails"
 
 
@@ -32,7 +33,6 @@ def encode_oauth_state(frontend_origin: Optional[str] = None) -> str:
     """Encode the frontend origin and a nonce into the OAuth state parameter."""
     origin = (frontend_origin or settings.FRONTEND_URL or "http://localhost:5173").rstrip("/")
     if origin:
-        from urllib.parse import urlparse
         p = urlparse(origin)
         if p.scheme and p.netloc:
             origin = f"{p.scheme}://{p.netloc}".rstrip("/")
@@ -161,11 +161,6 @@ async def google_callback(request: Request):
             # 4. Create active session record
             db = get_db()
             session_id = f"sess-{uuid4().hex[:8]}"
-            user_agent = (
-                request.headers.get("user-agent", "Browser / Desktop")
-                if request
-                else "Browser"
-            )
             client_ip = (
                 request.client.host if request and request.client else "127.0.0.1"
             )
