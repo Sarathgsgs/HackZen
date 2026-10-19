@@ -53,7 +53,11 @@ async def chat_with_ai_co_mentor(
     )
 
     response_data = await ai_service.generate_response(
-        query, [], resolved_hackathon_id, student_id=user_id
+        query,
+        context=[],
+        hackathon_id=resolved_hackathon_id,
+        student_id=user_id,
+        history=request.history
     )
     response_text = response_data.get("response")
     if not isinstance(response_text, str) or not response_text.strip():

@@ -7,10 +7,10 @@
 import apiClient from '../../api/api';
 
 const QUICK_STARTERS = [
-    { id: 1, text: 'Analyze the hackathon theme and suggest key focus areas' },
-    { id: 2, text: 'Critique my project idea for feasibility and impact' },
-    { id: 3, text: 'Suggest a folder structure and tech stack' },
-    { id: 4, text: 'What are urgent problems fitting this track?' }
+    { id: 1, text: 'Review our project architecture & suggest best practices' },
+    { id: 2, text: 'How should we design our database schema & indexes?' },
+    { id: 3, text: 'Help me plan our MVP features & implementation roadmap' },
+    { id: 4, text: 'What are the key points to cover in our demo pitch deck?' }
 ];
 
 const FRIENDLY_AI_BUSY_MESSAGE = 'AI service is temporarily busy. Please try again in a moment.';
@@ -102,11 +102,19 @@ export const fetchQuickStarters = async () => {
     return QUICK_STARTERS;
 };
 
-export const sendChatMessage = async (text, hackathonId) => {
+export const sendChatMessage = async (text, hackathonId, history = []) => {
     try {
+        const formattedHistory = Array.isArray(history)
+            ? history.slice(-6).map((msg) => ({
+                role: msg.sender === 'user' || msg.role === 'user' ? 'user' : 'assistant',
+                content: msg.text || msg.content || '',
+            })).filter((m) => m.content && m.content.trim())
+            : [];
+
         const payload = {
             query: text,
             hackathon_id: hackathonId || null,
+            history: formattedHistory,
         };
 
         const { data } = await apiClient.post('/ai/chat', payload);
@@ -122,7 +130,7 @@ export const sendChatMessage = async (text, hackathonId) => {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
     } catch (error) {
-        console.error('AI request failed');
+        console.error('AI request failed', error);
         throw resolveAiError(error);
     }
 };

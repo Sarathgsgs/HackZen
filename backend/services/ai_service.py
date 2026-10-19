@@ -18,7 +18,8 @@ class AICoMentorService:
         self.client = None
         self.primary_model = "meta/llama-3.2-11b-vision-instruct"
         self.fallback_models = [
-            "meta/llama-3.2-11b-vision-instruct"
+            "meta/llama-3.2-11b-vision-instruct",
+            "meta/llama-3.2-90b-vision-instruct"
         ]
         self.executor = ThreadPoolExecutor(max_workers=5)
         self._init_client()
@@ -79,25 +80,29 @@ class AICoMentorService:
 
     def _call_llm(
         self,
-        prompt: str,
+        prompt: Optional[str] = None,
         system_role: str = "You are a specialized AI system that strictly responds with valid JSON. Do not include markdown code block backticks, preamble, or commentary. Return only the raw JSON object.",
         temperature: float = 0.2,
-        max_tokens: int = 800
+        max_tokens: int = 800,
+        messages: Optional[List[Dict[str, str]]] = None
     ) -> Optional[str]:
         """Synchronously invoke LLM with fallback models"""
         client = self._get_active_client()
         if not client:
             return None
 
+        if messages is None:
+            messages = [
+                {"role": "system", "content": system_role},
+                {"role": "user", "content": prompt or ""}
+            ]
+
         last_error = None
         for model in self.fallback_models:
             try:
                 response = client.chat.completions.create(
                     model=model,
-                    messages=[
-                        {"role": "system", "content": system_role},
-                        {"role": "user", "content": prompt}
-                    ],
+                    messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens
                 )
@@ -641,31 +646,100 @@ Return ONLY a valid JSON array of 6 objects with keys:
 
     async def _get_student_team_context(self, student_id: Optional[str], hackathon_id: Optional[str]) -> str:
         if not student_id:
-            return "General participant (No team specified)"
+            return "Participant: General (No team specified)"
         try:
             db = get_db()
             from bson import ObjectId
-            memberships = await db["teamMembers"].find({"userId": str(student_id)}).to_list(100)
-            team_ids = [
-                ObjectId(str(item.get("teamId")))
-                for item in memberships
-                if item.get("teamId") and ObjectId.is_valid(str(item.get("teamId")))
+            user_str = str(student_id)
+            
+            # Search teams collection for matching member, leader, or teamMembers record
+            team = None
+            candidate_queries = [
+                {"members.userId": user_str},
+                {"members.id": user_str},
+                {"leaderId": user_str}
             ]
-            if team_ids:
-                team_query = {"_id": {"$in": team_ids}}
-                if hackathon_id and ObjectId.is_valid(str(hackathon_id)):
-                    team_query["hackathonId"] = str(hackathon_id)
-                team = await db["teams"].find_one(team_query)
-                if team:
-                    return f"Team: {team.get('teamName', 'Team')}, Project: {team.get('project', 'In Progress')}"
-        except Exception:
-            pass
-        return "Individual participant"
+            if ObjectId.is_valid(user_str):
+                candidate_queries.append({"leaderId": ObjectId(user_str)})
+
+            team_filter = {"$or": candidate_queries}
+            if hackathon_id and hackathon_id != "general":
+                hack_conditions = [{"hackathonId": hackathon_id}, {"hackathonId": str(hackathon_id)}]
+                if ObjectId.is_valid(str(hackathon_id)):
+                    hack_conditions.append({"hackathonId": ObjectId(str(hackathon_id))})
+                team_filter = {"$and": [team_filter, {"$or": hack_conditions}]}
+
+            team = await db["teams"].find_one(team_filter)
+
+            # Check teamMembers collection if not matched directly
+            if not team:
+                memberships = await db["teamMembers"].find({"userId": user_str}).to_list(100)
+                team_ids = [
+                    ObjectId(str(item.get("teamId")))
+                    for item in memberships
+                    if item.get("teamId") and ObjectId.is_valid(str(item.get("teamId")))
+                ]
+                if team_ids:
+                    t_query = {"_id": {"$in": team_ids}}
+                    if hackathon_id and hackathon_id != "general":
+                        t_query["hackathonId"] = str(hackathon_id)
+                    team = await db["teams"].find_one(t_query)
+
+            if team:
+                team_name = team.get("teamName") or team.get("name") or "Team"
+                project_name = team.get("project") or team.get("projectName") or "Under Development"
+                track = team.get("track") or "General"
+                college = team.get("college") or ""
+                mentor = team.get("mentorName") or ""
+                members_list = []
+                for m in team.get("members", []):
+                    m_name = m.get("name") or "Member"
+                    m_role = m.get("role") or ""
+                    members_list.append(f"{m_name} ({m_role})" if m_role else m_name)
+
+                submission_details = ""
+                try:
+                    team_id_str = str(team.get("_id", ""))
+                    sub = await db["submissions"].find_one({
+                        "$or": [
+                            {"teamId": team_id_str},
+                            {"teamId": team.get("teamCode")},
+                            {"teamId": team.get("name")}
+                        ]
+                    })
+                    if sub:
+                        submission_details = f"\nProject Submission: {sub.get('project', project_name)}\nSubmission Overview: {sub.get('desc', '')}\nTrack Category: {sub.get('category', track)}"
+                except Exception:
+                    pass
+
+                info = [
+                    f"Team: {team_name}",
+                    f"Project Title: {project_name}",
+                    f"Track: {track}",
+                ]
+                if college:
+                    info.append(f"Institution: {college}")
+                if mentor:
+                    info.append(f"Assigned Mentor: {mentor}")
+                if members_list:
+                    info.append(f"Team Members: {', '.join(members_list[:4])}")
+                if submission_details:
+                    info.append(submission_details)
+                return "\n".join(info)
+        except Exception as e:
+            print(f"[AI Service] Team context resolution notice: {e}")
+        return "Individual participant / No registered team found"
 
     async def generate_response(
-        self, query: str, context: List[str] = None, hackathon_id: Optional[str] = None, objective: Optional[str] = None, student_id: Optional[str] = None
+        self,
+        query: str,
+        context: List[str] = None,
+        hackathon_id: Optional[str] = None,
+        objective: Optional[str] = None,
+        student_id: Optional[str] = None,
+        history: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
-        """Generate AI response with hackathon context"""
+        """Generate AI response with hackathon & project context, respecting dual-mode query rules"""
         try:
             hackathon_info = await self._get_hackathon_context(hackathon_id)
             relevant_docs = await self._retrieve_relevant_documents(query, hackathon_id) if hackathon_id else []
@@ -674,50 +748,85 @@ Return ONLY a valid JSON array of 6 objects with keys:
             if context and len(context) > 0:
                 context_str = "\nAdditional Context: " + "\n".join(context)
 
-            objective_str = f"Student Objective: {objective}" if objective else "Stage: General Mentorship & Guidance"
+            objective_str = f"Student Objective: {objective}" if objective else ""
             team_context_str = await self._get_student_team_context(student_id, hackathon_id)
 
-            user_prompt = f"""Hackathon Context:
+            system_role = f"""You are the ProEduvate Project AI Assistant & Technical Co-Mentor for students participating in hackathons.
+Your primary role is to provide real-time, expert, and encouraging technical mentorship on hackathon projects, problem statements, architectures, tech stacks, code, debugging, APIs, and submission pitches.
+
+ACTIVE HACKATHON CONTEXT:
 {hackathon_info}
-Team Status:
+
+STUDENT TEAM & PROJECT CONTEXT:
 {team_context_str}
 {objective_str}
 {context_str}
 
-Relevant Attachments:
-{chr(10).join(relevant_docs[:3]) if relevant_docs else "None"}
+CRITICAL BEHAVIORAL INSTRUCTIONS:
+1. PROJECT & TECHNICAL QUERIES:
+If the student asks queries about their hackathon project, problem statement, architecture, system design, algorithm, code, debugging, database, tech stack, presentation pitch, or hackathon rules:
+- Provide high-quality, comprehensive, and actionable technical advice.
+- Format responses in clean GitHub markdown using structured headers, bullet points, and code blocks with language tags (e.g. ```python, ```javascript, ```sql) where appropriate.
+- Directly connect your guidance to their project and track context when relevant.
 
-Student Question:
-{query}"""
+2. GENERAL / CASUAL / OFF-TOPIC QUERIES:
+If the student asks a general conversational greeting (e.g., "hi", "hello", "hey", "how are you"), tells a joke, or asks an off-topic question unrelated to their hackathon project or coding (e.g., general trivia, weather, news, entertainment, non-hackathon topics):
+- Respond politely and warmly, but immediately state your purpose and redirect them to their project:
+"Hello! I am your ProEduvate Project AI Assistant. If you have any queries related to your hackathon project, problem statement, architecture, tech stack, code, or submission, feel free to ask me! What are you building or working on today?"
+- If the student has a registered project, invite them to ask about that specific project.
+- Do NOT provide extended essays or dive into unrelated non-hackathon topics; always gently redirect them back to their project.
+"""
 
-            system_role = """You are the ProEduvate AI Co-Mentor, an expert, encouraging technical advisor for students participating in hackathons.
-Provide concise, actionable, and architecturally sound advice formatted in clean GitHub markdown (bold headings, bullet points, and code blocks)."""
+            chat_messages = [{"role": "system", "content": system_role}]
 
+            # Add multi-turn conversation history (last 6 messages)
+            if history and isinstance(history, list):
+                for item in history[-6:]:
+                    r = item.get("role") or ("user" if item.get("sender") == "user" else "assistant")
+                    c = item.get("content") or item.get("text") or ""
+                    if r in ["user", "assistant"] and isinstance(c, str) and c.strip():
+                        chat_messages.append({"role": r, "content": c.strip()})
+
+            chat_messages.append({"role": "user", "content": query})
+
+            loop = asyncio.get_event_loop()
             text = await asyncio.wait_for(
-                asyncio.to_thread(
-                    self._call_llm,
-                    user_prompt,
-                    system_role=system_role,
-                    temperature=0.4,
-                    max_tokens=700
+                loop.run_in_executor(
+                    self.executor,
+                    lambda: self._call_llm(
+                        messages=chat_messages,
+                        temperature=0.3,
+                        max_tokens=950
+                    )
                 ),
                 timeout=50.0
             )
 
-
-            if text:
+            if text and text.strip():
                 return {
-                    "response": text,
-                    "sources": relevant_docs[:3],
+                    "response": text.strip(),
+                    "sources": relevant_docs[:3] if relevant_docs else [],
                     "model_used": self.primary_model,
-                    "source": "nvidia-llama"
+                    "source": "nvidia-nim"
                 }
         except Exception as e:
             print(f"[AI Service] generate_response notice: {e}")
 
+        # Smart fallback if NVIDIA API fails or times out
+        q_lower = query.strip().lower()
+        is_greeting_or_casual = (
+            len(q_lower.split()) <= 4 and
+            any(w in q_lower for w in ["hi", "hello", "hey", "greetings", "good morning", "good evening", "how are you", "who are you"])
+        )
+        if is_greeting_or_casual:
+            return {
+                "response": "Hello! I am your ProEduvate Project AI Assistant. If you have any queries related to your hackathon project, problem statement, architecture, tech stack, code, or submission, feel free to ask me! What are you building or working on today?",
+                "source": "fallback"
+            }
+
         return {
-            "response": f"### Mentorship Guidance\n\nFor your question regarding *'{query[:60]}...'*, focus on the following key pillars:\n- **MVP First:** Implement your core end-to-end functionality before polishing the UI.\n- **Modular Architecture:** Keep business logic separated from presentation layers.\n- **Testing & Pitch:** Prepare a clear demo script highlighting the problem solved.",
-            "source": "heuristic"
+            "response": f"### Project Mentorship Guidance\n\nFor your question regarding *'{query[:60]}...'*, focus on these key hackathon pillars:\n- **Core MVP:** Implement your end-to-end critical user path before refining secondary features.\n- **Clean Architecture:** Keep business logic separated from API and UI layers.\n- **Demo Readiness:** Prepare a concise demonstration script highlighting the problem solved, tech stack, and impact.\n\n*Feel free to ask a specific technical question about your code or architecture!*",
+            "source": "fallback"
         }
 
     async def _retrieve_relevant_documents(

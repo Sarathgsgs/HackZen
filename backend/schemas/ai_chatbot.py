@@ -1,12 +1,14 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 from pydantic import BaseModel, Field, field_validator
 
 
 class AIChatRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=4000)
-    hackathon_id: Optional[str] = Field(None, min_length=1, max_length=128)
+    hackathon_id: Optional[str] = Field(None, max_length=128)
+    history: Optional[List[Dict[str, Any]]] = None
+    team_id: Optional[str] = None
 
     @field_validator("query")
     @classmethod
