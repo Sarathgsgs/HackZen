@@ -387,7 +387,7 @@ const DashboardLayout = () => {
         };
     }, []);
 
-    const isTopNavbarMode = (isAdmin && adminNavLayout === 'navbar') || isOrganizer;
+    const isTopNavbarMode = (isAdmin && adminNavLayout === 'navbar') || isOrganizer || isStudent;
 
     // Role Config
     const roleConfig = {
@@ -642,7 +642,7 @@ const DashboardLayout = () => {
     }
 
     return (
-        <div className={`flex h-screen bg-[#f8fafc] dark:bg-navy-950 text-slate-900 dark:text-white overflow-hidden font-sans transition-colors duration-300 ${isStudent ? 'flex-col' : ''}`}>
+        <div className="flex h-screen bg-[#f8fafc] dark:bg-navy-950 text-slate-900 dark:text-white overflow-hidden font-sans transition-colors duration-300">
             {/* Mobile Overlay */}
             {sidebarOpen && (
                 <div
@@ -653,7 +653,7 @@ const DashboardLayout = () => {
 
             {/* --- SIDEBAR CONTAINER --- */}
             <div 
-                className={`${isStudent ? '!hidden' : ''} ${isAdmin ? 'bg-white' : 'bg-[#f9f9f9]'} dark:bg-navy-900 border-r border-[#e2e8f0] dark:border-white/10 flex flex-col shrink-0 transition-all duration-300 ease-in-out ${
+                className={`${isAdmin ? 'bg-white' : 'bg-[#f9f9f9]'} dark:bg-navy-900 border-r border-[#e2e8f0] dark:border-white/10 flex flex-col shrink-0 transition-all duration-300 ease-in-out ${
                     isSidebarExpanded ? 'w-64' : 'w-[72px]'
                 } ${isTopNavbarMode ? (sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-40 lg:hidden' : 'hidden') : (sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-40' : '-translate-x-full lg:translate-x-0 fixed lg:relative h-full z-20')}`}
             >
@@ -879,28 +879,28 @@ const DashboardLayout = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className={`flex-1 flex flex-col relative overflow-hidden ${isStudent ? 'min-h-0' : 'h-full'}`}>
+            <div className="flex-1 flex flex-col relative overflow-hidden h-full">
                 {/* --- MAIN CONTENT HEADER --- */}
                 <header className="h-16 bg-white dark:bg-navy-900/90 border-b border-slate-200/80 dark:border-white/10 backdrop-blur-md flex items-center justify-between px-3.5 sm:px-6 shrink-0 z-10 transition-colors overflow-visible">
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         {/* Mobile Drawer Trigger (when on small screens or when sidebar mode is active) */}
-                        {!isStudent && <button
+                        <button
                             onClick={() => setSidebarOpen(true)}
                             className="p-2 text-[#64748b] dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-[#f1f5f9] dark:hover:bg-white/10 rounded-full lg:hidden transition-colors"
                             aria-label="Toggle Navigation Drawer"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>}
+                        </button>
 
                         {/* Top Navbar Brand Logo (displayed when in Top Navbar mode) */}
-                        {(isTopNavbarMode || isStudent) && (
+                        {isTopNavbarMode && (
                             <Link to={isStudent ? '/student/dashboard' : (isOrganizer ? '/organizer/dashboard' : '/admin/dashboard')} className="flex items-center gap-2 select-none shrink-0 pr-1 sm:pr-3">
                                 <Logo size="sm" showSubtext={false} />
                             </Link>
                         )}
 
                         {/* Search Bar Container with Live Omnibox Dropdown */}
-                        <div className={`relative hidden ${isTopNavbarMode ? 'xl:block w-48 2xl:w-64' : isStudent ? 'lg:block w-48 xl:w-64' : 'md:block w-80 xl:w-96'}`} ref={searchRef}>
+                        <div className={`relative hidden ${isTopNavbarMode ? 'lg:block w-40 xl:w-56 2xl:w-64' : 'md:block w-80 xl:w-96'}`} ref={searchRef}>
                             <div className="relative flex items-center">
                                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                     <svg className={`w-4 h-4 text-slate-400 ${isStudent ? '' : 'dark:text-gray-400'} ${isAdmin ? 'group-focus-within:text-indigo-600' : 'group-focus-within:text-[#0ea5e9]'} transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -996,20 +996,21 @@ const DashboardLayout = () => {
 
                     </div>
 
-                    {/* Center: In Top Navbar Mode, render horizontal navigation links as in Figma reference */}
+                    {/* Center: In Top Navbar Mode, render horizontal navigation links next to search bar */}
                     {isTopNavbarMode && (
                         <nav className="hidden lg:flex items-center h-full gap-0.5 xl:gap-1.5 overflow-x-auto scrollbar-hide px-2">
-                            {(isOrganizer ? organizerNav : adminNav).map((item) => {
-                                const isActive = location.pathname === item.path || (item.path !== '/admin/dashboard' && item.path !== '/organizer/dashboard' && location.pathname.startsWith(item.path));
+                            {(isStudent ? studentNav : (isOrganizer ? organizerNav : adminNav)).map((item) => {
+                                const isDashboardRoot = item.path.endsWith('/dashboard');
+                                const isActive = isDashboardRoot
+                                    ? location.pathname === item.path
+                                    : location.pathname.startsWith(item.path);
                                 return (
                                     <Link
                                         key={item.name}
                                         to={item.path}
                                         className={`h-full flex items-center px-2.5 xl:px-3 text-xs xl:text-[13px] font-semibold transition-all whitespace-nowrap border-b-2 ${
                                             isActive
-                                                ? (isOrganizer
-                                                    ? 'text-[#7C65F6] dark:text-purple-400 font-bold border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20'
-                                                    : 'text-[#7C65F6] dark:text-purple-400 font-bold border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20')
+                                                ? 'text-[#7C65F6] dark:text-purple-400 font-bold border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20'
                                                 : 'text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white border-transparent hover:border-slate-300 dark:hover:border-white/20'
                                         }`}
                                     >
@@ -1164,32 +1165,6 @@ const DashboardLayout = () => {
                         )}
                     </div>
                 </header>
-
-                {isStudent && (
-                    <nav aria-label="Student navigation" className="flex h-14 shrink-0 items-stretch gap-1 overflow-x-auto border-b border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3 shadow-xs scrollbar-hide sm:px-6">
-                        {studentNav.map((item) => {
-                            const isDashboardRoot = item.path === '/student/dashboard';
-                            const isActive = isDashboardRoot
-                                ? location.pathname === item.path
-                                : location.pathname.startsWith(item.path);
-                            return (
-                                <Link
-                                    key={item.name}
-                                    to={item.path}
-                                    aria-current={isActive ? 'page' : undefined}
-                                    className={`flex shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors sm:px-4 ${
-                                        isActive
-                                            ? 'border-[#7C65F6] dark:border-purple-400 bg-purple-50/40 dark:bg-purple-950/20 text-[#7C65F6] dark:text-purple-300 font-bold'
-                                            : 'border-transparent text-slate-600 dark:text-gray-300 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
-                                    }`}
-                                >
-                                    <span className={isActive ? 'text-[#7C65F6] dark:text-purple-300' : 'text-slate-500 dark:text-gray-400'}>{item.icon}</span>
-                                    <span className="whitespace-nowrap">{item.name}</span>
-                                </Link>
-                            );
-                        })}
-                    </nav>
-                )}
 
                 {/* Main Content from child routes */}
                 <main ref={mainRef} className={`flex-1 overflow-y-auto scrollbar-hide ${isStudent ? 'min-h-0 p-0' : 'p-3.5 sm:p-6 lg:p-10'}`}>
