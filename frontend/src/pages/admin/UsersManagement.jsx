@@ -6,7 +6,8 @@ import {
     fetchUserProfile, 
     updateUserRole, 
     updateUserStatus, 
-    performBulkUserAction 
+    performBulkUserAction,
+    deleteUser 
 } from '../../services/admin/usersManagementApi';
 
 // SVG Icons requested for Profile Inspector Sub-Tabs
@@ -127,6 +128,8 @@ const UsersManagement = () => {
     const [isBulkNotifyOpen, setIsBulkNotifyOpen] = useState(false);
     const [bulkRoleConfig, setBulkRoleConfig] = useState({ isOpen: false, targetRole: 'STUDENT' });
     const [contactModalConfig, setContactModalConfig] = useState({ isOpen: false, user: null, subject: '', body: '' });
+    const [deleteModalConfig, setDeleteModalConfig] = useState({ isOpen: false, user: null, isBulk: false });
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Listen to URL Search Params for deep linking from Admin Dashboard
     useEffect(() => {
@@ -366,6 +369,43 @@ const UsersManagement = () => {
         if (!contactModalConfig.user) return;
         showToast(`Message successfully dispatched to ${contactModalConfig.user.email}`);
         setContactModalConfig({ isOpen: false, user: null, subject: '', body: '' });
+    };
+
+    // User deletion modal and confirmation
+    const openDeleteModal = (user = null, isBulk = false) => {
+        setDeleteModalConfig({ isOpen: true, user, isBulk });
+    };
+
+    const handleDeleteConfirm = async () => {
+        const { user, isBulk } = deleteModalConfig;
+        setIsDeleting(true);
+        try {
+            if (isBulk) {
+                if (selectedUserIds.length === 0) return;
+                const count = selectedUserIds.length;
+                await performBulkUserAction(selectedUserIds, 'delete');
+                setUsers(prev => prev.filter(u => !selectedUserIds.includes(u.id)));
+                if (selectedUser && selectedUserIds.includes(selectedUser.id)) {
+                    setSelectedUser(null);
+                }
+                setSelectedUserIds([]);
+                showToast(`Permanently deleted ${count} accounts.`);
+            } else if (user) {
+                await deleteUser(user.id);
+                setUsers(prev => prev.filter(u => u.id !== user.id));
+                if (selectedUser?.id === user.id) {
+                    setSelectedUser(null);
+                }
+                showToast(`User ${user.email} permanently deleted. You can re-register this email for testing.`);
+            }
+            setDeleteModalConfig({ isOpen: false, user: null, isBulk: false });
+        } catch (err) {
+            console.error("Error during deletion:", err);
+            const errorMsg = err?.response?.data?.detail || "Failed to delete user.";
+            showToast(errorMsg, "error");
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     // Bulk actions
@@ -779,6 +819,14 @@ const UsersManagement = () => {
                         <button onClick={() => handleBulkAction('suspend')} className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300/80 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Suspend</button>
                         <button onClick={() => setBulkRoleConfig({ isOpen: true, targetRole: 'STUDENT' })} className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300/80 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Change Role</button>
                         <button onClick={() => setIsBulkNotifyOpen(true)} className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300/80 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer">Send Notice</button>
+                        <button onClick={() => openDeleteModal(null, true)} className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            </svg>
+                            <span>Delete Selected</span>
+                        </button>
                         <button onClick={() => setSelectedUserIds([])} className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300/80 rounded-lg text-[10px] font-bold cursor-pointer">Clear</button>
                     </div>
                 </div>
@@ -809,7 +857,7 @@ const UsersManagement = () => {
                                     <th className="w-24 py-3 px-3 text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider text-left">Role</th>
                                     <th className="w-16 py-3 px-3 text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider text-left">Status</th>
                                     <th className="w-24 py-3 px-3 text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider text-left">Last Active</th>
-                                    <th className="w-24 py-3 px-3 text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                                    <th className="w-28 py-3 px-3 text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -902,6 +950,19 @@ const UsersManagement = () => {
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                             <circle cx="12" cy="12" r="10" />
                                                             <path d="m4.9 4.9 14.2 14.2" />
+                                                        </svg>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => openDeleteModal(user, false)}
+                                                        title="Delete User (Permanently purge to re-use email for testing)"
+                                                        className="p-1.5 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 rounded-lg text-rose-600 dark:text-rose-400 transition-all shadow-xs flex items-center justify-center cursor-pointer"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M3 6h18"/>
+                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                                            <line x1="10" x2="10" y1="11" y2="17"/>
+                                                            <line x1="14" x2="14" y1="11" y2="17"/>
                                                         </svg>
                                                     </button>
                                                 </div>
@@ -1289,6 +1350,18 @@ const UsersManagement = () => {
                                 >
                                     {selectedUser.status === 'Active' ? 'Suspend' : 'Restore'}
                                 </button>
+                                <button 
+                                    onClick={() => openDeleteModal(selectedUser, false)}
+                                    title="Permanently Delete Account"
+                                    className="py-2.5 px-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-xs font-bold shadow-sm transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M3 6h18"/>
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                    </svg>
+                                    <span>Delete</span>
+                                </button>
                             </div>
 
                         </div>
@@ -1485,6 +1558,65 @@ const UsersManagement = () => {
                         </div>
                     </div>
                 )}
+            </ActionModal>
+
+            {/* PERMANENT USER DELETION MODAL */}
+            <ActionModal 
+                isOpen={deleteModalConfig.isOpen} 
+                onClose={() => !isDeleting && setDeleteModalConfig({ isOpen: false, user: null, isBulk: false })} 
+                title={deleteModalConfig.isBulk ? "Delete Selected Accounts" : "Delete User Account"}
+            >
+                <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/40 text-xs text-rose-800 dark:text-rose-300 space-y-2">
+                        <div className="flex items-center gap-2 font-bold text-sm text-rose-900 dark:text-rose-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                                <line x1="12" x2="12" y1="9" strokeWidth="2.5"/>
+                                <line x1="12" x2="12.01" y1="17" strokeWidth="2.5"/>
+                            </svg>
+                            <span>Permanent Account Deletion</span>
+                        </div>
+                        {deleteModalConfig.isBulk ? (
+                            <p>
+                                Are you sure you want to permanently delete <strong>{selectedUserIds.length}</strong> selected accounts?
+                                All linked profiles (student, mentor, organizer) and notification logs will be removed immediately.
+                            </p>
+                        ) : deleteModalConfig.user ? (
+                            <p>
+                                Are you sure you want to permanently delete account for <strong className="underline">{deleteModalConfig.user.name}</strong> (<span className="font-mono">{deleteModalConfig.user.email}</span>)?
+                                <br /><br />
+                                All profile data across student, mentor, and organizer records will be purged. <strong>This email can immediately be re-registered to test different roles.</strong>
+                            </p>
+                        ) : null}
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
+                        <button 
+                            disabled={isDeleting}
+                            onClick={() => setDeleteModalConfig({ isOpen: false, user: null, isBulk: false })} 
+                            className="px-4 py-2.5 rounded-xl bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-white/10 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            disabled={isDeleting}
+                            onClick={handleDeleteConfirm} 
+                            className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                    </svg>
+                                    <span>Deleting...</span>
+                                </>
+                            ) : (
+                                <span>Permanently Delete</span>
+                            )}
+                        </button>
+                    </div>
+                </div>
             </ActionModal>
 
         </div>

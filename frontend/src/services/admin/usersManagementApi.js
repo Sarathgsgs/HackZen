@@ -53,3 +53,14 @@ export const performBulkUserAction = async (userIds, action, value = "", reason 
         throw error;
     }
 };
+
+export const deleteUser = async (userId) => {
+    try {
+        const { data } = await apiClient.delete(`/admin/users/${userId}`);
+        return data;
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        throw error;
+    }
+};
+

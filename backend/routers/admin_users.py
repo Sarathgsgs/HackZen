@@ -438,12 +438,108 @@ async def update_user_status(
     return {"success": True, "message": f"User status changed to {data.status}"}
 
 
+@router.delete("/{user_id}")
+async def delete_user(
+    user_id: str,
+    current_user: dict = Depends(RequireRole(["admin", "superadmin"])),
+):
+    """
+    Permanently delete a user account and cascade delete related profile records
+    (students, mentors, organizers, notifications, and team references).
+    This allows the email address to be immediately re-registered for testing.
+    """
+    db = get_db()
+
+    query = {"$or": []}
+    if ObjectId.is_valid(user_id):
+        query["$or"].append({"_id": ObjectId(user_id)})
+    query["$or"].extend([{"_id": user_id}, {"id": user_id}])
+
+    user = await db["users"].find_one(query)
+    if not user and "@" in user_id:
+        user = await db["users"].find_one({"email": user_id.strip().lower()})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Prevent admin from deleting their own active session account
+    curr_id = str(current_user.get("_id") or current_user.get("id") or current_user.get("sub", ""))
+    curr_email = str(current_user.get("email", "")).strip().lower()
+    u_id_str = str(user.get("_id", user.get("id", "")))
+    u_email = str(user.get("email", "")).strip().lower()
+
+    if (curr_id and curr_id == u_id_str) or (curr_email and curr_email == u_email):
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete your own active administrator account.",
+        )
+
+    user_obj_id = user["_id"] if isinstance(user.get("_id"), ObjectId) else (ObjectId(user["_id"]) if ObjectId.is_valid(str(user.get("_id", ""))) else None)
+    user_name = user.get("name", "User")
+
+    # 1. Delete from users collection (matching ID or email)
+    await db["users"].delete_many({
+        "$or": [
+            {"_id": user["_id"]},
+            {"id": u_id_str},
+            {"email": u_email}
+        ]
+    })
+
+    # 2. Delete role profiles
+    id_or_email_conditions = [{"userId": u_id_str}, {"email": u_email}]
+    if user_obj_id:
+        id_or_email_conditions.append({"userId": user_obj_id})
+
+    await db["students"].delete_many({"$or": id_or_email_conditions})
+    await db["mentors"].delete_many({"$or": id_or_email_conditions})
+    await db["organizers"].delete_many({
+        "$or": id_or_email_conditions + [{"contactEmail": u_email}]
+    })
+
+    # 3. Clean up notifications
+    await db["notifications"].delete_many({
+        "$or": [
+            {"userId": u_id_str},
+            {"applicantId": u_id_str},
+            {"applicantEmail": u_email}
+        ]
+    })
+
+    # 4. Clean up team references if any
+    try:
+        await db["teams"].update_many(
+            {"members": u_email},
+            {"$pull": {"members": u_email}}
+        )
+        await db["teams"].update_many(
+            {"members.email": u_email},
+            {"$pull": {"members": {"email": u_email}}}
+        )
+    except Exception as e:
+        print(f"[Admin Delete] Team cleanup note: {e}")
+
+    # 5. Insert audit log
+    await db["audit_logs"].insert_one({
+        "action": "User Deleted",
+        "category": "Users",
+        "details": f"Permanently deleted user '{user_name}' ({u_email}) and cascaded profiles.",
+        "adminName": current_user.get("name", "Admin"),
+        "timestamp": datetime.utcnow(),
+    })
+
+    return {
+        "success": True,
+        "message": f"User '{u_email}' was permanently deleted. You can now re-register with this email."
+    }
+
+
 @router.post("/bulk-action")
 async def bulk_user_action(
     payload: BulkUserActionRequest,
     current_user: dict = Depends(RequireRole(["admin", "superadmin"])),
 ):
-    """Perform bulk action (Change Role, Suspend, Activate, Send Notification) across selected users"""
+    """Perform bulk action (Change Role, Suspend, Activate, Delete, Send Notification) across selected users"""
     db = get_db()
     user_ids = payload.user_ids
     action = payload.action
@@ -465,6 +561,33 @@ async def bulk_user_action(
         await db["users"].update_many(
             query, {"$set": {"status": "Active", "is_active": True}}
         )
+    elif action == "delete":
+        curr_id = str(current_user.get("_id") or current_user.get("id") or current_user.get("sub", ""))
+        curr_email = str(current_user.get("email", "")).strip().lower()
+
+        matched_users = await db["users"].find(query).to_list(1000)
+        deleted_count = 0
+        for u in matched_users:
+            u_id_str = str(u.get("_id", u.get("id", "")))
+            u_email = str(u.get("email", "")).strip().lower()
+            if (curr_id and curr_id == u_id_str) or (curr_email and curr_email == u_email):
+                continue  # Prevent self deletion
+
+            u_obj_id = u["_id"] if isinstance(u.get("_id"), ObjectId) else (ObjectId(u["_id"]) if ObjectId.is_valid(str(u.get("_id", ""))) else None)
+
+            await db["users"].delete_many({
+                "$or": [{"_id": u["_id"]}, {"id": u_id_str}, {"email": u_email}]
+            })
+            conds = [{"userId": u_id_str}, {"email": u_email}]
+            if u_obj_id:
+                conds.append({"userId": u_obj_id})
+            await db["students"].delete_many({"$or": conds})
+            await db["mentors"].delete_many({"$or": conds})
+            await db["organizers"].delete_many({"$or": conds + [{"contactEmail": u_email}]})
+            await db["notifications"].delete_many({
+                "$or": [{"userId": u_id_str}, {"applicantId": u_id_str}, {"applicantEmail": u_email}]
+            })
+            deleted_count += 1
     elif action == "notify":
         message = payload.value or "Notice from Admin governance panel."
         for uid in user_ids:
