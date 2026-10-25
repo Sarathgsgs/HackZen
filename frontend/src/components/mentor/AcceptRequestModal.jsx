@@ -51,7 +51,7 @@ export default function AcceptRequestModal() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-[#FAFAFD] dark:bg-navy-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-[#5B45D9] dark:text-purple-300 flex items-center justify-center font-bold text-lg">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#2563eb] dark:text-blue-300 flex items-center justify-center font-bold text-lg">
               {request.teamName?.charAt(0) || 'T'}
             </div>
             <div>
@@ -69,9 +69,9 @@ export default function AcceptRequestModal() {
 
         {/* Body */}
         <div className="p-6 space-y-4">
-          <div className="p-4 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30">
+          <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#5B45D9] dark:text-purple-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#2563eb] dark:text-blue-400">
                 {request.domain || request.track || 'Artificial Intelligence'}
               </span>
               <span className="text-xs text-slate-400">
@@ -88,14 +88,14 @@ export default function AcceptRequestModal() {
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-100 dark:border-white/5">
               <span className="text-slate-400 block mb-1">Team Size</span>
               <span className="font-semibold text-slate-800 dark:text-white flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-[#5B45D9]" />
+                <Users className="w-3.5 h-3.5 text-[#2563eb]" />
                 {request.teamSize || request.members || 4} Members
               </span>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-100 dark:border-white/5">
               <span className="text-slate-400 block mb-1">Expertise Required</span>
               <span className="font-semibold text-slate-800 dark:text-white flex items-center gap-1.5 truncate">
-                <Award className="w-3.5 h-3.5 text-[#5B45D9]" />
+                <Award className="w-3.5 h-3.5 text-[#2563eb]" />
                 {Array.isArray(request.requiredSkills) && request.requiredSkills.length ? request.requiredSkills.join(', ') : (request.domain || 'Software Development')}
               </span>
             </div>
@@ -104,14 +104,14 @@ export default function AcceptRequestModal() {
           {/* Optional Message */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-gray-300 mb-1.5 flex items-center gap-1.5">
-              <MessageSquare className="w-3.5 h-3.5 text-[#5B45D9]" />
+              <MessageSquare className="w-3.5 h-3.5 text-[#2563eb]" />
               Welcome Message to Team
             </label>
             <textarea
               rows={2}
               value={mentorMessage}
               onChange={(e) => setMentorMessage(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] resize-none"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] resize-none"
             />
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function AcceptRequestModal() {
               type="button"
               disabled={submitting}
               onClick={() => handleAction('accept')}
-              className="px-5 py-2.5 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-sm font-semibold shadow-sm shadow-purple-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
             >
               <CheckCircle className="w-4 h-4" />
               {submitting ? 'Accepting...' : 'Accept Mentorship'}

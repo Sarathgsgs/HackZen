@@ -95,7 +95,7 @@ const InviteMentors = () => {
                     <button 
                         onClick={handleInvite}
                         disabled={isLoading || activeTab === 'history'}
-                        className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#7C65F6]/20 active:scale-95 disabled:opacity-50"
+                        className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50"
                     >
                         {isLoading ? "Dispatching..." : "Send Invitations"}
                     </button>
@@ -109,13 +109,13 @@ const InviteMentors = () => {
                         <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/5">
                             <button 
                                 onClick={() => setActiveTab('compose')}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'compose' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'compose' ? 'bg-[#2563eb] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 COMPOSE
                             </button>
                             <button 
                                 onClick={() => setActiveTab('history')}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'history' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'history' ? 'bg-[#2563eb] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 INVITATION LOGS ({inviteHistory.length})
                             </button>
@@ -130,7 +130,7 @@ const InviteMentors = () => {
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Mentor Email Addresses</label>
                                     <textarea 
-                                        className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all min-h-[140px] resize-none"
+                                        className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] transition-all min-h-[140px] resize-none"
                                         placeholder="Enter recipient emails separated by commas (e.g. mentor1@tech.com, advisor@ai.org)..."
                                         value={emails}
                                         onChange={(e) => setEmails(e.target.value)}
@@ -141,7 +141,7 @@ const InviteMentors = () => {
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Role</label>
                                         <select 
-                                            className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] cursor-pointer"
+                                            className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] cursor-pointer"
                                             value={invitationData.role}
                                             onChange={(e) => setInvitationData(prev => ({ ...prev, role: e.target.value }))}
                                         >
@@ -153,7 +153,7 @@ const InviteMentors = () => {
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Focus Track / Domain</label>
                                         <select 
-                                            className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] cursor-pointer"
+                                            className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] cursor-pointer"
                                             value={invitationData.domain}
                                             onChange={(e) => setInvitationData(prev => ({ ...prev, domain: e.target.value }))}
                                         >
@@ -170,7 +170,7 @@ const InviteMentors = () => {
                             <div className="space-y-2 flex flex-col">
                                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">Custom Invitation Message</label>
                                 <textarea 
-                                    className="w-full flex-1 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all min-h-[140px] resize-none"
+                                    className="w-full flex-1 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] transition-all min-h-[140px] resize-none"
                                     placeholder="Write a custom welcome note..."
                                     value={invitationData.message}
                                     onChange={(e) => setInvitationData(prev => ({ ...prev, message: e.target.value }))}
@@ -200,7 +200,7 @@ const InviteMentors = () => {
                                             <span className="text-xs text-slate-500 dark:text-gray-400">{invite.role}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-xs text-[#7C65F6] font-semibold">{invite.domain}</span>
+                                            <span className="text-xs text-[#2563eb] dark:text-blue-400 font-semibold">{invite.domain}</span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="text-xs text-slate-500 dark:text-gray-400">

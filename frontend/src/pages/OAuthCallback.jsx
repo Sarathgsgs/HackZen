@@ -114,10 +114,10 @@ const OAuthCallback = () => {
                 {status === 'processing' && (
                     <div className="flex flex-col items-center py-6 space-y-4">
                         <div className="relative flex items-center justify-center">
-                            <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
+                            <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
                             <div className="absolute w-8 h-8 border-4 border-blue-500/20 border-b-blue-400 rounded-full animate-spin" style={{ animationDirection: 'reverse' }}></div>
                         </div>
-                        <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                        <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-400 bg-clip-text text-transparent">
                             Authenticating Account
                         </h2>
                         <p className="text-sm text-gray-400">
@@ -158,7 +158,7 @@ const OAuthCallback = () => {
                         <div className="pt-2 flex flex-col sm:flex-row gap-3 w-full justify-center">
                             <Link
                                 to="/login"
-                                className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium text-sm transition shadow-lg"
+                                className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-blue-700 text-white font-medium text-sm transition shadow-lg"
                             >
                                 Back to Sign In
                             </Link>

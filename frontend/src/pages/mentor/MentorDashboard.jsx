@@ -64,7 +64,7 @@ export default function MentorDashboard() {
             <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-                        Welcome back, <span className="text-[#7C65F6] dark:text-purple-400">{data?.mentor?.name || 'Mentor'}</span>!
+                        Welcome back, <span className="text-[#2563eb] dark:text-blue-400">{data?.mentor?.name || 'Mentor'}</span>!
                     </h1>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         Review incoming mentorship inquiries, assess milestone progress, and coordinate active teams.
@@ -85,11 +85,11 @@ export default function MentorDashboard() {
                     <Link
                         key={title}
                         to={link}
-                        className="p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 shadow-xs flex flex-col justify-between transition-all hover:shadow-md hover:border-purple-300 dark:hover:border-purple-700/50 group"
+                        className="p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 shadow-xs flex flex-col justify-between transition-all hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700/50 group"
                     >
                         <div className="flex items-center justify-between gap-3">
                             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{title}</span>
-                            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] dark:text-purple-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                                 <Icon className="h-4 w-4" />
                             </div>
                         </div>
@@ -108,7 +108,7 @@ export default function MentorDashboard() {
                 <section className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3.5 mb-4">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Mentorship Requests</h2>
-                        <Link className="text-xs font-bold text-[#7C65F6] dark:text-purple-400 hover:underline" to="/mentor/requests">
+                        <Link className="text-xs font-bold text-[#2563eb] dark:text-blue-400 hover:underline" to="/mentor/requests">
                             View all
                         </Link>
                     </div>
@@ -135,7 +135,7 @@ export default function MentorDashboard() {
                                         </button>
                                         <button
                                             onClick={() => navigate('/mentor/requests')}
-                                            className="rounded-xl bg-[#7C65F6] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#6D28D9] transition active:scale-95 cursor-pointer"
+                                            className="rounded-xl bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1d4ed8] transition active:scale-95 cursor-pointer"
                                         >
                                             Review
                                         </button>
@@ -154,7 +154,7 @@ export default function MentorDashboard() {
                 <section className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3.5 mb-4">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Upcoming Sessions</h2>
-                        <Link to="/mentor/sessions" className="text-xs font-bold text-[#7C65F6] dark:text-purple-400 hover:underline">
+                        <Link to="/mentor/sessions" className="text-xs font-bold text-[#2563eb] dark:text-blue-400 hover:underline">
                             Calendar
                         </Link>
                     </div>
@@ -164,10 +164,10 @@ export default function MentorDashboard() {
                     ) : meetings.length ? (
                         <div className="space-y-4">
                             {meetings.slice(0, 4).map((meeting) => (
-                                <div key={meeting.id} className="flex items-start gap-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/60 p-3 transition hover:border-purple-300 dark:hover:border-purple-700/50">
-                                    <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#7C65F6] ring-4 ring-purple-100 dark:ring-purple-950/50" />
+                                <div key={meeting.id} className="flex items-start gap-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/60 p-3 transition hover:border-blue-300 dark:hover:border-blue-700/50">
+                                    <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#2563eb] ring-4 ring-blue-100 dark:ring-blue-950/50" />
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-bold text-[#7C65F6] dark:text-purple-400">{dateTime(meeting.startTime)}</p>
+                                        <p className="text-xs font-bold text-[#2563eb] dark:text-blue-400">{dateTime(meeting.startTime)}</p>
                                         <p className="mt-0.5 text-xs font-bold text-slate-900 dark:text-white truncate">
                                             {meeting.title || 'Mentoring session'} · {meeting.teamName || 'Team'}
                                         </p>
@@ -188,7 +188,7 @@ export default function MentorDashboard() {
             <section className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 sm:p-6 shadow-xs">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3.5 mb-4">
                     <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Assigned Teams</h2>
-                    <Link to="/mentor/teams" className="text-xs font-bold text-[#7C65F6] dark:text-purple-400 hover:underline">
+                    <Link to="/mentor/teams" className="text-xs font-bold text-[#2563eb] dark:text-blue-400 hover:underline">
                         View All
                     </Link>
                 </div>
@@ -214,7 +214,7 @@ export default function MentorDashboard() {
                                     </div>
                                     <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-navy-800">
                                         <div
-                                            className="h-full rounded-full bg-[#7C65F6]"
+                                            className="h-full rounded-full bg-[#2563eb]"
                                             style={{ width: `${Math.min(100, Math.max(0, Number(team.progress) || 0))}%` }}
                                         />
                                     </div>
@@ -244,7 +244,7 @@ export default function MentorDashboard() {
                         to={to}
                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 shadow-xs transition active:scale-95"
                     >
-                        <Icon className="h-4 w-4 text-[#7C65F6] dark:text-purple-400" />
+                        <Icon className="h-4 w-4 text-[#2563eb] dark:text-blue-400" />
                         {label}
                     </Link>
                 ))}

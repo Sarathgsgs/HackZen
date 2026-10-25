@@ -92,7 +92,7 @@ export default function MentorMessages() {
             : messages.length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No messages yet. Start the conversation with your team.</p>
               : messages.map((message) => {
                 const ownMessage = String(message.senderId) === String(user._id || user.id);
-                return <article key={message.id || message._id} className={`max-w-[85%] rounded-2xl px-4 py-3 ${ownMessage ? 'ml-auto bg-[#5B45D9] text-white' : 'bg-slate-100 text-slate-800 dark:bg-white/5 dark:text-slate-100'}`}>
+                return <article key={message.id || message._id} className={`max-w-[85%] rounded-2xl px-4 py-3 ${ownMessage ? 'ml-auto bg-[#2563eb] text-white' : 'bg-slate-100 text-slate-800 dark:bg-white/5 dark:text-slate-100'}`}>
                   <div className="flex items-center justify-between gap-5 text-[11px] opacity-75"><span>{ownMessage ? 'You' : message.senderName || 'Team member'}</span><time>{message.createdAt ? new Date(message.createdAt).toLocaleString() : ''}</time></div>
                   <p className="mt-1 whitespace-pre-wrap text-sm">{message.content}</p>
                 </article>;
@@ -100,8 +100,8 @@ export default function MentorMessages() {
         </div>
 
         <form onSubmit={sendMessage} className="flex items-end gap-3 border-t border-slate-200 p-4 dark:border-white/10">
-          <textarea value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} maxLength={5000} rows={2} disabled={!teamId || sending} placeholder={teamId ? 'Write a message...' : 'Select an assigned team to message'} className="min-h-12 flex-1 resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 outline-none focus:border-[#5B45D9] dark:border-white/10 dark:bg-navy-950 dark:text-white" />
-          <button type="submit" disabled={!teamId || !text.trim() || sending} className="inline-flex items-center gap-2 rounded-xl bg-[#5B45D9] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-4 w-4" />{sending ? 'Sending' : 'Send'}</button>
+          <textarea value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} maxLength={5000} rows={2} disabled={!teamId || sending} placeholder={teamId ? 'Write a message...' : 'Select an assigned team to message'} className="min-h-12 flex-1 resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-navy-950 dark:text-white" />
+          <button type="submit" disabled={!teamId || !text.trim() || sending} className="inline-flex items-center gap-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer transition-colors"><Send className="h-4 w-4" />{sending ? 'Sending' : 'Send'}</button>
         </form>
       </section>
     </main>

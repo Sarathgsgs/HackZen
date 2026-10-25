@@ -45,7 +45,7 @@ const Toggle = ({ enabled, onChange, disabled = false }) => (
         onClick={onChange}
         className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
             enabled 
-                ? 'bg-indigo-600 dark:bg-indigo-500' 
+                ? 'bg-blue-600 dark:bg-blue-500' 
                 : 'bg-slate-300 dark:bg-white/20'
         }`}
     >
@@ -578,7 +578,7 @@ const Settings = () => {
                     <button 
                         onClick={handleSaveChanges}
                         disabled={isSaving}
-                        className="w-full sm:w-auto justify-center px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold transition-all shadow-md shadow-[#7C65F6]/20 active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                        className="w-full sm:w-auto justify-center px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                     >
                         <CheckIcon className="w-3.5 h-3.5 text-white" />
                         <span>{isSaving ? 'Saving Changes...' : 'Save Configuration'}</span>
@@ -604,16 +604,16 @@ const Settings = () => {
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`w-auto lg:w-full shrink-0 whitespace-nowrap flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                                         isActive 
-                                            ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/40 font-extrabold shadow-sm' 
+                                            ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/40 font-extrabold shadow-sm' 
                                             : 'text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white border border-transparent'
                                     }`}
                                 >
                                     <div className="flex items-center gap-2.5">
-                                        <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-gray-500'}`} />
+                                        <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-gray-500'}`} />
                                         <span>{tab.label}</span>
                                     </div>
                                     {tab.id === 'Admins' && (
-                                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isActive ? 'bg-indigo-200/70 dark:bg-indigo-400/20 text-indigo-800 dark:text-indigo-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
+                                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isActive ? 'bg-blue-200/70 dark:bg-blue-400/20 text-blue-800 dark:text-blue-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
                                             {admins.length}
                                         </span>
                                     )}
@@ -642,7 +642,7 @@ const Settings = () => {
                                             type="text" 
                                             value={config.general.platformName}
                                             onChange={(e) => handleInputChange('general', 'platformName', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
                                     <div>
@@ -651,7 +651,7 @@ const Settings = () => {
                                             type="text" 
                                             value={config.general.website}
                                             onChange={(e) => handleInputChange('general', 'website', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
                                     <div>
@@ -660,7 +660,7 @@ const Settings = () => {
                                             type="email" 
                                             value={config.general.supportEmail}
                                             onChange={(e) => handleInputChange('general', 'supportEmail', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
                                     <div>
@@ -669,7 +669,7 @@ const Settings = () => {
                                             type="text" 
                                             value={config.general.supportPhone}
                                             onChange={(e) => handleInputChange('general', 'supportPhone', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
                                 </div>
@@ -685,7 +685,7 @@ const Settings = () => {
                                         <select 
                                             value={config.general.timezone}
                                             onChange={(e) => handleInputChange('general', 'timezone', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                         >
                                             <option value="Asia/Kolkata (IST)">Asia/Kolkata (IST)</option>
                                             <option value="UTC">UTC</option>
@@ -698,7 +698,7 @@ const Settings = () => {
                                         <select 
                                             value={config.general.country}
                                             onChange={(e) => handleInputChange('general', 'country', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                         >
                                             <option value="India">India</option>
                                             <option value="United States">United States</option>
@@ -711,7 +711,7 @@ const Settings = () => {
                                         <select 
                                             value={config.general.dateFormat}
                                             onChange={(e) => handleInputChange('general', 'dateFormat', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                         >
                                             <option value="MMM DD, YYYY">MMM DD, YYYY</option>
                                             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
@@ -768,7 +768,7 @@ const Settings = () => {
                                         onClick={() => handleNavLayoutChange('navbar')}
                                         className={`p-4 rounded-2xl border transition-all cursor-pointer relative flex flex-col justify-between ${
                                             navLayout === 'navbar'
-                                                ? 'border-[#7C65F6] bg-purple-50/40 dark:bg-purple-950/20 ring-2 ring-[#7C65F6]/30 shadow-md'
+                                                ? 'border-[#2563eb] bg-blue-50/40 dark:bg-blue-950/20 ring-2 ring-blue-500/30 shadow-md'
                                                 : 'border-slate-200/90 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 hover:border-slate-300 dark:hover:border-white/20'
                                         }`}
                                     >
@@ -778,11 +778,11 @@ const Settings = () => {
                                                 {/* Top navbar schematic */}
                                                 <div className="w-full h-5 rounded-md bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 px-2 flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#7C65F6]"></div>
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></div>
                                                         <div className="w-8 h-1.5 rounded-sm bg-slate-300 dark:bg-white/30"></div>
                                                     </div>
                                                     <div className="flex items-center gap-1">
-                                                        <div className="w-7 h-1.5 rounded-sm bg-[#7C65F6]"></div>
+                                                        <div className="w-7 h-1.5 rounded-sm bg-[#2563eb]"></div>
                                                         <div className="w-7 h-1.5 rounded-sm bg-slate-200 dark:bg-white/20"></div>
                                                         <div className="w-7 h-1.5 rounded-sm bg-slate-200 dark:bg-white/20"></div>
                                                     </div>
@@ -803,7 +803,7 @@ const Settings = () => {
                                                     Top Navbar Navigation
                                                 </span>
                                                 {navLayout === 'navbar' && (
-                                                    <span className="w-2 h-2 rounded-full bg-[#7C65F6] ring-4 ring-purple-400/30"></span>
+                                                    <span className="w-2 h-2 rounded-full bg-[#2563eb] ring-4 ring-blue-400/30"></span>
                                                 )}
                                             </div>
                                             <p className="text-[11px] text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -817,7 +817,7 @@ const Settings = () => {
                                             </span>
                                             <span className={`text-[11px] font-bold px-3 py-1 rounded-lg ${
                                                 navLayout === 'navbar' 
-                                                    ? 'bg-[#7C65F6] text-white shadow-xs' 
+                                                    ? 'bg-[#2563eb] text-white shadow-xs' 
                                                     : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'
                                             }`}>
                                                 {navLayout === 'navbar' ? 'Active' : 'Select'}
@@ -830,7 +830,7 @@ const Settings = () => {
                                         onClick={() => handleNavLayoutChange('sidebar')}
                                         className={`p-4 rounded-2xl border transition-all cursor-pointer relative flex flex-col justify-between ${
                                             navLayout === 'sidebar'
-                                                ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20 ring-2 ring-indigo-500/30 shadow-md'
+                                                ? 'border-blue-600 bg-blue-50/40 dark:bg-blue-950/20 ring-2 ring-blue-500/30 shadow-md'
                                                 : 'border-slate-200/90 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 hover:border-slate-300 dark:hover:border-white/20'
                                         }`}
                                     >
@@ -839,8 +839,8 @@ const Settings = () => {
                                             <div className="w-full h-20 rounded-xl bg-slate-100 dark:bg-navy-950 border border-slate-200 dark:border-white/10 p-2 flex gap-1.5 mb-3 overflow-hidden pointer-events-none select-none">
                                                 {/* Left sidebar schematic */}
                                                 <div className="w-12 h-full rounded-md bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 p-1 flex flex-col gap-1 items-center shrink-0">
-                                                    <div className="w-3 h-3 rounded-full bg-indigo-600 mb-0.5"></div>
-                                                    <div className="w-8 h-1 rounded-xs bg-indigo-600"></div>
+                                                    <div className="w-3 h-3 rounded-full bg-blue-600 mb-0.5"></div>
+                                                    <div className="w-8 h-1 rounded-xs bg-blue-600"></div>
                                                     <div className="w-8 h-1 rounded-xs bg-slate-200 dark:bg-white/20"></div>
                                                     <div className="w-8 h-1 rounded-xs bg-slate-200 dark:bg-white/20"></div>
                                                     <div className="w-8 h-1 rounded-xs bg-slate-200 dark:bg-white/20"></div>
@@ -862,7 +862,7 @@ const Settings = () => {
                                                     Sidebar Navigation
                                                 </span>
                                                 {navLayout === 'sidebar' && (
-                                                    <span className="w-2 h-2 rounded-full bg-indigo-600 ring-4 ring-indigo-400/30"></span>
+                                                    <span className="w-2 h-2 rounded-full bg-blue-600 ring-4 ring-blue-400/30"></span>
                                                 )}
                                             </div>
                                             <p className="text-[11px] text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -876,7 +876,7 @@ const Settings = () => {
                                             </span>
                                             <span className={`text-[11px] font-bold px-3 py-1 rounded-lg ${
                                                 navLayout === 'sidebar' 
-                                                    ? 'bg-indigo-600 text-white shadow-xs' 
+                                                    ? 'bg-blue-600 text-white shadow-xs' 
                                                     : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'
                                             }`}>
                                                 {navLayout === 'sidebar' ? 'Active' : 'Select'}
@@ -916,7 +916,7 @@ const Settings = () => {
                                             <select 
                                                 value={config.security.sessionTimeout}
                                                 onChange={(e) => handleInputChange('security', 'sessionTimeout', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                             >
                                                 <option value="15 Minutes">15 Minutes</option>
                                                 <option value="30 Minutes">30 Minutes</option>
@@ -929,7 +929,7 @@ const Settings = () => {
                                             <select 
                                                 value={config.security.maxLoginAttempts}
                                                 onChange={(e) => handleInputChange('security', 'maxLoginAttempts', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                             >
                                                 <option value="3 Attempts">3 Attempts</option>
                                                 <option value="5 Attempts">5 Attempts</option>
@@ -941,7 +941,7 @@ const Settings = () => {
                                             <select 
                                                 value={config.security.lockoutDuration}
                                                 onChange={(e) => handleInputChange('security', 'lockoutDuration', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                             >
                                                 <option value="15 Minutes">15 Minutes</option>
                                                 <option value="30 Minutes">30 Minutes</option>
@@ -1028,7 +1028,7 @@ const Settings = () => {
                                 </div>
                                 <button 
                                     onClick={() => setIsAddAdminOpen(true)}
-                                    className="w-full sm:w-auto justify-center px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                                    className="w-full sm:w-auto justify-center px-3.5 py-1.5 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
                                 >
                                     <span>+ Add Administrator</span>
                                 </button>
@@ -1059,8 +1059,8 @@ const Settings = () => {
                                                             admin.role === 'Super Admin' 
                                                                 ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30' 
                                                                 : admin.role === 'Moderator'
-                                                                ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30'
-                                                                : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
+                                                                ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30'
+                                                                : 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30'
                                                         }`}>
                                                             {admin.role}
                                                         </span>
@@ -1079,7 +1079,7 @@ const Settings = () => {
                                                     <td className="p-3.5 text-right">
                                                         <button 
                                                             onClick={() => setEditingAdmin({ ...admin })}
-                                                            className="text-indigo-600 dark:text-indigo-400 hover:underline text-xs font-bold mr-3"
+                                                            className="text-blue-600 dark:text-blue-400 hover:underline text-xs font-bold mr-3"
                                                         >
                                                             Edit
                                                         </button>
@@ -1123,7 +1123,7 @@ const Settings = () => {
                                             <button 
                                                 onClick={() => handleTriggerTestAlert('orgApprovalNotif')}
                                                 disabled={isTestingAlert === 'orgApprovalNotif'}
-                                                className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
+                                                className="px-3 py-1 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
                                             >
                                                 <span>{isTestingAlert === 'orgApprovalNotif' ? 'Sending...' : 'Send Test Alert'}</span>
                                             </button>
@@ -1143,7 +1143,7 @@ const Settings = () => {
                                             <button 
                                                 onClick={() => handleTriggerTestAlert('newDisputeNotif')}
                                                 disabled={isTestingAlert === 'newDisputeNotif'}
-                                                className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
+                                                className="px-3 py-1 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
                                             >
                                                 <span>{isTestingAlert === 'newDisputeNotif' ? 'Sending...' : 'Send Test Alert'}</span>
                                             </button>
@@ -1163,7 +1163,7 @@ const Settings = () => {
                                             <button 
                                                 onClick={() => handleTriggerTestAlert('certVerifNotif')}
                                                 disabled={isTestingAlert === 'certVerifNotif'}
-                                                className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
+                                                className="px-3 py-1 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
                                             >
                                                 <span>{isTestingAlert === 'certVerifNotif' ? 'Sending...' : 'Send Test Alert'}</span>
                                             </button>
@@ -1183,7 +1183,7 @@ const Settings = () => {
                                             <button 
                                                 onClick={() => handleTriggerTestAlert('sysErrorNotif')}
                                                 disabled={isTestingAlert === 'sysErrorNotif'}
-                                                className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
+                                                className="px-3 py-1 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
                                             >
                                                 <span>{isTestingAlert === 'sysErrorNotif' ? 'Sending...' : 'Send Test Alert'}</span>
                                             </button>
@@ -1203,7 +1203,7 @@ const Settings = () => {
                                             <button 
                                                 onClick={() => handleTriggerTestAlert('secAlertNotif')}
                                                 disabled={isTestingAlert === 'secAlertNotif'}
-                                                className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
+                                                className="px-3 py-1 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
                                             >
                                                 <span>{isTestingAlert === 'secAlertNotif' ? 'Sending...' : 'Send Test Alert'}</span>
                                             </button>
@@ -1237,7 +1237,7 @@ const Settings = () => {
                                                 placeholder="e.g. Scheduled System Upgrade at 2 AM IST" 
                                                 value={broadcastForm.title}
                                                 onChange={(e) => setBroadcastForm(prev => ({ ...prev, title: e.target.value }))}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                             />
                                         </div>
                                         <div>
@@ -1245,7 +1245,7 @@ const Settings = () => {
                                             <select 
                                                 value={broadcastForm.audience}
                                                 onChange={(e) => setBroadcastForm(prev => ({ ...prev, audience: e.target.value }))}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                             >
                                                 <option value="all">All Platform Users</option>
                                                 <option value="student">Students & Participants</option>
@@ -1263,7 +1263,7 @@ const Settings = () => {
                                             placeholder="Write your broadcast message..." 
                                             value={broadcastForm.message}
                                             onChange={(e) => setBroadcastForm(prev => ({ ...prev, message: e.target.value }))}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
 
@@ -1279,7 +1279,7 @@ const Settings = () => {
                                                         broadcastForm.priority === p
                                                             ? p === 'urgent' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40' :
                                                               p === 'high' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40' :
-                                                              'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-500/40'
+                                                              'bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/40'
                                                             : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 border-transparent'
                                                     }`}
                                                 >
@@ -1290,7 +1290,7 @@ const Settings = () => {
                                         <button 
                                             type="submit" 
                                             disabled={isBroadcasting}
-                                            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+                                            className="px-4 py-2 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="m3 11 18-5v12L3 14v-3z"/>
@@ -1330,7 +1330,7 @@ const Settings = () => {
                                                 placeholder="e.g. smtp.gmail.com or smtp.sendgrid.net" 
                                                 value={config.notifications.smtpHost || ''}
                                                 onChange={(e) => handleInputChange('notifications', 'smtpHost', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                             />
                                         </div>
                                         <div>
@@ -1340,7 +1340,7 @@ const Settings = () => {
                                                 placeholder="587" 
                                                 value={config.notifications.smtpPort || 587}
                                                 onChange={(e) => handleInputChange('notifications', 'smtpPort', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                             />
                                         </div>
                                     </div>
@@ -1353,7 +1353,7 @@ const Settings = () => {
                                                 placeholder="notifications@hackzen.org" 
                                                 value={config.notifications.smtpUser || ''}
                                                 onChange={(e) => handleInputChange('notifications', 'smtpUser', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                             />
                                         </div>
                                         <div>
@@ -1363,7 +1363,7 @@ const Settings = () => {
                                                 placeholder="••••••••••••" 
                                                 value={config.notifications.smtpPassword || ''}
                                                 onChange={(e) => handleInputChange('notifications', 'smtpPassword', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                             />
                                         </div>
                                     </div>
@@ -1376,7 +1376,7 @@ const Settings = () => {
                                                 placeholder="HackZen Platform <notifications@hackzen.org>" 
                                                 value={config.notifications.smtpFrom || ''}
                                                 onChange={(e) => handleInputChange('notifications', 'smtpFrom', e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                             />
                                         </div>
                                         <div className="flex flex-col justify-end">
@@ -1398,14 +1398,14 @@ const Settings = () => {
                                                 placeholder="Test recipient email (defaults to admin)"
                                                 value={smtpTestRecipient}
                                                 onChange={(e) => setSmtpTestRecipient(e.target.value)}
-                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                                className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                             />
                                         </div>
                                         <button 
                                             type="button"
                                             onClick={handleTestSmtp}
                                             disabled={smtpTesting || !config.notifications.smtpHost}
-                                            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-[#7C65F6]/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                                         >
                                             {smtpTesting ? (
                                                 <>
@@ -1469,7 +1469,7 @@ const Settings = () => {
                                                             <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
                                                                 n.priority === 'urgent' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' :
                                                                 n.priority === 'high' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
-                                                                'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                                                                'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                                                             }`}>
                                                                 {n.priority}
                                                             </span>
@@ -1511,7 +1511,7 @@ const Settings = () => {
                                             max={12}
                                             value={config.hackathons.maxTeamSize}
                                             onChange={(e) => handleInputChange('hackathons', 'maxTeamSize', parseInt(e.target.value) || 4)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
                                     <div>
@@ -1522,7 +1522,7 @@ const Settings = () => {
                                             max={4}
                                             value={config.hackathons.minTeamSize}
                                             onChange={(e) => handleInputChange('hackathons', 'minTeamSize', parseInt(e.target.value) || 1)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
                                 </div>
@@ -1595,7 +1595,7 @@ const Settings = () => {
                                         <select 
                                             value={config.submissions.maxUploadFileSize}
                                             onChange={(e) => handleInputChange('submissions', 'maxUploadFileSize', e.target.value)}
-                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                            className={`w-full px-3.5 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                                         >
                                             <option value="25 MB">25 MB</option>
                                             <option value="50 MB">50 MB</option>
@@ -1616,7 +1616,7 @@ const Settings = () => {
                                                         onClick={() => handleFileTypeToggle(ext)}
                                                         className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
                                                             isSelected 
-                                                                ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-500/40 shadow-sm' 
+                                                                ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-500/40 shadow-sm' 
                                                                 : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 border-transparent hover:border-slate-300'
                                                         }`}
                                                     >
@@ -1679,7 +1679,7 @@ const Settings = () => {
                                                 handleInputChange('certificates', 'prefix', sanitized);
                                             }}
                                             placeholder="PROEDU"
-                                            className={`w-full px-3.5 py-2 text-xs font-mono font-bold focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                            className={`w-full px-3.5 py-2 text-xs font-mono font-bold focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                                         />
                                     </div>
                                     <div>
@@ -1792,7 +1792,7 @@ const Settings = () => {
                                                 <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02]">
                                                     <td className="p-3 text-slate-500 dark:text-gray-400 whitespace-nowrap font-mono text-[11px]">{log.date}</td>
                                                     <td className="p-3 font-bold text-slate-900 dark:text-white">{log.admin}</td>
-                                                    <td className="p-3 font-semibold text-indigo-600 dark:text-indigo-400">{log.action}</td>
+                                                    <td className="p-3 font-semibold text-blue-600 dark:text-blue-400">{log.action}</td>
                                                     <td className="p-3 text-slate-700 dark:text-gray-300">
                                                         <span className="text-[11px]">{log.details || log.target}</span>
                                                     </td>
@@ -1827,7 +1827,7 @@ const Settings = () => {
                                 placeholder="e.g. Sarah Chen" 
                                 value={newAdminForm.name}
                                 onChange={(e) => setNewAdminForm(prev => ({ ...prev, name: e.target.value }))}
-                                className={`w-full px-3 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                className={`w-full px-3 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                             />
                         </div>
                         <div>
@@ -1838,7 +1838,7 @@ const Settings = () => {
                                 placeholder="sarah@proeduvate.com" 
                                 value={newAdminForm.email}
                                 onChange={(e) => setNewAdminForm(prev => ({ ...prev, email: e.target.value }))}
-                                className={`w-full px-3 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`} 
+                                className={`w-full px-3 py-2 text-xs focus:outline-none rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`} 
                             />
                         </div>
                     </div>
@@ -1848,7 +1848,7 @@ const Settings = () => {
                         <select 
                             value={newAdminForm.role}
                             onChange={(e) => setNewAdminForm(prev => ({ ...prev, role: e.target.value }))}
-                            className={`w-full px-3 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                            className={`w-full px-3 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                         >
                             <option value="Admin">Admin (Standard Governance)</option>
                             <option value="Moderator">Moderator (Disputes & Submissions)</option>
@@ -1871,7 +1871,7 @@ const Settings = () => {
                                             ...prev,
                                             permissions: { ...prev.permissions, [key]: e.target.checked }
                                         }))}
-                                        className="rounded text-indigo-600 focus:ring-0" 
+                                        className="rounded text-blue-600 focus:ring-0" 
                                     />
                                     <span className="capitalize">{key} Management</span>
                                 </label>
@@ -1889,7 +1889,7 @@ const Settings = () => {
                         </button>
                         <button 
                             type="submit" 
-                            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+                            className="px-4 py-2 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
                         >
                             Grant Admin Access
                         </button>
@@ -1913,7 +1913,7 @@ const Settings = () => {
                             <select 
                                 value={editingAdmin.role}
                                 onChange={(e) => setEditingAdmin(prev => ({ ...prev, role: e.target.value }))}
-                                className={`w-full px-3 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500`}
+                                className={`w-full px-3 py-2 text-xs focus:outline-none cursor-pointer rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]`}
                             >
                                 <option value="Super Admin">Super Admin</option>
                                 <option value="Admin">Admin</option>
@@ -1937,7 +1937,7 @@ const Settings = () => {
                                                 ...prev,
                                                 permissions: { ...prev.permissions, [key]: e.target.checked }
                                             }))}
-                                            className="rounded text-indigo-600 focus:ring-0" 
+                                            className="rounded text-blue-600 focus:ring-0" 
                                         />
                                         <span className="capitalize">{key} Management</span>
                                     </label>
@@ -1955,7 +1955,7 @@ const Settings = () => {
                             </button>
                             <button 
                                 type="submit" 
-                                className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+                                className="px-4 py-2 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
                             >
                                 Save Permissions
                             </button>

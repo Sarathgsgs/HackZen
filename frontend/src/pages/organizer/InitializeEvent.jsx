@@ -142,8 +142,8 @@ const InitializeEvent = () => {
 
                     {/* Temporal Coordinates Section */}
                     <div className="glass p-8 rounded-xl border border-white/5 shadow-2xl bg-navy-900/40 space-y-8">
-                        <h3 className="text-lg font-semibold text-white border-l-4 border-purple-500 pl-4">
-                            <span className="text-purple-500">02</span> // Temporal Coordinates
+                        <h3 className="text-lg font-semibold text-white border-l-4 border-blue-500 pl-4">
+                            <span className="text-blue-500">02</span> // Temporal Coordinates
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -154,7 +154,7 @@ const InitializeEvent = () => {
                                     name="startDate"
                                     value={formData.startDate}
                                     onChange={handleInputChange}
-                                    className={`w-full bg-white/5 border ${validationErrors.startDate ? 'border-rose-500/50' : 'border-white/10'} rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:ring-1 focus:ring-purple-500/50 outline-none`}
+                                    className={`w-full bg-white/5 border ${validationErrors.startDate ? 'border-rose-500/50' : 'border-white/10'} rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:ring-1 focus:ring-blue-500/50 outline-none`}
                                 />
                                 {validationErrors.startDate && <p className="text-xs text-rose-500 font-semibold ml-1">{validationErrors.startDate}</p>}
                             </div>
@@ -165,7 +165,7 @@ const InitializeEvent = () => {
                                     name="endDate"
                                     value={formData.endDate}
                                     onChange={handleInputChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:ring-1 focus:ring-purple-500/50 outline-none"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:ring-1 focus:ring-blue-500/50 outline-none"
                                 />
                             </div>
                         </div>

@@ -66,7 +66,7 @@ const ComparisonModal = ({ isOpen, onClose, subA, subB }) => {
                 </button>
 
                 <div className="flex items-center gap-2.5 mb-5">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                         <ScaleIcon className="w-4 h-4" />
                     </div>
                     <div>
@@ -79,7 +79,7 @@ const ComparisonModal = ({ isOpen, onClose, subA, subB }) => {
                     {/* Submission A */}
                     <div className="sm:pr-5 space-y-4 text-xs">
                         <div className="border-b border-slate-200 dark:border-white/10 pb-3">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Submission A</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Submission A</span>
                             <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1">{subA.projectTitle}</h3>
                             <p className="text-slate-500 dark:text-gray-400 text-xs">{subA.teamDetails?.name || subA.teamName} • {subA.category}</p>
                         </div>
@@ -87,7 +87,7 @@ const ComparisonModal = ({ isOpen, onClose, subA, subB }) => {
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Health Score</span><strong className="text-emerald-600 dark:text-emerald-400">{subA.healthScore}/100</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Risk Level</span><strong className={subA.riskLevel === 'HIGH' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}>{subA.riskLevel}</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Originality Score</span><strong>{subA.originality?.similarityScore}% Similarity</strong></div>
-                            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Judge Avg Score</span><strong className="text-purple-600 dark:text-purple-400">{subA.evaluation?.averageScore}/100</strong></div>
+                            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Judge Avg Score</span><strong className="text-blue-600 dark:text-blue-400">{subA.evaluation?.averageScore}/100</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Problem Alignment</span><strong>{subA.aiReview?.problemFit}%</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Technical Feasibility</span><strong>{subA.aiReview?.technicalFeasibility}%</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>On-Time Status</span><strong>{subA.isLate ? 'Late Submission' : 'On Time'}</strong></div>
@@ -97,7 +97,7 @@ const ComparisonModal = ({ isOpen, onClose, subA, subB }) => {
                     {/* Submission B */}
                     <div className="sm:pl-6 space-y-4 text-xs">
                         <div className="border-b border-slate-200 dark:border-white/10 pb-3">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Submission B</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Submission B</span>
                             <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1">{subB.projectTitle}</h3>
                             <p className="text-slate-500 dark:text-gray-400 text-xs">{subB.teamDetails?.name || subB.teamName} • {subB.category}</p>
                         </div>
@@ -105,7 +105,7 @@ const ComparisonModal = ({ isOpen, onClose, subA, subB }) => {
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Health Score</span><strong className="text-emerald-600 dark:text-emerald-400">{subB.healthScore}/100</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Risk Level</span><strong className={subB.riskLevel === 'HIGH' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}>{subB.riskLevel}</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Originality Score</span><strong>{subB.originality?.similarityScore}% Similarity</strong></div>
-                            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Judge Avg Score</span><strong className="text-purple-600 dark:text-purple-400">{subB.evaluation?.averageScore}/100</strong></div>
+                            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Judge Avg Score</span><strong className="text-blue-600 dark:text-blue-400">{subB.evaluation?.averageScore}/100</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Problem Alignment</span><strong>{subB.aiReview?.problemFit}%</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>Technical Feasibility</span><strong>{subB.aiReview?.technicalFeasibility}%</strong></div>
                             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-white/5"><span>On-Time Status</span><strong>{subB.isLate ? 'Late Submission' : 'On Time'}</strong></div>
@@ -456,7 +456,7 @@ const Submissions = () => {
                         <select 
                             value={actionFilter} 
                             onChange={(e) => setActionFilter(e.target.value)}
-                            className="appearance-none pr-9 pl-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold bg-white dark:bg-navy-800 text-slate-700 dark:text-gray-200 focus:outline-none focus:border-indigo-500 cursor-pointer transition-all shadow-sm"
+                            className="appearance-none pr-9 pl-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold bg-white dark:bg-navy-800 text-slate-700 dark:text-gray-200 focus:outline-none focus:border-[#2563eb] cursor-pointer transition-all shadow-sm"
                         >
                             <option value="All">All Filter Conditions</option>
                             <option value="High Risk">⚠️ High Risk</option>
@@ -494,7 +494,7 @@ const Submissions = () => {
                         <p className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-gray-400">Total Submissions</p>
                         <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5 leading-tight">{stats.total}</p>
                     </div>
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                         <FileTextIcon className="w-4 h-4" />
                     </div>
                 </div>
@@ -521,10 +521,10 @@ const Submissions = () => {
 
                 <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider text-purple-500">Changes / Flagged</p>
-                        <p className="text-xl sm:text-2xl font-bold text-purple-600 dark:text-purple-400 mt-0.5 leading-tight">{stats.changes + stats.flagged}</p>
+                        <p className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider text-blue-500">Changes / Flagged</p>
+                        <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-0.5 leading-tight">{stats.changes + stats.flagged}</p>
                     </div>
-                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/20 text-purple-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 text-blue-500 flex items-center justify-center shrink-0">
                         <ShieldIcon className="w-4 h-4" />
                     </div>
                 </div>
@@ -563,12 +563,12 @@ const Submissions = () => {
                                     onClick={() => setActiveTab(tab)}
                                     className={`py-1.5 px-2.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                                         isActive 
-                                        ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/40 shadow-sm' 
+                                        ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/40 shadow-sm' 
                                         : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5 border border-transparent'
                                     }`}
                                 >
                                     <span>{tab.replace('Requested', 'Req')}</span>
-                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isActive ? 'bg-indigo-200/70 dark:bg-indigo-400/20 text-indigo-800 dark:text-indigo-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
+                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isActive ? 'bg-blue-200/70 dark:bg-blue-400/20 text-blue-800 dark:text-blue-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
                                         {count}
                                     </span>
                                 </button>
@@ -578,9 +578,9 @@ const Submissions = () => {
 
                     {/* Bulk Actions Header Bar */}
                     {selectedSubIds.length > 0 && (
-                        <div className="p-3 bg-indigo-50 dark:bg-indigo-500/10 border-b border-indigo-200 dark:border-indigo-500/20 text-indigo-900 dark:text-indigo-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs font-bold animate-in fade-in shrink-0">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-500/10 border-b border-blue-200 dark:border-blue-500/20 text-blue-900 dark:text-blue-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs font-bold animate-in fade-in shrink-0">
                             <span className="flex items-center gap-1.5">
-                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                                 {selectedSubIds.length} Selected
                             </span>
                             <div className="flex items-center gap-1.5 flex-wrap">
@@ -589,7 +589,7 @@ const Submissions = () => {
                                 <button 
                                     onClick={() => setIsCompareModalOpen(true)} 
                                     disabled={selectedSubIds.length !== 2} 
-                                    className={`px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:hover:bg-purple-500/25 dark:text-purple-300 border border-purple-300/80 dark:border-purple-500/30 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer ${selectedSubIds.length !== 2 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:hover:bg-blue-500/25 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 rounded-lg text-[10px] uppercase font-bold transition-all cursor-pointer ${selectedSubIds.length !== 2 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     Compare
                                 </button>
@@ -607,7 +607,7 @@ const Submissions = () => {
                                 placeholder="Search project, team, or track..." 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
+                                className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#2563eb] transition-colors shadow-sm"
                             />
                         </div>
                     </div>
@@ -633,8 +633,8 @@ const Submissions = () => {
                                         onClick={() => setSelectedSubId(sub.id)}
                                         className={`p-3.5 rounded-xl cursor-pointer transition-all border relative text-left ${
                                             isSelected 
-                                            ? 'bg-indigo-50/90 dark:bg-indigo-500/15 border-indigo-400 dark:border-indigo-500/60 shadow-sm' 
-                                            : 'bg-white dark:bg-white/[0.02] border-slate-200/80 dark:border-white/5 hover:border-indigo-300 dark:hover:border-white/20'
+                                            ? 'bg-blue-50/90 dark:bg-blue-500/15 border-blue-400 dark:border-blue-500/60 shadow-sm' 
+                                            : 'bg-white dark:bg-white/[0.02] border-slate-200/80 dark:border-white/5 hover:border-blue-300 dark:hover:border-white/20'
                                         }`}
                                     >
                                         <div className="flex justify-between items-start mb-2">
@@ -643,11 +643,11 @@ const Submissions = () => {
                                                     type="checkbox" 
                                                     checked={isChecked} 
                                                     onChange={(e) => { e.stopPropagation(); toggleSelectSub(sub.id); }} 
-                                                    className="mt-0.5 rounded border-slate-300 dark:border-white/20 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                                    className="mt-0.5 rounded border-slate-300 dark:border-white/20 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                 />
                                                 <div className="truncate">
                                                     <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">{sub.projectTitle}</h4>
-                                                    <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold truncate mt-0.5">{sub.teamDetails?.name || sub.teamName}</p>
+                                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 font-bold truncate mt-0.5">{sub.teamDetails?.name || sub.teamName}</p>
                                                     <p className="text-[10px] text-slate-500 dark:text-gray-400 truncate">{sub.category}</p>
                                                 </div>
                                             </div>
@@ -656,7 +656,7 @@ const Submissions = () => {
                                                 sub.riskLevel === 'HIGH' ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/30' :
                                                 sub.status === 'Approved' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' :
                                                 sub.status === 'Changes Requested' ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' :
-                                                sub.status === 'Flagged for Investigation' ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30' :
+                                                sub.status === 'Flagged for Investigation' ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30' :
                                                 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-gray-300 border-slate-200 dark:border-white/10'
                                             }`}>
                                                 {sub.riskLevel === 'HIGH' ? '⚠️ High Risk' : sub.status}
@@ -684,7 +684,7 @@ const Submissions = () => {
                             {/* Selected Header */}
                             <div className="p-3.5 sm:p-4 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 font-black text-base flex items-center justify-center shadow-sm shrink-0">
+                                    <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 font-black text-base flex items-center justify-center shadow-sm shrink-0">
                                         <FileTextIcon className="w-4.5 h-4.5" />
                                     </div>
                                     <div>
@@ -693,7 +693,7 @@ const Submissions = () => {
                                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
                                                 selectedSub.status === 'Approved' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' :
                                                 selectedSub.status === 'Changes Requested' ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' :
-                                                selectedSub.status === 'Flagged for Investigation' ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30' :
+                                                selectedSub.status === 'Flagged for Investigation' ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30' :
                                                 selectedSub.status === 'Rejected' ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/30' :
                                                 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30'
                                             }`}>
@@ -701,7 +701,7 @@ const Submissions = () => {
                                             </span>
                                         </div>
                                         <p className="text-xs text-slate-500 dark:text-gray-400 font-medium mt-0.5">
-                                            {selectedSub.category} • <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{selectedSub.teamDetails?.name || selectedSub.teamName}</strong> • {selectedSub.hackathon}
+                                            {selectedSub.category} • <strong className="text-blue-600 dark:text-blue-400 font-bold">{selectedSub.teamDetails?.name || selectedSub.teamName}</strong> • {selectedSub.hackathon}
                                         </p>
                                     </div>
                                 </div>
@@ -711,7 +711,7 @@ const Submissions = () => {
                                     <select 
                                         value={activeVersion} 
                                         onChange={(e) => setActiveVersion(e.target.value)}
-                                        className="rounded-xl px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-800 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 shadow-sm cursor-pointer"
+                                        className="rounded-xl px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] shadow-sm cursor-pointer"
                                     >
                                         {(selectedSub.versions || [{ v: 'v1', note: 'Final' }]).map(v => (
                                             <option key={v.v} value={v.v}>{v.v} - {v.note || 'Version'}</option>
@@ -756,7 +756,7 @@ const Submissions = () => {
                                         onClick={() => setActiveDetailTab(tab.id)}
                                         className={`pb-2.5 px-2 text-xs font-extrabold transition-all border-b-2 flex items-center gap-1.5 cursor-pointer ${
                                             activeDetailTab === tab.id
-                                            ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
+                                            ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
                                             : 'border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'
                                         }`}
                                     >
@@ -792,9 +792,9 @@ const Submissions = () => {
                                         )}
 
                                         {selectedSub.status === 'Flagged for Investigation' && (
-                                            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-800 dark:text-purple-300 text-xs">
+                                            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-800 dark:text-blue-300 text-xs">
                                                 <p className="font-extrabold flex items-center gap-1.5 mb-1">
-                                                    <ShieldIcon className="w-4 h-4 text-purple-500" /> Under Active Compliance Investigation:
+                                                    <ShieldIcon className="w-4 h-4 text-blue-500" /> Under Active Compliance Investigation:
                                                 </p>
                                                 <p className="font-medium pl-5">{selectedSub.investigationReason || 'High code similarity or post-deadline activity flag.'}</p>
                                             </div>
@@ -809,7 +809,7 @@ const Submissions = () => {
                                             <div className="space-y-3.5 text-xs">
                                                 <div>
                                                     <span className="text-slate-400 dark:text-gray-400 font-bold block mb-1">Tagline</span>
-                                                    <p className="text-indigo-600 dark:text-indigo-400 font-semibold italic text-sm">"{selectedSub.tagline}"</p>
+                                                    <p className="text-blue-600 dark:text-blue-400 font-semibold italic text-sm">"{selectedSub.tagline}"</p>
                                                 </div>
                                                 <div>
                                                     <span className="text-slate-400 dark:text-gray-400 font-bold block mb-1">Full Solution Description</span>
@@ -818,7 +818,7 @@ const Submissions = () => {
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-200/80 dark:border-white/5">
                                                     <div>
                                                         <span className="text-slate-400 dark:text-gray-400 font-bold block mb-1">Repository URL</span>
-                                                        <a href={selectedSub.repoUrl} target="_blank" rel="noreferrer" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline truncate block">
+                                                        <a href={selectedSub.repoUrl} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 font-bold hover:underline truncate block">
                                                             {selectedSub.repoUrl}
                                                         </a>
                                                     </div>
@@ -838,7 +838,7 @@ const Submissions = () => {
                                             <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
                                                 <div className="flex justify-between items-center mb-3 border-b border-slate-200/80 dark:border-white/5 pb-2.5">
                                                     <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-gray-400">Deliverables Checklist</h4>
-                                                    <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-500/20">
+                                                    <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-500/20">
                                                         {getDeliverableCount(selectedSub.deliverables).done} / {getDeliverableCount(selectedSub.deliverables).total} Completed
                                                     </span>
                                                 </div>
@@ -887,7 +887,7 @@ const Submissions = () => {
                                         <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
                                             <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-gray-400 mb-3.5 flex items-center justify-between">
                                                 <span>Team Profile & Member Roster</span>
-                                                <span className="text-indigo-600 dark:text-indigo-400 font-mono font-bold">{selectedSub.teamDetails?.college}</span>
+                                                <span className="text-blue-600 dark:text-blue-400 font-mono font-bold">{selectedSub.teamDetails?.college}</span>
                                             </h4>
                                             
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
@@ -895,7 +895,7 @@ const Submissions = () => {
                                                     <div key={idx} className="p-3 rounded-xl bg-white dark:bg-black/20 border border-slate-200/80 dark:border-white/5 text-xs shadow-sm">
                                                         <div className="flex justify-between items-center mb-0.5">
                                                             <strong className="text-slate-900 dark:text-white font-bold">{m.name}</strong>
-                                                            <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400">{m.role}</span>
+                                                            <span className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400">{m.role}</span>
                                                         </div>
                                                         <p className="text-[11px] text-slate-500 dark:text-gray-400 truncate">{m.email}</p>
                                                     </div>
@@ -944,7 +944,7 @@ const Submissions = () => {
                                         <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
                                             <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-gray-400 mb-3.5 flex items-center justify-between">
                                                 <span>Judge Evaluation & Rubric Scores</span>
-                                                <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">Average: {selectedSub.evaluation?.averageScore || 84.5} / 100</span>
+                                                <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">Average: {selectedSub.evaluation?.averageScore || 84.5} / 100</span>
                                             </h4>
 
                                             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs mb-3">
@@ -971,13 +971,13 @@ const Submissions = () => {
                                         
                                         {/* Top Header & Re-run Button */}
                                         <div className="flex justify-between items-center">
-                                            <h4 className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                                            <h4 className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-2">
                                                 <ZapIcon className="w-4 h-4" /> Live AI Technical Co-Review & Rubric Analysis
                                             </h4>
                                             <button 
                                                 onClick={() => handleRunAiReview(true)}
                                                 disabled={isAiReviewLoading}
-                                                className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+                                                className="px-4 py-2 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
                                             >
                                                 {isAiReviewLoading ? 'Analyzing...' : 'Re-Run AI Analysis'}
                                             </button>
@@ -991,12 +991,12 @@ const Submissions = () => {
                                         ) : (
                                             <div className="space-y-4">
                                                 {/* AI Review Card */}
-                                                <div className="p-5 bg-indigo-50/60 dark:bg-indigo-500/10 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm">
-                                                    <div className="flex justify-between items-center mb-4 border-b border-indigo-200 dark:border-indigo-500/20 pb-3">
+                                                <div className="p-5 bg-blue-50/60 dark:bg-blue-500/10 rounded-2xl border border-blue-200 dark:border-blue-500/20 shadow-sm">
+                                                    <div className="flex justify-between items-center mb-4 border-b border-blue-200 dark:border-blue-500/20 pb-3">
                                                         <div>
-                                                            <span className="font-black uppercase tracking-wider text-[10px] text-indigo-700 dark:text-indigo-300 block mb-0.5">AI Technical Score</span>
+                                                            <span className="font-black uppercase tracking-wider text-[10px] text-blue-700 dark:text-blue-300 block mb-0.5">AI Technical Score</span>
                                                             <div className="flex items-baseline gap-2">
-                                                                <span className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">
+                                                                <span className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">
                                                                     {currentAiReview?.overallScore ?? selectedSub.healthScore ?? 88}
                                                                 </span>
                                                                 <span className="text-xs text-slate-500 font-bold">/ 100</span>
@@ -1021,10 +1021,10 @@ const Submissions = () => {
                                                         <div>
                                                             <div className="flex justify-between text-[10px] uppercase font-bold mb-1.5">
                                                                 <span className="text-slate-600 dark:text-gray-400">Problem Alignment & Scope</span>
-                                                                <span className="text-indigo-600 dark:text-indigo-400">{currentAiReview?.problemFit || selectedSub.aiReview?.problemFit || 92}%</span>
+                                                                <span className="text-blue-600 dark:text-blue-400">{currentAiReview?.problemFit || selectedSub.aiReview?.problemFit || 92}%</span>
                                                             </div>
                                                             <div className="w-full bg-slate-200 dark:bg-black/40 h-2 rounded-full overflow-hidden">
-                                                                <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${currentAiReview?.problemFit || selectedSub.aiReview?.problemFit || 92}%` }}></div>
+                                                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${currentAiReview?.problemFit || selectedSub.aiReview?.problemFit || 92}%` }}></div>
                                                             </div>
                                                         </div>
 
@@ -1041,32 +1041,32 @@ const Submissions = () => {
                                                         <div>
                                                             <div className="flex justify-between text-[10px] uppercase font-bold mb-1.5">
                                                                 <span className="text-slate-600 dark:text-gray-400">Innovation & Originality</span>
-                                                                <span className="text-purple-600 dark:text-purple-400">{currentAiReview?.innovationScore || 89}%</span>
+                                                                <span className="text-blue-600 dark:text-blue-400">{currentAiReview?.innovationScore || 89}%</span>
                                                             </div>
                                                             <div className="w-full bg-slate-200 dark:bg-black/40 h-2 rounded-full overflow-hidden">
-                                                                <div className="h-full bg-purple-500 rounded-full" style={{ width: `${currentAiReview?.innovationScore || 89}%` }}></div>
+                                                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${currentAiReview?.innovationScore || 89}%` }}></div>
                                                             </div>
                                                         </div>
 
                                                         <div>
                                                             <div className="flex justify-between text-[10px] uppercase font-bold mb-1.5">
                                                                 <span className="text-slate-600 dark:text-gray-400">Code Quality & Completeness</span>
-                                                                <span className="text-indigo-600 dark:text-indigo-400">{currentAiReview?.codeQualityScore || 85}%</span>
+                                                                <span className="text-blue-600 dark:text-blue-400">{currentAiReview?.codeQualityScore || 85}%</span>
                                                             </div>
                                                             <div className="w-full bg-slate-200 dark:bg-black/40 h-2 rounded-full overflow-hidden">
-                                                                <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${currentAiReview?.codeQualityScore || 85}%` }}></div>
+                                                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${currentAiReview?.codeQualityScore || 85}%` }}></div>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     {/* Summary */}
-                                                    <p className="text-xs text-slate-700 dark:text-gray-300 italic bg-white/80 dark:bg-black/30 p-3 rounded-xl border border-indigo-200/50 dark:border-white/5">
+                                                    <p className="text-xs text-slate-700 dark:text-gray-300 italic bg-white/80 dark:bg-black/30 p-3 rounded-xl border border-blue-200/50 dark:border-white/5">
                                                         "{currentAiReview?.summary || selectedSub.aiReview?.summary || 'Project delivers strong alignment with track objectives, featuring modular architectural structure and clear deliverable assets.'}"
                                                     </p>
 
                                                     {/* Strengths & Concerns */}
                                                     {(currentAiReview?.strengths || currentAiReview?.concerns) && (
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-3.5 pt-3.5 border-t border-indigo-200/50 dark:border-white/5 text-xs">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-3.5 pt-3.5 border-t border-blue-200/50 dark:border-white/5 text-xs">
                                                             {currentAiReview?.strengths && currentAiReview.strengths.length > 0 && (
                                                                 <div>
                                                                     <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 block mb-1.5">Key Strengths</span>
@@ -1109,7 +1109,7 @@ const Submissions = () => {
                                                 ) : (
                                                     (selectedSub.notes || []).map((note, idx) => (
                                                         <div key={idx} className="p-3 bg-white dark:bg-black/30 rounded-xl border border-slate-200/80 dark:border-white/5 text-xs shadow-sm">
-                                                            <div className="flex justify-between font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+                                                            <div className="flex justify-between font-bold text-blue-600 dark:text-blue-400 mb-1">
                                                                 <span>{note.author}</span>
                                                                 <span className="text-[10px] text-slate-400 font-mono">{note.date}</span>
                                                             </div>
@@ -1126,9 +1126,9 @@ const Submissions = () => {
                                                     placeholder="Add private note for admin team..." 
                                                     value={newAdminNote} 
                                                     onChange={(e) => setNewAdminNote(e.target.value)}
-                                                    className="flex-1 bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                                                    className="flex-1 bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#2563eb]"
                                                 />
-                                                <button type="submit" className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 text-xs font-bold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer">
+                                                <button type="submit" className="px-4 py-2 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 text-xs font-bold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer">
                                                     Add Note
                                                 </button>
                                             </form>
@@ -1158,7 +1158,7 @@ const Submissions = () => {
                                             <button 
                                                 onClick={() => setIsFlagModalOpen(true)}
                                                 disabled={actionLoading}
-                                                className="px-4 py-2 bg-purple-50 dark:bg-purple-500/10 hover:bg-purple-100 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                                                className="px-4 py-2 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 text-xs font-bold rounded-xl transition-all cursor-pointer"
                                             >
                                                 Flag Investigation
                                             </button>
@@ -1172,7 +1172,7 @@ const Submissions = () => {
                                             <button 
                                                 onClick={() => handleStatusUpdate(selectedSub.id, 'Approved')}
                                                 disabled={actionLoading}
-                                                className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 font-bold text-xs rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                                                className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-[#2563eb]/20 font-bold text-xs rounded-xl shadow-md shadow-[#2563eb]/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                                             >
                                                 <CheckIcon className="w-3.5 h-3.5 text-white" />
                                                 Approve Submission
@@ -1195,7 +1195,7 @@ const Submissions = () => {
                                             <button 
                                                 onClick={() => handleStatusUpdate(selectedSub.id, 'Approved')}
                                                 disabled={actionLoading}
-                                                className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 font-bold text-xs rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+                                                className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-[#2563eb]/20 font-bold text-xs rounded-xl shadow-md shadow-[#2563eb]/20 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
                                             >
                                                 <CheckIcon className="w-3.5 h-3.5 text-white" />
                                                 Re-Approve
@@ -1277,10 +1277,10 @@ const Submissions = () => {
                             { key: 'problemStatement', label: 'Problem Scope Definition' },
                             { key: 'postDeadline', label: 'Post-Deadline Git Revisions' },
                         ].map(({ key, label }) => (
-                            <label key={key} className="flex items-center gap-2 text-xs text-slate-700 dark:text-gray-300 cursor-pointer p-2.5 rounded-xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/5 hover:border-indigo-300">
+                            <label key={key} className="flex items-center gap-2 text-xs text-slate-700 dark:text-gray-300 cursor-pointer p-2.5 rounded-xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/5 hover:border-blue-300">
                                 <input 
                                     type="checkbox" 
-                                    className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer" 
+                                    className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer" 
                                     checked={changeRequests[key]} 
                                     onChange={(e) => setChangeRequests({...changeRequests, [key]: e.target.checked})} 
                                 /> 
@@ -1294,7 +1294,7 @@ const Submissions = () => {
                         <select 
                             value={extendedDeadline} 
                             onChange={(e) => setExtendedDeadline(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                         >
                             <option value="12 hours">12 Hours Extension</option>
                             <option value="24 hours">24 Hours Extension (Standard)</option>
@@ -1348,14 +1348,14 @@ const Submissions = () => {
                             'Submission Deadline Policy Violation',
                             'Other Compliance Concern'
                         ].map(reason => (
-                            <label key={reason} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-gray-300 cursor-pointer p-2.5 rounded-xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/5 hover:border-purple-300">
+                            <label key={reason} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-gray-300 cursor-pointer p-2.5 rounded-xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/5 hover:border-blue-300">
                                 <input 
                                     type="radio" 
                                     name="flagReason" 
                                     value={reason} 
                                     checked={flagReason === reason}
                                     onChange={(e) => setFlagReason(e.target.value)} 
-                                    className="text-purple-600 focus:ring-purple-500 cursor-pointer" 
+                                    className="text-blue-600 focus:ring-blue-500 cursor-pointer" 
                                 /> 
                                 <span className="font-bold">{reason}</span>
                             </label>
@@ -1368,7 +1368,7 @@ const Submissions = () => {
                             rows="2" 
                             value={flagExplanation} 
                             onChange={(e) => setFlagExplanation(e.target.value)} 
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-purple-500 resize-none"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 resize-none"
                         ></textarea>
                     </div>
                     <div className="flex justify-end gap-2.5 pt-2">
@@ -1381,7 +1381,7 @@ const Submissions = () => {
                         <button 
                             onClick={handleFlagInvestigation} 
                             disabled={actionLoading}
-                            className="px-5 py-2 bg-purple-50 dark:bg-purple-500/15 hover:bg-purple-100 dark:hover:bg-purple-500/25 text-purple-700 dark:text-purple-300 border border-purple-300/80 dark:border-purple-500/30 font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer active:scale-95"
+                            className="px-5 py-2 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer active:scale-95"
                         >
                             {actionLoading ? 'Flagging...' : 'Confirm Flag'}
                         </button>

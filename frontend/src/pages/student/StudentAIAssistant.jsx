@@ -362,7 +362,7 @@ const StudentAIAssistant = () => {
                     <div>
                         <div className="flex items-center gap-2.5">
                             <h1 className="text-[2.2rem] font-bold tracking-[-0.04em] text-[#1d1f2a]">AI Project Assistant</h1>
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
                                 <Sparkles className="h-3.5 w-3.5" />
                                 NVIDIA Llama 3.2 NIM
                             </span>
@@ -374,11 +374,11 @@ const StudentAIAssistant = () => {
 
                     {selectedTeam && (
                         <div className="flex items-center gap-3 rounded-2xl border border-[#d8d2e6] bg-white px-4 py-2.5 shadow-sm">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
                                 <FolderGit2 className="h-5 w-5" />
                             </div>
                             <div className="text-left">
-                                <div className="text-[11px] font-semibold uppercase tracking-wider text-purple-800">Active Project</div>
+                                <div className="text-[11px] font-semibold uppercase tracking-wider text-blue-800">Active Project</div>
                                 <div className="text-sm font-bold text-gray-900 truncate max-w-[200px]">
                                     {selectedTeam.project || selectedTeam.teamName}
                                 </div>
@@ -424,7 +424,7 @@ const StudentAIAssistant = () => {
                             <div className="flex-1 space-y-4 overflow-y-auto pr-2">
                                 {isLoading ? (
                                     <div className="flex h-full flex-col items-center justify-center py-12 text-[#777487]">
-                                        <Cpu className="h-8 w-8 animate-spin text-purple-600 mb-3" />
+                                        <Cpu className="h-8 w-8 animate-spin text-blue-600 mb-3" />
                                         <p className="text-sm font-medium">Connecting to AI Co-Mentor...</p>
                                     </div>
                                 ) : null}
@@ -438,7 +438,7 @@ const StudentAIAssistant = () => {
 
                                 {!isLoading && messages.length === 0 && (
                                     <div className="flex h-full flex-col items-center justify-center py-12 text-center">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-700 mb-3">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 mb-3">
                                             <MessageSquare className="h-6 w-6" />
                                         </div>
                                         <h3 className="text-base font-bold text-gray-800">Welcome to your Project AI Assistant</h3>
@@ -451,7 +451,7 @@ const StudentAIAssistant = () => {
                                                     key={starter.id}
                                                     type="button"
                                                     onClick={() => handleSelectStarter(starter.text)}
-                                                    className="rounded-full border border-purple-200 bg-white px-3.5 py-1.5 text-xs font-medium text-purple-800 shadow-sm transition hover:bg-purple-50"
+                                                    className="rounded-full border border-blue-200 bg-white px-3.5 py-1.5 text-xs font-medium text-blue-800 shadow-sm transition hover:bg-blue-50"
                                                 >
                                                     {starter.text}
                                                 </button>
@@ -469,8 +469,8 @@ const StudentAIAssistant = () => {
                                             <div
                                                 className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold ${
                                                     msg.sender === 'user'
-                                                        ? 'bg-[#4d3bb5] text-white shadow-sm'
-                                                        : 'border border-[#d6d0e6] bg-white text-[#4d3bb5] shadow-sm'
+                                                        ? 'bg-[#2563eb] text-white shadow-sm'
+                                                        : 'border border-[#d6d0e6] bg-white text-[#2563eb] shadow-sm'
                                                 }`}
                                             >
                                                 {msg.sender === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
@@ -480,7 +480,7 @@ const StudentAIAssistant = () => {
                                                 <div
                                                     className={`rounded-[22px] px-4 py-3 shadow-[0_2px_10px_rgba(40,35,65,0.03)] ${
                                                         msg.sender === 'user'
-                                                            ? 'bg-[#4d3bb5] text-white leading-relaxed'
+                                                            ? 'bg-[#2563eb] text-white leading-relaxed'
                                                             : 'border border-[#e7e1f0] bg-white text-[#1f2330]'
                                                     }`}
                                                 >
@@ -505,15 +505,15 @@ const StudentAIAssistant = () => {
                                 {isAITyping && (
                                     <div className="flex justify-start">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#d6d0e6] bg-white text-[#4d3bb5] shadow-sm">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#d6d0e6] bg-white text-[#2563eb] shadow-sm">
                                                 <Bot className="h-4 w-4" />
                                             </div>
                                             <div className="flex items-center gap-2 rounded-2xl border border-[#e7e1f0] bg-white px-4 py-3 shadow-sm">
-                                                <span className="text-xs font-semibold uppercase tracking-wider text-purple-700">AI Thinking</span>
+                                                <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">AI Thinking</span>
                                                 <div className="flex items-center gap-1">
-                                                    <span className="h-2 w-2 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                                                    <span className="h-2 w-2 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                                                    <span className="h-2 w-2 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                                                    <span className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                                                    <span className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                                                    <span className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '300ms' }}></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -531,7 +531,7 @@ const StudentAIAssistant = () => {
                                         type="button"
                                         onClick={() => handleSelectStarter(starter.text)}
                                         disabled={isAITyping}
-                                        className="rounded-full border border-[#dfe2ea] bg-white px-3 py-1.5 text-[0.76rem] font-medium text-[#2d2e39] shadow-sm transition hover:border-purple-300 hover:bg-purple-50 disabled:opacity-50"
+                                        className="rounded-full border border-[#dfe2ea] bg-white px-3 py-1.5 text-[0.76rem] font-medium text-[#2d2e39] shadow-sm transition hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50"
                                     >
                                         {starter.text}
                                     </button>
@@ -557,7 +557,7 @@ const StudentAIAssistant = () => {
                             )}
 
                             {/* Input Form */}
-                            <div className="mt-3 flex items-end gap-2.5 rounded-[20px] border border-[#d6d2dd] bg-white p-2 shadow-[0_6px_25px_rgba(41,32,72,0.04)] focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100">
+                            <div className="mt-3 flex items-end gap-2.5 rounded-[20px] border border-[#d6d2dd] bg-white p-2 shadow-[0_6px_25px_rgba(41,32,72,0.04)] focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
                                 <div className="flex-1">
                                     <textarea
                                         ref={textareaRef}
@@ -579,7 +579,7 @@ const StudentAIAssistant = () => {
                                     type="button"
                                     onClick={handleSendMessage}
                                     disabled={!inputValue.trim() || isAITyping || isContextLoading}
-                                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#4d3bb5] text-white shadow-[0_8px_18px_rgba(77,59,181,0.25)] transition hover:bg-[#3f2fa0] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#2563eb] text-white shadow-[0_8px_18px_rgba(37,99,235,0.25)] transition hover:bg-[#1d4ed8] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                                     aria-label="Send message"
                                 >
                                     <Send className="h-4 w-4" />
@@ -596,7 +596,7 @@ const StudentAIAssistant = () => {
                                 <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[#6c6778]">
                                     Hackathon Context
                                 </span>
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d4cde7] bg-white text-[#5d4ad6]">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d4cde7] bg-white text-[#2563eb]">
                                     <Layers className="h-4 w-4" />
                                 </div>
                             </div>
@@ -610,7 +610,7 @@ const StudentAIAssistant = () => {
                                             aria-label="Current hackathon"
                                             value={selectedHackathonId}
                                             onChange={(event) => setSelectedHackathonId(event.target.value)}
-                                            className="w-full rounded-xl border border-[#d8d4de] bg-white px-3 py-2 text-[0.95rem] font-semibold text-[#1d1e2a] focus:outline-none focus:ring-2 focus:ring-purple-200"
+                                            className="w-full rounded-xl border border-[#d8d4de] bg-white px-3 py-2 text-[0.95rem] font-semibold text-[#1d1e2a] focus:outline-none focus:ring-2 focus:ring-blue-200"
                                         >
                                             {hackathons.map((hackathon) => (
                                                 <option key={hackathon.id || hackathon._id} value={hackathon.id || hackathon._id}>
@@ -621,9 +621,9 @@ const StudentAIAssistant = () => {
                                     </div>
 
                                     {selectedTeam && (
-                                        <div className="mt-4 rounded-xl border border-purple-200 bg-purple-50/70 p-3.5">
-                                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-900">
-                                                <Users className="h-4 w-4 text-purple-700" />
+                                        <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/70 p-3.5">
+                                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900">
+                                                <Users className="h-4 w-4 text-blue-700" />
                                                 <span>Your Team: {selectedTeam.teamName}</span>
                                             </div>
                                             {selectedTeam.project && (
@@ -632,7 +632,7 @@ const StudentAIAssistant = () => {
                                                 </div>
                                             )}
                                             {selectedTeam.track && (
-                                                <div className="mt-0.5 text-xs text-purple-700 font-medium">
+                                                <div className="mt-0.5 text-xs text-blue-700 font-medium">
                                                     Track: {selectedTeam.track}
                                                 </div>
                                             )}
@@ -680,7 +680,7 @@ const StudentAIAssistant = () => {
                                     'Structuring your pitch deck, demo flow, and presentation points.'
                                 ].map((item, i) => (
                                     <li key={i} className="flex items-start gap-2.5">
-                                        <span className="mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-700">
+                                        <span className="mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
                                             <CheckCircle2 className="h-3 w-3" />
                                         </span>
                                         <span className="leading-snug">{item}</span>
@@ -688,8 +688,8 @@ const StudentAIAssistant = () => {
                                 ))}
                             </ul>
 
-                            <div className="mt-5 rounded-xl border border-purple-100 bg-white p-3 text-xs text-gray-600">
-                                <span className="font-semibold text-purple-900 block mb-1">💡 Quick Tip:</span>
+                            <div className="mt-5 rounded-xl border border-blue-100 bg-white p-3 text-xs text-gray-600">
+                                <span className="font-semibold text-blue-900 block mb-1">💡 Quick Tip:</span>
                                 If you ask general questions, I will always guide you back to your hackathon project so you stay focused on winning!
                             </div>
                         </div>
@@ -718,8 +718,8 @@ class AIAssistantErrorBoundary extends React.Component {
         if (this.state.hasError) {
             return (
                 <div className="min-h-screen bg-[#f3f0f5] px-4 py-12 flex flex-col items-center justify-center text-center">
-                    <div className="max-w-md w-full rounded-2xl bg-white p-8 border border-purple-200 shadow-xl">
-                        <div className="h-14 w-14 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center mx-auto mb-4">
+                    <div className="max-w-md w-full rounded-2xl bg-white p-8 border border-blue-200 shadow-xl">
+                        <div className="h-14 w-14 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mx-auto mb-4">
                             <Bot className="h-7 w-7" />
                         </div>
                         <h2 className="text-xl font-bold text-gray-900 mb-2">AI Assistant Ready</h2>
@@ -732,7 +732,7 @@ class AIAssistantErrorBoundary extends React.Component {
                                 this.setState({ hasError: false, error: null });
                                 window.location.reload();
                             }}
-                            className="w-full py-3 px-4 bg-[#4d3bb5] text-white rounded-xl font-semibold hover:bg-[#3f2fa0] transition shadow-md"
+                            className="w-full py-3 px-4 bg-[#2563eb] text-white rounded-xl font-semibold hover:bg-[#1d4ed8] transition shadow-md"
                         >
                             Reload Assistant
                         </button>

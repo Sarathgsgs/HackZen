@@ -63,7 +63,7 @@ const OrganizerSettings = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-8 h-8 border-2 border-[#7C65F6] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -93,7 +93,7 @@ const OrganizerSettings = () => {
                         className={`rounded-xl px-5 py-2.5 text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
                             !isDirty || !isValid || isSaving
                                 ? 'border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-navy-800 text-slate-400 cursor-not-allowed'
-                                : 'bg-[#7C65F6] hover:bg-[#6D28D9] text-white'
+                                : 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white'
                         }`}
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
@@ -121,7 +121,7 @@ const OrganizerSettings = () => {
                                     value={orgSettings.orgName}
                                     placeholder="e.g. Acme Tech Innovations"
                                     onChange={(e) => setOrgSettings({ ...orgSettings, orgName: e.target.value })}
-                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#7C65F6] transition-colors"
+                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 transition-colors"
                                 />
                             </div>
 
@@ -135,7 +135,7 @@ const OrganizerSettings = () => {
                                             onClick={() => setOrgSettings({ ...orgSettings, emailReports: freq })}
                                             className={`py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                                                 orgSettings.emailReports === freq
-                                                    ? 'bg-[#7C65F6] text-white shadow-xs'
+                                                    ? 'bg-[#2563eb] text-white shadow-xs'
                                                     : 'border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800'
                                             }`}
                                         >
@@ -168,7 +168,7 @@ const OrganizerSettings = () => {
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Automatically grant access to approved mentors.</p>
                                 </div>
                                 <div className={`w-10 h-5 rounded-full relative transition-all duration-300 ${
-                                    orgSettings.autoApproveMentors ? 'bg-[#7C65F6]' : 'bg-slate-300 dark:bg-slate-700'
+                                    orgSettings.autoApproveMentors ? 'bg-[#2563eb]' : 'bg-slate-300 dark:bg-slate-700'
                                 }`}>
                                     <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-xs ${
                                         orgSettings.autoApproveMentors ? 'left-5' : 'left-0.5'

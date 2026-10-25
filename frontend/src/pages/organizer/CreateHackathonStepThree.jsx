@@ -125,7 +125,7 @@ const CreateHackathonStepThree = () => {
                 {/* Phase 1: Registration Window */}
                 <div className="p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] space-y-4">
                     <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/30 text-[#7C65F6] flex items-center justify-center text-xs font-bold">
+                        <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950/30 text-[#2563eb] flex items-center justify-center text-xs font-bold">
                             1
                         </span>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -142,7 +142,7 @@ const CreateHackathonStepThree = () => {
                                 type="datetime-local"
                                 value={timeline.registrationStart}
                                 onChange={(e) => handleChange('registrationStart', e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6]"
+                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                             />
                             {errors.registrationStart && (
                                 <p className="text-xs text-rose-500 font-medium mt-1">{errors.registrationStart}</p>
@@ -157,7 +157,7 @@ const CreateHackathonStepThree = () => {
                                 type="datetime-local"
                                 value={timeline.registrationEnd}
                                 onChange={(e) => handleChange('registrationEnd', e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6]"
+                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                             />
                             {errors.registrationEnd && (
                                 <p className="text-xs text-rose-500 font-medium mt-1">{errors.registrationEnd}</p>
@@ -169,7 +169,7 @@ const CreateHackathonStepThree = () => {
                 {/* Phase 2: Hacking Period */}
                 <div className="p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] space-y-4">
                     <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/30 text-[#7C65F6] flex items-center justify-center text-xs font-bold">
+                        <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950/30 text-[#2563eb] flex items-center justify-center text-xs font-bold">
                             2
                         </span>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -186,7 +186,7 @@ const CreateHackathonStepThree = () => {
                                 type="datetime-local"
                                 value={timeline.hackathonStart}
                                 onChange={(e) => handleChange('hackathonStart', e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6]"
+                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                             />
                             {errors.hackathonStart && (
                                 <p className="text-xs text-rose-500 font-medium mt-1">{errors.hackathonStart}</p>
@@ -201,7 +201,7 @@ const CreateHackathonStepThree = () => {
                                 type="datetime-local"
                                 value={timeline.hackathonEnd}
                                 onChange={(e) => handleChange('hackathonEnd', e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6]"
+                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                             />
                             {errors.hackathonEnd && (
                                 <p className="text-xs text-rose-500 font-medium mt-1">{errors.hackathonEnd}</p>
@@ -213,7 +213,7 @@ const CreateHackathonStepThree = () => {
                 {/* Phase 3: Judging & Results */}
                 <div className="p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] space-y-4">
                     <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/30 text-[#7C65F6] flex items-center justify-center text-xs font-bold">
+                        <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950/30 text-[#2563eb] flex items-center justify-center text-xs font-bold">
                             3
                         </span>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -230,7 +230,7 @@ const CreateHackathonStepThree = () => {
                                 type="datetime-local"
                                 value={timeline.judgingStart}
                                 onChange={(e) => handleChange('judgingStart', e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6]"
+                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                             />
                         </div>
 
@@ -242,7 +242,7 @@ const CreateHackathonStepThree = () => {
                                 type="datetime-local"
                                 value={timeline.resultsDate}
                                 onChange={(e) => handleChange('resultsDate', e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6]"
+                                className="w-full px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                             />
                         </div>
                     </div>
@@ -265,7 +265,7 @@ const CreateHackathonStepThree = () => {
                         type="button"
                         onClick={handleSaveDraft}
                         disabled={isSaving}
-                        className="px-5 py-2.5 rounded-xl border border-[#7C65F6] text-[#7C65F6] hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                        className="px-5 py-2.5 rounded-xl border border-[#2563eb] text-[#2563eb] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
                     >
                         Save as Draft
                     </button>
@@ -274,7 +274,7 @@ const CreateHackathonStepThree = () => {
                         type="button"
                         onClick={handleNext}
                         disabled={isSaving}
-                        className="px-6 py-2.5 rounded-xl bg-[#7C65F6] hover:bg-[#6852F6] text-white text-xs font-bold shadow-md shadow-[#7C65F6]/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                        className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                     >
                         <span>Next Step</span>
                         <span>&rarr;</span>

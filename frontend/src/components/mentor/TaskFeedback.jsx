@@ -47,7 +47,7 @@ export const TaskManagement = ({ studentId, teamId }) => {
                 <h3 className="text-xl font-semibold text-white">📋 Task Management</h3>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                     + New Task
                 </button>
@@ -62,7 +62,7 @@ export const TaskManagement = ({ studentId, teamId }) => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({...formData, title: e.target.value})}
-                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                             placeholder="Enter task title"
                         />
                     </div>
@@ -72,7 +72,7 @@ export const TaskManagement = ({ studentId, teamId }) => {
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500 h-24 resize-none"
+                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb] h-24 resize-none"
                             placeholder="Enter task description"
                         />
                     </div>
@@ -85,7 +85,7 @@ export const TaskManagement = ({ studentId, teamId }) => {
                                 required
                                 value={formData.deadline}
                                 onChange={(e) => setFormData({...formData, deadline: e.target.value})}
-                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                             />
                         </div>
 
@@ -94,7 +94,7 @@ export const TaskManagement = ({ studentId, teamId }) => {
                             <select
                                 value={formData.priority}
                                 onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                             >
                                 <option value="low">Low</option>
                                 <option value="medium">Medium</option>
@@ -107,7 +107,7 @@ export const TaskManagement = ({ studentId, teamId }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
                             {loading ? 'Creating...' : 'Create Task'}
                         </button>
@@ -174,7 +174,7 @@ export const FeedbackForm = ({ studentId, taskId = null, onSubmit }) => {
                     <select
                         value={formData.type}
                         onChange={(e) => setFormData({...formData, type: e.target.value})}
-                        className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                        className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                     >
                         <option value="general">General</option>
                         <option value="code_review">Code Review</option>
@@ -188,7 +188,7 @@ export const FeedbackForm = ({ studentId, taskId = null, onSubmit }) => {
                     <select
                         value={formData.rating}
                         onChange={(e) => setFormData({...formData, rating: parseInt(e.target.value)})}
-                        className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                        className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                     >
                         <option value="1">1 - Needs Improvement</option>
                         <option value="2">2 - Below Average</option>
@@ -206,7 +206,7 @@ export const FeedbackForm = ({ studentId, taskId = null, onSubmit }) => {
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                    className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                     placeholder="Feedback title"
                 />
             </div>
@@ -217,7 +217,7 @@ export const FeedbackForm = ({ studentId, taskId = null, onSubmit }) => {
                     required
                     value={formData.content}
                     onChange={(e) => setFormData({...formData, content: e.target.value})}
-                    className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500 h-32 resize-none"
+                    className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb] h-32 resize-none"
                     placeholder="Provide constructive feedback..."
                 />
             </div>
@@ -225,7 +225,7 @@ export const FeedbackForm = ({ studentId, taskId = null, onSubmit }) => {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
             >
                 {loading ? 'Submitting...' : 'Submit Feedback'}
             </button>

@@ -38,7 +38,7 @@ const ThemeToggle = ({ className = '', showLabel = false, variant = 'switch', fo
                         />
                     </svg>
                     <svg
-                        className={`w-5 h-5 text-indigo-400 transition-all duration-300 transform ${
+                        className={`w-5 h-5 text-blue-400 transition-all duration-300 transform ${
                             !isLight ? 'scale-100 rotate-0 opacity-100' : 'scale-0 rotate-90 opacity-0 absolute'
                         }`}
                         fill="none"

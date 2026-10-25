@@ -20,13 +20,25 @@ class UserService:
         if existing_user:
             raise ValueError("Email already registered")
 
+        # Determine activation and approval status based on role
+        role_val = (
+            user_data.role.value.lower()
+            if hasattr(user_data.role, "value")
+            else str(user_data.role).lower()
+        )
+        is_organizer = role_val == "organizer"
+        account_status = "Pending" if is_organizer else "Active"
+        is_active = not is_organizer  # Organizers must be approved by admin before activation
+
         # Create user document
         user_dict = {
             "name": user_data.name,
             "email": email,
             "password": get_password_hash(user_data.password),
-            "role": user_data.role,
-            "is_active": True,
+            "role": role_val,
+            "status": account_status,
+            "is_active": is_active,
+            "isVerified": not is_organizer,
             "createdAt": datetime.utcnow(),
         }
 
@@ -36,11 +48,13 @@ class UserService:
 
         # Initialize role-specific profile
         db = users_collection.database
-        if user_data.role == "student":
+        normalized_role = role_val
+
+        if normalized_role == "student":
             await db.students.insert_one(
                 {"userId": user_id, "createdAt": datetime.utcnow()}
             )
-        elif user_data.role == "mentor":
+        elif normalized_role == "mentor":
             await db.mentors.insert_one(
                 {
                     "userId": user_id,
@@ -48,10 +62,66 @@ class UserService:
                     "availability": "Available",
                 }
             )
-        elif user_data.role == "organizer":
+        elif normalized_role == "organizer":
             await db.organizers.insert_one(
-                {"userId": user_id, "createdAt": datetime.utcnow()}
+                {
+                    "userId": user_id,
+                    "name": user_data.name or "",
+                    "contactEmail": email,
+                    "status": "Pending",
+                    "createdAt": datetime.utcnow(),
+                }
             )
+
+            # In-app notification for Administrators
+            try:
+                await db["notifications"].insert_one(
+                    {
+                        "userId": "admin",
+                        "type": "NEW_ORGANIZER_APPLICATION",
+                        "title": "New Organizer Application Pending Review",
+                        "message": f"Organizer {user_data.name or email} ({email}) has registered and is awaiting administrator verification.",
+                        "applicantId": user_id,
+                        "applicantEmail": email,
+                        "read": False,
+                        "createdAt": datetime.utcnow(),
+                    }
+                )
+            except Exception as e:
+                print(f"[UserService] Admin notification error: {e}")
+
+            # Send acknowledgment email to Organizer applicant
+            try:
+                from services.email_service import EmailService
+                email_service = EmailService()
+                applicant_name = user_data.name or email.split("@")[0].capitalize()
+                subject = "HackZen - Organizer Registration Received (Pending Approval)"
+                html_body = f"""
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <h2 style="color: #4338ca; margin: 0; font-size: 24px; font-weight: 800;">HackZen</h2>
+                        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Next-Generation Hackathon Management Platform</p>
+                    </div>
+                    <div style="background: #eef2ff; border-left: 4px solid #4338ca; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+                        <h3 style="color: #312e81; margin: 0 0 6px 0; font-size: 16px;">Registration Submitted for Review</h3>
+                        <p style="color: #4338ca; margin: 0; font-size: 13px;">Your application to host and manage hackathons as an Organizer is currently being verified by platform administration.</p>
+                    </div>
+                    <p style="color: #334155; font-size: 14px; line-height: 1.6;">Hello <strong>{applicant_name}</strong>,</p>
+                    <p style="color: #334155; font-size: 14px; line-height: 1.6;">Thank you for creating an Organizer account on HackZen. To maintain platform integrity and quality standards, all new organizer accounts undergo administrative review.</p>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                        <p style="margin: 0 0 8px 0; font-size: 13px; color: #475569;"><strong>Registered Email:</strong> {email}</p>
+                        <p style="margin: 0; font-size: 13px; color: #475569;"><strong>Current Status:</strong> <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 9999px; font-weight: 600; font-size: 11px;">PENDING APPROVAL</span></p>
+                    </div>
+                    <p style="color: #334155; font-size: 14px; line-height: 1.6;">You will receive an email as soon as an administrator approves your account. Once approved, you will be able to log in and immediately launch hackathons.</p>
+                    <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+                    <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">&copy; 2026 HackZen Platform. All rights reserved.</p>
+                </div>
+                """
+                text_body = f"Hello {applicant_name},\n\nThank you for creating an Organizer account on HackZen ({email}). Your account is currently pending administrative review. You will receive an email once approved.\n\nRegards,\nHackZen Team"
+                import asyncio
+                asyncio.create_task(email_service.send_email(email, subject, html_body, text_body))
+            except Exception as email_err:
+                print(f"[UserService] Acknowledgment email dispatch notice: {email_err}")
 
         return user_dict
 

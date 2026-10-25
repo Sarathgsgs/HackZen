@@ -41,7 +41,7 @@ class UserCreate(UserBase):
             raise ValueError("Password must contain at least one lowercase letter")
         if not re.search(r"\d", v):
             raise ValueError("Password must contain at least one number")
-        if not re.search(r"[@$!%*?&#^()_\-+=\[\]{}|:;<>,.~]", v):
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?~`]|[^A-Za-z0-9]", v):
             raise ValueError("Password must contain at least one special character")
         return v
 
@@ -100,7 +100,7 @@ class ResetPasswordRequest(BaseModel):
             raise ValueError("Password must contain at least one lowercase letter")
         if not re.search(r"\d", v):
             raise ValueError("Password must contain at least one number")
-        if not re.search(r"[@$!%*?&#^()_\-+=\[\]{}|:;<>,.~]", v):
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?~`]|[^A-Za-z0-9]", v):
             raise ValueError("Password must contain at least one special character")
         return v
 

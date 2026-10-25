@@ -74,7 +74,7 @@ const MyTeams = () => {
                     // Map mentor team fields to match TeamsPage expectations
                     teamsData = [...mentorData.activeTeams, ...mentorData.pastTeams].map(t => ({
                         ...t,
-                        gradient: t.logoColor || 'from-blue-600 to-indigo-600',
+                        gradient: t.logoColor || 'from-blue-600 to-blue-500',
                         roleInTeam: mentorData.activeTeams.find(at => at.id === t.id) ? 'Mentor' : 'Alumni Mentor',
                         lastMessage: 'Viewing as Mentor', // Default for workspace
                         time: 'Active'
@@ -362,7 +362,7 @@ const MyTeams = () => {
                 </div>
                 <div className="glass rounded-2xl border border-white/5 p-6">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Average Progress</p>
-                    <p className="text-3xl font-bold text-purple-400">{teams.length ? Math.round(teams.reduce((sum, team) => sum + team.progress, 0) / teams.length) : 0}%</p>
+                    <p className="text-3xl font-bold text-blue-400">{teams.length ? Math.round(teams.reduce((sum, team) => sum + team.progress, 0) / teams.length) : 0}%</p>
                 </div>
                 <div className="glass rounded-2xl border border-white/5 p-6">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Registered Events</p>
@@ -377,7 +377,7 @@ const MyTeams = () => {
                         placeholder="Search team, hackathon, or domain"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 transition-colors placeholder:text-gray-500"
+                        className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#2563eb]/50 transition-colors placeholder:text-gray-500"
                     />
                 </div>
 
@@ -410,7 +410,7 @@ const MyTeams = () => {
                             </button>
                             <button
                                 onClick={() => setModal({ type: 'create' })}
-                                className="px-5 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl transition-colors"
+                                className="px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl transition-colors"
                             >
                                 Create Team
                             </button>
@@ -431,9 +431,9 @@ const MyTeams = () => {
                         <div
                             key={team.id}
                             onClick={() => { setSelectedTeamId(team.id); setViewMode('workspace'); }}
-                            className="glass rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all duration-300 group cursor-pointer flex flex-col overflow-hidden"
+                            className="glass rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all duration-300 group cursor-pointer flex flex-col overflow-hidden"
                         >
-                            <div className={`h-40 bg-gradient-to-br ${team.gradient || 'from-purple-600 to-blue-600'} p-6 relative`}>
+                            <div className={`h-40 bg-gradient-to-br ${team.gradient || 'from-blue-600 to-cyan-600'} p-6 relative`}>
                                 <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-[10px] font-bold text-white uppercase">
                                     {team.status}
                                 </div>
@@ -444,7 +444,7 @@ const MyTeams = () => {
 
                             <div className="p-6 flex-1 flex flex-col">
                                 <div className="flex justify-between items-start mb-2 gap-3">
-                                    <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">{team.name}</h3>
+                                    <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">{team.name}</h3>
                                     <span className="text-[10px] text-cyan-300 font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-nowrap">{team.roleInTeam}</span>
                                 </div>
                                 <p className="text-gray-400 text-sm line-clamp-2 mb-6">{team.domain} • {team.lastMessage}</p>
@@ -456,14 +456,14 @@ const MyTeams = () => {
                                             <span className="text-white font-semibold">{team.progress}%</span>
                                         </div>
                                         <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                                            <div className="h-full bg-gradient-to-r from-purple-600 to-blue-500 rounded-full" style={{ width: `${team.progress}%` }}></div>
+                                            <div className="h-full bg-gradient-to-r from-blue-600 to-blue-500 rounded-full" style={{ width: `${team.progress}%` }}></div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between pt-4 border-t border-white/5">
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className="flex items-center gap-2 shrink-0">
-                                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                                                 <span className="text-xs text-gray-300">{team.members} members</span>
                                             </div>
                                             {team.teamCode && (
@@ -480,7 +480,7 @@ const MyTeams = () => {
                                                 </button>
                                             )}
                                         </div>
-                                        <button className="flex items-center gap-1.5 text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors shrink-0">
+                                        <button className="flex items-center gap-1.5 text-xs text-blue-400 font-bold hover:text-blue-300 transition-colors shrink-0">
                                             Open Workspace
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                         </button>
@@ -505,8 +505,8 @@ const MyTeams = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {registeredHackathons.map((hack) => (
-                            <div key={hack.id} className="glass rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all duration-300 flex flex-col overflow-hidden">
-                                <div className="h-32 bg-gradient-to-br from-indigo-600 to-purple-600 p-6 relative">
+                            <div key={hack.id} className="glass rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all duration-300 flex flex-col overflow-hidden">
+                                <div className="h-32 bg-gradient-to-br from-blue-600 to-blue-600 p-6 relative">
                                     <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-[10px] font-bold text-white uppercase">
                                         {hack.status}
                                     </div>
@@ -540,7 +540,7 @@ const MyTeams = () => {
                                                 });
                                                 setModal({ type: 'create' });
                                             }}
-                                            className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors"
+                                            className="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors"
                                         >
                                             Form Team
                                         </button>
@@ -573,7 +573,7 @@ const MyTeams = () => {
                     
                     <div className="glass h-full rounded-2xl border border-white/5 overflow-hidden flex flex-col p-6 shadow-2xl bg-black/10">
                         <div className="flex items-center gap-3 mb-8 px-2">
-                             <div className="w-1.5 h-6 bg-purple-500 rounded-full shadow-[0_0_10px_rgba(147,51,234,1)]"></div>
+                             <div className="w-1.5 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(147,51,234,1)]"></div>
                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Sessions</h4>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
@@ -581,14 +581,14 @@ const MyTeams = () => {
                                 <button
                                     key={t.id}
                                     onClick={() => setSelectedTeamId(t.id)}
-                                    className={`w-full flex items-center gap-5 p-4 rounded-3xl transition-all duration-500 relative group overflow-hidden ${String(selectedTeamId) === String(t.id) ? 'bg-black/20 border border-purple-500/30 shadow-xl' : 'hover:bg-white/5 opacity-40 hover:opacity-100 grayscale hover:grayscale-0'}`}
+                                    className={`w-full flex items-center gap-5 p-4 rounded-3xl transition-all duration-500 relative group overflow-hidden ${String(selectedTeamId) === String(t.id) ? 'bg-black/20 border border-blue-500/30 shadow-xl' : 'hover:bg-white/5 opacity-40 hover:opacity-100 grayscale hover:grayscale-0'}`}
                                 >
-                                    {String(selectedTeamId) === String(t.id) && <div className="absolute left-0 top-0 h-full w-1.5 bg-purple-600 shadow-[0_0_15px_rgba(147,51,234,1)]"></div>}
+                                    {String(selectedTeamId) === String(t.id) && <div className="absolute left-0 top-0 h-full w-1.5 bg-blue-600 shadow-[0_0_15px_rgba(147,51,234,1)]"></div>}
                                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${t.gradient || 'from-navy-800 to-navy-950'} flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-black/40 group-hover:scale-110 transition-transform duration-500 border border-white/10 shrink-0`}>
                                         {t.name.charAt(0)}
                                     </div>
                                     <div className="text-left overflow-hidden">
-                                        <p className="text-xs font-bold text-white truncate tracking-tight uppercase group-hover:text-purple-400 transition-colors">{t.name}</p>
+                                        <p className="text-xs font-bold text-white truncate tracking-tight uppercase group-hover:text-blue-400 transition-colors">{t.name}</p>
                                         <p className="text-xs text-gray-600 font-bold tracking-widest uppercase mt-1  truncate opacity-70">{t.domain || 'Field Ops'}</p>
                                     </div>
                                 </button>
@@ -602,7 +602,7 @@ const MyTeams = () => {
                     {/* Header Protocol */}
                     <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 bg-navy-950/40 relative z-20">
                         <div className="flex items-center gap-4 sm:gap-8">
-                            <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${currentTeam.gradient || 'from-purple-600 to-blue-700'} flex items-center justify-center text-white text-xl sm:text-3xl font-bold shadow-2xl relative overflow-hidden group-hover/env:scale-105 transition-transform duration-700 shrink-0`}>
+                            <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${currentTeam.gradient || 'from-blue-600 to-blue-700'} flex items-center justify-center text-white text-xl sm:text-3xl font-bold shadow-2xl relative overflow-hidden group-hover/env:scale-105 transition-transform duration-700 shrink-0`}>
                                 <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
                                 <span className="relative z-10 ">{currentTeam.name.charAt(0)}</span>
                             </div>
@@ -614,7 +614,7 @@ const MyTeams = () => {
                                         <span className="text-xs text-gray-400 font-semibold">{currentTeam.isOnline ? 'Real-time Link established' : 'Node Dormant'}</span>
                                     </div>
                                     <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/10"></div>
-                                    <span className="text-xs text-indigo-400 font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase">Sector: {currentTeam.domain || 'Tactical'}</span>
+                                    <span className="text-xs text-blue-400 font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase">Sector: {currentTeam.domain || 'Tactical'}</span>
                                 </div>
                             </div>
                         </div>
@@ -625,7 +625,7 @@ const MyTeams = () => {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`px-4 sm:px-8 py-2 sm:py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] transition-all whitespace-nowrap ${activeTab === tab ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/30 translate-y-[-1px]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                                    className={`px-4 sm:px-8 py-2 sm:py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] transition-all whitespace-nowrap ${activeTab === tab ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-xl shadow-blue-500/30 translate-y-[-1px]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                                 >
                                     {tab}
                                 </button>
@@ -651,9 +651,9 @@ const MyTeams = () => {
                                             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
                                             <button
                                                 onClick={() => fileInputRef.current.click()}
-                                                className="px-10 h-16 bg-navy-950/60 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl border border-white/5 hover:border-purple-500/20 transition-all flex items-center gap-4 text-sm font-semibold text-gray-400 active:scale-95 shadow-xl"
+                                                className="px-10 h-16 bg-navy-950/60 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl border border-white/5 hover:border-blue-500/20 transition-all flex items-center gap-4 text-sm font-semibold text-gray-400 active:scale-95 shadow-xl"
                                             >
-                                                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                                 Inject Asset
                                             </button>
                                         </>
@@ -661,7 +661,7 @@ const MyTeams = () => {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                                     {(files[currentTeam.id] || []).map(file => (
-                                        <div key={file.id} className="glass p-8 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all duration-700 group relative flex flex-col bg-navy-950/20 hover:shadow-2xl">
+                                        <div key={file.id} className="glass p-8 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all duration-700 group relative flex flex-col bg-navy-950/20 hover:shadow-2xl">
                                             <div className="flex items-start justify-between mb-8">
                                                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl shadow-2xl relative overflow-hidden ${file.type === 'PDF' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
                                                     <div className="absolute inset-0 bg-white/5 opacity-20"></div>
@@ -702,7 +702,7 @@ const MyTeams = () => {
                                     {canEditWorkspace && (
                                         <button
                                             onClick={() => setModal({ type: 'task' })}
-                                            className="px-10 h-16 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-xl text-sm font-semibold text-gray-400 shadow-xl shadow-purple-500/20 transition-all hover:scale-105 hover:shadow-purple-500/40 active:scale-95 flex items-center justify-center gap-4"
+                                            className="px-10 h-16 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-semibold text-gray-400 shadow-xl shadow-blue-500/20 transition-all hover:scale-105 hover:shadow-blue-500/40 active:scale-95 flex items-center justify-center gap-4"
                                         >
                                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4" /></svg>
                                             Push Objective
@@ -714,10 +714,10 @@ const MyTeams = () => {
                                         <div
                                             key={task.id}
                                             onClick={() => toggleTask(currentTeam.id, task.id)}
-                                            className={`group relative p-8 rounded-2xl glass border transition-all duration-700 flex items-center justify-between cursor-pointer overflow-hidden ${task.status === 'Done' ? 'border-emerald-500/20 bg-emerald-500/5 opacity-50' : 'border-white/5 hover:bg-navy-950/60 hover:border-purple-500/30'}`}
+                                            className={`group relative p-8 rounded-2xl glass border transition-all duration-700 flex items-center justify-between cursor-pointer overflow-hidden ${task.status === 'Done' ? 'border-emerald-500/20 bg-emerald-500/5 opacity-50' : 'border-white/5 hover:bg-navy-950/60 hover:border-blue-500/30'}`}
                                         >
                                             <div className="flex items-center gap-8 relative z-10">
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-[3px] transition-all duration-500 ${task.status === 'Done' ? 'bg-emerald-500 border-emerald-400/50 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-navy-950 border-white/10 group-hover:border-purple-500/40'}`}>
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-[3px] transition-all duration-500 ${task.status === 'Done' ? 'bg-emerald-500 border-emerald-400/50 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-navy-950 border-white/10 group-hover:border-blue-500/40'}`}>
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>
                                                 </div>
                                                 <div className="space-y-3">
@@ -729,11 +729,11 @@ const MyTeams = () => {
                                                 </div>
                                             </div>
                                             <div className="flex flex-col items-end gap-2 relative z-10">
-                                                <span className={`text-xs font-bold uppercase tracking-[0.3em] px-4 py-2 rounded-full border backdrop-blur-md  ${task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-purple-500/10 text-purple-400 border-purple-500/20'}`}>
+                                                <span className={`text-xs font-bold uppercase tracking-[0.3em] px-4 py-2 rounded-full border backdrop-blur-md  ${task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
                                                     {task.status}
                                                 </span>
                                             </div>
-                                            <div className={`absolute inset-0 bg-gradient-to-r ${task.status === 'Done' ? 'from-emerald-500/5 to-transparent' : 'from-purple-500/5 to-transparent'} opacity-0 group-hover:opacity-100 transition-opacity duration-700`}></div>
+                                            <div className={`absolute inset-0 bg-gradient-to-r ${task.status === 'Done' ? 'from-emerald-500/5 to-transparent' : 'from-blue-500/5 to-transparent'} opacity-0 group-hover:opacity-100 transition-opacity duration-700`}></div>
                                         </div>
                                     ))}
                                 </div>
@@ -749,14 +749,14 @@ const MyTeams = () => {
                                 <div className="space-y-6 max-w-4xl">
                                     {(currentTeam.activity || []).map(act => (
                                         <div key={act.id} className="flex gap-8 p-6 rounded-2xl bg-navy-950/40 border border-white/5 hover:border-white/10 transition-all group relative overflow-hidden">
-                                            <div className="w-14 h-14 rounded-2xl bg-navy-950 flex items-center justify-center text-sm font-bold text-gray-700 shrink-0 group-hover:text-purple-400 group-hover:bg-navy-900 border border-white/5 transition-all duration-500 ">
+                                            <div className="w-14 h-14 rounded-2xl bg-navy-950 flex items-center justify-center text-sm font-bold text-gray-700 shrink-0 group-hover:text-blue-400 group-hover:bg-navy-900 border border-white/5 transition-all duration-500 ">
                                                 {act.user.charAt(0)}
                                             </div>
                                             <div className="flex-1 space-y-2">
                                                 <p className="text-sm font-medium text-gray-400 leading-relaxed">
                                                     <span className="font-bold text-white uppercase tracking-widest  drop-shadow-sm">{act.user}</span> 
                                                     <span className="mx-2 opacity-50 uppercase text-xs tracking-tight">{act.action}</span> 
-                                                    <span className="font-bold text-purple-400 ">"{act.item.toUpperCase()}"</span>
+                                                    <span className="font-bold text-blue-400 ">"{act.item.toUpperCase()}"</span>
                                                 </p>
                                                 <div className="flex items-center gap-4">
                                                      <div className="w-1.5 h-1.5 rounded-full bg-navy-800"></div>
@@ -789,7 +789,7 @@ const MyTeams = () => {
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-navy-950/90 backdrop-blur-xl animate-in fade-in duration-300">
                     <div className="absolute inset-0 cursor-crosshair" onClick={() => setModal({ type: null })}></div>
                     <div className="glass border border-white/10 rounded-3xl w-full max-w-xl p-12 relative animate-in zoom-in-95 duration-500 shadow-[0_0_100px_rgba(147,51,234,0.1)] bg-navy-900 overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/5 blur-3xl -mr-32 -mt-32"></div>
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-3xl -mr-32 -mt-32"></div>
                         
                         <div className="relative z-10 space-y-10">
                             <div className="space-y-4">
@@ -823,7 +823,7 @@ const MyTeams = () => {
                                                 placeholder="ENTER UNIT NAME..."
                                                 value={newTeamData.name}
                                                 onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
-                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-purple-500/40 transition-all uppercase  tracking-widest placeholder:text-gray-800 shadow-inner"
+                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-[#2563eb]/40 transition-all uppercase  tracking-widest placeholder:text-gray-800 shadow-inner"
                                             />
                                         </div>
                                         <div className="space-y-3">
@@ -832,7 +832,7 @@ const MyTeams = () => {
                                                 required
                                                 value={newTeamData.hackathonId || newTeamData.hackathon || ''}
                                                 onChange={(e) => setNewTeamData({ ...newTeamData, hackathon: e.target.value, hackathonId: e.target.value })}
-                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-purple-500/40 transition-all uppercase  tracking-widest shadow-inner appearance-none cursor-pointer"
+                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-[#2563eb]/40 transition-all uppercase  tracking-widest shadow-inner appearance-none cursor-pointer"
                                             >
                                                 <option value="" className="bg-navy-900">SELECT DEPLOYMENT SECTOR...</option>
                                                 {registeredHackathons.map(h => (
@@ -848,7 +848,7 @@ const MyTeams = () => {
                                                 placeholder="E.G., CYBERSECURITY, AI, WEB3..."
                                                 value={newTeamData.domain}
                                                 onChange={(e) => setNewTeamData({ ...newTeamData, domain: e.target.value })}
-                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-purple-500/40 transition-all uppercase  tracking-widest placeholder:text-gray-800 shadow-inner"
+                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-[#2563eb]/40 transition-all uppercase  tracking-widest placeholder:text-gray-800 shadow-inner"
                                             />
                                         </div>
                                     </div>
@@ -866,7 +866,7 @@ const MyTeams = () => {
                                                 value={inviteCode}
                                                 onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                                                 maxLength={6}
-                                                className="w-full bg-black/20 border border-white/10 rounded-3xl py-10 text-5xl font-bold text-center text-purple-400 focus:outline-none focus:border-purple-500 shadow-2xl tracking-[0.5em] transition-all placeholder:text-gray-900"
+                                                className="w-full bg-black/20 border border-white/10 rounded-3xl py-10 text-5xl font-bold text-center text-blue-400 focus:outline-none focus:border-[#2563eb] shadow-2xl tracking-[0.5em] transition-all placeholder:text-gray-900"
                                             />
                                         </div>
                                         <p className="text-xs text-gray-700 font-bold uppercase tracking-[0.2em] text-center ">Verify invite key from unit lead before transmission.</p>
@@ -883,7 +883,7 @@ const MyTeams = () => {
                                                 placeholder="DECODE MISSION PARAMETERS..."
                                                 value={newTaskData.title}
                                                 onChange={(e) => setNewTaskData({ ...newTaskData, title: e.target.value })}
-                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-purple-500/40 transition-all uppercase  tracking-widest placeholder:text-gray-800"
+                                                className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-[#2563eb]/40 transition-all uppercase  tracking-widest placeholder:text-gray-800"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-6">
@@ -892,7 +892,7 @@ const MyTeams = () => {
                                                 <select
                                                     value={newTaskData.priority}
                                                     onChange={(e) => setNewTaskData({ ...newTaskData, priority: e.target.value })}
-                                                    className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-xs font-bold text-white focus:outline-none focus:border-purple-500/40 appearance-none  uppercase tracking-widest"
+                                                    className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-xs font-bold text-white focus:outline-none focus:border-[#2563eb]/40 appearance-none  uppercase tracking-widest"
                                                 >
                                                     <option value="Low" className="bg-navy-900">LOW SIGNAL</option>
                                                     <option value="Medium" className="bg-navy-900">STEADY STATUS</option>
@@ -907,7 +907,7 @@ const MyTeams = () => {
                                                     placeholder="ALPHA-01..."
                                                     value={newTaskData.assignedTo}
                                                     onChange={(e) => setNewTaskData({ ...newTaskData, assignedTo: e.target.value })}
-                                                    className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-purple-500/40 transition-all uppercase  tracking-widest placeholder:text-gray-800"
+                                                    className="w-full bg-navy-950/50 border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white focus:outline-none focus:border-[#2563eb]/40 transition-all uppercase  tracking-widest placeholder:text-gray-800"
                                                 />
                                             </div>
                                         </div>
@@ -931,7 +931,7 @@ const MyTeams = () => {
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`flex-1 py-5 rounded-xl font-bold uppercase tracking-[0.3em] text-xs transition-all shadow-xl  transform hover:scale-105 active:scale-95 ${modal.type === 'delete' ? 'bg-red-600/20 border border-red-500/40 text-red-500 hover:bg-red-600 hover:text-white' : 'bg-gradient-to-r from-purple-600 to-indigo-700 text-white shadow-purple-500/20 hover:shadow-purple-500/40'}`}
+                                        className={`flex-1 py-5 rounded-xl font-bold uppercase tracking-[0.3em] text-xs transition-all shadow-xl  transform hover:scale-105 active:scale-95 ${modal.type === 'delete' ? 'bg-red-600/20 border border-red-500/40 text-red-500 hover:bg-red-600 hover:text-white' : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-blue-500/20 hover:shadow-blue-500/40'}`}
                                     >
                                         {modal.type === 'delete' ? 'Confirm Neutralization' : 'Execute Protocol'}
                                     </button>

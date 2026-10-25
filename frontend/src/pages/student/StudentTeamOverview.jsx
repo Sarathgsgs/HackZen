@@ -67,7 +67,7 @@ const StudentTeamOverview = () => {
                         </button>
                         <button
                             onClick={() => navigate('/student/teams/create')}
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#7C65F6] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#2563eb] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95 cursor-pointer"
                         >
                             Create Team
                         </button>
@@ -82,7 +82,7 @@ const StudentTeamOverview = () => {
                     </div>
                     <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 shadow-xs">
                         <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Avg. Progress</span>
-                        <p className="mt-3 text-3xl font-extrabold text-[#7C65F6] dark:text-purple-400 leading-none">
+                        <p className="mt-3 text-3xl font-extrabold text-blue-600 dark:text-blue-400 leading-none">
                             {avgProgress === null ? '0%' : `${avgProgress}%`}
                         </p>
                     </div>
@@ -104,7 +104,7 @@ const StudentTeamOverview = () => {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search by team, hackathon, or domain..."
-                            className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 pl-10 pr-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#7C65F6]"
+                            className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 pl-10 pr-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
                 </div>
@@ -131,7 +131,7 @@ const StudentTeamOverview = () => {
                             </button>
                             <button
                                 onClick={() => navigate('/student/teams/create')}
-                                className="rounded-xl bg-[#7C65F6] px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#6D28D9] cursor-pointer"
+                                className="rounded-xl bg-[#2563eb] px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#1d4ed8] cursor-pointer"
                             >
                                 Create Team
                             </button>
@@ -141,7 +141,7 @@ const StudentTeamOverview = () => {
                     <div className="grid gap-6 xl:grid-cols-2">
                         {filteredTeams.map((team) => (
                             <div key={team.id} className="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 shadow-xs transition-all hover:shadow-md">
-                                <div className={`h-24 bg-gradient-to-r ${team.gradient || 'from-indigo-600 to-violet-600'} p-5 flex flex-col justify-between`}>
+                                <div className={`h-24 bg-gradient-to-r ${team.gradient || 'from-blue-600 to-blue-500'} p-5 flex flex-col justify-between`}>
                                     <div className="flex items-center justify-between">
                                         <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 bg-black/20 px-2 py-0.5 rounded-md">
                                             {team.members === null ? 'Members TBA' : `${team.members} ${team.members === 1 ? 'Member' : 'Members'}`}
@@ -160,7 +160,7 @@ const StudentTeamOverview = () => {
                                         </div>
                                         <button
                                             onClick={() => navigate(`/student/teams/${team.id}/workspace`)}
-                                            className="rounded-xl border border-purple-200 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-950/40 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#7C65F6] dark:text-purple-300 hover:bg-purple-100 transition cursor-pointer"
+                                            className="rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-950/40 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition cursor-pointer"
                                         >
                                             Open
                                         </button>
@@ -174,7 +174,7 @@ const StudentTeamOverview = () => {
                                         <div className="h-2 rounded-full bg-slate-200 dark:bg-navy-800 overflow-hidden">
                                             {team.progress !== null && (
                                                 <div
-                                                    className="h-full rounded-full bg-[#7C65F6]"
+                                                    className="h-full rounded-full bg-[#2563eb]"
                                                     style={{ width: `${Math.max(0, Math.min(100, team.progress))}%` }}
                                                 />
                                             )}
@@ -184,7 +184,7 @@ const StudentTeamOverview = () => {
                                     <div className="flex gap-3 pt-2 border-t border-slate-100 dark:border-white/5">
                                         <button
                                             onClick={() => navigate(`/student/teams/${team.id}/workspace`)}
-                                            className="flex-1 rounded-xl bg-[#7C65F6] px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
+                                            className="flex-1 rounded-xl bg-[#2563eb] px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-[#1d4ed8] active:scale-95 cursor-pointer"
                                         >
                                             Workspace
                                         </button>

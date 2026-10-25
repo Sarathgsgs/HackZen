@@ -118,14 +118,14 @@ export default function MentorshipRequests() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search by team or topic..."
-                            className="h-11 w-full pl-9 pr-3.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#7C65F6]"
+                            className="h-11 w-full pl-9 pr-3.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb]"
                         />
                     </div>
 
                     <select
                         value={selectedTrack}
                         onChange={(e) => setSelectedTrack(e.target.value)}
-                        className="h-11 px-3.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-[#7C65F6] cursor-pointer"
+                        className="h-11 px-3.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-[#2563eb] cursor-pointer"
                     >
                         <option value="All">All Tracks</option>
                         <option value="Artificial Intelligence">Artificial Intelligence</option>
@@ -144,7 +144,7 @@ export default function MentorshipRequests() {
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-3 text-xs font-bold transition-all border-b-2 cursor-pointer ${
                             activeTab === tab
-                                ? 'border-[#7C65F6] text-[#7C65F6] dark:text-purple-400 dark:border-purple-400'
+                                ? 'border-[#2563eb] text-[#2563eb] dark:text-blue-400 dark:border-blue-400'
                                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
                         }`}
                     >
@@ -162,7 +162,7 @@ export default function MentorshipRequests() {
                 </div>
             ) : filteredRequests.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 p-12 text-center shadow-xs">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] dark:text-purple-400 mb-3">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 mb-3">
                         <Inbox className="w-6 h-6" />
                     </div>
                     <h2 className="text-sm font-bold text-slate-900 dark:text-white">No requests found</h2>
@@ -177,11 +177,11 @@ export default function MentorshipRequests() {
                         return (
                             <div
                                 key={req.id}
-                                className="p-5 sm:p-6 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-purple-300 dark:hover:border-purple-700/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
+                                className="p-5 sm:p-6 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-blue-300 dark:hover:border-blue-700/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
                             >
                                 {/* Team Info & Topic */}
                                 <div className="flex items-start gap-4 min-w-0 flex-1">
-                                    <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] dark:text-purple-300 font-extrabold text-base flex items-center justify-center shrink-0 border border-purple-100 dark:border-purple-800/40">
+                                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-300 font-extrabold text-base flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800/40">
                                         {req.teamName?.charAt(0) || 'T'}
                                     </div>
 
@@ -190,7 +190,7 @@ export default function MentorshipRequests() {
                                             <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">
                                                 {req.teamName}
                                             </h3>
-                                            <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] dark:text-purple-300 border border-purple-100 dark:border-purple-800/50">
+                                            <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-300 border border-blue-100 dark:border-blue-800/50">
                                                 {req.domain || req.track}
                                             </span>
                                             <span
@@ -212,7 +212,7 @@ export default function MentorshipRequests() {
 
                                         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-3 text-xs text-slate-500 dark:text-slate-400">
                                             <span className="flex items-center gap-1.5">
-                                                <Users className="w-3.5 h-3.5 text-[#7C65F6] dark:text-purple-400" />
+                                                <Users className="w-3.5 h-3.5 text-[#2563eb] dark:text-blue-400" />
                                                 {req.teamSize || 4} Team Members
                                             </span>
                                             <span className="flex items-center gap-1.5">
@@ -250,7 +250,7 @@ export default function MentorshipRequests() {
                                             </button>
                                             <button
                                                 onClick={() => handleAccept(req)}
-                                                className="px-4 py-2 rounded-xl bg-[#7C65F6] hover:bg-[#6D28D9] text-white text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                                                className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
                                             >
                                                 <CheckCircle className="w-3.5 h-3.5" />
                                                 Accept

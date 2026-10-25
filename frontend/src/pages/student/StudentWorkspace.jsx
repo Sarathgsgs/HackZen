@@ -35,7 +35,7 @@ const StudentWorkspace = () => {
                 const mappedTeams = data.map((team, idx) => ({
                     id: team.id || team._id,
                     name: team.teamName || 'Team name unavailable',
-                    avatarColor: idx % 2 === 0 ? 'from-blue-500 to-indigo-600' : 'from-purple-500 to-pink-600',
+                    avatarColor: idx % 2 === 0 ? 'from-blue-500 to-blue-600' : 'from-blue-600 to-cyan-600',
                 }));
                 setTeams(mappedTeams);
                 if (mappedTeams.length > 0) {
@@ -232,7 +232,7 @@ const StudentWorkspace = () => {
                             key={team.id}
                             onClick={() => setSelectedTeam(team.id)}
                             className={`w-full group relative p-3 rounded-2xl flex items-center gap-4 transition-all duration-300 ${selectedTeam === team.id
-                                    ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/10 border border-blue-500/30'
+                                    ? 'bg-gradient-to-r from-blue-600/20 to-blue-600/10 border border-blue-500/30'
                                     : 'hover:bg-white/5 border border-transparent grayscale hover:grayscale-0'
                                 }`}
                         >
@@ -285,7 +285,7 @@ const StudentWorkspace = () => {
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
                                         className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${activeTab === tab
-                                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md ring-1 ring-white/10'
+                                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md ring-1 ring-white/10'
                                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
@@ -305,7 +305,7 @@ const StudentWorkspace = () => {
                                                 <div className={`flex gap-4 max-w-[75%] ${msg.sender === 'me' ? 'flex-row-reverse' : ''}`}>
                                                     <div className="mt-auto">
                                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-md border border-white/10 ${msg.sender === 'me'
-                                                                ? 'bg-gradient-to-br from-blue-700 to-indigo-800 text-white'
+                                                                ? 'bg-gradient-to-br from-blue-700 to-blue-800 text-white'
                                                                 : 'bg-gradient-to-br from-gray-800 to-gray-900 text-gray-400'
                                                             }`}>
                                                             {msg.user.charAt(0)}
@@ -320,7 +320,7 @@ const StudentWorkspace = () => {
                                                         <div className={`
                                                             relative p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm break-words
                                                             ${msg.sender === 'me'
-                                                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-none border border-white/10'
+                                                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-tr-none border border-white/10'
                                                                 : 'glass bg-white/5 text-gray-200 rounded-tl-none border border-white/5 hover:bg-white/10 transition-colors'}
                                                         `}>
                                                             {msg.text}
@@ -347,7 +347,7 @@ const StudentWorkspace = () => {
                                                     <button
                                                         type="submit"
                                                         disabled={!messageInput.trim()}
-                                                        className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center"
+                                                        className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl shadow-lg transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center"
                                                     >
                                                         <svg className="w-5 h-5 translate-x-0.5 -translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

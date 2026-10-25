@@ -299,7 +299,7 @@ export default function Feedback() {
         return (
             <div className="h-[calc(100vh-140px)] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+                    <div className="w-12 h-12 border-4 border-blue-500/20 border-t-[#2563eb] rounded-full animate-spin"></div>
                     <p className="text-gray-400 font-medium animate-pulse">Loading Assigned Teams…</p>
                 </div>
             </div>
@@ -328,7 +328,7 @@ export default function Feedback() {
                         id="team-select"
                         value={selectedTeamId || ''}
                         onChange={(e) => setSelectedTeamId(e.target.value)}
-                        className="bg-white dark:bg-navy-900 border border-slate-300 dark:border-white/10 rounded-xl py-2 px-4 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 shadow-sm cursor-pointer"
+                        className="bg-white dark:bg-navy-900 border border-slate-300 dark:border-white/10 rounded-xl py-2 px-4 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-[#2563eb] shadow-sm cursor-pointer"
                     >
                         {teamsList.map((team) => (
                             <option key={team.id} value={team.id}>
@@ -361,7 +361,7 @@ export default function Feedback() {
                         <div className="glass border border-slate-200 dark:border-white/10 rounded-2xl p-6 bg-white dark:bg-navy-900/50 shadow-sm space-y-6">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                                    <div className="w-14 h-14 rounded-2xl bg-[#2563eb] text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                                         {selectedTeam.name.charAt(0)}
                                     </div>
                                     <div>
@@ -372,7 +372,7 @@ export default function Feedback() {
                                             </span>
                                         </div>
                                         <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
-                                            Domain / Project Challenge: <strong className="text-purple-600 dark:text-purple-300 font-bold">{selectedTeam.domain}</strong> · Current Stage: <strong className="text-slate-800 dark:text-white">{selectedTeam.stage}</strong>
+                                            Domain / Project Challenge: <strong className="text-[#2563eb] dark:text-blue-300 font-bold">{selectedTeam.domain}</strong> · Current Stage: <strong className="text-slate-800 dark:text-white">{selectedTeam.stage}</strong>
                                         </p>
                                     </div>
                                 </div>
@@ -380,7 +380,7 @@ export default function Feedback() {
                                 <div className="flex items-center gap-6 bg-slate-50 dark:bg-navy-950/60 px-5 py-3 rounded-xl border border-slate-100 dark:border-white/5">
                                     <div>
                                         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Team Progress</p>
-                                        <p className="text-lg font-black text-purple-600 dark:text-purple-400">{selectedTeam.progress}%</p>
+                                        <p className="text-lg font-black text-[#2563eb] dark:text-blue-400">{selectedTeam.progress}%</p>
                                     </div>
                                     <div className="w-px h-8 bg-slate-200 dark:bg-white/10" />
                                     <div>
@@ -402,14 +402,14 @@ export default function Feedback() {
                                                 key={member.id || member._id || member.userId}
                                                 className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950/40 border border-slate-100 dark:border-white/5"
                                             >
-                                                <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0">
+                                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[#2563eb] dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0">
                                                     {(member.name || '?').slice(0, 2).toUpperCase()}
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-bold text-slate-800 dark:text-white truncate">
                                                         {member.name || 'Student'}
                                                     </p>
-                                                    <p className="text-[11px] text-purple-600 dark:text-purple-400 truncate">
+                                                    <p className="text-[11px] text-[#2563eb] dark:text-blue-400 truncate">
                                                         {formatMemberRole(member.role)}
                                                     </p>
                                                 </div>
@@ -453,7 +453,7 @@ export default function Feedback() {
                                         return (
                                             <div
                                                 key={item.key}
-                                                className="p-4 rounded-xl bg-slate-50 dark:bg-navy-950/60 border border-slate-100 dark:border-white/5 space-y-2 hover:border-purple-500/30 transition-all"
+                                                className="p-4 rounded-xl bg-slate-50 dark:bg-navy-950/60 border border-slate-100 dark:border-white/5 space-y-2 hover:border-blue-500/30 transition-all"
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -480,12 +480,12 @@ export default function Feedback() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                            <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-5 h-5 text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                             Written Guidance
                                         </h3>
-                                        <span className="text-xs font-bold text-purple-600 dark:text-purple-300">
+                                        <span className="text-xs font-bold text-[#2563eb] dark:text-blue-300">
                                             Avg: ★ {overallAverageScore} / 5.0
                                         </span>
                                     </div>
@@ -498,7 +498,7 @@ export default function Feedback() {
                                         <select
                                             value={feedbackType}
                                             onChange={(e) => setFeedbackType(e.target.value)}
-                                            className="w-full bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-white/10 rounded-xl py-2.5 px-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 cursor-pointer"
+                                            className="w-full bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-white/10 rounded-xl py-2.5 px-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-[#2563eb] cursor-pointer"
                                         >
                                             <option>Code Quality</option>
                                             <option>Technical Architecture</option>
@@ -525,7 +525,7 @@ export default function Feedback() {
                                             value={writtenGuidance}
                                             onChange={(e) => setWrittenGuidance(e.target.value)}
                                             placeholder="Highlight team strengths, technical weaknesses, next architectural steps, and actionable guidance for the next review..."
-                                            className="w-full bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-white/10 rounded-xl p-3.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-purple-500 resize-none font-sans leading-relaxed"
+                                            className="w-full bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-white/10 rounded-xl p-3.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] resize-none font-sans leading-relaxed"
                                         />
                                     </div>
                                 </div>
@@ -540,7 +540,7 @@ export default function Feedback() {
                                             className="flex-1 py-2.5 px-4 rounded-xl border border-slate-300 dark:border-white/15 bg-slate-50 dark:bg-navy-900 hover:bg-slate-100 dark:hover:bg-white/5 font-bold text-xs text-slate-700 dark:text-gray-200 transition-all flex items-center justify-center gap-2"
                                         >
                                             {isSavingDraft ? (
-                                                <div className="w-3.5 h-3.5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                                <div className="w-3.5 h-3.5 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin"></div>
                                             ) : (
                                                 <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -553,7 +553,7 @@ export default function Feedback() {
                                             type="button"
                                             onClick={handleSubmitFeedback}
                                             disabled={isSubmitting || isSavingDraft}
-                                            className="flex-1 py-2.5 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-purple-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                            className="flex-1 py-2.5 px-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                         >
                                             {isSubmitting ? (
                                                 <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -577,7 +577,7 @@ export default function Feedback() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                        <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         Feedback History for {selectedTeam.name}
@@ -602,7 +602,7 @@ export default function Feedback() {
                                     {feedbackHistory.map((item) => (
                                         <div
                                             key={item.id}
-                                            className="p-4 rounded-xl bg-slate-50 dark:bg-navy-950/60 border border-slate-100 dark:border-white/5 hover:border-purple-500/30 transition-all space-y-2"
+                                            className="p-4 rounded-xl bg-slate-50 dark:bg-navy-950/60 border border-slate-100 dark:border-white/5 hover:border-blue-500/30 transition-all space-y-2"
                                         >
                                             <div className="flex flex-wrap items-center justify-between gap-2">
                                                 <div className="flex items-center gap-2.5">
@@ -613,7 +613,7 @@ export default function Feedback() {
                                                     }`}>
                                                         {item.status === 'draft' ? 'Draft' : 'Submitted'}
                                                     </span>
-                                                    <span className="text-xs font-bold text-purple-600 dark:text-purple-300">
+                                                    <span className="text-xs font-bold text-[#2563eb] dark:text-blue-300">
                                                         {item.type || 'General'}
                                                     </span>
                                                     <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
@@ -654,7 +654,7 @@ export default function Feedback() {
                                                             setFeedbackType(item.type || 'Code Quality');
                                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                                         }}
-                                                        className="text-purple-600 dark:text-purple-400 font-bold hover:underline"
+                                                        className="text-[#2563eb] dark:text-blue-400 font-bold hover:underline"
                                                     >
                                                         Resume editing draft →
                                                     </button>

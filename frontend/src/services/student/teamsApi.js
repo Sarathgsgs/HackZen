@@ -77,7 +77,7 @@ export const fetchMyTeams = async () => {
                 lastMessage: 'Workspace ready',
                 time: 'Active',
                 unread: 0,
-                gradient: idx % 2 === 0 ? 'from-blue-600 to-indigo-600' : 'from-emerald-500 to-teal-600',
+                gradient: idx % 2 === 0 ? 'from-blue-600 to-blue-500' : 'from-emerald-500 to-teal-600',
                 isOnline: true,
                 progress,
                 members: memberCount,

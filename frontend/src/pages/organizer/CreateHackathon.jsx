@@ -105,9 +105,9 @@ const CreateHackathon = () => {
                                         onClick={() => handleStepChange(step.id)}
                                         className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all cursor-pointer ${
                                             isCurrent
-                                                ? 'bg-[#7C65F6] text-white shadow-md shadow-[#7C65F6]/30'
+                                                ? 'bg-[#2563eb] text-white shadow-md shadow-blue-500/30'
                                                 : isCompleted
-                                                ? 'bg-purple-100 text-[#7C65F6] dark:bg-purple-500/20 dark:text-purple-300'
+                                                ? 'bg-blue-100 text-[#2563eb] dark:bg-blue-500/20 dark:text-blue-300'
                                                 : 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-gray-500'
                                         }`}
                                     >
@@ -117,7 +117,7 @@ const CreateHackathon = () => {
                                     <div className="hidden sm:block">
                                         <p className={`text-xs font-bold ${
                                             isCurrent 
-                                                ? 'text-[#7C65F6]' 
+                                                ? 'text-[#2563eb]' 
                                                 : isCompleted 
                                                 ? 'text-slate-800 dark:text-white font-semibold' 
                                                 : 'text-slate-400 dark:text-gray-500 font-medium'
@@ -131,7 +131,7 @@ const CreateHackathon = () => {
                                     <div className="flex-1 mx-3 sm:mx-6 h-0.5 bg-slate-100 dark:bg-white/10 relative">
                                         <div 
                                             className={`h-full transition-all duration-300 ${
-                                                currentStep > step.id ? 'bg-[#7C65F6]' : 'bg-transparent'
+                                                currentStep > step.id ? 'bg-[#2563eb]' : 'bg-transparent'
                                             }`} 
                                         />
                                     </div>

@@ -14,6 +14,13 @@ const RoleSelection = () => {
     const [selectedRole, setSelectedRole] = useState(initialRole === 'admin' ? 'student' : initialRole);
     const [openFaq, setOpenFaq] = useState(null);
 
+    useEffect(() => {
+        const queryRole = new URLSearchParams(location.search).get('role');
+        if (queryRole && ['student', 'mentor', 'organizer'].includes(queryRole.toLowerCase())) {
+            setSelectedRole(queryRole.toLowerCase());
+        }
+    }, [location.search]);
+
     // If an authenticated user lands on /get-started, redirect them to their authentic dashboard
     useEffect(() => {
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
@@ -85,8 +92,8 @@ const RoleSelection = () => {
                 <div className="w-full max-w-2xl mx-auto bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-slate-800 rounded-full py-2 px-3 sm:px-8 mb-8 sm:mb-10 shadow-sm">
                     <div className="flex items-center justify-between text-xs sm:text-sm font-medium">
                         {/* Step 1: Account Creation */}
-                        <div className="flex items-center gap-1.5 sm:gap-2 text-indigo-600 dark:text-indigo-400 shrink-0">
-                            <span className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-blue-600 dark:text-blue-400 shrink-0">
+                            <span className="w-5 h-5 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold">
                                 ✓
                             </span>
                             <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 hidden sm:inline">Account Creation</span>
@@ -95,12 +102,12 @@ const RoleSelection = () => {
                         <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-1.5 sm:mx-4" />
 
                         {/* Step 2: Role Selection (Active) */}
-                        <div className="flex items-center gap-1.5 sm:gap-2 text-indigo-600 dark:text-indigo-400 shrink-0">
-                            <span className="w-5 h-5 rounded-full bg-[#4338ca] text-white flex items-center justify-center text-[11px] font-bold shadow-sm">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-blue-600 dark:text-blue-400 shrink-0">
+                            <span className="w-5 h-5 rounded-full bg-[#2563eb] text-white flex items-center justify-center text-[11px] font-bold shadow-sm">
                                 2
                             </span>
-                            <span className="text-xs font-bold text-[#4338ca] dark:text-indigo-400 hidden sm:inline">Role Selection</span>
-                            <span className="text-[11px] font-bold text-[#4338ca] dark:text-indigo-400 sm:hidden">Role</span>
+                            <span className="text-xs font-bold text-[#2563eb] dark:text-blue-400 hidden sm:inline">Role Selection</span>
+                            <span className="text-[11px] font-bold text-[#2563eb] dark:text-blue-400 sm:hidden">Role</span>
                         </div>
                         <div className="flex-1 h-[1.5px] bg-slate-200 dark:bg-slate-800 mx-1.5 sm:mx-4" />
 
@@ -143,13 +150,13 @@ const RoleSelection = () => {
                                 onClick={() => setSelectedRole(role.id)}
                                 className={`relative p-5 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between min-h-[175px] ${
                                     isSelected
-                                        ? 'bg-[#F4F6FF] dark:bg-indigo-950/40 border-2 border-[#4338ca] shadow-md ring-2 ring-indigo-500/10'
+                                        ? 'bg-blue-50/60 dark:bg-blue-950/40 border-2 border-[#2563eb] shadow-md ring-2 ring-blue-500/10'
                                         : 'bg-white dark:bg-navy-900 border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm'
                                 }`}
                             >
                                 {/* Top-right selection indicator */}
                                 {isSelected ? (
-                                    <span className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-[#4338ca] text-white flex items-center justify-center text-[11px] font-bold shadow-sm">
+                                    <span className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-[#2563eb] text-white flex items-center justify-center text-[11px] font-bold shadow-sm">
                                         ✓
                                     </span>
                                 ) : (
@@ -157,7 +164,7 @@ const RoleSelection = () => {
                                 )}
 
                                 <div>
-                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-[#EEF2FD] dark:bg-indigo-950 text-[#4338ca] dark:text-indigo-400">
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-blue-50 dark:bg-blue-950 text-[#2563eb] dark:text-blue-400">
                                         {role.icon}
                                     </div>
                                     <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base mb-1">
@@ -177,13 +184,13 @@ const RoleSelection = () => {
                     <button
                         type="button"
                         onClick={handleContinue}
-                        className="px-12 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
+                        className="px-12 py-3 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-sm shadow-md shadow-blue-600/20 hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
                     >
                         Continue
                     </button>
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2">
                         <span>Are you a platform administrator?</span>
-                        <Link to="/login?role=admin" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                        <Link to="/login?role=admin" className="font-bold text-blue-600 dark:text-blue-400 hover:underline">
                             Sign in to Admin Console →
                         </Link>
                     </div>
@@ -192,8 +199,8 @@ const RoleSelection = () => {
                 {/* BOTTOM 2 CARDS: ROLE INFO & FAQ */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
                     {/* Role Information Card */}
-                    <div className="p-6 rounded-2xl bg-[#F5F7FF] dark:bg-navy-900/60 border border-[#E0E7FF] dark:border-slate-800">
-                        <div className="flex items-center gap-2 text-[#4338ca] dark:text-indigo-400 font-bold text-sm mb-4">
+                    <div className="p-6 rounded-2xl bg-blue-50/50 dark:bg-navy-900/60 border border-blue-100 dark:border-slate-800">
+                        <div className="flex items-center gap-2 text-[#2563eb] dark:text-blue-400 font-bold text-sm mb-4">
                             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -201,19 +208,19 @@ const RoleSelection = () => {
                         </div>
                         <ul className="space-y-3 text-xs text-slate-600 dark:text-slate-300">
                             <li className="flex items-start gap-2.5">
-                                <span className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-950 text-[#4338ca] dark:text-indigo-400 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                <span className="w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-950 text-[#2563eb] dark:text-blue-400 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
                                     ✓
                                 </span>
                                 <span><strong className="text-slate-800 dark:text-white">Students:</strong> Join teams, find mentors, and submit innovative projects.</span>
                             </li>
                             <li className="flex items-start gap-2.5">
-                                <span className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-950 text-[#4338ca] dark:text-indigo-400 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                <span className="w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-950 text-[#2563eb] dark:text-blue-400 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
                                     ✓
                                 </span>
                                 <span><strong className="text-slate-800 dark:text-white">Mentors:</strong> Guide emerging talent and share industry expertise.</span>
                             </li>
                             <li className="flex items-start gap-2.5">
-                                <span className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-950 text-[#4338ca] dark:text-indigo-400 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                <span className="w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-950 text-[#2563eb] dark:text-blue-400 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
                                     ✓
                                 </span>
                                 <span><strong className="text-slate-800 dark:text-white">Organizers:</strong> Host and manage large-scale hackathon events.</span>
@@ -223,7 +230,7 @@ const RoleSelection = () => {
 
                     {/* FAQ Card */}
                     <div className="p-6 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-                        <div className="flex items-center gap-2 text-[#4338ca] dark:text-indigo-400 font-bold text-sm mb-4">
+                        <div className="flex items-center gap-2 text-[#2563eb] dark:text-blue-400 font-bold text-sm mb-4">
                             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>

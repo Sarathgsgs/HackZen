@@ -144,8 +144,8 @@ const Submissions = () => {
     const getStatusStyle = (status) => {
         switch (status) {
             case 'Pending Review': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
-            case 'Reviewed': return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
-            case 'Shortlisted': return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
+            case 'Reviewed': return 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20';
+            case 'Shortlisted': return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
             case 'Rejected': return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
             case 'Evaluated': return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
             case 'Approved': return 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20';
@@ -178,17 +178,17 @@ const Submissions = () => {
             {/* Active Platform Deliverables Policy Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 dark:bg-navy-950/40 rounded-xl border border-slate-200/80 dark:border-white/5 text-xs text-slate-500 dark:text-gray-400">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#7C65F6] animate-pulse"></span>
+                    <span className="w-2 h-2 rounded-full bg-[#2563eb] animate-pulse"></span>
                     <span className="font-semibold text-slate-800 dark:text-white">Platform Deliverable Baseline:</span>
-                    <span>Max Size: <strong className="text-slate-800 dark:text-purple-300">{maxUploadFileSize}</strong></span>
+                    <span>Max Size: <strong className="text-slate-800 dark:text-blue-300">{maxUploadFileSize}</strong></span>
                     <span>•</span>
-                    <span>Allowed Formats: <strong className="text-slate-800 dark:text-purple-300">{(allowedFileTypes || []).join(', ')}</strong></span>
+                    <span>Allowed Formats: <strong className="text-slate-800 dark:text-blue-300">{(allowedFileTypes || []).join(', ')}</strong></span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${gitHubRepo ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400'}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${gitHubRepo ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400'}`}>
                         GitHub: {gitHubRepo ? 'Mandatory' : 'Optional'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${demoUrl ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400'}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${demoUrl ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400'}`}>
                         Demo: {demoUrl ? 'Mandatory' : 'Optional'}
                     </span>
                 </div>
@@ -206,7 +206,7 @@ const Submissions = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-5 border-b border-slate-200/80 dark:border-white/5 gap-4">
                     <div className="flex items-center gap-3">
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white">All Submissions</h2>
-                        {isLoading && <span className="text-xs text-[#7C65F6] animate-pulse bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">Loading...</span>}
+                        {isLoading && <span className="text-xs text-[#2563eb] animate-pulse bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">Loading...</span>}
                     </div>
                     <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                         <div className="relative flex-1 md:w-64 min-w-[200px]">
@@ -215,7 +215,7 @@ const Submissions = () => {
                                 placeholder="Search team or project..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all"
+                                className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-[#2563eb] transition-all"
                             />
                             <svg className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -246,7 +246,7 @@ const Submissions = () => {
 
                 {isLoading ? (
                     <div className="p-20 flex flex-col items-center justify-center space-y-4">
-                        <div className="w-10 h-10 border-4 border-[#7C65F6] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-10 h-10 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin"></div>
                         <p className="text-sm text-slate-400 animate-pulse">Loading submissions...</p>
                     </div>
                 ) : paginatedItems.length === 0 ? (
@@ -273,11 +273,11 @@ const Submissions = () => {
                                     <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-[#7C65F6]/10 flex items-center justify-center border border-[#7C65F6]/20 text-[#7C65F6] font-semibold text-sm">
+                                                <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20 text-[#2563eb] font-semibold text-sm">
                                                     {item.logo}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-[#7C65F6] transition-colors">{item.team}</p>
+                                                    <p className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-[#2563eb] transition-colors">{item.team}</p>
                                                     <p className="text-xs text-slate-500 dark:text-gray-500 mt-0.5">Code: {item.teamCode}</p>
                                                 </div>
                                             </div>
@@ -355,7 +355,7 @@ const Submissions = () => {
                                                 <button
                                                     onClick={() => handleEvaluate(item.id)}
                                                     disabled={actionLoading[item.id]}
-                                                    className="px-3.5 py-1.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white text-xs font-semibold rounded-lg shadow-sm shadow-[#7C65F6]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-semibold rounded-lg shadow-sm shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {actionLoading[item.id] ? 'Evaluating...' : 'Evaluate'}
                                                 </button>
@@ -386,7 +386,7 @@ const Submissions = () => {
                                 onClick={() => setCurrentPage(page)}
                                 className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                                     currentPage === page
-                                        ? 'bg-[#7C65F6] text-white shadow-sm'
+                                        ? 'bg-[#2563eb] text-white shadow-sm'
                                         : 'bg-white dark:bg-white/5 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10'
                                 }`}
                             >
@@ -467,7 +467,7 @@ const Submissions = () => {
                                     )}
                                     <button
                                         onClick={() => handleEvaluate(selectedSubmission.id)}
-                                        className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+                                        className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
                                     >
                                         Evaluate Submission
                                     </button>

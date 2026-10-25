@@ -96,7 +96,7 @@ const Login = () => {
     return (
         <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-navy-900 transition-colors duration-300">
             {/* LEFT HERO / ARTWORK PANEL */}
-            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-8 sm:p-12 lg:p-16 bg-[#EEF0FD] dark:bg-navy-950 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-8 sm:p-12 lg:p-16 bg-[#eff6ff] dark:bg-navy-950 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 overflow-hidden">
                 {/* Brand Logo */}
                 <div className="relative z-10">
                     <Link to="/" className="inline-block">
@@ -132,7 +132,7 @@ const Login = () => {
                 </div>
 
                 {/* Subtle decorative background circles */}
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-200/30 dark:bg-purple-900/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-200/30 dark:bg-blue-900/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute top-1/4 -right-20 w-80 h-80 bg-blue-200/30 dark:bg-blue-900/10 rounded-full blur-3xl pointer-events-none" />
             </div>
 
@@ -183,14 +183,25 @@ const Login = () => {
                         </div>
                     )}
 
-                    {/* Error Banner */}
+                    {/* Error Banner / Approval Notice */}
                     {error && (
-                        <div className="mb-6 p-4 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 rounded-xl flex items-start gap-2">
+                        <div className={`mb-6 p-4 text-xs font-medium rounded-xl flex items-start gap-2.5 ${
+                            error.toLowerCase().includes('pending')
+                                ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40'
+                                : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40'
+                        }`}>
                             <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" strokeWidth="2" />
                                 <path strokeLinecap="round" strokeWidth="2" d="M12 8v4m0 4h.01" />
                             </svg>
-                            <span>{error}</span>
+                            <div className="flex-1">
+                                {error.toLowerCase().includes('pending') && (
+                                    <span className="block font-bold text-[11px] uppercase tracking-wider mb-0.5 text-amber-800 dark:text-amber-300">
+                                        Account Pending Review
+                                    </span>
+                                )}
+                                <span>{error}</span>
+                            </div>
                         </div>
                     )}
 
@@ -208,7 +219,7 @@ const Login = () => {
                                 onChange={handleChange}
                                 placeholder="Enter your email"
                                 required
-                                className="w-full px-4 py-3 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 dark:focus:border-indigo-400 transition"
+                                className="w-full px-4 py-3 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-400 transition"
                             />
                         </div>
 
@@ -225,7 +236,7 @@ const Login = () => {
                                     onChange={handleChange}
                                     placeholder="••••••••"
                                     required
-                                    className="w-full px-4 py-3 pr-11 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 dark:focus:border-indigo-400 transition"
+                                    className="w-full px-4 py-3 pr-11 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-400 transition"
                                 />
                                 <button
                                     type="button"
@@ -254,13 +265,13 @@ const Login = () => {
                                     type="checkbox"
                                     checked={rememberMe}
                                     onChange={(e) => setRememberMe(e.target.checked)}
-                                    className="w-4 h-4 rounded text-indigo-600 border-slate-300 dark:border-slate-600 focus:ring-indigo-500"
+                                    className="w-4 h-4 rounded text-blue-600 border-slate-300 dark:border-slate-600 focus:ring-blue-500"
                                 />
                                 <span>Remember me</span>
                             </label>
                             <Link
                                 to="/forgot-password"
-                                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
+                                className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition"
                             >
                                 Forgot Password?
                             </Link>
@@ -270,7 +281,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full py-3.5 px-4 font-semibold text-sm text-white rounded-xl bg-[#4338ca] hover:bg-[#3730a3] shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                            className={`w-full py-3.5 px-4 font-semibold text-sm text-white rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 ${
                                 loading ? 'opacity-70 cursor-not-allowed' : ''
                             }`}
                         >
@@ -331,7 +342,7 @@ const Login = () => {
                     {/* Footer */}
                     <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
                         Don't have an account?{' '}
-                        <Link to="/signup" className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition">
+                        <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition">
                             Sign Up
                         </Link>
                     </p>

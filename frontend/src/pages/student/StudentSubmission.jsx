@@ -147,7 +147,7 @@ const StudentSubmission = () => {
     if (loadError) return <div role="alert" className="mx-auto max-w-4xl rounded-[18px] border border-red-200 bg-white p-10 text-center text-red-800">{loadError}</div>;
     return (
       <div className="mx-auto max-w-4xl pb-10">
-        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f7f4fb] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
+        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f8fafc] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
           <h2 className="text-2xl font-bold text-[#1d1a2a]">No active team</h2>
           <p className="mt-3 text-[#69707d]">Join or create a team before submitting your project.</p>
         </div>
@@ -163,7 +163,7 @@ const StudentSubmission = () => {
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7d7a88]">Deliverable</p>
             <h1 className="mt-2 text-[44px] font-bold leading-none tracking-[-0.05em] text-[#1d1a2a]">Project Submission</h1>
           </div>
-          <button onClick={() => navigate(`/student/submission-status${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#f4f0ff] px-4 py-2.5 text-sm font-semibold text-[#5a44c9]">
+          <button onClick={() => navigate(`/student/submission-status${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#eff6ff] px-4 py-2.5 text-sm font-semibold text-[#5a44c9]">
             Submission status
           </button>
         </div>
@@ -242,7 +242,7 @@ const StudentSubmission = () => {
           )}
 
           <div className="flex items-center justify-between gap-4 rounded-[18px] border border-[#dfe0ea] bg-[#f8f6fb] p-4 shadow-[0_8px_26px_rgba(83,63,166,0.04)]">
-            <button type="button" onClick={() => navigate(`/student/files${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#f4f0ff] px-5 py-3 text-sm font-semibold text-[#5a44c9]">
+            <button type="button" onClick={() => navigate(`/student/files${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#eff6ff] px-5 py-3 text-sm font-semibold text-[#5a44c9]">
               File sharing
             </button>
             <button

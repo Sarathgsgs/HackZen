@@ -203,7 +203,7 @@ const ResultsCertificates = () => {
                         <select
                             value={selectedHackathonId}
                             onChange={(e) => setSelectedHackathonId(e.target.value)}
-                            className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] cursor-pointer"
+                            className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-[#2563eb] cursor-pointer"
                         >
                             {allHackathons.map(h => (
                                 <option key={h.id} value={h.id} className="bg-white dark:bg-gray-900 text-slate-900 dark:text-white">
@@ -225,7 +225,7 @@ const ResultsCertificates = () => {
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed
                             ${publishStatus === 'published'
                                 ? 'bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 shadow-emerald-500/10'
-                                : 'bg-[#7C65F6] hover:bg-[#6851ec] text-white shadow-[#7C65F6]/20'
+                                : 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-blue-500/20'
                             }`}
                     >
                         {isPublishing ? (
@@ -250,9 +250,9 @@ const ResultsCertificates = () => {
 
             {/* Notifications */}
             {statusMessage && (
-                <div className="p-4 rounded-xl bg-purple-500/10 text-[#7C65F6] dark:text-purple-300 border border-purple-500/20 flex items-center justify-between animate-in fade-in">
+                <div className="p-4 rounded-xl bg-blue-500/10 text-[#2563eb] dark:text-blue-300 border border-blue-500/20 flex items-center justify-between animate-in fade-in">
                     <span className="font-semibold text-sm">{statusMessage}</span>
-                    <button onClick={() => setStatusMessage('')} className="text-[#7C65F6] hover:text-purple-400 text-sm font-bold">✕</button>
+                    <button onClick={() => setStatusMessage('')} className="text-[#2563eb] hover:text-blue-400 text-sm font-bold">✕</button>
                 </div>
             )}
 
@@ -269,7 +269,7 @@ const ResultsCertificates = () => {
                                 🔒 Hidden from public by policy
                             </span>
                         )}
-                        {isLoading && <span className="text-xs text-[#7C65F6] animate-pulse bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">Syncing...</span>}
+                        {isLoading && <span className="text-xs text-[#2563eb] animate-pulse bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">Syncing...</span>}
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -298,23 +298,23 @@ const ResultsCertificates = () => {
                         <thead>
                             <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-200/80 dark:border-white/5 text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">
                                 <th
-                                    className="px-6 py-4 cursor-pointer hover:text-[#7C65F6] transition-colors"
+                                    className="px-6 py-4 cursor-pointer hover:text-[#2563eb] transition-colors"
                                     onClick={() => handleSort('rank')}
                                 >
                                     <div className="flex items-center gap-1">
                                         Rank
-                                        <Icon name="Sort" className={`w-3 h-3 transition-opacity ${sortConfig.key === 'rank' ? 'opacity-100 text-[#7C65F6]' : 'opacity-0 group-hover:opacity-50'}`} />
+                                        <Icon name="Sort" className={`w-3 h-3 transition-opacity ${sortConfig.key === 'rank' ? 'opacity-100 text-[#2563eb]' : 'opacity-0 group-hover:opacity-50'}`} />
                                     </div>
                                 </th>
                                 <th className="px-6 py-4">Team Name</th>
                                 <th className="px-6 py-4">Project</th>
                                 <th
-                                    className="px-6 py-4 cursor-pointer hover:text-[#7C65F6] transition-colors"
+                                    className="px-6 py-4 cursor-pointer hover:text-[#2563eb] transition-colors"
                                     onClick={() => handleSort('score')}
                                 >
                                     <div className="flex items-center gap-1">
                                         Total Score
-                                        <Icon name="Sort" className={`w-3 h-3 transition-opacity ${sortConfig.key === 'score' ? 'opacity-100 text-[#7C65F6]' : 'opacity-0 group-hover:opacity-50'}`} />
+                                        <Icon name="Sort" className={`w-3 h-3 transition-opacity ${sortConfig.key === 'score' ? 'opacity-100 text-[#2563eb]' : 'opacity-0 group-hover:opacity-50'}`} />
                                     </div>
                                 </th>
                                 <th className="px-6 py-4">Prize Tier</th>
@@ -343,10 +343,10 @@ const ResultsCertificates = () => {
                                         {/* Team Name */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded bg-[#7C65F6]/10 flex items-center justify-center text-xs font-bold text-[#7C65F6]">
+                                                <div className="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center text-xs font-bold text-[#2563eb]">
                                                     {item.logo}
                                                 </div>
-                                                <span className="font-semibold text-slate-900 dark:text-white group-hover:text-[#7C65F6] transition-colors">{item.team}</span>
+                                                <span className="font-semibold text-slate-900 dark:text-white group-hover:text-[#2563eb] transition-colors">{item.team}</span>
                                             </div>
                                         </td>
                                         {/* Project */}
@@ -362,18 +362,18 @@ const ResultsCertificates = () => {
                                                     max="100"
                                                     value={item.score}
                                                     onChange={(e) => handleScoreChange(item.teamId, e.target.value)}
-                                                    className="w-20 bg-slate-50 dark:bg-black/60 border border-[#7C65F6] rounded px-2 py-1 text-[#7C65F6] font-bold text-sm outline-none"
+                                                    className="w-20 bg-slate-50 dark:bg-black/60 border border-[#2563eb] rounded px-2 py-1 text-[#2563eb] font-bold text-sm outline-none"
                                                 />
                                             ) : (
-                                                <span className="text-[#7C65F6] font-bold">{item.score}/{item.maxScore || 100}</span>
+                                                <span className="text-[#2563eb] font-bold">{item.score}/{item.maxScore || 100}</span>
                                             )}
                                         </td>
                                         {/* Tier */}
                                         <td className="px-6 py-4">
                                             <span className={`px-2.5 py-1 rounded-md text-xs font-medium border whitespace-nowrap
                                                 ${item.tier === 'Grand Winner' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
-                                                    item.tier.includes('Runner Up') ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20' :
-                                                        'bg-purple-500/10 text-[#7C65F6] border-purple-500/20'}
+                                                    item.tier.includes('Runner Up') ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' :
+                                                        'bg-blue-500/10 text-[#2563eb] border-blue-500/20'}
                                             `}>
                                                 {item.tier}
                                             </span>
@@ -406,7 +406,7 @@ const ResultsCertificates = () => {
                             </span>
                         )}
                         {autoGenParticipant && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                                 <span>⚡ Participant Auto-Issuance Active</span>
                             </span>
                         )}
@@ -420,12 +420,12 @@ const ResultsCertificates = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {templates.map((template) => (
-                            <div key={template.id} className="bg-white dark:bg-navy-900 p-6 rounded-2xl border border-slate-200/80 dark:border-white/10 hover:border-[#7C65F6]/40 transition-all shadow-xs group">
+                            <div key={template.id} className="bg-white dark:bg-navy-900 p-6 rounded-2xl border border-slate-200/80 dark:border-white/10 hover:border-[#2563eb]/40 transition-all shadow-xs group">
                                 <div className="flex justify-between items-start mb-5">
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center border
                                         ${template.iconColor === 'yellow'
                                             ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
-                                            : 'bg-indigo-500/10 border-indigo-500/20 text-[#7C65F6]'
+                                            : 'bg-blue-500/10 border-blue-500/20 text-[#2563eb]'
                                         }`}>
                                         <Icon name="Award" className="w-6 h-6" />
                                     </div>
@@ -437,7 +437,7 @@ const ResultsCertificates = () => {
                                         {template.status}
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-[#7C65F6] transition-colors">{template.name || template.title}</h3>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-[#2563eb] transition-colors">{template.name || template.title}</h3>
                                 <p className="text-sm text-slate-500 dark:text-gray-400 mb-5">{template.description}</p>
 
                                 <div className="flex gap-6 mb-6 text-xs text-slate-600 dark:text-gray-300">
@@ -461,7 +461,7 @@ const ResultsCertificates = () => {
                                         disabled={template.status !== 'Ready' || issuingState[template.id]}
                                         className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-xs active:scale-95
                                             ${template.status === 'Ready'
-                                                ? 'bg-[#7C65F6] hover:bg-[#6851ec] text-white shadow-sm'
+                                                ? 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-sm'
                                                 : 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-gray-500 cursor-not-allowed border border-slate-200 dark:border-white/10 opacity-50'
                                             }
                                         `}

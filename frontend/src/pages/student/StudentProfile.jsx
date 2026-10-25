@@ -78,7 +78,7 @@ const StudentProfile = () => {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 animate-in fade-in duration-700">
             <div className="glass-strong border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
-                <div className="h-48 bg-gradient-to-r from-navy-950 via-indigo-950 to-navy-950 relative overflow-hidden">
+                <div className="h-48 bg-gradient-to-r from-navy-950 via-blue-950 to-navy-950 relative overflow-hidden">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                     <div className="absolute inset-0 bg-radial-at-t from-blue-500/5 to-transparent"></div>
                 </div>
@@ -154,7 +154,7 @@ const StudentProfile = () => {
                                         <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">{item.level}</span>
                                     </div>
                                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                        <div className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-1000 group-hover:shadow-[0_0_12px_rgba(59,130,246,0.3)]" style={{ width: `${item.value}%` }}></div>
+                                        <div className="h-full bg-gradient-to-r from-blue-600 to-blue-500 rounded-full transition-all duration-1000 group-hover:shadow-[0_0_12px_rgba(59,130,246,0.3)]" style={{ width: `${item.value}%` }}></div>
                                     </div>
                                 </div>
                             )) : (

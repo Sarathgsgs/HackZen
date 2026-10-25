@@ -11,22 +11,22 @@ const metricDefinitions = [
 
 const metricIcons = {
     registeredHackathons: (
-        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
         </svg>
     ),
     activeTeams: (
-        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
     ),
     submissions: (
-        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
     ),
     certificates: (
-        <svg className="w-4 h-4 text-[#7C65F6] dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
         </svg>
     ),
@@ -99,7 +99,7 @@ const getStatusClasses = (status) => {
     if (normalized.includes('rejected') || normalized.includes('declined')) {
         return 'border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400';
     }
-    return 'border-purple-500/20 bg-purple-500/10 text-purple-700 dark:text-purple-400';
+    return 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400';
 };
 
 const DashboardSkeleton = () => (
@@ -127,7 +127,7 @@ const MetricCard = ({ label, value, metricKey }) => (
     <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between transition-all hover:shadow-md">
         <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center shrink-0">
                 {metricIcons[metricKey]}
             </div>
         </div>
@@ -158,9 +158,9 @@ const getActivityBadge = (type) => {
         case 'certificate':
             return { icon: '🏆', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' };
         case 'team':
-            return { icon: '👥', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' };
+            return { icon: '👥', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' };
         default:
-            return { icon: '⚡', color: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20' };
+            return { icon: '⚡', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' };
     }
 };
 
@@ -206,7 +206,7 @@ const StudentDashboard = () => {
                         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{error}</p>
                         <button
                             onClick={loadDashboard}
-                            className="mt-6 rounded-xl bg-[#7C65F6] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95"
+                            className="mt-6 rounded-xl bg-[#2563eb] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95"
                         >
                             Try again
                         </button>
@@ -217,7 +217,7 @@ const StudentDashboard = () => {
                         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-                                    Welcome back, <span className="text-[#7C65F6] dark:text-purple-400">{studentName}</span>!
+                                    Welcome back, <span className="text-[#2563eb] dark:text-blue-400">{studentName}</span>!
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                     Track your active hackathon registrations, squad milestones, submissions, and credentials.
@@ -226,7 +226,7 @@ const StudentDashboard = () => {
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => navigate('/student/hackathons')}
-                                    className="inline-flex items-center gap-2 rounded-xl bg-[#7C65F6] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
+                                    className="inline-flex items-center gap-2 rounded-xl bg-[#2563eb] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95 cursor-pointer"
                                 >
                                     Explore Hackathons
                                 </button>
@@ -260,7 +260,7 @@ const StudentDashboard = () => {
                                         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Explore upcoming events and register for a hackathon to see it here.</p>
                                         <button
                                             onClick={() => navigate('/student/hackathons')}
-                                            className="mt-4 rounded-xl bg-[#7C65F6] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95"
+                                            className="mt-4 rounded-xl bg-[#2563eb] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95"
                                         >
                                             Explore Hackathons
                                         </button>
@@ -280,7 +280,7 @@ const StudentDashboard = () => {
                                             return (
                                                 <article
                                                     key={hackathon.id}
-                                                    className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-4 sm:p-5 transition-all hover:border-purple-300 dark:hover:border-purple-700/50"
+                                                    className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-4 sm:p-5 transition-all hover:border-blue-300 dark:hover:border-blue-700/50"
                                                 >
                                                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                                                         <div className="aspect-video w-full shrink-0 overflow-hidden rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-navy-900 sm:w-[140px]">
@@ -310,7 +310,7 @@ const StudentDashboard = () => {
                                                                 </div>
                                                                 <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-navy-800">
                                                                     {progressValue !== null && (
-                                                                        <div className="h-full rounded-full bg-[#7C65F6] transition-all duration-500" style={{ width: `${progressValue}%` }} />
+                                                                        <div className="h-full rounded-full bg-[#2563eb] transition-all duration-500" style={{ width: `${progressValue}%` }} />
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -320,7 +320,7 @@ const StudentDashboard = () => {
                                                     <div className="mt-4 flex items-center justify-end border-t border-slate-200/60 dark:border-white/5 pt-3">
                                                         <button
                                                             onClick={() => navigate(workspaceRoute)}
-                                                            className="rounded-xl bg-[#7C65F6] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
+                                                            className="rounded-xl bg-[#2563eb] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95 cursor-pointer"
                                                         >
                                                             View Workspace
                                                         </button>
@@ -340,7 +340,7 @@ const StudentDashboard = () => {
                                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Upcoming Events</h2>
                                         <button
                                             onClick={() => navigate('/student/hackathons')}
-                                            className="text-xs font-bold text-[#7C65F6] dark:text-purple-400 hover:underline cursor-pointer"
+                                            className="text-xs font-bold text-[#2563eb] dark:text-blue-400 hover:underline cursor-pointer"
                                         >
                                             See all
                                         </button>
@@ -357,19 +357,19 @@ const StudentDashboard = () => {
                                                 return (
                                                     <article
                                                         key={hackathon.id}
-                                                        className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-3.5 transition-all hover:border-purple-300 dark:hover:border-purple-700/50"
+                                                        className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/40 p-3.5 transition-all hover:border-blue-300 dark:hover:border-blue-700/50"
                                                     >
                                                         <h3 className="text-sm font-bold leading-tight text-slate-900 dark:text-white truncate">{hackathon.title}</h3>
                                                         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{formatDateRange(hackathon.hackathonStart, hackathon.hackathonEnd)}</p>
 
                                                         <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-200/60 dark:border-white/5 pt-2.5">
                                                             <div>
-                                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Prize Pool</p>
+                                                                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Prize Pool</p>
                                                                 <p className="text-xs font-bold text-slate-900 dark:text-white">{prize || 'TBA'}</p>
                                                             </div>
                                                             <button
                                                                 onClick={() => navigate(`/student/hackathons/${hackathon.id}/register`)}
-                                                                className="rounded-lg bg-[#7C65F6] px-3 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 cursor-pointer"
+                                                                className="rounded-lg bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95 cursor-pointer"
                                                             >
                                                                 Register
                                                             </button>

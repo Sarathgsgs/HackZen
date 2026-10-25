@@ -73,7 +73,7 @@ export default function HackathonApprovalStatus() {
     if (loading && !data) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] text-center p-8 space-y-4">
-                <div className="w-10 h-10 border-4 border-[#5B45D9]/20 border-t-[#5B45D9] rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-blue-500/20 border-t-[#2563eb] rounded-full animate-spin"></div>
                 <p className="text-sm text-slate-400 font-medium">Retrieving event review standing...</p>
             </div>
         );
@@ -137,13 +137,13 @@ export default function HackathonApprovalStatus() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setGuidelinesOpen(true)}
-                        className="px-4 py-2.5 rounded-xl border border-[#5B45D9]/40 hover:border-[#5B45D9] text-[#5B45D9] dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/20 text-xs font-bold transition-all cursor-pointer shadow-xs"
+                        className="px-4 py-2.5 rounded-xl border border-blue-500/40 hover:border-[#2563eb] text-[#2563eb] dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/20 text-xs font-bold transition-all cursor-pointer shadow-xs"
                     >
                         View Detailed Guidelines
                     </button>
                     <button
                         onClick={handleEditAndResubmit}
-                        className="px-4 py-2.5 rounded-xl bg-[#5B45D9] hover:bg-[#4E39C4] text-white text-xs font-bold shadow-sm flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+                        className="px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-sm flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
                     >
                         <Edit3 className="w-4 h-4" />
                         <span>Edit & Resubmit</span>
@@ -181,7 +181,7 @@ export default function HackathonApprovalStatus() {
                         <div className="relative pt-4 pb-2">
                             {/* Horizontal connector line */}
                             <div className="absolute top-[34px] left-[12%] right-[12%] h-[2px] bg-slate-200 dark:bg-slate-700 z-0">
-                                <div className="h-full bg-[#5B45D9] transition-all duration-500" style={{ width: '66%' }}></div>
+                                <div className="h-full bg-[#2563eb] transition-all duration-500" style={{ width: '66%' }}></div>
                             </div>
 
                             <div className="grid grid-cols-4 relative z-10 text-center">
@@ -194,15 +194,15 @@ export default function HackathonApprovalStatus() {
                                             <div className="relative">
                                                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-xs ${
                                                     isDone 
-                                                        ? 'bg-[#5B45D9] text-white ring-4 ring-purple-100 dark:ring-purple-950/40' 
+                                                        ? 'bg-[#2563eb] text-white ring-4 ring-blue-100 dark:ring-blue-950/40' 
                                                         : isActive 
-                                                        ? 'bg-white dark:bg-[#111625] text-[#5B45D9] border-2 border-[#5B45D9] ring-4 ring-purple-100 dark:ring-purple-950/40' 
+                                                        ? 'bg-white dark:bg-[#111625] text-[#2563eb] border-2 border-[#2563eb] ring-4 ring-blue-100 dark:ring-blue-950/40' 
                                                         : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-white/10'
                                                 }`}>
                                                     {isDone ? (
                                                         <Check className="w-4 h-4 stroke-[3]" />
                                                     ) : isActive ? (
-                                                        <Eye className="w-4 h-4 text-[#5B45D9]" />
+                                                        <Eye className="w-4 h-4 text-[#2563eb]" />
                                                     ) : (
                                                         <Flag className="w-4 h-4 text-slate-400" />
                                                     )}
@@ -210,12 +210,12 @@ export default function HackathonApprovalStatus() {
 
                                                 {/* Glowing dot for current active step */}
                                                 {isActive && (
-                                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#5B45D9] ring-2 ring-white dark:ring-[#111625] animate-pulse"></span>
+                                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#2563eb] ring-2 ring-white dark:ring-[#111625] animate-pulse"></span>
                                                 )}
                                             </div>
 
                                             <div className="mt-3">
-                                                <div className={`text-xs font-bold ${isActive ? 'text-[#5B45D9] dark:text-purple-300' : 'text-slate-800 dark:text-slate-200'}`}>
+                                                <div className={`text-xs font-bold ${isActive ? 'text-[#2563eb] dark:text-blue-300' : 'text-slate-800 dark:text-slate-200'}`}>
                                                     {st.label}
                                                 </div>
                                                 <div className="text-[11px] text-slate-400 mt-0.5">
@@ -240,7 +240,7 @@ export default function HackathonApprovalStatus() {
                                 const isAction = item.type === 'action';
                                 return (
                                     <div key={item.id || idx} className="flex items-start gap-3.5">
-                                        <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${isAction ? 'bg-[#5B45D9]' : 'bg-slate-400'}`}></div>
+                                        <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${isAction ? 'bg-[#2563eb]' : 'bg-slate-400'}`}></div>
                                         <div>
                                             <div className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
                                                 {item.title}
@@ -268,7 +268,7 @@ export default function HackathonApprovalStatus() {
                                     <div key={doc.id || idx} className="py-3 flex items-center justify-between">
                                         <div className="flex items-center gap-2.5">
                                             <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                                                isVerified ? 'text-[#5B45D9]' : 'text-slate-400'
+                                                isVerified ? 'text-[#2563eb]' : 'text-slate-400'
                                             }`}>
                                                 {isVerified ? <CheckCircle2 className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />}
                                             </div>
@@ -278,7 +278,7 @@ export default function HackathonApprovalStatus() {
                                         </div>
 
                                         <span className={`text-xs font-semibold ${
-                                            isVerified ? 'text-[#5B45D9] dark:text-purple-300' : 'text-slate-400'
+                                            isVerified ? 'text-[#2563eb] dark:text-blue-300' : 'text-slate-400'
                                         }`}>
                                             {doc.status}
                                         </span>
@@ -336,7 +336,7 @@ export default function HackathonApprovalStatus() {
                                     onClick={() => handleToggleStep(step.id, step.completed)}
                                     className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-3.5 ${
                                         step.completed 
-                                            ? 'bg-purple-50/40 dark:bg-purple-950/20 border-[#5B45D9]/40' 
+                                            ? 'bg-blue-50/40 dark:bg-blue-950/20 border-blue-500/40' 
                                             : 'bg-slate-50/60 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/10 hover:border-slate-300'
                                     }`}
                                 >
@@ -344,7 +344,7 @@ export default function HackathonApprovalStatus() {
                                         type="checkbox" 
                                         checked={step.completed} 
                                         onChange={() => {}}
-                                        className="mt-1 h-4 w-4 rounded border-slate-300 text-[#5B45D9] focus:ring-[#5B45D9] cursor-pointer"
+                                        className="mt-1 h-4 w-4 rounded border-slate-300 text-[#2563eb] focus:ring-[#2563eb] cursor-pointer"
                                     />
                                     <div className="min-w-0">
                                         <div className={`text-xs sm:text-sm font-bold ${step.completed ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}`}>
@@ -369,7 +369,7 @@ export default function HackathonApprovalStatus() {
                             {approvalData.reviewerTeam.map((rev) => {
                                 const isLead = rev.role.includes('Lead');
                                 const avatarBg = isLead 
-                                    ? 'bg-purple-100 dark:bg-purple-950/60 text-[#5B45D9] dark:text-purple-300' 
+                                    ? 'bg-blue-100 dark:bg-blue-950/60 text-[#2563eb] dark:text-blue-300' 
                                     : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
 
                                 return (
@@ -400,7 +400,7 @@ export default function HackathonApprovalStatus() {
                     <div className="bg-white dark:bg-[#111625] border border-slate-200 dark:border-white/10 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
                             <div className="flex items-center gap-2.5">
-                                <BookOpen className="w-5 h-5 text-[#5B45D9]" />
+                                <BookOpen className="w-5 h-5 text-[#2563eb]" />
                                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Platform Approval Guidelines</h3>
                             </div>
                             <button
@@ -419,7 +419,7 @@ export default function HackathonApprovalStatus() {
                         <div className="pt-2 text-right">
                             <button
                                 onClick={() => setGuidelinesOpen(false)}
-                                className="px-4 py-2 rounded-xl bg-[#5B45D9] text-white text-xs font-bold"
+                                className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold"
                             >
                                 Got it
                             </button>

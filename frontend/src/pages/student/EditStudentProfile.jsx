@@ -116,7 +116,7 @@ const EditStudentProfile = () => {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className={`px-8 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-white text-sm font-bold shadow-lg shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`px-8 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl text-white text-sm font-bold shadow-lg shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         {saving ? 'Syncing...' : 'Save Changes'}
                     </button>

@@ -55,8 +55,8 @@ const AnnouncementModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                 </button>
                 
                 <div className="flex items-center gap-3 border-b border-slate-100 dark:border-white/10 pb-4">
-                    <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                        <MegaphoneIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <MegaphoneIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white">Send Platform Announcement</h2>
@@ -72,7 +72,7 @@ const AnnouncementModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                         <select 
                             value={formData.audience}
                             onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] transition-colors"
                         >
                             <option value="all">All Platform Users</option>
                             <option value="students">Students Only</option>
@@ -91,7 +91,7 @@ const AnnouncementModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                             placeholder="e.g., Scheduled Platform Maintenance"
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] transition-colors"
                         />
                     </div>
 
@@ -105,7 +105,7 @@ const AnnouncementModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                             placeholder="Provide clear instructions or update details for recipients..."
                             value={formData.message}
                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] transition-colors resize-none"
                         ></textarea>
                     </div>
 
@@ -120,7 +120,7 @@ const AnnouncementModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                         <button 
                             type="submit" 
                             disabled={isSubmitting}
-                            className="px-5 py-2.5 rounded-xl bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 text-xs font-bold shadow-md shadow-[#7C65F6]/20 transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-5 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 text-xs font-bold shadow-md shadow-blue-500/20 transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? 'Dispatching...' : 'Broadcast Announcement'}
                         </button>
@@ -225,7 +225,7 @@ const AdminDashboard = () => {
                 if (text.includes('mentor') || text.includes('unassigned team')) {
                     link = '/admin/users?role=Mentor&filter=unassigned';
                     category = 'Mentors';
-                    badgeColor = 'text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20';
+                    badgeColor = 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20';
                 } else if (text.includes('submission') || text.includes('milestone') || text.includes('incomplete') || text.includes('flagged') || text.includes('repository')) {
                     link = text.includes('milestone') ? '/admin/submissions?filter=pending' : '/admin/submissions?filter=flagged';
                     category = 'Submissions';
@@ -233,7 +233,7 @@ const AdminDashboard = () => {
                 } else if (text.includes('judge') || text.includes('hackathon')) {
                     link = '/admin/hackathon-approvals?filter=needs_revision';
                     category = 'Hackathons';
-                    badgeColor = 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
+                    badgeColor = 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20';
                 } else if (text.includes('organizer') || text.includes('sla')) {
                     link = '/admin/organizer-approvals?filter=pending';
                     category = 'Organizers';
@@ -305,8 +305,8 @@ const AdminDashboard = () => {
             
             {/* Notification Toast */}
             {toastMessage && (
-                <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border backdrop-blur-md transition-all duration-300 animate-in slide-in-from-bottom-5 bg-violet-50 border border-violet-300/80 text-violet-700 shadow-xl">
-                    <MegaphoneIcon className="w-4 h-4 text-indigo-400" />
+                <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border backdrop-blur-md transition-all duration-300 animate-in slide-in-from-bottom-5 bg-blue-50 border border-blue-200 text-blue-700 shadow-xl">
+                    <MegaphoneIcon className="w-4 h-4 text-blue-400" />
                     <span className="text-sm font-medium">{toastMessage}</span>
                 </div>
             )}
@@ -327,7 +327,7 @@ const AdminDashboard = () => {
                         <select 
                             value={dateRange}
                             onChange={(e) => setDateRange(e.target.value)}
-                            className="w-full bg-white dark:bg-navy-800 border border-slate-200 dark:border-white/10 rounded-xl pr-9 pl-4 py-2 text-xs font-bold text-slate-700 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors appearance-none cursor-pointer shadow-sm"
+                            className="w-full bg-white dark:bg-navy-800 border border-slate-200 dark:border-white/10 rounded-xl pr-9 pl-4 py-2 text-xs font-bold text-slate-700 dark:text-white focus:outline-none focus:border-[#2563eb] transition-colors appearance-none cursor-pointer shadow-sm"
                         >
                             <option>Today</option>
                             <option>Yesterday</option>
@@ -351,9 +351,9 @@ const AdminDashboard = () => {
                 
                 <button 
                     onClick={() => navigate('/admin/organizer-approvals')} 
-                    className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-bold transition-all hover:bg-indigo-100 dark:hover:bg-indigo-500/20 flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer active:scale-95"
+                    className="px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold transition-all hover:bg-blue-100 dark:hover:bg-blue-500/20 flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer active:scale-95"
                 >
-                    <CheckIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Approve Organizers ({dashboardData?.quickActionCounts?.organizerApprovals ?? 0})
+                    <CheckIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Approve Organizers ({dashboardData?.quickActionCounts?.organizerApprovals ?? 0})
                 </button>
                 <button 
                     onClick={() => navigate('/admin/users?role=MENTOR&filter=pending_mentors')} 
@@ -375,13 +375,13 @@ const AdminDashboard = () => {
                 </button>
                 <button 
                     onClick={() => navigate('/admin/certificates?filter=pending')} 
-                    className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-400 rounded-lg text-xs font-bold transition-all hover:bg-indigo-100 dark:hover:bg-indigo-500/20 flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer active:scale-95"
+                    className="px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-bold transition-all hover:bg-blue-100 dark:hover:bg-blue-500/20 flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer active:scale-95"
                 >
-                    <CertificateIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Certificates ({dashboardData?.quickActionCounts?.certificateRequests ?? 0})
+                    <CertificateIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Certificates ({dashboardData?.quickActionCounts?.certificateRequests ?? 0})
                 </button>
                 <button 
                     onClick={() => setIsAnnouncementOpen(true)} 
-                    className="px-3.5 py-1.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-md shadow-[#7C65F6]/20 cursor-pointer active:scale-95 shrink-0 md:ml-auto"
+                    className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-md shadow-blue-500/20 cursor-pointer active:scale-95 shrink-0 md:ml-auto"
                 >
                     <MegaphoneIcon className="w-3.5 h-3.5 text-white" /> Broadcast Announcement
                 </button>
@@ -398,11 +398,11 @@ const AdminDashboard = () => {
             {/* 3. CORE KPI GRID (Organizer Style with Sky Accents) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-3.5">
                 {[
-                    { title: 'Active Hackathons', value: dashboardData?.stats?.[0]?.value ?? 0, trend: dashboardData?.stats?.[0]?.change || 'Live Events', icon: <RocketIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />, badge: `${dashboardData?.stats?.[0]?.value ?? 0} Live`, link: '/admin/hackathon-approvals?filter=active' },
-                    { title: 'Total Users', value: dashboardData?.stats?.[1]?.value ?? 0, trend: dashboardData?.stats?.[1]?.change || 'Verified Accounts', icon: <UsersIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />, badge: `${dashboardData?.stats?.[1]?.value ?? 0} Active`, link: '/admin/users' },
-                    { title: 'Active Teams', value: dashboardData?.stats?.[2]?.value ?? 0, trend: dashboardData?.stats?.[2]?.change || 'Formed Squads', icon: <ZapIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />, badge: `${dashboardData?.stats?.[2]?.value ?? 0} Formed`, link: '/admin/users?role=Student' },
-                    { title: 'Submissions', value: dashboardData?.stats?.[3]?.value ?? 0, trend: dashboardData?.stats?.[3]?.change || 'Project Repos', icon: <BoxIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />, badge: `${dashboardData?.stats?.[3]?.value ?? 0} Total`, link: '/admin/submissions?filter=all' },
-                    { title: 'Certificates', value: dashboardData?.stats?.[4]?.value ?? 0, trend: dashboardData?.stats?.[4]?.change || 'Issued Ledger', icon: <CertificateIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />, badge: `${dashboardData?.stats?.[4]?.value ?? 0} Issued`, link: '/admin/certificates?filter=issued' },
+                    { title: 'Active Hackathons', value: dashboardData?.stats?.[0]?.value ?? 0, trend: dashboardData?.stats?.[0]?.change || 'Live Events', icon: <RocketIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />, badge: `${dashboardData?.stats?.[0]?.value ?? 0} Live`, link: '/admin/hackathon-approvals?filter=active' },
+                    { title: 'Total Users', value: dashboardData?.stats?.[1]?.value ?? 0, trend: dashboardData?.stats?.[1]?.change || 'Verified Accounts', icon: <UsersIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />, badge: `${dashboardData?.stats?.[1]?.value ?? 0} Active`, link: '/admin/users' },
+                    { title: 'Active Teams', value: dashboardData?.stats?.[2]?.value ?? 0, trend: dashboardData?.stats?.[2]?.change || 'Formed Squads', icon: <ZapIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />, badge: `${dashboardData?.stats?.[2]?.value ?? 0} Formed`, link: '/admin/users?role=Student' },
+                    { title: 'Submissions', value: dashboardData?.stats?.[3]?.value ?? 0, trend: dashboardData?.stats?.[3]?.change || 'Project Repos', icon: <BoxIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />, badge: `${dashboardData?.stats?.[3]?.value ?? 0} Total`, link: '/admin/submissions?filter=all' },
+                    { title: 'Certificates', value: dashboardData?.stats?.[4]?.value ?? 0, trend: dashboardData?.stats?.[4]?.change || 'Issued Ledger', icon: <CertificateIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />, badge: `${dashboardData?.stats?.[4]?.value ?? 0} Issued`, link: '/admin/certificates?filter=issued' },
                 ].map((kpi, idx) => (
                     <div 
                         key={idx} 
@@ -413,7 +413,7 @@ const AdminDashboard = () => {
                             <span className="text-[11px] font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider truncate">
                                 {kpi.title}
                             </span>
-                            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                                 {kpi.icon}
                             </div>
                         </div>
@@ -432,10 +432,10 @@ const AdminDashboard = () => {
                         </div>
 
                         <div className="mt-2 pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-500/30">
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-500/30">
                                 {kpi.badge}
                             </span>
-                            <span className="text-xs font-bold text-slate-400 dark:text-gray-400 group-hover:translate-x-0.5 group-hover:text-indigo-500 transition-all">→</span>
+                            <span className="text-xs font-bold text-slate-400 dark:text-gray-400 group-hover:translate-x-0.5 group-hover:text-blue-500 transition-all">→</span>
                         </div>
                     </div>
                 ))}
@@ -453,7 +453,7 @@ const AdminDashboard = () => {
                             </div>
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Action Center</h2>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30">
                             {actionCenterItems.length} items
                         </span>
                     </div>
@@ -468,7 +468,7 @@ const AdminDashboard = () => {
                                     <span className="text-xs shrink-0">{act.icon}</span>
                                     <span className="text-xs font-semibold text-slate-700 dark:text-gray-200 truncate">{act.text}</span>
                                 </div>
-                                <button className="text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-indigo-600 dark:text-indigo-400 shrink-0">
+                                <button className="text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-blue-600 dark:text-blue-400 shrink-0">
                                     {act.btn} →
                                 </button>
                             </div>
@@ -545,7 +545,7 @@ const AdminDashboard = () => {
                 <div className="rounded-xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-4 sm:p-4.5">
                     <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-white/5 mb-3">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Participation Funnel</h2>
-                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">All Active Events</span>
+                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">All Active Events</span>
                     </div>
                     <div className="space-y-2">
                         {(dashboardData?.funnel || []).map((f, i) => (
@@ -555,7 +555,7 @@ const AdminDashboard = () => {
                                 className="p-2 rounded-lg hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors cursor-pointer group"
                             >
                                 <div className="flex justify-between text-xs font-bold mb-0.5">
-                                    <span className="text-slate-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{f.step}</span>
+                                    <span className="text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{f.step}</span>
                                     <div className="flex items-center gap-1.5">
                                         <span className="font-mono text-slate-900 dark:text-white">{f.val}</span>
                                         <span className="text-[10px] text-slate-500 dark:text-gray-400">({f.pct})</span>
@@ -584,11 +584,11 @@ const AdminDashboard = () => {
                         <div className="grid grid-cols-2 gap-2.5 mb-3">
                             <div 
                                 onClick={() => navigate('/admin/hackathon-approvals?filter=approved')} 
-                                className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"
+                                className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/30 transition-all"
                             >
                                 <div className="flex justify-between items-center">
                                     <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-gray-400">Running</p>
-                                    <span className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold">Live →</span>
+                                    <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold">Live →</span>
                                 </div>
                                 <p className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">{dashboardData?.hackathonHealth?.running ?? 0}</p>
                                 <p className="text-[9px] text-slate-500 dark:text-gray-400 mt-0.5">Active event tracks</p>
@@ -652,7 +652,7 @@ const AdminDashboard = () => {
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Submission Pipeline Health</h2>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                            <div onClick={() => navigate('/admin/submissions?filter=pending')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all">
+                            <div onClick={() => navigate('/admin/submissions?filter=pending')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/30 transition-all">
                                 <span className="text-slate-500 dark:text-gray-400 font-medium text-[11px]">Pending Review</span>
                                 <span className="font-bold text-slate-900 dark:text-white">{dashboardData?.quickActionCounts?.pendingSubmissions ?? 0}</span>
                             </div>
@@ -670,9 +670,9 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     </div>
-                    <div onClick={() => navigate('/admin/submissions?filter=pending')} className="p-3 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors">
-                        <p className="text-xs text-indigo-900 dark:text-indigo-200 font-medium leading-relaxed">{dashboardData?.evaluationStatus?.alert || 'Submission evaluation data is unavailable.'}</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mt-0.5">Investigate Submissions →</p>
+                    <div onClick={() => navigate('/admin/submissions?filter=pending')} className="p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors">
+                        <p className="text-xs text-blue-900 dark:text-blue-200 font-medium leading-relaxed">{dashboardData?.evaluationStatus?.alert || 'Submission evaluation data is unavailable.'}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mt-0.5">Investigate Submissions →</p>
                     </div>
                 </div>
 
@@ -688,9 +688,9 @@ const AdminDashboard = () => {
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Mentor Capacity</h2>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Available</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.available ?? 0}</span></div>
-                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Assigned</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.assigned ?? 0}</span></div>
-                            <div onClick={() => navigate('/admin/users?role=Mentor&filter=unassigned')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Unassigned</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.unassigned ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Available</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.available ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/users?role=Mentor')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Assigned</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.assigned ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/users?role=Mentor&filter=unassigned')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Unassigned</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.mentorCapacity?.unassigned ?? 0}</span></div>
                             <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex justify-between items-center"><span className="text-rose-600 dark:text-rose-400 font-bold">Capacity</span><span className="text-rose-600 dark:text-rose-400 font-bold">{dashboardData?.mentorCapacity?.healthPercentage ?? 0}%</span></div>
                         </div>
                     </div>
@@ -710,11 +710,11 @@ const AdminDashboard = () => {
                         <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mt-0.5">Judges Completion Rate</p>
                     </div>
                     <ul className="space-y-1.5 text-xs font-medium p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5">
-                        <li onClick={() => navigate('/admin/hackathon-approvals')} className="flex justify-between items-center cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1 rounded-md">
+                        <li onClick={() => navigate('/admin/hackathon-approvals')} className="flex justify-between items-center cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded-md">
                             <span className="text-slate-600 dark:text-gray-300">Evaluations Completed</span>
                             <span className="font-bold text-slate-900 dark:text-white">{dashboardData?.evaluationStatus?.evaluationsCompleted ?? 0}</span>
                         </li>
-                        <li onClick={() => navigate('/admin/submissions?filter=approved')} className="flex justify-between items-center cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1 rounded-md">
+                        <li onClick={() => navigate('/admin/submissions?filter=approved')} className="flex justify-between items-center cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded-md">
                             <span className="text-slate-600 dark:text-gray-300">Pending Evaluation</span>
                             <span className="font-bold text-slate-900 dark:text-white">{dashboardData?.evaluationStatus?.pending ?? 0}</span>
                         </li>
@@ -732,9 +732,9 @@ const AdminDashboard = () => {
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Certificate Minting Pipeline</h2>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div onClick={() => navigate('/admin/certificates?filter=eligibility')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Eligible</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.certificatePipeline?.eligible ?? 0}</span></div>
-                            <div onClick={() => navigate('/admin/certificates?filter=active')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Issued</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.certificatePipeline?.issued ?? 0}</span></div>
-                            <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 flex justify-between items-center"><span className="text-indigo-700 dark:text-indigo-300">Pending Generation</span><span className="font-bold text-indigo-700 dark:text-indigo-300">{dashboardData?.certificatePipeline?.pendingGeneration ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/certificates?filter=eligibility')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Eligible</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.certificatePipeline?.eligible ?? 0}</span></div>
+                            <div onClick={() => navigate('/admin/certificates?filter=active')} className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex justify-between items-center cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/30 transition-all"><span className="text-slate-500 dark:text-gray-400">Issued</span><span className="font-bold text-slate-900 dark:text-white">{dashboardData?.certificatePipeline?.issued ?? 0}</span></div>
+                            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 flex justify-between items-center"><span className="text-blue-700 dark:text-blue-300">Pending Generation</span><span className="font-bold text-blue-700 dark:text-blue-300">{dashboardData?.certificatePipeline?.pendingGeneration ?? 0}</span></div>
                             <div onClick={() => navigate('/admin/certificates?filter=verify')} className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex justify-between items-center cursor-pointer hover:bg-emerald-500/15 transition-all"><span className="text-emerald-600 dark:text-emerald-400">Verified</span><span className="font-bold text-emerald-600 dark:text-emerald-400">{dashboardData?.certificatePipeline?.verified ?? 0}</span></div>
                         </div>
                     </div>
@@ -754,18 +754,18 @@ const AdminDashboard = () => {
                     <div>
                         <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-white/5 mb-3">
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                                <RobotIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> AI Assistant Operational Health
+                                <RobotIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" /> AI Assistant Operational Health
                             </h2>
                         </div>
                         <div className="space-y-2.5 text-xs font-medium">
                             <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Queries Today:</span><strong className="font-mono text-slate-900 dark:text-white">{dashboardData?.aiHealth?.queriesToday ?? 0}</strong></div>
                             <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Avg Response Time:</span><strong className="text-emerald-600 dark:text-emerald-400 font-mono">{dashboardData?.aiHealth?.avgResponseTime || 'Unavailable'}</strong></div>
                             <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Helpful Responses:</span><strong className="text-emerald-600 dark:text-emerald-400">{dashboardData?.aiHealth?.helpfulPercentage ?? 'Unavailable'}{dashboardData?.aiHealth?.helpfulPercentage != null ? '%' : ''}</strong></div>
-                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Top Question Category:</span><strong className="text-indigo-600 dark:text-indigo-400">{dashboardData?.aiHealth?.topTopic || 'Unavailable'}</strong></div>
+                            <div className="flex justify-between items-center"><span className="text-slate-500 dark:text-gray-400">Top Question Category:</span><strong className="text-blue-600 dark:text-blue-400">{dashboardData?.aiHealth?.topTopic || 'Unavailable'}</strong></div>
                         </div>
                     </div>
-                    <div className="mt-3 p-2.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg text-xs font-medium text-indigo-800 dark:text-indigo-200 flex items-center gap-2">
-                        <ZapIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" /> {dashboardData?.aiHealth ? 'AI service metrics loaded.' : 'AI service metrics are unavailable.'}
+                    <div className="mt-3 p-2.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg text-xs font-medium text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                        <ZapIcon className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" /> {dashboardData?.aiHealth ? 'AI service metrics loaded.' : 'AI service metrics are unavailable.'}
                     </div>
                 </div>
 
@@ -810,7 +810,7 @@ const AdminDashboard = () => {
                     <div>
                         <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-white/5 mb-3">
                             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Top Participating Colleges</h2>
-                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Leaderboard</span>
+                            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Leaderboard</span>
                         </div>
                         <ul className="space-y-1.5 text-xs">
                             {(dashboardData?.topColleges || []).filter(c => c && c.name).map((col, idx) => (
@@ -820,9 +820,9 @@ const AdminDashboard = () => {
                                     className="flex justify-between items-center cursor-pointer hover:bg-slate-50/80 dark:hover:bg-white/[0.02] p-1 rounded-md transition-colors group"
                                     title={`Click to inspect institutional analytics for ${col.name}`}
                                 >
-                                    <span className="truncate max-w-[170px] text-slate-700 dark:text-gray-300 font-medium group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{idx + 1}. {col.name || 'Institution'}</span>
+                                    <span className="truncate max-w-[170px] text-slate-700 dark:text-gray-300 font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{idx + 1}. {col.name || 'Institution'}</span>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{col.participants || 0}</span>
+                                        <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{col.participants || 0}</span>
                                         {col.trend && <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">{col.trend}</span>}
                                     </div>
                                 </li>
@@ -835,7 +835,7 @@ const AdminDashboard = () => {
 
                     <div 
                         onClick={() => navigate('/admin/analytics?focus=colleges#college-breakdown')} 
-                        className="mt-3 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 cursor-pointer flex items-center justify-end gap-1 group"
+                        className="mt-3 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 cursor-pointer flex items-center justify-end gap-1 group"
                     >
                         <span>View College Analytics</span>
                         <span className="group-hover:translate-x-0.5 transition-transform">→</span>
@@ -849,8 +849,8 @@ const AdminDashboard = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-slate-100 dark:border-white/5 mb-3">
                     <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
                         <span className="relative flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
                         </span>
                         Live Operational Activity Stream
                     </h2>
@@ -863,7 +863,7 @@ const AdminDashboard = () => {
                                 onClick={() => setActivityFilter(f)}
                                 className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                                     activityFilter === f 
-                                        ? 'bg-purple-50 dark:bg-purple-500/20 text-[#6D5CE8] dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 font-bold shadow-sm' 
+                                        ? 'bg-blue-50 dark:bg-blue-500/20 text-[#2563eb] dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 font-bold shadow-sm' 
                                         : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
                                 }`}
                             >
@@ -884,12 +884,12 @@ const AdminDashboard = () => {
                                 <span className={`h-2 w-2 rounded-full ${
                                     act.categoryColor === 'red' ? 'bg-rose-500' :
                                     act.categoryColor === 'amber' ? 'bg-amber-500' :
-                                    act.categoryColor === 'emerald' ? 'bg-emerald-500' : 'bg-indigo-500'
+                                    act.categoryColor === 'emerald' ? 'bg-emerald-500' : 'bg-blue-500'
                                 }`} />
                             </span>
                             <span className="font-mono w-14 shrink-0 text-[11px] text-slate-400 dark:text-gray-500">{act.time}</span>
                             <span className="text-slate-700 dark:text-gray-200 flex-1 truncate">{act.description || act.text}</span>
-                            <span className="text-indigo-600 dark:text-indigo-400 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity shrink-0">View →</span>
+                            <span className="text-blue-600 dark:text-blue-400 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity shrink-0">View →</span>
                         </div>
                     ))}
                 </div>
@@ -897,13 +897,13 @@ const AdminDashboard = () => {
 
             {/* 9. BOTTOM: SMART AI ADMIN INTELLIGENCE */}
             <div className="rounded-xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-4 sm:p-5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 dark:bg-blue-500/10 blur-3xl rounded-full pointer-events-none"></div>
                 <div className="flex flex-col sm:flex-row items-start gap-4 relative z-10">
-                    <div className="w-10 h-10 rounded-xl shrink-0 bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-100 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl shrink-0 bg-blue-50 dark:bg-blue-500/20 border border-blue-100 dark:border-blue-500/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-sm">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                     </div>
                     <div className="flex-1 w-full">
-                        <h2 className="text-xs font-extrabold uppercase tracking-widest mb-2.5 text-indigo-600 dark:text-indigo-400">✦ Smart Admin Intelligence & Operator Recommendations</h2>
+                        <h2 className="text-xs font-extrabold uppercase tracking-widest mb-2.5 text-blue-600 dark:text-blue-400">✦ Smart Admin Intelligence & Operator Recommendations</h2>
                         <p className="text-xs text-slate-600 dark:text-gray-300">Automated recommendations are unavailable.</p>
                     </div>
                 </div>

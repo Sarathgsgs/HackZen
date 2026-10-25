@@ -164,7 +164,7 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
     const badgeClasses = isWinner 
         ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40' 
         : isRunnerUp 
-            ? 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-400/40' 
+            ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-400/40' 
             : 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40';
 
     return (
@@ -198,7 +198,7 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
                     <a
                         href={certImage}
                         download={`${recipient.replace(/\s+/g, '_')}_Certificate.png`}
-                        className="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-400/30 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+                        className="px-2.5 py-1 text-[11px] font-bold bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-400/30 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
                         title="Download certificate image"
                     >
                         <DownloadIcon className="w-3.5 h-3.5" />
@@ -226,7 +226,7 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
                 {/* Subtle Hover Action Overlay */}
                 <div className="absolute inset-0 bg-slate-900/20 dark:bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[1px]">
                     <div className="px-4 py-2 bg-white text-slate-900 rounded-xl font-black text-xs shadow-xl flex items-center gap-2 transform group-hover:scale-105 transition-all border border-slate-200/80">
-                        <SearchIcon className="w-4 h-4 text-indigo-600" />
+                        <SearchIcon className="w-4 h-4 text-blue-600" />
                         <span>Click to Enlarge Full Certificate</span>
                     </div>
                 </div>
@@ -249,10 +249,10 @@ const CertificateDocument = ({ cert, templates = [], onPreviewFull }) => {
                 <div className="flex items-center gap-3 ml-auto">
                     <div className="text-right">
                         <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400">Validation ID</p>
-                        <p className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{valId}</p>
+                        <p className="font-mono text-blue-600 dark:text-blue-400 font-bold">{valId}</p>
                     </div>
                     <div className="p-1 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-white/10">
-                        <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 rounded flex items-center justify-center text-[7px] font-mono text-indigo-700 dark:text-indigo-300 text-center font-bold leading-none">
+                        <div className="w-8 h-8 bg-blue-50 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 rounded flex items-center justify-center text-[7px] font-mono text-blue-700 dark:text-blue-300 text-center font-bold leading-none">
                             QR<br/>VERIFIED
                         </div>
                     </div>
@@ -996,10 +996,10 @@ const Certificates = () => {
             {/* Toast Notification Alert */}
             {toastMessage && (
                 <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-bold animate-in slide-in-from-bottom-5 duration-300 border ${
-                    toastMessage.type === 'success' ? 'bg-violet-50 text-violet-700 border-violet-300/80' :
+                    toastMessage.type === 'success' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                     toastMessage.type === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-300/80' :
                     toastMessage.type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-300/80' :
-                    'bg-violet-50 text-violet-700 border-violet-300/80'
+                    'bg-blue-50 text-blue-700 border-blue-200'
                 }`}>
                     <span>{toastMessage.text}</span>
                 </div>
@@ -1080,18 +1080,18 @@ const Certificates = () => {
                                             setIsTemplatesModalOpen(true);
                                             setIsTemplatesDropdownOpen(false);
                                         }}
-                                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center justify-between group transition-colors cursor-pointer"
+                                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 dark:hover:bg-blue-500/10 flex items-center justify-between group transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center gap-2.5">
-                                            <div className="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                            <div className="w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                                                 <MedalIcon className="w-3.5 h-3.5" />
                                             </div>
                                             <div>
-                                                <div className="text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 font-extrabold">Runner-Up Tier</div>
+                                                <div className="text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 font-extrabold">Runner-Up Tier</div>
                                                 <div className="text-[10px] font-normal text-slate-500 dark:text-gray-400">Silver & Royal Blue Distinction</div>
                                             </div>
                                         </div>
-                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-300 font-mono font-bold">
+                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-400/20 text-blue-700 dark:text-blue-300 font-mono font-bold">
                                             {templatesByCategoryCount['Runner Up'] || 1}
                                         </span>
                                     </button>
@@ -1145,7 +1145,7 @@ const Certificates = () => {
                                             setIsUploadModalOpen(true);
                                             setIsTemplatesDropdownOpen(false);
                                         }}
-                                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+                                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
                                     >
                                         <UploadIcon className="w-3.5 h-3.5" />
                                         <span>Upload New Certificate...</span>
@@ -1156,7 +1156,7 @@ const Certificates = () => {
                     </div>
                     <button 
                         onClick={() => { setBulkStep(1); setBulkPreviewData(null); setBulkResultData(null); setIsBulkModalOpen(true); }} 
-                        className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-500/30 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
+                        className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
                     >
                         <BoxIcon className="w-3.5 h-3.5" /> 
                         <span>Bulk Issue</span>
@@ -1166,7 +1166,7 @@ const Certificates = () => {
                         disabled={selectedCertIds.length === 0}
                         className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 ${
                             selectedCertIds.length > 0 
-                            ? 'bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 cursor-pointer active:scale-95' 
+                            ? 'bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 cursor-pointer active:scale-95' 
                             : 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-gray-500 border border-slate-200/60 dark:border-white/5 cursor-not-allowed opacity-60'
                         }`}
                         title={selectedCertIds.length > 0 ? "Send personalized email to selected certificates" : "Select certificates using checkboxes below to email"}
@@ -1176,9 +1176,9 @@ const Certificates = () => {
                     </button>
                     <button 
                         onClick={() => setIsIssueModalOpen(true)} 
-                        className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/30 font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        className="px-4 py-1.5 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
                     >
-                        <span className="font-extrabold text-indigo-600 dark:text-indigo-400">+</span> 
+                        <span className="font-extrabold text-blue-600 dark:text-blue-400">+</span> 
                         <span>Issue Certificate</span>
                     </button>
                 </div>
@@ -1194,7 +1194,7 @@ const Certificates = () => {
                         <p className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-gray-400">Total Issued</p>
                         <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5 leading-tight">{stats.total}</p>
                     </div>
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                         <CertificateIcon className="w-4 h-4" />
                     </div>
                 </div>
@@ -1255,20 +1255,20 @@ const Certificates = () => {
             {/* 3. Instant Public QR Verification Engine Bar */}
             <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 shadow-sm">
                 <form onSubmit={handleVerifySearch} className="flex flex-col sm:flex-row gap-3 items-center">
-                    <span className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 shrink-0 flex items-center gap-2">
-                        <SearchIcon className="w-4 h-4 text-indigo-500" /> Instant Public QR Verification:
+                    <span className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 shrink-0 flex items-center gap-2">
+                        <SearchIcon className="w-4 h-4 text-blue-500" /> Instant Public QR Verification:
                     </span>
                     <input 
                         type="text" 
                         placeholder={`Enter validation ID (e.g. ${prefix || 'PROEDU'}-2026-A1B2C3D4)...`} 
                         value={verifySearchId} 
                         onChange={(e) => setVerifySearchId(e.target.value)} 
-                        className="flex-1 w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                        className="flex-1 w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#2563eb]"
                     />
                     <button 
                         type="submit" 
                         disabled={isVerifying}
-                        className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/30 font-bold text-xs rounded-xl shadow-xs transition-all shrink-0 cursor-pointer active:scale-95"
+                        className="px-4 py-2 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 font-bold text-xs rounded-xl shadow-xs transition-all shrink-0 cursor-pointer active:scale-95"
                     >
                         {isVerifying ? 'Verifying...' : 'Verify Authenticity'}
                     </button>
@@ -1309,12 +1309,12 @@ const Certificates = () => {
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex-1 py-1.5 px-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all whitespace-nowrap flex items-center justify-center gap-1.5 ${
                                         isActive 
-                                        ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/40 font-extrabold shadow-sm' 
+                                        ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/40 font-extrabold shadow-sm' 
                                         : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5 border border-transparent'
                                     }`}
                                 >
                                     <span>{tab.label}</span>
-                                    <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-indigo-200/70 dark:bg-indigo-400/20 text-indigo-800 dark:text-indigo-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
+                                    <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-blue-200/70 dark:bg-blue-400/20 text-blue-800 dark:text-blue-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
                                         {tab.count}
                                     </span>
                                 </button>
@@ -1332,7 +1332,7 @@ const Certificates = () => {
                                     placeholder={activeTab === 'Eligibility Queue' ? "Search candidate or event..." : "Search recipient, email, or ID..."} 
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
+                                    className="w-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#2563eb] transition-colors shadow-sm"
                                 />
                             </div>
 
@@ -1340,7 +1340,7 @@ const Certificates = () => {
                             <select 
                                 value={hackathonFilter} 
                                 onChange={(e) => setHackathonFilter(e.target.value)}
-                                className="rounded-xl px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-white/10 max-w-[160px] truncate bg-white dark:bg-navy-800 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 shadow-sm cursor-pointer"
+                                className="rounded-xl px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-white/10 max-w-[160px] truncate bg-white dark:bg-navy-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] shadow-sm cursor-pointer"
                                 title="Filter certificates by specific Hackathon"
                             >
                                 <option value="ALL">All Hackathons ({availableHackathons.length})</option>
@@ -1353,7 +1353,7 @@ const Certificates = () => {
                                 <select 
                                     value={typeFilter} 
                                     onChange={(e) => setTypeFilter(e.target.value)}
-                                    className="rounded-xl px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-800 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 shadow-sm cursor-pointer"
+                                    className="rounded-xl px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] shadow-sm cursor-pointer"
                                 >
                                     <option value="ALL">All Types</option>
                                     <option value="WINNER">Winner</option>
@@ -1366,18 +1366,18 @@ const Certificates = () => {
 
                         {/* Active Hackathon Filter Banner */}
                         {hackathonFilter !== 'ALL' && (
-                            <div className="flex items-center justify-between px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-lg text-xs animate-in fade-in">
-                                <span className="text-indigo-700 dark:text-indigo-300 font-bold truncate flex items-center gap-1.5">
-                                    <CertificateIcon className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                            <div className="flex items-center justify-between px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg text-xs animate-in fade-in">
+                                <span className="text-blue-700 dark:text-blue-300 font-bold truncate flex items-center gap-1.5">
+                                    <CertificateIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                                     <span className="truncate">Hackathon: <strong>{hackathonFilter}</strong></span>
-                                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-200/60 dark:bg-indigo-400/20 shrink-0">
+                                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-200/60 dark:bg-blue-400/20 shrink-0">
                                         {filteredCertificates.length} {filteredCertificates.length === 1 ? 'cert' : 'certs'}
                                     </span>
                                 </span>
                                 <button 
                                     type="button"
                                     onClick={() => setHackathonFilter('ALL')}
-                                    className="text-xs font-black text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-white shrink-0 ml-2 hover:underline"
+                                    className="text-xs font-black text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-white shrink-0 ml-2 hover:underline"
                                     title="Show all hackathons"
                                 >
                                     ✕ Clear Filter
@@ -1390,7 +1390,7 @@ const Certificates = () => {
                             <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/70 dark:border-white/5 text-xs">
                                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-0.5">
                                     <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 dark:text-gray-400 shrink-0 flex items-center gap-1">
-                                        <CalendarIcon className="w-3.5 h-3.5 text-indigo-500" />
+                                        <CalendarIcon className="w-3.5 h-3.5 text-blue-500" />
                                         <span>Year:</span>
                                     </span>
                                     <button
@@ -1398,7 +1398,7 @@ const Certificates = () => {
                                         onClick={() => setSelectedYear('ALL')}
                                         className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all shrink-0 ${
                                             selectedYear === 'ALL'
-                                            ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 shadow-sm'
+                                            ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 shadow-sm'
                                             : 'bg-white dark:bg-white/5 text-slate-600 dark:text-gray-400 hover:bg-slate-100 border border-slate-200/80 dark:border-white/5'
                                         }`}
                                     >
@@ -1411,7 +1411,7 @@ const Certificates = () => {
                                             onClick={() => setSelectedYear(yr)}
                                             className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all shrink-0 ${
                                                 selectedYear === yr
-                                                ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 shadow-sm'
+                                                ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 shadow-sm'
                                                 : 'bg-white dark:bg-white/5 text-slate-600 dark:text-gray-400 hover:bg-slate-100 border border-slate-200/80 dark:border-white/5'
                                             }`}
                                         >
@@ -1423,7 +1423,7 @@ const Certificates = () => {
                                 <button
                                     type="button"
                                     onClick={toggleAllHackathons}
-                                    className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-200/70 dark:border-indigo-500/30 transition-all shrink-0 whitespace-nowrap"
+                                    className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 px-2.5 py-1 rounded-lg border border-blue-200/70 dark:border-blue-500/30 transition-all shrink-0 whitespace-nowrap"
                                     title="Expand or collapse all hackathon sections"
                                 >
                                     {certificatesByHackathon.some(g => collapsedHackathons[g.hackathon]) ? 'Expand All' : 'Collapse All'}
@@ -1440,20 +1440,20 @@ const Certificates = () => {
                                     type="checkbox" 
                                     checked={filteredCertificates.length > 0 && selectedCertIds.length === filteredCertificates.length}
                                     onChange={selectAllFilteredCerts}
-                                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
+                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
                                 />
                                 <span>Select All ({filteredCertificates.length})</span>
                             </label>
 
                             {selectedCertIds.length > 0 ? (
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-black text-indigo-600 dark:text-indigo-400">
+                                    <span className="text-[11px] font-black text-blue-600 dark:text-blue-400">
                                         {selectedCertIds.length} selected
                                     </span>
                                     <button
                                         type="button"
                                         onClick={openBulkEmailModal}
-                                        className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 font-bold text-[11px] rounded-lg shadow-sm transition-all flex items-center gap-1 active:scale-95"
+                                        className="px-2.5 py-1 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 font-bold text-[11px] rounded-lg shadow-sm transition-all flex items-center gap-1 active:scale-95"
                                     >
                                         <MailIcon className="w-3 h-3" />
                                         <span>Email Selected ({selectedCertIds.length})</span>
@@ -1489,16 +1489,16 @@ const Certificates = () => {
                                 filteredEligibility.map((item) => (
                                     <div 
                                         key={item.id}
-                                        className="p-3 rounded-xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-white/[0.03] text-left hover:border-indigo-300 transition-all flex flex-col justify-between gap-2.5"
+                                        className="p-3 rounded-xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-white/[0.03] text-left hover:border-blue-300 transition-all flex flex-col justify-between gap-2.5"
                                     >
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className="text-xs font-black text-slate-900 dark:text-white">{item.name}</h4>
-                                                <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">{item.email}</p>
+                                                <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">{item.email}</p>
                                                 <button
                                                     type="button"
                                                     onClick={() => setHackathonFilter(item.event || item.hackathon)}
-                                                    className="text-[10px] text-slate-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 mt-0.5 text-left font-medium hover:underline"
+                                                    className="text-[10px] text-slate-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 mt-0.5 text-left font-medium hover:underline"
                                                     title={`Filter by "${item.event || item.hackathon}"`}
                                                 >
                                                     {item.event || 'Hackathon unavailable'}
@@ -1520,7 +1520,7 @@ const Certificates = () => {
                                             <button
                                                 disabled={!item.hackathonId}
                                                 onClick={() => handleIssueFromQueue(item)}
-                                                className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40 font-bold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/40 font-bold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 Issue Certificate
                                             </button>
@@ -1548,7 +1548,7 @@ const Certificates = () => {
                                                 className="px-3.5 py-2.5 bg-slate-50/90 dark:bg-white/[0.04] border-b border-slate-100 dark:border-white/5 flex items-center justify-between cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-white/[0.07] transition-colors"
                                             >
                                                 <div className="flex items-center gap-2.5 min-w-0">
-                                                    <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200/80 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                                                    <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-500/15 border border-blue-200/80 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                                                         <TrophyIcon className="w-3.5 h-3.5" />
                                                     </div>
                                                     <div className="min-w-0 text-left">
@@ -1556,7 +1556,7 @@ const Certificates = () => {
                                                             <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">
                                                                 {group.hackathon}
                                                             </h4>
-                                                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black font-mono bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-500/30">
+                                                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black font-mono bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200/70 dark:border-blue-500/30">
                                                                 {group.year}
                                                             </span>
                                                         </div>
@@ -1574,7 +1574,7 @@ const Certificates = () => {
                                                             e.stopPropagation();
                                                             setHackathonFilter(group.hackathon);
                                                         }}
-                                                        className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-2 py-0.5 rounded-md border border-indigo-200/60 dark:border-indigo-500/30 transition-all"
+                                                        className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 px-2 py-0.5 rounded-md border border-blue-200/60 dark:border-blue-500/30 transition-all"
                                                         title="Focus exclusively on this hackathon"
                                                     >
                                                         Focus
@@ -1596,7 +1596,7 @@ const Certificates = () => {
                                                             </span>
                                                         )}
                                                         {group.runnerUpCount > 0 && (
-                                                            <span className="px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-500/30 flex items-center gap-1">
+                                                            <span className="px-1.5 py-0.2 rounded bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-200/60 dark:border-blue-500/30 flex items-center gap-1">
                                                                 <MedalIcon className="w-2.5 h-2.5" /> {group.runnerUpCount} Runner Up
                                                             </span>
                                                         )}
@@ -1616,8 +1616,8 @@ const Certificates = () => {
                                                                 onClick={() => setSelectedCert(cert)}
                                                                 className={`p-2.5 rounded-xl cursor-pointer transition-all border relative text-left ${
                                                                     isSelected 
-                                                                    ? 'bg-indigo-50/90 dark:bg-indigo-500/15 border-indigo-400 dark:border-indigo-500/60 shadow-sm' 
-                                                                    : 'bg-white dark:bg-white/[0.03] border-slate-200/80 dark:border-white/5 hover:border-indigo-300 dark:hover:border-white/20'
+                                                                    ? 'bg-blue-50/90 dark:bg-blue-500/15 border-blue-400 dark:border-blue-500/60 shadow-sm' 
+                                                                    : 'bg-white dark:bg-white/[0.03] border-slate-200/80 dark:border-white/5 hover:border-blue-300 dark:hover:border-white/20'
                                                                 }`}
                                                             >
                                                                 <div className="flex justify-between items-start mb-1">
@@ -1627,7 +1627,7 @@ const Certificates = () => {
                                                                             checked={selectedCertIds.includes(cert.id || cert.validationId)}
                                                                             onChange={(e) => toggleCertSelection(cert.id || cert.validationId, e)}
                                                                             onClick={(e) => e.stopPropagation()}
-                                                                            className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 shrink-0 cursor-pointer"
+                                                                            className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 shrink-0 cursor-pointer"
                                                                             title="Select for bulk email"
                                                                         />
                                                                         <div className="truncate">
@@ -1637,7 +1637,7 @@ const Certificates = () => {
                                                                                     {cert.type || 'Standard'}
                                                                                 </span>
                                                                             </div>
-                                                                            <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium truncate">{cert.recipientEmail}</p>
+                                                                            <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate">{cert.recipientEmail}</p>
                                                                         </div>
                                                                     </div>
 
@@ -1648,7 +1648,7 @@ const Certificates = () => {
                                                                                 e.stopPropagation();
                                                                                 openEmailModalForCert(cert);
                                                                             }}
-                                                                            className="px-2 py-0.5 text-[9.5px] font-bold rounded-lg bg-purple-50 dark:bg-purple-500/20 text-[#6D5CE8] dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 hover:bg-indigo-100 flex items-center gap-1 transition-all"
+                                                                            className="px-2 py-0.5 text-[9.5px] font-bold rounded-lg bg-blue-50 dark:bg-blue-500/20 text-[#2563eb] dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 hover:bg-blue-100 flex items-center gap-1 transition-all"
                                                                             title="Send personalized award email"
                                                                         >
                                                                             <MailIcon className="w-2.5 h-2.5" />
@@ -1665,7 +1665,7 @@ const Certificates = () => {
                                                                 </div>
 
                                                                 <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-slate-100 dark:border-white/5 text-[10px] text-slate-500 font-mono">
-                                                                    <span className="font-bold text-indigo-600 dark:text-indigo-400">{cert.validationId}</span>
+                                                                    <span className="font-bold text-blue-600 dark:text-blue-400">{cert.validationId}</span>
                                                                     <div className="flex items-center gap-2.5">
                                                                         <span className="flex items-center gap-1" title={cert.deliveryStatus?.emailSent ? "Email delivered" : "Email pending"}>
                                                                             <MailIcon className={`w-3 h-3 ${cert.deliveryStatus?.emailSent ? 'text-emerald-500' : 'text-slate-400'}`} />
@@ -1701,8 +1701,8 @@ const Certificates = () => {
                                         onClick={() => setSelectedCert(cert)}
                                         className={`p-3 rounded-xl cursor-pointer transition-all border relative text-left ${
                                             isSelected 
-                                            ? 'bg-indigo-50/90 dark:bg-indigo-500/15 border-indigo-400 dark:border-indigo-500/60 shadow-sm' 
-                                            : 'bg-white dark:bg-white/[0.03] border-slate-200/80 dark:border-white/5 hover:border-indigo-300 dark:hover:border-white/20'
+                                            ? 'bg-blue-50/90 dark:bg-blue-500/15 border-blue-400 dark:border-blue-500/60 shadow-sm' 
+                                            : 'bg-white dark:bg-white/[0.03] border-slate-200/80 dark:border-white/5 hover:border-blue-300 dark:hover:border-white/20'
                                         }`}
                                     >
                                         <div className="flex justify-between items-start mb-1.5">
@@ -1712,12 +1712,12 @@ const Certificates = () => {
                                                     checked={selectedCertIds.includes(cert.id || cert.validationId)}
                                                     onChange={(e) => toggleCertSelection(cert.id || cert.validationId, e)}
                                                     onClick={(e) => e.stopPropagation()}
-                                                    className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 shrink-0 cursor-pointer"
+                                                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 shrink-0 cursor-pointer"
                                                     title="Select for bulk email"
                                                 />
                                                 <div className="truncate">
                                                     <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">{cert.recipientName}</h4>
-                                                    <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium truncate">{cert.recipientEmail}</p>
+                                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate">{cert.recipientEmail}</p>
                                                     <button
                                                         type="button"
                                                         onClick={(e) => {
@@ -1725,7 +1725,7 @@ const Certificates = () => {
                                                             const h = cert.hackathon || cert.eventTitle;
                                                             if (h) setHackathonFilter(h);
                                                         }}
-                                                        className="text-[10px] text-slate-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 truncate mt-0.5 text-left font-medium block hover:underline"
+                                                        className="text-[10px] text-slate-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 truncate mt-0.5 text-left font-medium block hover:underline"
                                                         title={`Filter certificates by "${cert.hackathon || cert.eventTitle}"`}
                                                     >
                                                         {cert.hackathon || cert.eventTitle || 'General Hackathon'}
@@ -1740,7 +1740,7 @@ const Certificates = () => {
                                                         e.stopPropagation();
                                                         openEmailModalForCert(cert);
                                                     }}
-                                                    className="px-2 py-0.5 text-[9.5px] font-bold rounded-lg bg-purple-50 dark:bg-purple-500/20 text-[#6D5CE8] dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 hover:bg-indigo-100 flex items-center gap-1 transition-all"
+                                                    className="px-2 py-0.5 text-[9.5px] font-bold rounded-lg bg-blue-50 dark:bg-blue-500/20 text-[#2563eb] dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 hover:bg-blue-100 flex items-center gap-1 transition-all"
                                                     title="Send personalized award email"
                                                 >
                                                     <MailIcon className="w-2.5 h-2.5" />
@@ -1757,7 +1757,7 @@ const Certificates = () => {
                                         </div>
 
                                         <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-white/5 text-[10px] text-slate-500 font-mono">
-                                            <span className="font-bold text-indigo-600 dark:text-indigo-400">{cert.validationId}</span>
+                                            <span className="font-bold text-blue-600 dark:text-blue-400">{cert.validationId}</span>
                                             <div className="flex items-center gap-2.5">
                                                 <span className="flex items-center gap-1" title={cert.deliveryStatus?.emailSent ? "Email delivered" : "Email pending"}>
                                                     <MailIcon className={`w-3 h-3 ${cert.deliveryStatus?.emailSent ? 'text-emerald-500' : 'text-slate-400'}`} />
@@ -1790,7 +1790,7 @@ const Certificates = () => {
                             <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] flex justify-between items-center shrink-0">
                                 <div>
                                     <h2 className="text-base font-black text-slate-900 dark:text-white">{selectedCert.recipientName}</h2>
-                                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-mono font-bold mt-0.5">{selectedCert.validationId}</p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-mono font-bold mt-0.5">{selectedCert.validationId}</p>
                                 </div>
                                 <span className={`px-2.5 py-1 rounded-full text-[9.5px] font-black uppercase tracking-wider border ${
                                     selectedCert.status === 'Active' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' :
@@ -1813,7 +1813,7 @@ const Certificates = () => {
                                         onClick={() => setActiveDetailTab(tab.id)}
                                         className={`pb-2.5 px-2.5 text-xs font-extrabold transition-all border-b-2 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                                             activeDetailTab === tab.id
-                                            ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
+                                            ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
                                             : 'border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'
                                         }`}
                                     >
@@ -1909,7 +1909,7 @@ const Certificates = () => {
                                                 </div>
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-slate-500 dark:text-gray-400">Public QR Verifications:</span>
-                                                    <strong className="font-mono text-indigo-600 dark:text-indigo-400">{selectedCert.deliveryStatus?.verificationCount || 0} checks</strong>
+                                                    <strong className="font-mono text-blue-600 dark:text-blue-400">{selectedCert.deliveryStatus?.verificationCount || 0} checks</strong>
                                                 </div>
                                                 <div className="flex justify-between items-center pt-2 border-t border-slate-200/80 dark:border-white/5">
                                                     <span className="text-slate-500 dark:text-gray-400">Template Style:</span>
@@ -1934,7 +1934,7 @@ const Certificates = () => {
                                                 {(selectedCert.auditHistory || []).map((entry, idx) => (
                                                     <div key={idx} className="p-3 bg-white dark:bg-black/30 rounded-xl border border-slate-200/80 dark:border-white/5 text-xs shadow-sm">
                                                         <div className="flex justify-between items-center mb-1">
-                                                            <span className="font-bold text-indigo-600 dark:text-indigo-400">{entry.event}</span>
+                                                            <span className="font-bold text-blue-600 dark:text-blue-400">{entry.event}</span>
                                                             <span className="text-[10px] font-mono text-slate-400">{entry.date}</span>
                                                         </div>
                                                     </div>
@@ -1958,7 +1958,7 @@ const Certificates = () => {
                                             <button 
                                                 onClick={() => openEmailModalForCert(selectedCert)}
                                                 disabled={actionLoading}
-                                                className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 active:scale-95"
+                                                className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 active:scale-95"
                                             >
                                                 <MailIcon className="w-3.5 h-3.5" />
                                                 <span>Send Email</span>
@@ -1975,7 +1975,7 @@ const Certificates = () => {
                                                     setIsReplacementModalOpen(true);
                                                 }}
                                                 disabled={actionLoading}
-                                                className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-xs font-bold rounded-xl transition-all shadow-sm"
+                                                className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 text-xs font-bold rounded-xl transition-all shadow-sm"
                                             >
                                                 Issue Replacement
                                             </button>
@@ -2034,7 +2034,7 @@ const Certificates = () => {
                                 required 
                                 value={issueForm.recipientName} 
                                 onChange={(e) => setIssueForm({...issueForm, recipientName: e.target.value})} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500" 
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]" 
                                 placeholder="e.g. Alex Johnson" 
                             />
                         </div>
@@ -2045,7 +2045,7 @@ const Certificates = () => {
                                 required 
                                 value={issueForm.recipientEmail} 
                                 onChange={(e) => setIssueForm({...issueForm, recipientEmail: e.target.value})} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500" 
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]" 
                                 placeholder="alex@example.com" 
                             />
                         </div>
@@ -2068,7 +2068,7 @@ const Certificates = () => {
                                         template: matchTmpl ? matchTmpl.name : `${newType} Certificate`
                                     });
                                 }} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] cursor-pointer"
                             >
                                 <option value="Winner">Winner</option>
                                 <option value="Runner Up">Runner Up</option>
@@ -2081,7 +2081,7 @@ const Certificates = () => {
                             <select 
                                 value={issueForm.template} 
                                 onChange={(e) => setIssueForm({...issueForm, template: e.target.value})} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] cursor-pointer"
                             >
                                 {templates.map(t => (
                                     <option key={t.id} value={t.name}>{t.name} ({t.category})</option>
@@ -2100,8 +2100,8 @@ const Certificates = () => {
                             />
                         </div>
                         <div className="text-xs text-slate-800 dark:text-white">
-                            <p className="font-extrabold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                                <PaletteIcon className="w-4 h-4 text-indigo-500" />
+                            <p className="font-extrabold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+                                <PaletteIcon className="w-4 h-4 text-blue-500" />
                                 <span>Design: {issueForm.template || `${issueForm.type} Certificate`}</span>
                             </p>
                             <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">High-resolution authentic certificate image</p>
@@ -2116,7 +2116,7 @@ const Certificates = () => {
                             required
                             value={issueForm.hackathonId}
                             onChange={(e) => setIssueForm({ ...issueForm, hackathonId: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                             placeholder="Enter the actual hackathon ID"
                         />
                     </div>
@@ -2128,7 +2128,7 @@ const Certificates = () => {
                             required 
                             value={issueForm.eventTitle} 
                             onChange={(e) => setIssueForm({...issueForm, eventTitle: e.target.value})} 
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500" 
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]" 
                             placeholder="Global AI Summit 2026" 
                         />
                     </div>
@@ -2142,7 +2142,7 @@ const Certificates = () => {
                         <button 
                             type="submit" 
                             disabled={actionLoading} 
-                            className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 font-bold text-xs rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all active:scale-95 cursor-pointer"
+                            className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-[#2563eb]/20 font-bold text-xs rounded-xl shadow-md shadow-[#2563eb]/20 transition-all active:scale-95 cursor-pointer"
                         >
                             {actionLoading ? 'Issuing...' : 'Confirm & Issue'}
                         </button>
@@ -2210,7 +2210,7 @@ const Certificates = () => {
                                 required 
                                 value={replacementForm.recipientName} 
                                 onChange={(e) => setReplacementForm({...replacementForm, recipientName: e.target.value})} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500" 
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]" 
                             />
                         </div>
                         <div>
@@ -2220,7 +2220,7 @@ const Certificates = () => {
                                 required 
                                 value={replacementForm.recipientEmail} 
                                 onChange={(e) => setReplacementForm({...replacementForm, recipientEmail: e.target.value})} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500" 
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]" 
                             />
                         </div>
                     </div>
@@ -2232,14 +2232,14 @@ const Certificates = () => {
                             required 
                             value={replacementForm.reason} 
                             onChange={(e) => setReplacementForm({...replacementForm, reason: e.target.value})} 
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500" 
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]" 
                             placeholder="e.g. Typo correction on recipient name" 
                         />
                     </div>
 
                     <div className="flex justify-end gap-2.5 pt-2">
                         <button type="button" onClick={() => setIsReplacementModalOpen(false)} className="px-4 py-2 text-xs text-slate-500 dark:text-gray-400 font-bold hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">Cancel</button>
-                        <button type="submit" disabled={actionLoading} className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 font-bold text-xs rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all active:scale-95 cursor-pointer">
+                        <button type="submit" disabled={actionLoading} className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-[#2563eb]/20 font-bold text-xs rounded-xl shadow-md shadow-[#2563eb]/20 transition-all active:scale-95 cursor-pointer">
                             {actionLoading ? 'Issuing...' : 'Issue Replacement'}
                         </button>
                     </div>
@@ -2264,7 +2264,7 @@ const Certificates = () => {
                                 rows="6" 
                                 value={bulkText} 
                                 onChange={(e) => setBulkText(e.target.value)} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs font-mono text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs font-mono text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                             placeholder="Name, email@example.com, Event title, Winner"
                             ></textarea>
                         </div>
@@ -2276,7 +2276,7 @@ const Certificates = () => {
                             <select 
                                 value={bulkTemplate} 
                                 onChange={(e) => setBulkTemplate(e.target.value)} 
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] cursor-pointer"
                             >
                                 {templates.map(t => (
                                     <option key={t.id} value={t.name}>{t.name} ({t.category})</option>
@@ -2294,7 +2294,7 @@ const Certificates = () => {
                                 />
                             </div>
                             <div className="text-xs text-slate-800 dark:text-white">
-                                <p className="font-extrabold text-indigo-600 dark:text-indigo-400">Batch Design: {bulkTemplate}</p>
+                                <p className="font-extrabold text-blue-600 dark:text-blue-400">Batch Design: {bulkTemplate}</p>
                                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Recipients will receive certificates rendered with this design</p>
                             </div>
                         </div>
@@ -2304,7 +2304,7 @@ const Certificates = () => {
                             <button 
                                 onClick={handleBulkPreview} 
                                 disabled={actionLoading}
-                                className="px-5 py-2 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 font-bold text-xs rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all cursor-pointer"
+                                className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-[#2563eb]/20 font-bold text-xs rounded-xl shadow-md shadow-[#2563eb]/20 transition-all cursor-pointer"
                             >
                                 {actionLoading ? 'Validating...' : 'Step 1: Preview Batch'}
                             </button>
@@ -2371,19 +2371,19 @@ const Certificates = () => {
                                         onClick={() => setSelectedTemplateCategory(cat)}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
                                             isSel 
-                                            ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/40 shadow-sm font-extrabold' 
+                                            ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/40 shadow-sm font-extrabold' 
                                             : 'bg-slate-100/80 dark:bg-white/5 text-slate-600 dark:text-gray-400 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-transparent'
                                         }`}
                                     >
                                         <span className="flex items-center gap-1.5">
                                             {cat === 'All' && <FolderIcon className="w-3.5 h-3.5" />}
                                             {cat === 'Winner' && <TrophyIcon className="w-3.5 h-3.5 text-amber-500" />}
-                                            {cat === 'Runner Up' && <MedalIcon className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />}
+                                            {cat === 'Runner Up' && <MedalIcon className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />}
                                             {cat === 'Participation' && <ScrollIcon className="w-3.5 h-3.5 text-emerald-500" />}
                                             <span>{cat}</span>
                                         </span>
                                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                                            isSel ? 'bg-indigo-200/80 dark:bg-indigo-400/25 text-indigo-900 dark:text-indigo-200' : 'bg-slate-200/80 dark:bg-white/10 text-slate-600 dark:text-gray-400'
+                                            isSel ? 'bg-blue-200/80 dark:bg-blue-400/25 text-blue-900 dark:text-blue-200' : 'bg-slate-200/80 dark:bg-white/10 text-slate-600 dark:text-gray-400'
                                         }`}>
                                             {count}
                                         </span>
@@ -2395,7 +2395,7 @@ const Certificates = () => {
                         <button
                             type="button"
                             onClick={() => setIsUploadModalOpen(true)}
-                            className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 active:scale-95"
+                            className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 active:scale-95"
                         >
                             <UploadIcon className="w-3.5 h-3.5" />
                             <span>Upload New Certificate</span>
@@ -2409,7 +2409,7 @@ const Certificates = () => {
                             <p className="text-xs font-bold text-slate-600 dark:text-gray-300">No certificate templates found in this category</p>
                             <button
                                 onClick={() => setIsUploadModalOpen(true)}
-                                className="mt-3 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-xs font-bold rounded-lg transition-colors shadow-sm"
+                                className="mt-3 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 text-xs font-bold rounded-lg transition-colors shadow-sm"
                             >
                                 Upload Certificate to {selectedTemplateCategory}
                             </button>
@@ -2421,7 +2421,7 @@ const Certificates = () => {
                                 const badgeColor = catLower.includes('winner')
                                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                                     : catLower.includes('runner')
-                                    ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                                    ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
                                     : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
 
                                 return (
@@ -2462,7 +2462,7 @@ const Certificates = () => {
                                             {/* Hover Inspect CTA */}
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[1px]">
                                                 <span className="px-3 py-1.5 rounded-xl bg-white text-slate-900 text-xs font-black shadow-lg flex items-center gap-1.5">
-                                                    <svg className="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
@@ -2564,7 +2564,7 @@ const Certificates = () => {
                                 </div>
                                 <div className="mt-2 px-2 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300">
                                     <span className="truncate font-semibold max-w-[200px]">{uploadForm.file.name}</span>
-                                    <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{(uploadForm.file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                                    <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{(uploadForm.file.size / (1024 * 1024)).toFixed(2)} MB</span>
                                 </div>
                                 <button
                                     type="button"
@@ -2578,8 +2578,8 @@ const Certificates = () => {
                                 </button>
                             </div>
                         ) : (
-                            <label className="border-2 border-dashed border-slate-300 dark:border-white/20 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer bg-slate-50 dark:bg-white/[0.02] hover:bg-indigo-50/50 dark:hover:bg-indigo-500/5 transition-all group">
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <label className="border-2 border-dashed border-slate-300 dark:border-white/20 hover:border-blue-500 dark:hover:border-blue-400 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer bg-slate-50 dark:bg-white/[0.02] hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all group">
+                                <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                     <UploadIcon className="w-6 h-6" />
                                 </div>
                                 <p className="text-xs font-black text-slate-800 dark:text-white">Click or drag certificate image here to upload</p>
@@ -2606,7 +2606,7 @@ const Certificates = () => {
                             placeholder="e.g. HackZen AI First Prize Certificate"
                             value={uploadForm.name}
                             onChange={(e) => setUploadForm(prev => ({ ...prev, name: e.target.value }))}
-                            className="w-full rounded-xl px-3.5 py-2 text-xs bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full rounded-xl px-3.5 py-2 text-xs bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                         />
                     </div>
 
@@ -2618,7 +2618,7 @@ const Certificates = () => {
                         <select
                             value={uploadForm.category}
                             onChange={(e) => setUploadForm(prev => ({ ...prev, category: e.target.value }))}
-                            className="w-full rounded-xl px-3.5 py-2 text-xs font-bold bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full rounded-xl px-3.5 py-2 text-xs font-bold bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                         >
                             <option value="Winner">Winner (1st / Champion)</option>
                             <option value="Runner Up">Runner Up (2nd / 3rd Place)</option>
@@ -2638,7 +2638,7 @@ const Certificates = () => {
                             rows="2"
                             value={uploadForm.description}
                             onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
-                            className="w-full rounded-xl px-3.5 py-2 text-xs bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 resize-none"
+                            className="w-full rounded-xl px-3.5 py-2 text-xs bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] resize-none"
                         ></textarea>
                     </div>
 
@@ -2654,7 +2654,7 @@ const Certificates = () => {
                         <button
                             type="submit"
                             disabled={uploading || !uploadForm.file}
-                            className="px-5 py-2 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
+                            className="px-5 py-2 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
                         >
                             {uploading ? (
                                 <>
@@ -2687,7 +2687,7 @@ const Certificates = () => {
                             <span className="font-extrabold uppercase tracking-wider text-[10px] text-slate-500 dark:text-gray-400">
                                 {emailModal.mode === 'bulk' ? 'Bulk Dispatch Recipients:' : 'Recipient Details:'}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300">
+                            <span className="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300">
                                 {emailModal.mode === 'bulk' ? `${emailModal.certs.length} Candidates` : (emailModal.cert?.validationId || 'Certificate')}
                             </span>
                         </div>
@@ -2702,7 +2702,7 @@ const Certificates = () => {
                                         type="text" 
                                         value={emailModal.recipientName}
                                         onChange={(e) => setEmailModal(prev => ({ ...prev, recipientName: e.target.value }))}
-                                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-white font-bold text-xs focus:outline-none focus:border-indigo-500"
+                                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-white font-bold text-xs focus:outline-none focus:border-[#2563eb]"
                                         required
                                     />
                                 </div>
@@ -2714,7 +2714,7 @@ const Certificates = () => {
                                         type="email" 
                                         value={emailModal.recipientEmail}
                                         onChange={(e) => setEmailModal(prev => ({ ...prev, recipientEmail: e.target.value }))}
-                                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-white font-bold text-xs focus:outline-none focus:border-indigo-500"
+                                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-white font-bold text-xs focus:outline-none focus:border-[#2563eb]"
                                         required
                                     />
                                 </div>
@@ -2736,11 +2736,11 @@ const Certificates = () => {
                     </div>
 
                     {/* PNG Attachment Notice Banner */}
-                    <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/80 dark:border-indigo-500/20 text-xs flex items-center gap-2.5 text-indigo-900 dark:text-indigo-200">
+                    <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 text-xs flex items-center gap-2.5 text-blue-900 dark:text-blue-200">
                         <span className="text-base">📎</span>
                         <div className="min-w-0 flex-1">
                             <span className="font-extrabold text-[11px] block">High-Resolution Certificate PNG Attachment Included</span>
-                            <span className="text-[10px] text-indigo-700 dark:text-indigo-300">
+                            <span className="text-[10px] text-blue-700 dark:text-blue-300">
                                 The official high-resolution PNG certificate matching the selected template will be attached to each recipient's email.
                             </span>
                         </div>
@@ -2754,9 +2754,9 @@ const Certificates = () => {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             {[
                                 { id: 'Winner', label: '🏆 Winner', template: 'Winner Certificate', color: 'border-amber-400 text-amber-700 bg-amber-50 dark:bg-amber-500/20 dark:text-amber-300' },
-                                { id: 'Runner Up', label: '🥈 Runner-Up', template: 'Runner-up Certificate', color: 'border-indigo-400 text-indigo-700 bg-indigo-50 dark:bg-indigo-500/20 dark:text-indigo-300' },
+                                { id: 'Runner Up', label: '🥈 Runner-Up', template: 'Runner-up Certificate', color: 'border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-300' },
                                 { id: 'Participant', label: '🎓 Participant', template: 'Participation Certificate', color: 'border-emerald-400 text-emerald-700 bg-emerald-50 dark:bg-emerald-500/20 dark:text-emerald-300' },
-                                { id: 'Special Recognition', label: '⭐ Recognition', template: 'Achievement Certificate', color: 'border-purple-400 text-purple-700 bg-purple-50 dark:bg-purple-500/20 dark:text-purple-300' },
+                                { id: 'Special Recognition', label: '⭐ Recognition', template: 'Achievement Certificate', color: 'border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-300' },
                             ].map((tpl) => {
                                 const isSelected = emailModal.certType === tpl.id;
                                 return (
@@ -2766,7 +2766,7 @@ const Certificates = () => {
                                         onClick={() => handleEmailTemplateChange(tpl.template, tpl.id)}
                                         className={`py-2 px-2.5 rounded-xl text-xs font-black transition-all border text-center flex items-center justify-center gap-1.5 ${
                                             isSelected 
-                                            ? `${tpl.color} shadow-sm ring-2 ring-indigo-400/40`
+                                            ? `${tpl.color} shadow-sm ring-2 ring-blue-400/40`
                                             : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-400 hover:bg-slate-50'
                                         }`}
                                     >
@@ -2789,7 +2789,7 @@ const Certificates = () => {
                                     const defaultMsg = DEFAULT_EMAIL_MESSAGES[emailModal.certType] || DEFAULT_EMAIL_MESSAGES['Winner'];
                                     setEmailModal(prev => ({ ...prev, customMessage: defaultMsg }));
                                 }}
-                                className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                                className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
                             >
                                 <span>↺ Reset to Default Paragraph</span>
                             </button>
@@ -2799,10 +2799,10 @@ const Certificates = () => {
                             value={emailModal.customMessage}
                             onChange={(e) => setEmailModal(prev => ({ ...prev, customMessage: e.target.value }))}
                             placeholder="Type personalized congratulatory message..."
-                            className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-white text-xs font-normal leading-relaxed focus:outline-none focus:border-indigo-500"
+                            className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-white text-xs font-normal leading-relaxed focus:outline-none focus:border-[#2563eb]"
                         />
                         <p className="text-[10px] text-slate-400 dark:text-gray-500 mt-1">
-                            Available dynamic tags: <code className="text-indigo-600 font-bold">{'{name}'}</code>, <code className="text-indigo-600 font-bold">{'{hackathon}'}</code>, <code className="text-indigo-600 font-bold">{'{certId}'}</code>
+                            Available dynamic tags: <code className="text-blue-600 font-bold">{'{name}'}</code>, <code className="text-blue-600 font-bold">{'{hackathon}'}</code>, <code className="text-blue-600 font-bold">{'{certId}'}</code>
                         </p>
                     </div>
 
@@ -2815,9 +2815,9 @@ const Certificates = () => {
                             {/* Email Header Preview */}
                             <div className={`p-4 text-center text-white ${
                                 emailModal.certType === 'Winner' ? 'bg-gradient-to-r from-amber-500 to-amber-700' :
-                                emailModal.certType === 'Runner Up' ? 'bg-gradient-to-r from-indigo-500 to-indigo-700' :
+                                emailModal.certType === 'Runner Up' ? 'bg-gradient-to-r from-blue-500 to-blue-700' :
                                 emailModal.certType === 'Participant' ? 'bg-gradient-to-r from-emerald-500 to-teal-700' :
-                                'bg-gradient-to-r from-purple-500 to-indigo-700'
+                                'bg-gradient-to-r from-blue-500 to-blue-700'
                             }`}>
                                 <div className="text-2xl mb-1">
                                     {emailModal.certType === 'Winner' ? '🏆' : emailModal.certType === 'Runner Up' ? '🥈' : emailModal.certType === 'Participant' ? '🎓' : '⭐'}
@@ -2847,7 +2847,7 @@ const Certificates = () => {
                                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/5 text-[11px] space-y-1">
                                     <div className="flex justify-between">
                                         <span className="text-slate-500">Certificate ID:</span>
-                                        <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{emailModal.cert?.validationId || 'CERT-2026-A1B2C3'}</span>
+                                        <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{emailModal.cert?.validationId || 'CERT-2026-A1B2C3'}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-slate-500">Recognition Tier:</span>
@@ -2872,7 +2872,7 @@ const Certificates = () => {
                                 </div>
 
                                 <div className="pt-1 text-center">
-                                    <span className="inline-block px-4 py-1.5 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 shadow-sm">
+                                    <span className="inline-block px-4 py-1.5 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 shadow-sm">
                                         Verify Certificate Online &rarr;
                                     </span>
                                 </div>
@@ -2892,7 +2892,7 @@ const Certificates = () => {
                         <button
                             type="submit"
                             disabled={emailModal.sending}
-                            className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
+                            className="px-5 py-2 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
                         >
                             {emailModal.sending ? (
                                 <>
@@ -2926,7 +2926,7 @@ const Certificates = () => {
                         <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
                             <div>
                                 <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">{previewImageModal.title}</h3>
-                                <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider mt-0.5">
+                                <p className="text-[11px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mt-0.5">
                                     {previewImageModal.category} • Authentic Resolution
                                 </p>
                             </div>
@@ -2934,7 +2934,7 @@ const Certificates = () => {
                                 <a
                                     href={previewImageModal.imageUrl}
                                     download={`${previewImageModal.title.replace(/\s+/g, '_')}_Full.png`}
-                                    className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-400/30 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
+                                    className="px-3 py-1.5 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-400/30 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
                                 >
                                     <DownloadIcon className="w-3.5 h-3.5" />
                                     <span>Download</span>

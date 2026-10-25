@@ -112,7 +112,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
-        <div className="w-10 h-10 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mb-4"></div>
+        <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
         <p className="text-gray-400 text-xs font-medium animate-pulse">Restoring workspace session...</p>
       </div>
     );

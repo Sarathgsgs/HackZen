@@ -68,7 +68,7 @@ const TeamsMentors = () => {
             startDate: 'Oct 11, 2024',
             endDate: 'Oct 25, 2024',
             status: 'Ongoing',
-            color: 'indigo'
+            color: 'blue'
         },
         {
             id: 'm3',
@@ -86,7 +86,7 @@ const TeamsMentors = () => {
             startDate: 'Nov 05, 2024',
             endDate: 'Nov 06, 2024',
             status: 'Upcoming',
-            color: 'purple'
+            color: 'blue'
         }
     ]);
 
@@ -329,7 +329,7 @@ const TeamsMentors = () => {
                     return (
                         <div
                             key={idx}
-                            className="w-8 h-8 rounded-full bg-[#EDE9FE] dark:bg-purple-900/50 text-[#7C65F6] dark:text-purple-300 font-bold text-[11px] flex items-center justify-center ring-2 ring-white dark:ring-navy-900 shadow-xs"
+                            className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#2563eb] dark:text-blue-300 font-bold text-[11px] flex items-center justify-center ring-2 ring-white dark:ring-navy-900 shadow-xs"
                             title={m.name}
                         >
                             {initials}
@@ -339,7 +339,7 @@ const TeamsMentors = () => {
 
                 {remainder > 0 && (
                     <div
-                        className="w-8 h-8 rounded-full bg-[#EDE9FE] dark:bg-purple-900/60 text-[#7C65F6] dark:text-purple-300 font-bold text-[11px] flex items-center justify-center ring-2 ring-white dark:ring-navy-900 shadow-xs"
+                        className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/60 text-[#2563eb] dark:text-blue-300 font-bold text-[11px] flex items-center justify-center ring-2 ring-white dark:ring-navy-900 shadow-xs"
                         title={`${remainder} more members`}
                     >
                         +{remainder}
@@ -354,8 +354,8 @@ const TeamsMentors = () => {
         const s = (status || 'Approved').toLowerCase();
         if (s === 'approved') {
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EDE9FE] text-[#6D28D9] border border-[#DDD6FE] dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800/40">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#7C65F6]"></span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#2563eb] border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/40">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
                     Approved
                 </span>
             );
@@ -381,7 +381,7 @@ const TeamsMentors = () => {
             {/* Toast Notification */}
             {toastMessage && (
                 <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-2xl border border-slate-700 animate-in slide-in-from-bottom-2">
-                    <span className="w-2 h-2 rounded-full bg-[#7C65F6]"></span>
+                    <span className="w-2 h-2 rounded-full bg-[#2563eb]"></span>
                     <span className="text-xs font-semibold">{toastMessage}</span>
                 </div>
             )}
@@ -402,7 +402,7 @@ const TeamsMentors = () => {
                         onClick={handleExportCSV}
                         className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
                     >
-                        <svg className="w-4 h-4 text-[#7C65F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
                         <span>Export CSV</span>
@@ -417,13 +417,13 @@ const TeamsMentors = () => {
                         onClick={() => setActiveTab('registrations')}
                         className={`pb-3.5 text-sm font-bold transition-all relative cursor-pointer ${
                             activeTab === 'registrations'
-                                ? 'text-[#7C65F6]'
+                                ? 'text-[#2563eb]'
                                 : 'text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'
                         }`}
                     >
                         Registrations
                         {activeTab === 'registrations' && (
-                            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#7C65F6] rounded-t-full"></div>
+                            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#2563eb] rounded-t-full"></div>
                         )}
                     </button>
 
@@ -431,13 +431,13 @@ const TeamsMentors = () => {
                         onClick={() => setActiveTab('timeline')}
                         className={`pb-3.5 text-sm font-bold transition-all relative cursor-pointer ${
                             activeTab === 'timeline'
-                                ? 'text-[#7C65F6]'
+                                ? 'text-[#2563eb]'
                                 : 'text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'
                         }`}
                     >
                         Timeline
                         {activeTab === 'timeline' && (
-                            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#7C65F6] rounded-t-full"></div>
+                            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#2563eb] rounded-t-full"></div>
                         )}
                     </button>
                 </div>
@@ -458,7 +458,7 @@ const TeamsMentors = () => {
                                     {metrics.total}
                                 </h3>
                             </div>
-                            <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-[#7C65F6]">
+                            <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-[#2563eb]">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
@@ -493,9 +493,9 @@ const TeamsMentors = () => {
                                 </h3>
                             </div>
                             <div className="mt-4">
-                                <div className="w-full h-1.5 bg-[#EDE9FE] dark:bg-purple-900/30 rounded-full overflow-hidden">
+                                <div className="w-full h-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-[#7C65F6] rounded-full transition-all duration-500"
+                                        className="h-full bg-[#2563eb] rounded-full transition-all duration-500"
                                         style={{ width: `${metrics.aiPercent}%` }}
                                     ></div>
                                 </div>
@@ -513,9 +513,9 @@ const TeamsMentors = () => {
                                 </h3>
                             </div>
                             <div className="mt-4">
-                                <div className="w-full h-1.5 bg-[#EDE9FE] dark:bg-purple-900/30 rounded-full overflow-hidden">
+                                <div className="w-full h-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-[#7C65F6] rounded-full transition-all duration-500"
+                                        className="h-full bg-[#2563eb] rounded-full transition-all duration-500"
                                         style={{ width: `${metrics.web3Percent}%` }}
                                     ></div>
                                 </div>
@@ -531,7 +531,7 @@ const TeamsMentors = () => {
                                 <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                                     Team Applications
                                 </h2>
-                                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#EDE9FE] text-[#7C65F6] dark:bg-purple-900/40 dark:text-purple-300">
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-[#2563eb] dark:bg-blue-900/40 dark:text-blue-300">
                                     {totalEntries} Total
                                 </span>
                             </div>
@@ -542,7 +542,7 @@ const TeamsMentors = () => {
                                     <select
                                         value={trackFilter}
                                         onChange={(e) => setTrackFilter(e.target.value)}
-                                        className="appearance-none pl-3.5 pr-8 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-navy-800 border border-slate-200/90 dark:border-white/10 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#7C65F6]/40 cursor-pointer shadow-xs"
+                                        className="appearance-none pl-3.5 pr-8 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-navy-800 border border-slate-200/90 dark:border-white/10 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#2563eb]/40 cursor-pointer shadow-xs"
                                     >
                                         {trackOptions.map((opt) => (
                                             <option key={opt} value={opt} className="bg-white dark:bg-navy-800 text-slate-800 dark:text-white">
@@ -562,7 +562,7 @@ const TeamsMentors = () => {
                                     <select
                                         value={statusFilter}
                                         onChange={(e) => setStatusFilter(e.target.value)}
-                                        className="appearance-none pl-3.5 pr-8 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-navy-800 border border-slate-200/90 dark:border-white/10 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#7C65F6]/40 cursor-pointer shadow-xs"
+                                        className="appearance-none pl-3.5 pr-8 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-navy-800 border border-slate-200/90 dark:border-white/10 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#2563eb]/40 cursor-pointer shadow-xs"
                                     >
                                         <option value="All Statuses" className="bg-white dark:bg-navy-800 text-slate-800 dark:text-white">All Statuses</option>
                                         <option value="Approved" className="bg-white dark:bg-navy-800 text-slate-800 dark:text-white">Approved</option>
@@ -626,7 +626,7 @@ const TeamsMentors = () => {
                                                 <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">
                                                     <button
                                                         onClick={() => setSelectedTeam(team)}
-                                                        className="hover:text-[#7C65F6] text-left transition-colors cursor-pointer"
+                                                        className="hover:text-[#2563eb] text-left transition-colors cursor-pointer"
                                                     >
                                                         {team.name}
                                                     </button>
@@ -687,7 +687,7 @@ const TeamsMentors = () => {
                                                         ) : (
                                                             <button
                                                                 onClick={() => setSelectedTeam(team)}
-                                                                className="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[#7C65F6] hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                                                                className="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[#2563eb] hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
                                                             >
                                                                 Review
                                                             </button>
@@ -745,7 +745,7 @@ const TeamsMentors = () => {
                                                     onClick={() => setCurrentPage(pageNum)}
                                                     className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center transition-colors cursor-pointer ${
                                                         currentPage === pageNum
-                                                            ? 'bg-[#7C65F6] text-white shadow-xs'
+                                                            ? 'bg-[#2563eb] text-white shadow-xs'
                                                             : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
                                                     }`}
                                                 >
@@ -791,7 +791,7 @@ const TeamsMentors = () => {
 
                             <button
                                 onClick={() => navigate('/organizer/edit-timeline')}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#7C65F6] hover:bg-[#6851ec] text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -805,7 +805,7 @@ const TeamsMentors = () => {
                             {timelineMilestones.map((m, idx) => (
                                 <div
                                     key={m.id}
-                                    className="p-5 rounded-xl border border-slate-200/90 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] flex flex-col justify-between relative group hover:border-[#7C65F6]/50 transition-colors"
+                                    className="p-5 rounded-xl border border-slate-200/90 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] flex flex-col justify-between relative group hover:border-[#2563eb]/50 transition-colors"
                                 >
                                     <div>
                                         <div className="flex items-center justify-between mb-3">
@@ -816,7 +816,7 @@ const TeamsMentors = () => {
                                                 m.status === 'Completed'
                                                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40'
                                                     : m.status === 'Ongoing'
-                                                    ? 'bg-[#EDE9FE] text-[#6D28D9] border border-[#DDD6FE] dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800/40'
+                                                    ? 'bg-blue-50 text-[#2563eb] border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/40'
                                                     : 'bg-slate-100 text-slate-500 border border-slate-200 dark:bg-white/10 dark:text-gray-400 dark:border-white/10'
                                             }`}>
                                                 {m.status}
@@ -833,7 +833,7 @@ const TeamsMentors = () => {
 
                                     <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-white/5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                                         <div className="flex items-center gap-1">
-                                            <svg className="w-3.5 h-3.5 text-[#7C65F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-3.5 h-3.5 text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                             <span>{m.startDate} – {m.endDate}</span>
@@ -852,7 +852,7 @@ const TeamsMentors = () => {
                     <div className="bg-white dark:bg-navy-900 w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl p-6 overflow-hidden">
                         <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-white/5">
                             <div>
-                                <span className="text-[11px] font-bold text-[#7C65F6] tracking-wider uppercase">
+                                <span className="text-[11px] font-bold text-[#2563eb] tracking-wider uppercase">
                                     Team Application Details
                                 </span>
                                 <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mt-1">
@@ -886,7 +886,7 @@ const TeamsMentors = () => {
                                         disabled={statusUpdating[selectedTeam.id]}
                                         className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                             getTeamStatus(selectedTeam).toLowerCase() === st.toLowerCase()
-                                                ? 'bg-[#7C65F6] text-white shadow-xs'
+                                                ? 'bg-[#2563eb] text-white shadow-xs'
                                                 : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                                         }`}
                                     >
@@ -911,7 +911,7 @@ const TeamsMentors = () => {
                                             {m.avatar ? (
                                                 <img src={m.avatar} alt={m.name} className="w-8 h-8 rounded-full object-cover" />
                                             ) : (
-                                                <div className="w-8 h-8 rounded-full bg-[#EDE9FE] text-[#7C65F6] font-bold flex items-center justify-center">
+                                                <div className="w-8 h-8 rounded-full bg-blue-100 text-[#2563eb] font-bold flex items-center justify-center">
                                                     {(m.name || 'M')[0]}
                                                 </div>
                                             )}
@@ -938,7 +938,7 @@ const TeamsMentors = () => {
                                 onClick={() => {
                                     setAssigningMentorTeam(selectedTeam);
                                 }}
-                                className="px-3 py-1.5 bg-slate-100 dark:bg-white/10 hover:bg-[#7C65F6] hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                                className="px-3 py-1.5 bg-slate-100 dark:bg-white/10 hover:bg-[#2563eb] hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                             >
                                 {selectedTeam.mentor ? 'Change Mentor' : 'Assign Mentor'}
                             </button>
@@ -973,13 +973,13 @@ const TeamsMentors = () => {
                                     <div
                                         key={m.id}
                                         onClick={() => handleAssignMentor(assigningMentorTeam.id, m)}
-                                        className="flex items-center justify-between p-3 rounded-xl hover:bg-[#EDE9FE]/50 dark:hover:bg-purple-900/20 border border-slate-200/60 dark:border-white/5 cursor-pointer transition-colors"
+                                        className="flex items-center justify-between p-3 rounded-xl hover:bg-blue-50/50 dark:hover:bg-blue-900/20 border border-slate-200/60 dark:border-white/5 cursor-pointer transition-colors"
                                     >
                                         <div>
                                             <div className="text-xs font-bold text-slate-900 dark:text-white">{m.name}</div>
                                             <div className="text-[11px] text-slate-400">{m.domain} • {m.assignedTeams || 0} teams</div>
                                         </div>
-                                        <button className="text-xs font-bold text-[#7C65F6]">
+                                        <button className="text-xs font-bold text-[#2563eb]">
                                             Select
                                         </button>
                                     </div>
@@ -1034,7 +1034,7 @@ class TeamsMentorsErrorBoundary extends React.Component {
                             this.setState({ hasError: false, error: null });
                             window.location.reload();
                         }}
-                        className="px-4 py-2 bg-[#7C65F6] hover:bg-[#6851ec] text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
+                        className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
                     >
                         Reload Page
                     </button>

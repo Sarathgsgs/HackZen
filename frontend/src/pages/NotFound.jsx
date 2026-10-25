@@ -29,11 +29,11 @@ const NotFound = () => {
                 <ThemeToggle />
             </div>
 
-            <div className="w-28 h-28 rounded-3xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-8 shadow-xl shadow-purple-500/5">
+            <div className="w-28 h-28 rounded-3xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-8 shadow-xl shadow-blue-500/5">
                 <span className="text-5xl">🧭</span>
             </div>
 
-            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-widest mb-4">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest mb-4">
                 404 Error
             </span>
 
@@ -47,7 +47,7 @@ const NotFound = () => {
             <div className="flex flex-wrap items-center justify-center gap-4">
                 <Link
                     to={getDashboardPath()}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple-500/25 text-sm"
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg shadow-blue-500/25 text-sm"
                 >
                     {isLoggedIn ? 'Go to Dashboard' : 'Back to Home'}
                 </Link>

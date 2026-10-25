@@ -284,13 +284,19 @@ async def update_organizer_direct_status(
     }
 
     if status_val == "Approved":
-        update_data["role"] = "ORGANIZER"
+        update_data["role"] = "organizer"
+        update_data["status"] = "Active"
+        update_data["is_active"] = True
         update_data["isVerified"] = True
     elif status_val == "Rejected":
+        update_data["status"] = "Rejected"
+        update_data["is_active"] = False
         update_data["rejectionReason"] = (
             body.reason or body.message or "Rejected by administrator"
         )
     elif status_val == "Suspended":
+        update_data["status"] = "Suspended"
+        update_data["is_active"] = False
         update_data["suspensionReason"] = (
             body.reason or body.message or "Suspended by administrator"
         )
@@ -303,12 +309,107 @@ async def update_organizer_direct_status(
 
     await db["users"].update_one(query, {"$set": update_data})
 
+    # Synchronize organizers collection
+    u_id_str = str(user["_id"])
+    recipient_email = user.get("email")
+    applicant_name = user.get("name") or (recipient_email.split("@")[0].capitalize() if recipient_email else "Organizer")
+
+    if status_val == "Approved":
+        await db["organizers"].update_one(
+            {"$or": [{"userId": u_id_str}, {"userId": user["_id"]}, {"contactEmail": recipient_email}]},
+            {"$set": {"status": "Approved", "isVerified": True, "updatedAt": datetime.utcnow()}},
+            upsert=False
+        )
+
+        # In-app notification for Organizer
+        await db["notifications"].insert_one(
+            {
+                "userId": u_id_str,
+                "type": "ORGANIZER_APPROVED",
+                "title": "Organizer Account Approved! 🎉",
+                "message": "Your organizer account has been approved by the platform administration. You can now create and manage hackathons!",
+                "read": False,
+                "createdAt": datetime.utcnow(),
+            }
+        )
+
+        # Intimation Email to Organizer
+        try:
+            from services.email_service import EmailService
+            email_service = EmailService()
+            subject = "🎉 Congratulations! Your Organizer Account Has Been Approved - HackZen"
+            login_url = "http://localhost:5173/login"
+            html_body = f"""
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <h2 style="color: #4338ca; margin: 0; font-size: 24px; font-weight: 800;">HackZen</h2>
+                    <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Next-Generation Hackathon Management Platform</p>
+                </div>
+                <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+                    <h3 style="color: #065f46; margin: 0 0 6px 0; font-size: 16px;">Organizer Account Approved!</h3>
+                    <p style="color: #047857; margin: 0; font-size: 13px;">Your application has been verified and approved by platform administration.</p>
+                </div>
+                <p style="color: #334155; font-size: 14px; line-height: 1.6;">Hello <strong>{applicant_name}</strong>,</p>
+                <p style="color: #334155; font-size: 14px; line-height: 1.6;">We are thrilled to inform you that your Organizer account on HackZen has been reviewed and approved! You now have full access to create hackathons, review team applications, assign mentors, and issue certificates.</p>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #475569;"><strong>Registered Email:</strong> {recipient_email}</p>
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #475569;"><strong>Account Role:</strong> Organizer</p>
+                    <p style="margin: 0; font-size: 13px; color: #475569;"><strong>Status:</strong> <span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 9999px; font-weight: 600; font-size: 11px;">ACTIVE &amp; APPROVED</span></p>
+                </div>
+                <div style="text-align: center; margin: 28px 0;">
+                    <a href="{login_url}" style="background: #4338ca; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; display: inline-block;">Log In to Organizer Dashboard &rarr;</a>
+                </div>
+                <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+                <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">&copy; 2026 HackZen Platform. All rights reserved.</p>
+            </div>
+            """
+            text_body = f"Hello {applicant_name},\n\nYour Organizer account on HackZen ({recipient_email}) has been approved! You can now log in at {login_url} and start organizing hackathons.\n\nRegards,\nHackZen Team"
+            import asyncio
+            asyncio.create_task(email_service.send_email(recipient_email, subject, html_body, text_body))
+        except Exception as email_err:
+            print(f"[AdminOrganizers] Approval email intimation notice: {email_err}")
+
+    elif status_val == "Rejected":
+        rejection_msg = update_data.get("rejectionReason", "Application did not meet platform guidelines.")
+        await db["notifications"].insert_one(
+            {
+                "userId": u_id_str,
+                "type": "ORGANIZER_REJECTED",
+                "title": "Organizer Application Update",
+                "message": f"Your organizer registration was not approved: {rejection_msg}",
+                "read": False,
+                "createdAt": datetime.utcnow(),
+            }
+        )
+        try:
+            from services.email_service import EmailService
+            email_service = EmailService()
+            subject = "HackZen - Organizer Application Status Update"
+            html_body = f"""
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <h2 style="color: #4338ca; margin: 0; font-size: 22px;">HackZen</h2>
+                <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 6px; margin: 20px 0;">
+                    <h3 style="color: #991b1b; margin: 0 0 6px 0; font-size: 15px;">Organizer Registration Not Approved</h3>
+                    <p style="color: #b91c1c; margin: 0; font-size: 13px;">Reason: {rejection_msg}</p>
+                </div>
+                <p style="color: #334155; font-size: 14px; line-height: 1.6;">Hello {applicant_name},</p>
+                <p style="color: #334155; font-size: 14px; line-height: 1.6;">Thank you for your interest in organizing hackathons on HackZen. After careful review, our administration was unable to approve your application at this time.</p>
+                <p style="color: #334155; font-size: 14px; line-height: 1.6;">If you believe this was an error or would like to submit additional credentials, please reach out to our platform support.</p>
+                <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+                <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">&copy; 2026 HackZen Platform. All rights reserved.</p>
+            </div>
+            """
+            import asyncio
+            asyncio.create_task(email_service.send_email(recipient_email, subject, html_body, f"Hello {applicant_name},\n\nYour organizer application was not approved. Reason: {rejection_msg}\n\nRegards,\nHackZen Team"))
+        except Exception as email_err:
+            print(f"[AdminOrganizers] Rejection email intimation notice: {email_err}")
+
     # Audit log entry
     await db["audit_logs"].insert_one(
         {
             "action": f"Organizer Status -> {status_val}",
             "module": "Organizer Approvals",
-            "details": f"Organizer {user.get('email')} status updated to {status_val}",
+            "details": f"Organizer {recipient_email} status updated to {status_val}",
             "adminName": current_user.get("name", "Admin"),
             "createdAt": datetime.utcnow(),
         }

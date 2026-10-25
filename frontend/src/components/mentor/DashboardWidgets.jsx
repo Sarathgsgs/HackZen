@@ -26,7 +26,7 @@ export const DashboardOverview = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
         );
     }
@@ -55,10 +55,10 @@ export const DashboardOverview = () => {
             </div>
 
             {/* Upcoming Meetings Card */}
-            <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-lg p-6 border border-purple-700/50">
+            <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg p-6 border border-blue-700/50">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-purple-200 text-sm font-medium">Upcoming Meetings</p>
+                        <p className="text-blue-200 text-sm font-medium">Upcoming Meetings</p>
                         <p className="text-4xl font-bold text-white mt-2">{overview.upcomingMeetings || 0}</p>
                     </div>
                     <div className="text-4xl">📅</div>
@@ -124,7 +124,7 @@ export const UpcomingMeetings = () => {
             ) : (
                 <div className="space-y-3">
                     {meetings.map((meeting) => (
-                        <div key={meeting._id} className="bg-navy-800/50 rounded-lg p-4 border border-white/5 hover:border-purple-500/30 transition-colors cursor-pointer">
+                        <div key={meeting._id} className="bg-navy-800/50 rounded-lg p-4 border border-white/5 hover:border-blue-500/30 transition-colors cursor-pointer">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <h4 className="font-semibold text-white">{meeting.title}</h4>
@@ -136,13 +136,13 @@ export const UpcomingMeetings = () => {
                                             href={meeting.meetingLink} 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            className="text-purple-400 text-sm hover:text-purple-300 mt-2 inline-block"
+                                            className="text-blue-400 text-sm hover:text-blue-300 mt-2 inline-block"
                                         >
                                             Join Meeting →
                                         </a>
                                     )}
                                 </div>
-                                <span className="bg-purple-900/50 text-purple-200 px-3 py-1 rounded-full text-xs font-medium">
+                                <span className="bg-blue-900/50 text-blue-200 px-3 py-1 rounded-full text-xs font-medium">
                                     {meeting.status}
                                 </span>
                             </div>

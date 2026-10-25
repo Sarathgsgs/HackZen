@@ -16,7 +16,7 @@ export default function HelpSupportModal() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-[#FAFAFD] dark:bg-navy-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-[#5B45D9] dark:text-purple-300 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#2563eb] dark:text-blue-300 flex items-center justify-center">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
@@ -64,9 +64,9 @@ export default function HelpSupportModal() {
             <div className="grid grid-cols-2 gap-3">
               <a
                 href="mailto:support@proeduvate.com"
-                className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#5B45D9] dark:hover:border-purple-500/50 transition-colors text-xs font-semibold text-slate-700 dark:text-slate-200"
+                className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#2563eb] dark:hover:border-blue-500/50 transition-colors text-xs font-semibold text-slate-700 dark:text-slate-200"
               >
-                <Mail className="w-4 h-4 text-[#5B45D9]" />
+                <Mail className="w-4 h-4 text-[#2563eb]" />
                 support@proeduvate.com
               </a>
               <div
@@ -83,7 +83,7 @@ export default function HelpSupportModal() {
         <div className="flex items-center justify-end px-6 py-4 border-t border-slate-100 dark:border-white/10 bg-[#FAFAFD] dark:bg-navy-950/40">
           <button
             onClick={closeHelpModal}
-            className="px-5 py-2.5 rounded-xl bg-[#5B45D9] text-white text-sm font-semibold hover:bg-[#4E3AC2] transition-colors"
+            className="px-5 py-2.5 rounded-xl bg-[#2563eb] text-white text-sm font-semibold hover:bg-[#1d4ed8] transition-colors"
           >
             Got It
           </button>

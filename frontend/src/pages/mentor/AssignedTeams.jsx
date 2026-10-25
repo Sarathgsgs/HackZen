@@ -73,13 +73,13 @@ export default function AssignedTeams() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search cohorts or domain..."
-                            className="h-11 w-full pl-9 pr-3.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#7C65F6]"
+                            className="h-11 w-full pl-9 pr-3.5 bg-white dark:bg-navy-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb]"
                         />
                     </div>
 
                     <button
                         onClick={() => navigate('/mentor/teams/join')}
-                        className="h-11 px-4 rounded-xl bg-[#7C65F6] hover:bg-[#6D28D9] text-white text-xs sm:text-sm font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                        className="h-11 px-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs sm:text-sm font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
                     >
                         <Plus className="w-4 h-4" />
                         Discover & Join
@@ -96,7 +96,7 @@ export default function AssignedTeams() {
                 </div>
             ) : filteredTeams.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 p-12 text-center shadow-xs">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] dark:text-purple-400 mb-3">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 mb-3">
                         <Users className="w-6 h-6" />
                     </div>
                     <h2 className="text-sm font-bold text-slate-900 dark:text-white">No teams found</h2>
@@ -112,11 +112,11 @@ export default function AssignedTeams() {
                         return (
                             <div
                                 key={team.id}
-                                className="p-5 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-purple-300 dark:hover:border-purple-700/50 transition-all flex flex-col justify-between group"
+                                className="p-5 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-blue-300 dark:hover:border-blue-700/50 transition-all flex flex-col justify-between group"
                             >
                                 <div>
                                     <div className="flex items-start justify-between gap-2 mb-2">
-                                        <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] dark:text-purple-300 border border-purple-100 dark:border-purple-800/40">
+                                        <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-300 border border-blue-100 dark:border-blue-800/40">
                                             {team.domain || 'Technology'}
                                         </span>
                                         <span
@@ -125,14 +125,14 @@ export default function AssignedTeams() {
                                                     ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
                                                     : isNeedsAttention
                                                     ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
-                                                    : 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20'
+                                                    : 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
                                             }`}
                                         >
                                             {status}
                                         </span>
                                     </div>
 
-                                    <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#7C65F6] transition-colors mt-2">
+                                    <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-[#2563eb] transition-colors mt-2">
                                         {team.name}
                                     </h3>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -162,11 +162,11 @@ export default function AssignedTeams() {
                                     <div className="mt-4">
                                         <div className="flex items-center justify-between text-xs font-semibold mb-1">
                                             <span className="text-slate-500 dark:text-slate-400">Milestone Progress</span>
-                                            <span className="text-[#7C65F6] dark:text-purple-300 font-bold">{team.progress || 0}%</span>
+                                            <span className="text-[#2563eb] dark:text-blue-300 font-bold">{team.progress || 0}%</span>
                                         </div>
                                         <div className="h-2 w-full bg-slate-200 dark:bg-navy-800 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-[#7C65F6] rounded-full transition-all duration-500"
+                                                className="h-full bg-[#2563eb] rounded-full transition-all duration-500"
                                                 style={{ width: `${Math.min(100, Math.max(0, team.progress || 0))}%` }}
                                             />
                                         </div>
@@ -180,7 +180,7 @@ export default function AssignedTeams() {
                                     </span>
                                     <button
                                         onClick={() => navigate(`/mentor/teams/${team.id}`)}
-                                        className="px-3.5 py-1.5 rounded-xl bg-[#7C65F6] hover:bg-[#6D28D9] text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                                        className="px-3.5 py-1.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
                                     >
                                         View Team
                                     </button>

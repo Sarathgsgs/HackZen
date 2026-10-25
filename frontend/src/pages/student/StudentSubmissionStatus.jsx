@@ -72,7 +72,7 @@ const StudentSubmissionStatus = () => {
   if (!submission) {
     return (
       <div className="mx-auto max-w-4xl pb-10">
-        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f7f4fb] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
+        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f8fafc] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
           <h2 className="text-2xl font-bold text-[#1d1a2a]">No submission found</h2>
           <p className="mt-3 text-[#69707d]">There is no submission record for your current team yet.</p>
         </div>
@@ -109,7 +109,7 @@ const StudentSubmissionStatus = () => {
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7d7a88]">Status</p>
             <h1 className="mt-2 text-[44px] font-bold leading-none tracking-[-0.05em] text-[#1d1a2a]">Submission Status</h1>
           </div>
-          <button onClick={() => navigate(`/student/project${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#f4f0ff] px-4 py-2.5 text-sm font-semibold text-[#5a44c9]">
+          <button onClick={() => navigate(`/student/project${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#eff6ff] px-4 py-2.5 text-sm font-semibold text-[#5a44c9]">
             Project info
           </button>
         </div>

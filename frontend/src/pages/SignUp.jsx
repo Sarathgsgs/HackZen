@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { register, login } from '../api/userApi';
 import Logo from '../components/Logo';
 import { usePlatformSettings } from '../context/PlatformSettingsContext';
 
+const VALID_ROLES = ['student', 'mentor', 'organizer'];
+
 const SignUp = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { isPublicRegistrationAllowed } = usePlatformSettings();
-    const searchParams = new URLSearchParams(location.search);
-    const initialRole = searchParams.get('role') || location.state?.role || sessionStorage.getItem('temp_selected_role') || 'student';
+
+    const queryRole = searchParams.get('role');
+    const initialRole = (queryRole && VALID_ROLES.includes(queryRole.toLowerCase()))
+        ? queryRole.toLowerCase()
+        : (location.state?.role && VALID_ROLES.includes(String(location.state.role).toLowerCase()))
+        ? String(location.state.role).toLowerCase()
+        : (sessionStorage.getItem('temp_selected_role') && VALID_ROLES.includes(sessionStorage.getItem('temp_selected_role')))
+        ? sessionStorage.getItem('temp_selected_role')
+        : 'student';
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -23,8 +33,26 @@ const SignUp = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [submittedOrganizer, setSubmittedOrganizer] = useState(false);
 
     const backendUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/api\/?$/, '');
+
+    // Synchronize formData.role if query parameter changes
+    useEffect(() => {
+        const paramRole = searchParams.get('role');
+        if (paramRole && VALID_ROLES.includes(paramRole.toLowerCase())) {
+            const normalized = paramRole.toLowerCase();
+            setFormData(prev => prev.role === normalized ? prev : { ...prev, role: normalized });
+            sessionStorage.setItem('temp_selected_role', normalized);
+        }
+    }, [searchParams]);
+
+    const handleRoleSelect = (newRoleId) => {
+        const normalized = newRoleId.toLowerCase();
+        setFormData(prev => ({ ...prev, role: normalized }));
+        setSearchParams({ role: normalized }, { replace: true });
+        sessionStorage.setItem('temp_selected_role', normalized);
+    };
 
     const handleChange = (e) => {
         setFormData({
@@ -48,7 +76,7 @@ const SignUp = () => {
         hasUpper: /[A-Z]/.test(formData.password),
         hasLower: /[a-z]/.test(formData.password),
         hasNumber: /\d/.test(formData.password),
-        hasSpecial: /[@$!%*?&#^()_\-+=[\\]{}|:;<>,.~]/.test(formData.password),
+        hasSpecial: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(formData.password),
     };
 
     const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
@@ -82,13 +110,19 @@ const SignUp = () => {
                 role: formData.role
             });
 
-            // Auto log in after successful account creation
+            // If registering as Organizer, the account requires admin review before access
+            if (formData.role === 'organizer') {
+                setSubmittedOrganizer(true);
+                return;
+            }
+
+            // Student and Mentor accounts auto log in immediately
             const loginResponse = await login({
                 email: formData.email,
                 password: formData.password
             });
 
-            const role = String(loginResponse.user.role || 'student').toLowerCase();
+            const role = String(loginResponse.user.role || formData.role || 'student').toLowerCase();
             const normalizedUser = { ...loginResponse.user, role };
 
             const storageData = {
@@ -130,7 +164,7 @@ const SignUp = () => {
     return (
         <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-navy-900 transition-colors duration-300">
             {/* LEFT HERO PANEL (Full-bleed workspace illustration) */}
-            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-8 sm:p-12 lg:p-16 bg-[#EEF0FD] dark:bg-navy-950 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 overflow-hidden min-h-screen">
+            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-8 sm:p-12 lg:p-16 bg-[#eff6ff] dark:bg-navy-950 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 overflow-hidden min-h-screen">
                 {/* Background Illustration */}
                 <div 
                     className="absolute inset-0 bg-cover bg-center opacity-90 dark:opacity-40 transition-opacity duration-300"
@@ -141,7 +175,7 @@ const SignUp = () => {
                 />
 
                 {/* Soft gradient overlay for text legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#EEF0FD] via-[#EEF0FD]/40 to-transparent dark:from-navy-950 dark:via-navy-950/60 dark:to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#eff6ff] via-[#eff6ff]/40 to-transparent dark:from-navy-950 dark:via-navy-950/60 dark:to-transparent" />
 
                 {/* Brand Logo */}
                 <div className="relative z-10">
@@ -172,15 +206,64 @@ const SignUp = () => {
                         </Link>
                     </div>
 
-                    {/* Header */}
-                    <div className="mb-6 text-center sm:text-left">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                            Create Your Account
-                        </h1>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
-                            Enter your details below to get started on the platform.
-                        </p>
-                    </div>
+                    {submittedOrganizer ? (
+                        <div className="text-center py-6 animate-in fade-in zoom-in-95 duration-300">
+                            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200 dark:border-amber-800/50 shadow-sm">
+                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 mb-2">
+                                Pending Admin Review
+                            </span>
+                            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
+                                Application Submitted!
+                            </h2>
+                            <p className="text-sm text-slate-600 dark:text-slate-300 max-w-sm mx-auto mb-6 leading-relaxed">
+                                Thank you for registering as an Organizer, <strong className="text-slate-900 dark:text-white">{formData.fullName || formData.email}</strong>. Your account has been submitted to platform administrators for verification.
+                            </p>
+
+                            <div className="p-4 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 text-left text-xs space-y-2.5 mb-6 text-slate-600 dark:text-slate-400">
+                                <div className="flex items-start gap-2.5">
+                                    <span className="text-blue-600 dark:text-blue-400 font-bold shrink-0">1.</span>
+                                    <span>An administrator will review your credentials and approve your organizer account.</span>
+                                </div>
+                                <div className="flex items-start gap-2.5">
+                                    <span className="text-blue-600 dark:text-blue-400 font-bold shrink-0">2.</span>
+                                    <span>You will receive an intimation email at <strong className="text-slate-800 dark:text-slate-200">{formData.email}</strong> once approved.</span>
+                                </div>
+                                <div className="flex items-start gap-2.5">
+                                    <span className="text-blue-600 dark:text-blue-400 font-bold shrink-0">3.</span>
+                                    <span>After approval, sign in with your email and password to start publishing and managing hackathons.</span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                <Link
+                                    to="/login"
+                                    className="w-full sm:w-auto px-6 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold rounded-xl shadow transition text-center"
+                                >
+                                    Go to Sign In
+                                </Link>
+                                <Link
+                                    to="/"
+                                    className="w-full sm:w-auto px-6 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl transition text-center"
+                                >
+                                    Back to Home
+                                </Link>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Header */}
+                            <div className="mb-6 text-center sm:text-left">
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                    Create Your Account
+                                </h1>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    Enter your details below to get started on the platform.
+                                </p>
+                            </div>
 
                     {/* Registration Status Warning */}
                     {!isPublicRegistrationAllowed && (
@@ -220,7 +303,7 @@ const SignUp = () => {
                                     onChange={handleChange}
                                     placeholder="e.g. Alex Johnson"
                                     required
-                                    className="w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 dark:focus:border-indigo-400 transition"
+                                    className="w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-400 transition"
                                 />
                             </div>
                         </div>
@@ -243,7 +326,7 @@ const SignUp = () => {
                                     onChange={handleChange}
                                     placeholder="name@university.edu"
                                     required
-                                    className="w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 dark:focus:border-indigo-400 transition"
+                                    className="w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-400 transition"
                                 />
                             </div>
                         </div>
@@ -255,8 +338,8 @@ const SignUp = () => {
                                     I am registering as:
                                 </label>
                                 <Link 
-                                    to="/role-selection" 
-                                    className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                                    to={`/role-selection?role=${formData.role}`} 
+                                    className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                                 >
                                     View All Roles &rarr;
                                 </Link>
@@ -272,10 +355,10 @@ const SignUp = () => {
                                         <button
                                             type="button"
                                             key={r.id}
-                                            onClick={() => setFormData({ ...formData, role: r.id })}
+                                            onClick={() => handleRoleSelect(r.id)}
                                             className={`p-2.5 rounded-xl border text-center flex flex-col items-center justify-center transition-all cursor-pointer ${
                                                 isSelected
-                                                    ? 'border-[#4338ca] bg-[#EEF2FD] dark:bg-indigo-950/50 text-[#4338ca] dark:text-indigo-400 font-bold shadow-sm'
+                                                    ? 'border-[#2563eb] bg-blue-50 dark:bg-blue-950/50 text-[#2563eb] dark:text-blue-400 font-bold shadow-sm'
                                                     : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-navy-950 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                                             }`}
                                         >
@@ -309,7 +392,7 @@ const SignUp = () => {
                                         onChange={handleChange}
                                         placeholder="••••••••"
                                         required
-                                        className="w-full pl-9 pr-9 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
+                                        className="w-full pl-9 pr-9 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
                                     />
                                     <button
                                         type="button"
@@ -343,7 +426,7 @@ const SignUp = () => {
                                         onChange={handleChange}
                                         placeholder="••••••••"
                                         required
-                                        className="w-full pl-9 pr-9 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
+                                        className="w-full pl-9 pr-9 py-2.5 text-sm text-slate-900 dark:text-white bg-white dark:bg-navy-950 border border-slate-200 dark:border-slate-700 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
                                     />
                                     <button
                                         type="button"
@@ -383,7 +466,7 @@ const SignUp = () => {
                                     </div>
                                     <div className={`flex items-center gap-1.5 col-span-2 ${passwordChecks.hasSpecial ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
                                         <span>{passwordChecks.hasSpecial ? '✓' : '○'}</span>
-                                        <span>Special symbol (@$!%*?&#)</span>
+                                        <span>Special symbol (!@#$%^&* etc.)</span>
                                     </div>
                                 </div>
                             </div>
@@ -395,15 +478,15 @@ const SignUp = () => {
                                 type="checkbox"
                                 id="terms"
                                 required
-                                className="w-4 h-4 mt-0.5 rounded text-indigo-600 border-slate-300 dark:border-slate-600 focus:ring-indigo-500"
+                                className="w-4 h-4 mt-0.5 rounded text-blue-600 border-slate-300 dark:border-slate-600 focus:ring-blue-500"
                             />
                             <label htmlFor="terms" className="ml-2 text-xs text-slate-500 dark:text-slate-400 leading-normal">
                                 I agree to the{' '}
-                                <Link to="/terms" className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 underline">
+                                <Link to="/terms" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 underline">
                                     Terms of Service
                                 </Link>{' '}
                                 and{' '}
-                                <Link to="/privacy" className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 underline">
+                                <Link to="/privacy" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 underline">
                                     Privacy Policy
                                 </Link>.
                             </label>
@@ -413,7 +496,7 @@ const SignUp = () => {
                         <button
                             type="submit"
                             disabled={loading || !isPublicRegistrationAllowed}
-                            className={`w-full py-3 px-4 font-semibold text-sm text-white rounded-xl bg-[#4338ca] hover:bg-[#3730a3] shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                            className={`w-full py-3 px-4 font-semibold text-sm text-white rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 ${
                                 (loading || !isPublicRegistrationAllowed) ? 'opacity-70 cursor-not-allowed' : ''
                             }`}
                         >
@@ -474,11 +557,13 @@ const SignUp = () => {
                     {/* Footer */}
                     <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                         Already have an account?{' '}
-                        <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition">
+                        <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition">
                             Sign In
                         </Link>
                     </p>
-                </div>
+                </>
+            )}
+        </div>
             </div>
         </div>
     );

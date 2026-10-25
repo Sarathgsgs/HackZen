@@ -177,7 +177,7 @@ const EvaluationCriteria = () => {
                     <button 
                         onClick={handleSave}
                         disabled={isSaving || isLoading}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-[#7C65F6]/20 active:scale-95 disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50"
                     >
                         {isSaving ? (
                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -191,7 +191,7 @@ const EvaluationCriteria = () => {
             <div className="flex-1 max-w-5xl mx-auto w-full">
                 {isLoading ? (
                     <div className="py-20 flex flex-col items-center justify-center">
-                        <div className="w-12 h-12 border-4 border-[#7C65F6]/30 border-t-[#7C65F6] rounded-full animate-spin mb-4"></div>
+                        <div className="w-12 h-12 border-4 border-blue-500/30 border-t-[#2563eb] rounded-full animate-spin mb-4"></div>
                         <p className="text-slate-500 dark:text-gray-400 font-bold uppercase tracking-widest text-xs">Synchronizing Rubric...</p>
                     </div>
                 ) : (
@@ -199,13 +199,13 @@ const EvaluationCriteria = () => {
                         <div className="flex justify-between items-center px-2">
                             <h2 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
                                 Scoring Components
-                                <span className="text-xs bg-[#7C65F6]/10 text-[#7C65F6] px-2.5 py-0.5 rounded-full border border-[#7C65F6]/20 font-bold">
+                                <span className="text-xs bg-blue-500/10 text-[#2563eb] dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-500/20 font-bold">
                                     {criteria.length}
                                 </span>
                             </h2>
                             <button 
                                 onClick={handleAdd}
-                                className="flex items-center gap-2 px-4 py-2 bg-[#7C65F6]/10 text-[#7C65F6] border border-[#7C65F6]/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#7C65F6] hover:text-white transition-all active:scale-95"
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 text-[#2563eb] dark:text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#2563eb] hover:text-white transition-all active:scale-95"
                             >
                                 <Icon name="Plus" className="w-3.5 h-3.5" />
                                 Add Criterion
@@ -216,7 +216,7 @@ const EvaluationCriteria = () => {
                             {criteria.map((c, index) => (
                                 <div 
                                     key={c.id} 
-                                    className="bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 group hover:border-[#7C65F6]/40 transition-all shadow-xs relative overflow-hidden"
+                                    className="bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 group hover:border-blue-500/40 transition-all shadow-xs relative overflow-hidden"
                                 >
                                     <div className="flex flex-col md:flex-row gap-6">
                                         {/* Left Side: Inputs */}
@@ -227,7 +227,7 @@ const EvaluationCriteria = () => {
                                                     type="text" 
                                                     value={c.label} 
                                                     onChange={(e) => handleUpdate(c.id, 'label', e.target.value)}
-                                                    className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all text-base"
+                                                    className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] transition-all text-base"
                                                     placeholder="e.g., Technical Depth"
                                                 />
                                             </div>
@@ -236,7 +236,7 @@ const EvaluationCriteria = () => {
                                                 <textarea 
                                                     value={c.description} 
                                                     onChange={(e) => handleUpdate(c.id, 'description', e.target.value)}
-                                                    className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-700 dark:text-gray-300 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all resize-none h-20"
+                                                    className="w-full bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-700 dark:text-gray-300 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] transition-all resize-none h-20"
                                                     placeholder="What should judges evaluate for this point?"
                                                 />
                                             </div>
@@ -247,7 +247,7 @@ const EvaluationCriteria = () => {
                                             <div className="flex flex-col gap-4 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5">
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-end">
-                                                        <label className="text-xs font-bold text-[#7C65F6] uppercase tracking-wider">Max Score</label>
+                                                        <label className="text-xs font-bold text-[#2563eb] dark:text-blue-400 uppercase tracking-wider">Max Score</label>
                                                         <span className="text-base font-bold text-slate-900 dark:text-white">{c.maxScore} pts</span>
                                                     </div>
                                                     <input 
@@ -256,12 +256,12 @@ const EvaluationCriteria = () => {
                                                         max="100" 
                                                         value={c.maxScore} 
                                                         onChange={(e) => handleUpdate(c.id, 'maxScore', parseInt(e.target.value))}
-                                                        className="w-full h-1.5 bg-slate-200 dark:bg-navy-950 rounded-full appearance-none cursor-pointer accent-[#7C65F6]"
+                                                        className="w-full h-1.5 bg-slate-200 dark:bg-navy-950 rounded-full appearance-none cursor-pointer accent-[#2563eb]"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-end">
-                                                        <label className="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">Weight (%)</label>
+                                                        <label className="text-xs font-bold text-blue-500 dark:text-blue-400 uppercase tracking-wider">Weight (%)</label>
                                                         <span className="text-base font-bold text-slate-900 dark:text-white">{c.weight}%</span>
                                                     </div>
                                                     <input 
@@ -270,7 +270,7 @@ const EvaluationCriteria = () => {
                                                         max="100" 
                                                         value={c.weight} 
                                                         onChange={(e) => handleUpdate(c.id, 'weight', parseInt(e.target.value))}
-                                                        className="w-full h-1.5 bg-slate-200 dark:bg-navy-950 rounded-full appearance-none cursor-pointer accent-indigo-500"
+                                                        className="w-full h-1.5 bg-slate-200 dark:bg-navy-950 rounded-full appearance-none cursor-pointer accent-blue-500"
                                                     />
                                                 </div>
                                             </div>
@@ -296,7 +296,7 @@ const EvaluationCriteria = () => {
                                 <p className="text-slate-500 dark:text-gray-400 text-sm max-w-sm mx-auto mb-6">Create scoring criteria so that judges can score submissions appropriately.</p>
                                 <button 
                                     onClick={handleAdd}
-                                    className="px-6 py-2.5 bg-[#7C65F6] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#6851ec] transition-all active:scale-95"
+                                    className="px-6 py-2.5 bg-[#2563eb] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#1d4ed8] transition-all active:scale-95"
                                 >
                                     Add First Criterion
                                 </button>
@@ -319,7 +319,7 @@ const EvaluationCriteria = () => {
                 </div>
                 <button 
                    onClick={handleSave}
-                   className="px-8 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#7C65F6]/20 transition-all active:scale-95 whitespace-nowrap"
+                   className="px-8 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all active:scale-95 whitespace-nowrap"
                 >
                     Save Rubric
                 </button>

@@ -48,7 +48,7 @@ export const ProgressTracker = ({ studentId, studentName }) => {
                     </div>
                     <div className="w-full bg-navy-900 rounded-full h-3 overflow-hidden border border-white/10">
                         <div
-                            className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
                             style={{ width: `${progressPercentage}%` }}
                         />
                     </div>
@@ -143,7 +143,7 @@ export const PerformanceAnalytics = ({ studentId, studentName }) => {
                         label="Activity Score" 
                         value={metrics.activityScore.toFixed(1)}
                         icon="🎯"
-                        color="purple"
+                        color="blue"
                     />
                 </div>
 
@@ -306,7 +306,7 @@ export const ReportGenerator = ({ studentId, studentName }) => {
                         <select
                             value={reportType}
                             onChange={(e) => setReportType(e.target.value)}
-                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                         >
                             <option value="weekly">Weekly Report</option>
                             <option value="monthly">Monthly Report</option>
@@ -317,7 +317,7 @@ export const ReportGenerator = ({ studentId, studentName }) => {
                     <button
                         onClick={handleGenerateReport}
                         disabled={loading}
-                        className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                         {loading ? 'Generating...' : 'Generate Report'}
                     </button>

@@ -6,7 +6,7 @@ const StudentSettings = () => {
         profileMode: 'Public',
         emailNotifications: true,
         pushNotifications: false,
-        theme: 'Purple Dark',
+        theme: 'Midnight Blue',
         accessibilityMode: false,
         contentLanguage: 'English (US)',
         twoFactorEnabled: false,
@@ -214,7 +214,7 @@ const StudentSettings = () => {
                         ? 'bg-emerald-600' 
                         : toast.type === 'error' 
                         ? 'bg-rose-600' 
-                        : 'bg-indigo-600'
+                        : 'bg-blue-600'
                 }`}>
                     {toast.message}
                 </div>
@@ -241,7 +241,7 @@ const StudentSettings = () => {
                     </div>
                     <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 shadow-xs">
                         <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Theme Preference</span>
-                        <p className="mt-2 text-2xl font-extrabold text-[#7C65F6] dark:text-purple-400">{settings.theme}</p>
+                        <p className="mt-2 text-2xl font-extrabold text-blue-600 dark:text-blue-400">{settings.theme}</p>
                     </div>
                     <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-navy-900 p-5 shadow-xs">
                         <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Content Language</span>
@@ -265,7 +265,7 @@ const StudentSettings = () => {
                                     value={settings.profileMode}
                                     onChange={handleProfileModeChange}
                                     disabled={isSaving}
-                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none focus:border-[#7C65F6] disabled:opacity-50"
+                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
                                 >
                                     <option>Public</option>
                                     <option>Private</option>
@@ -279,7 +279,7 @@ const StudentSettings = () => {
                                     value={settings.notificationFrequency}
                                     onChange={handleNotificationFrequencyChange}
                                     disabled={isSaving}
-                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none focus:border-[#7C65F6] disabled:opacity-50"
+                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-3.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
                                 >
                                     <option>Instant</option>
                                     <option>Daily</option>
@@ -299,7 +299,7 @@ const StudentSettings = () => {
                                     disabled={isSaving}
                                     className={`w-full flex items-center justify-between gap-4 rounded-xl border p-3.5 text-left transition-all disabled:opacity-50 cursor-pointer ${
                                         settings[item.key]
-                                            ? 'border-purple-300 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/20'
+                                            ? 'border-blue-300 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20'
                                             : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-navy-950/40 hover:bg-slate-100/60 dark:hover:bg-navy-900'
                                     }`}
                                 >
@@ -307,7 +307,7 @@ const StudentSettings = () => {
                                         <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{item.title}</h3>
                                         <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{item.description}</p>
                                     </div>
-                                    <div className={`relative h-5 w-10 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#7C65F6]' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                                    <div className={`relative h-5 w-10 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#2563eb]' : 'bg-slate-300 dark:bg-slate-700'}`}>
                                         <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${settings[item.key] ? 'left-5' : 'left-0.5'}`} />
                                     </div>
                                 </button>
@@ -330,7 +330,7 @@ const StudentSettings = () => {
                                         onChange={handlePasswordChange}
                                         placeholder="••••••••"
                                         disabled={isChangingPassword}
-                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] disabled:opacity-50"
+                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -342,7 +342,7 @@ const StudentSettings = () => {
                                         onChange={handlePasswordChange}
                                         placeholder="At least 8 characters"
                                         disabled={isChangingPassword}
-                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] disabled:opacity-50"
+                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -354,14 +354,14 @@ const StudentSettings = () => {
                                         onChange={handlePasswordChange}
                                         placeholder="Confirm new password"
                                         disabled={isChangingPassword}
-                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] disabled:opacity-50"
+                                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 px-3.5 text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
                                     />
                                 </div>
                                 <div className="pt-2">
                                     <button
                                         type="submit"
                                         disabled={isChangingPassword}
-                                        className="rounded-xl bg-[#7C65F6] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 disabled:opacity-50 cursor-pointer"
+                                        className="rounded-xl bg-[#2563eb] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95 disabled:opacity-50 cursor-pointer"
                                     >
                                         {isChangingPassword ? 'Updating...' : 'Update Password'}
                                     </button>
@@ -408,7 +408,7 @@ const StudentSettings = () => {
                                         disabled={isSaving}
                                         className={`w-full flex items-center justify-between gap-4 rounded-xl border p-3.5 text-left transition-all disabled:opacity-50 cursor-pointer ${
                                             settings[item.key]
-                                                ? 'border-purple-300 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/20'
+                                                ? 'border-blue-300 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20'
                                                 : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-navy-950/40 hover:bg-slate-100/60 dark:hover:bg-navy-900'
                                         }`}
                                     >
@@ -416,7 +416,7 @@ const StudentSettings = () => {
                                             <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{item.title}</h3>
                                             <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{item.description}</p>
                                         </div>
-                                        <div className={`relative h-5 w-10 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#7C65F6]' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                                        <div className={`relative h-5 w-10 shrink-0 rounded-full transition-colors ${settings[item.key] ? 'bg-[#2563eb]' : 'bg-slate-300 dark:bg-slate-700'}`}>
                                             <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${settings[item.key] ? 'left-5' : 'left-0.5'}`} />
                                         </div>
                                     </button>

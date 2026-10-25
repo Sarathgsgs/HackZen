@@ -78,7 +78,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                 <h3 className="text-xl font-semibold text-white">📅 Meeting Scheduler</h3>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                     + Schedule Meeting
                 </button>
@@ -95,7 +95,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                                 required
                                 value={formData.title}
                                 onChange={(e) => setFormData({...formData, title: e.target.value})}
-                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                                 placeholder="e.g., Weekly Sync, Code Review"
                             />
                         </div>
@@ -106,7 +106,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                                 type="text"
                                 value={formData.location}
                                 onChange={(e) => setFormData({...formData, location: e.target.value})}
-                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                                 placeholder="e.g., Room 101, Zoom"
                             />
                         </div>
@@ -117,7 +117,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500 h-20 resize-none"
+                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb] h-20 resize-none"
                             placeholder="Meeting agenda and objectives"
                         />
                     </div>
@@ -130,7 +130,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                                 required
                                 value={formData.startTime}
                                 onChange={(e) => setFormData({...formData, startTime: e.target.value})}
-                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                             />
                         </div>
 
@@ -141,7 +141,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                                 required
                                 value={formData.endTime}
                                 onChange={(e) => setFormData({...formData, endTime: e.target.value})}
-                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                                className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                             />
                         </div>
                     </div>
@@ -152,7 +152,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                             type="url"
                             value={formData.meetingLink}
                             onChange={(e) => setFormData({...formData, meetingLink: e.target.value})}
-                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                            className="w-full bg-navy-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#2563eb]"
                             placeholder="https://zoom.us/my/meeting"
                         />
                     </div>
@@ -161,7 +161,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
                             {loading ? 'Creating...' : 'Schedule Meeting'}
                         </button>
@@ -188,7 +188,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                         {meetings.map((meeting) => (
                             <div
                                 key={meeting._id}
-                                className="bg-navy-800/50 rounded-lg p-4 border border-white/5 hover:border-purple-500/30 transition-colors"
+                                className="bg-navy-800/50 rounded-lg p-4 border border-white/5 hover:border-blue-500/30 transition-colors"
                             >
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
@@ -205,7 +205,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                                                 href={meeting.meetingLink}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block"
+                                                className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
                                             >
                                                 Join Meeting →
                                             </a>
@@ -213,7 +213,7 @@ export const MeetingScheduler = ({ studentIds, teamId }) => {
                                     </div>
 
                                     <div className="text-right">
-                                        <span className="bg-purple-900/50 text-purple-200 px-3 py-1 rounded-full text-xs font-medium block">
+                                        <span className="bg-blue-900/50 text-blue-200 px-3 py-1 rounded-full text-xs font-medium block">
                                             {getMeetingStatus(meeting.startTime)}
                                         </span>
                                         <span className="text-xs text-gray-500 mt-2 block">
@@ -291,7 +291,7 @@ export const CalendarView = ({ meetings }) => {
                         key={idx}
                         className={`h-16 rounded-lg border p-1 text-sm ${
                             day
-                                ? 'bg-navy-800/50 border-white/10 hover:border-purple-500/30'
+                                ? 'bg-navy-800/50 border-white/10 hover:border-blue-500/30'
                                 : 'border-transparent'
                         }`}
                     >
@@ -306,7 +306,7 @@ export const CalendarView = ({ meetings }) => {
                                         .map((m) => (
                                             <div
                                                 key={m._id}
-                                                className="text-xs bg-purple-900/30 text-purple-200 px-1 py-0.5 rounded truncate"
+                                                className="text-xs bg-blue-900/30 text-blue-200 px-1 py-0.5 rounded truncate"
                                             >
                                                 {m.title}
                                             </div>

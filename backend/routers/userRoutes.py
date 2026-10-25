@@ -136,6 +136,29 @@ async def login(credentials: LoginRequest, request: Request):
     user_role = str(user.get("role", "")).lower()
     user["role"] = user_role  # persist normalized role for token + response
 
+    # 3.5 Check account approval and activation status
+    user_status = str(user.get("status", "")).strip().lower()
+
+    if user_role == "organizer" and (user_status in ["pending", "needs changes", "needs_changes"] or user.get("isVerified") is False and user.get("is_active") is False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your organizer account is pending approval by the platform administrator. You will be notified via email once approved.",
+        )
+
+    if user_status in ["rejected"]:
+        rejection_reason = user.get("rejectionReason") or "Registration did not meet platform verification guidelines."
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Organizer application was not approved: {rejection_reason}",
+        )
+
+    if user_status in ["suspended", "deactivated"]:
+        suspension_reason = user.get("suspensionReason") or "This account has been deactivated or suspended by administration."
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied: {suspension_reason}",
+        )
+
     # 4. Session Timeout Calculation
     session_timeout_str = str(settings_doc.get("sessionTimeout", "30 Minutes"))
     if "Hour" in session_timeout_str:

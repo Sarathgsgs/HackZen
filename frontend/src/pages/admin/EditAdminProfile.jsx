@@ -65,7 +65,7 @@ const EditAdminProfile = () => {
 
     if (loading) return (
         <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
         </div>
     );
 
@@ -92,7 +92,7 @@ const EditAdminProfile = () => {
                         type="button"
                         onClick={handleSave}
                         disabled={saving}
-                        className={`flex-1 sm:flex-initial justify-center px-6 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 rounded-xl text-xs font-bold shadow-md shadow-[#7C65F6]/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`flex-1 sm:flex-initial justify-center px-6 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         {saving ? (
                             <>
@@ -113,7 +113,7 @@ const EditAdminProfile = () => {
             <div className="bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
                 <div className="px-4.5 py-3 border-b border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.02]">
                     <h2 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-                        <span className="w-1.5 h-4 bg-indigo-300 dark:bg-indigo-500/40 rounded-full"></span>
+                        <span className="w-1.5 h-4 bg-blue-300 dark:bg-blue-500/40 rounded-full"></span>
                         Admin Identity
                     </h2>
                 </div>
@@ -125,7 +125,7 @@ const EditAdminProfile = () => {
                             type="text"
                             value={profileData.name}
                             onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white px-3.5 py-2 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500 transition-all shadow-sm"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white px-3.5 py-2 rounded-xl text-xs font-medium focus:outline-none focus:border-[#2563eb] transition-all shadow-sm"
                         />
                     </div>
                     <div className="space-y-1.5">
@@ -134,7 +134,7 @@ const EditAdminProfile = () => {
                             type="text"
                             value={profileData.institution}
                             onChange={(e) => setProfileData({ ...profileData, institution: e.target.value })}
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white px-3.5 py-2 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500 transition-all shadow-sm"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white px-3.5 py-2 rounded-xl text-xs font-medium focus:outline-none focus:border-[#2563eb] transition-all shadow-sm"
                         />
                     </div>
                 </div>
@@ -143,7 +143,7 @@ const EditAdminProfile = () => {
             {/* Form Section: Operational Summary */}
             <div className="bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm space-y-2.5">
                 <h2 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-                    <span className="w-1.5 h-4 bg-indigo-600 rounded-full"></span>
+                    <span className="w-1.5 h-4 bg-blue-600 rounded-full"></span>
                     Operational Summary & Bio
                 </h2>
                 <textarea
@@ -151,7 +151,7 @@ const EditAdminProfile = () => {
                     onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
                     rows="4"
                     placeholder="Describe administrative responsibilities and domain authority..."
-                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white p-3.5 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500 transition-all resize-none shadow-sm leading-relaxed"
+                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white p-3.5 rounded-xl text-xs font-medium focus:outline-none focus:border-[#2563eb] transition-all resize-none shadow-sm leading-relaxed"
                 />
             </div>
         </div>

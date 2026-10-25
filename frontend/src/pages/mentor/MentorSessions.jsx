@@ -124,7 +124,7 @@ export default function MentorSessions() {
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                 viewMode === 'list'
-                  ? 'bg-white dark:bg-navy-900 text-[#5B45D9] dark:text-purple-300 shadow-xs'
+                  ? 'bg-white dark:bg-navy-900 text-[#2563eb] dark:text-blue-300 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -135,7 +135,7 @@ export default function MentorSessions() {
               onClick={() => setViewMode('calendar')}
               className={`p-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                 viewMode === 'calendar'
-                  ? 'bg-white dark:bg-navy-900 text-[#5B45D9] dark:text-purple-300 shadow-xs'
+                  ? 'bg-white dark:bg-navy-900 text-[#2563eb] dark:text-blue-300 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -146,7 +146,7 @@ export default function MentorSessions() {
 
           <button
             onClick={() => openScheduleModal()}
-            className="px-4 py-2.5 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs shadow-purple-500/20 transition-all flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs shadow-blue-500/20 transition-all flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
             Schedule Session
@@ -162,7 +162,7 @@ export default function MentorSessions() {
             onClick={() => setActiveFilter(tab)}
             className={`px-4 py-3 text-xs font-bold transition-all border-b-2 ${
               activeFilter === tab
-                ? 'border-[#5B45D9] text-[#5B45D9] dark:text-purple-300 dark:border-purple-400'
+                ? 'border-[#2563eb] text-[#2563eb] dark:text-blue-300 dark:border-blue-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-white'
             }`}
           >
@@ -185,17 +185,17 @@ export default function MentorSessions() {
               return (
                 <div
                   key={s.id}
-                  className="p-5 sm:p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-[#5B45D9]/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
+                  className="p-5 sm:p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-[#2563eb]/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
                 >
                   {/* Left: Date/Time Badge + Session Info */}
                   <div className="flex items-start gap-4 min-w-0 flex-1">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-900/30 text-[#5B45D9] dark:text-purple-300 flex flex-col items-center justify-center shrink-0 border border-purple-100 dark:border-purple-800/40">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-300 flex flex-col items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800/40">
                       <CalendarIcon className="w-5 h-5" />
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-bold text-[#5B45D9] dark:text-purple-300">
+                        <span className="text-xs font-bold text-[#2563eb] dark:text-blue-300">
                           {s.date} · {s.time}
                         </span>
                         <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300">
@@ -204,7 +204,7 @@ export default function MentorSessions() {
                         <span
                           className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                             isUpcoming
-                              ? 'bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200'
+                              ? 'bg-blue-50 text-[#2563eb] dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200'
                               : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200'
                           }`}
                         >
@@ -234,7 +234,7 @@ export default function MentorSessions() {
                         href={s.meetingLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-4 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5"
                       >
                         <Video className="w-3.5 h-3.5" />
                         Join Meeting
@@ -314,14 +314,14 @@ export default function MentorSessions() {
                   onClick={() => openScheduleModal({ date: `${daysInMonth.year}-${String(daysInMonth.month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}` })}
                   className={`min-h-[70px] p-2 rounded-xl border transition-all cursor-pointer flex flex-col items-start justify-between text-left group ${
                     isToday
-                      ? 'border-[#5B45D9] bg-purple-50/40 dark:bg-purple-950/20'
-                      : 'border-slate-100 dark:border-white/5 bg-[#FAFAFD]/60 dark:bg-navy-950/30 hover:border-[#5B45D9]/50 hover:bg-white dark:hover:bg-navy-900'
+                      ? 'border-[#2563eb] bg-blue-50/40 dark:bg-blue-950/20'
+                      : 'border-slate-100 dark:border-white/5 bg-[#FAFAFD]/60 dark:bg-navy-950/30 hover:border-[#2563eb]/50 hover:bg-white dark:hover:bg-navy-900'
                   }`}
                 >
                   <span
                     className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
                       isToday
-                        ? 'bg-[#5B45D9] text-white'
+                        ? 'bg-[#2563eb] text-white'
                         : 'text-slate-700 dark:text-slate-300'
                     }`}
                   >
@@ -332,7 +332,7 @@ export default function MentorSessions() {
                     <span
                       key={session.id}
                       title={`${session.time} · ${session.teamName} · ${session.topic}`}
-                      className={`w-full truncate px-1 py-0.5 rounded text-[10px] font-bold text-white ${session.status === 'Completed' ? 'bg-emerald-600' : 'bg-[#5B45D9]'}`}
+                      className={`w-full truncate px-1 py-0.5 rounded text-[10px] font-bold text-white ${session.status === 'Completed' ? 'bg-emerald-600' : 'bg-[#2563eb]'}`}
                     >
                       {session.time} {session.teamName}
                     </span>

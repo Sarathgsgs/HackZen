@@ -33,7 +33,7 @@ const Unauthorized = () => {
             <div className="flex flex-wrap items-center justify-center gap-4">
                 <Link
                     to={getDashboardPath()}
-                    className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple-500/25 text-sm"
+                    className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg shadow-blue-500/25 text-sm"
                 >
                     {isLoggedIn ? 'Go to My Dashboard' : 'Sign In'}
                 </Link>

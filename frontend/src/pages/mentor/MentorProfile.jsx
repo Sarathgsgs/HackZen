@@ -110,11 +110,11 @@ export default function MentorProfile() {
       <div>
         {/* Breadcrumb matching Reference Image 1 */}
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-2">
-          <Link to="/mentor/hackathons" className="hover:text-[#5B45D9] transition-colors">
+          <Link to="/mentor/hackathons" className="hover:text-[#2563eb] transition-colors">
             Hackathons
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-          <Link to="/mentor/teams" className="hover:text-[#5B45D9] transition-colors">
+          <Link to="/mentor/teams" className="hover:text-[#2563eb] transition-colors">
             Mentor Discovery
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
@@ -130,7 +130,7 @@ export default function MentorProfile() {
           </h1>
           <Link
             to="/mentor/profile/edit"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111625] text-slate-700 dark:text-slate-200 hover:border-[#5B45D9] hover:text-[#5B45D9] dark:hover:text-purple-300 text-xs font-semibold shadow-2xs transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111625] text-slate-700 dark:text-slate-200 hover:border-[#2563eb] hover:text-[#2563eb] dark:hover:text-blue-300 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
           >
             <Edit3 className="w-3.5 h-3.5" />
             Edit Profile
@@ -155,7 +155,7 @@ export default function MentorProfile() {
         </div>
         <div className="p-4 bg-white dark:bg-[#111625] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs text-center">
           <span className="text-xs font-semibold text-slate-400">Sessions Completed</span>
-          <p className="text-2xl font-extrabold text-[#5B45D9] mt-1">
+          <p className="text-2xl font-extrabold text-[#2563eb] mt-1">
             {user.stats?.sessions ?? 0}
           </p>
         </div>
@@ -182,10 +182,10 @@ export default function MentorProfile() {
                   src={user.avatar}
                   alt={user.name}
                   onError={() => setImageError(true)}
-                  className="w-28 h-28 rounded-full object-cover ring-4 ring-purple-100 dark:ring-purple-900/30 mx-auto shadow-sm"
+                  className="w-28 h-28 rounded-full object-cover ring-4 ring-blue-100 dark:ring-blue-900/30 mx-auto shadow-sm"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#5B45D9] to-indigo-500 text-white flex items-center justify-center font-bold text-2xl ring-4 ring-purple-100 dark:ring-purple-900/30 mx-auto shadow-sm">
+                <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#2563eb] to-blue-600 text-white flex items-center justify-center font-bold text-2xl ring-4 ring-blue-100 dark:ring-blue-900/30 mx-auto shadow-sm">
                   {initials}
                 </div>
               )}
@@ -212,7 +212,7 @@ export default function MentorProfile() {
               <button
                 type="button"
                 onClick={handleRequestMentor}
-                className="w-full py-2.5 px-4 rounded-xl border border-[#5B45D9] text-[#5B45D9] hover:bg-[#5B45D9] hover:text-white dark:text-purple-300 dark:border-purple-500/50 dark:hover:bg-[#5B45D9] dark:hover:text-white font-bold text-xs transition-all shadow-xs active:scale-[0.99] cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl border border-[#2563eb] text-[#2563eb] hover:bg-[#2563eb] hover:text-white dark:text-blue-300 dark:border-blue-500/50 dark:hover:bg-[#2563eb] dark:hover:text-white font-bold text-xs transition-all shadow-xs active:scale-[0.99] cursor-pointer"
               >
                 Request Mentor
               </button>
@@ -231,7 +231,7 @@ export default function MentorProfile() {
           <div className="bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 shadow-xs space-y-4 transition-colors">
             {/* Availability Header */}
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#5B45D9] dark:text-purple-400" />
+              <Calendar className="w-4 h-4 text-[#2563eb] dark:text-blue-400" />
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                 Availability
               </h3>
@@ -298,7 +298,7 @@ export default function MentorProfile() {
               {user.skills.map((skill, idx) => (
                 <span
                   key={idx}
-                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#F0EEFD] dark:bg-purple-950/50 text-[#5B45D9] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/30 transition-colors"
+                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-[#2563eb] dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/30 transition-colors"
                 >
                   {skill}
                 </span>
@@ -318,7 +318,7 @@ export default function MentorProfile() {
                       key={i}
                       className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-200"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-[#5B45D9] dark:text-purple-400 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#2563eb] dark:text-blue-400 shrink-0" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -336,7 +336,7 @@ export default function MentorProfile() {
                       key={i}
                       className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-200"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-[#5B45D9] dark:text-purple-400 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#2563eb] dark:text-blue-400 shrink-0" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -363,7 +363,7 @@ export default function MentorProfile() {
                 user.experiences.map((exp) => (
                   <div key={exp.id || exp.title} className="relative group">
                     <span
-                      className={`absolute -left-[22px] top-1.5 w-2.5 h-2.5 rounded-full ${exp.dotColor || 'bg-[#5B45D9]'} ring-4 ring-white dark:ring-[#111625]`}
+                      className={`absolute -left-[22px] top-1.5 w-2.5 h-2.5 rounded-full ${exp.dotColor || 'bg-[#2563eb]'} ring-4 ring-white dark:ring-[#111625]`}
                     />
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-white">

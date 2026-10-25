@@ -67,7 +67,7 @@ const StudentCertificates = () => {
                                 onChange={(event) => setSearchQuery(event.target.value)}
                                 placeholder="Search by certificate ID..."
                                 aria-label="Search certificates"
-                                className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 pl-10 pr-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#7C65F6]"
+                                className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 pl-10 pr-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                             />
                         </div>
                     </div>
@@ -81,7 +81,7 @@ const StudentCertificates = () => {
                             {filteredCertificates.map((certificate) => (
                                 <article
                                     key={certificate.id || `${certificate.hackathonId}-${certificate.issuedAt}`}
-                                    className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/60 p-5 transition-all hover:border-purple-300 dark:hover:border-purple-700/50"
+                                    className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-navy-950/60 p-5 transition-all hover:border-blue-300 dark:hover:border-blue-700/50"
                                 >
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm font-bold text-slate-900 dark:text-white">Completion Credential</h2>
@@ -138,13 +138,13 @@ const StudentCertificates = () => {
                             onChange={(event) => setCertId(event.target.value)}
                             onKeyDown={(event) => event.key === 'Enter' && handleVerify()}
                             placeholder="Enter Certificate ID..."
-                            className="h-11 min-w-0 flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#7C65F6]"
+                            className="h-11 min-w-0 flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-navy-950 px-4 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                         />
                         <button
                             type="button"
                             onClick={handleVerify}
                             disabled={isVerifying || !certId.trim()}
-                            className="h-11 rounded-xl bg-[#7C65F6] px-5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#6D28D9] active:scale-95 disabled:opacity-50 cursor-pointer"
+                            className="h-11 rounded-xl bg-[#2563eb] px-5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#1d4ed8] active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
                             {isVerifying ? 'Checking…' : 'Verify'}
                         </button>

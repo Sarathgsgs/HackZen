@@ -9,7 +9,7 @@ const DEFAULT_PROFILE = {
     role: 'Mentor',
     institution: '',
     bio: '',
-    avatarGradient: 'from-purple-600 to-indigo-600',
+    avatarGradient: 'from-blue-600 to-blue-500',
     expertise: [],
     links: {
         scholar: '',

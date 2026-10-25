@@ -272,7 +272,7 @@ const EvaluationPanel = () => {
                     </button>
                     <button 
                         onClick={() => navigate('/organizer/results')}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#7C65F6]/20 active:scale-95"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
                     >
                         <Icon name="Check" className="w-4 h-4" />
                         Finalize Shortlist
@@ -287,33 +287,33 @@ const EvaluationPanel = () => {
                 <div className="w-full lg:w-1/3 flex flex-col gap-4 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-white/10 p-4 shadow-xs relative min-h-[550px]">
                     {isLoading && (
                         <div className="absolute inset-0 bg-white/70 dark:bg-navy-900/60 backdrop-blur-[2px] z-10 rounded-2xl flex items-center justify-center">
-                            <div className="w-8 h-8 border-2 border-[#7C65F6] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-8 h-8 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     )}
                     {/* Search & Tabs */}
                     <div className="space-y-3 shrink-0">
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Icon name="Search" className="w-4 h-4 text-slate-400 dark:text-gray-400 group-focus-within:text-[#7C65F6] transition-colors" />
+                                <Icon name="Search" className="w-4 h-4 text-slate-400 dark:text-gray-400 group-focus-within:text-[#2563eb] transition-colors" />
                             </div>
                             <input
                                 type="text"
                                 placeholder="Filter teams..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all"
+                                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] transition-all"
                             />
                         </div>
                         <div className="flex p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5">
                             <button
                                 onClick={() => setActiveTab('pending')}
-                                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'pending' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
+                                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'pending' ? 'bg-[#2563eb] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 Pending ({teams.filter(t => t.status !== 'Evaluated').length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('done')}
-                                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'done' ? 'bg-[#7C65F6] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
+                                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'done' ? 'bg-[#2563eb] text-white shadow-sm' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 Evaluated ({teams.filter(t => t.status === 'Evaluated').length})
                             </button>
@@ -329,21 +329,21 @@ const EvaluationPanel = () => {
                                     onClick={() => setSelectedTeamId(team.id)}
                                     className={`p-3.5 rounded-xl border cursor-pointer transition-all group relative ${
                                         selectedTeamId === team.id
-                                            ? 'bg-[#7C65F6]/10 border-[#7C65F6] dark:border-[#7C65F6]'
+                                            ? 'bg-blue-500/10 border-[#2563eb] dark:border-[#2563eb]'
                                             : 'bg-slate-50 dark:bg-white/5 border-slate-200/80 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/15'
                                     }`}
                                 >
                                     {selectedTeamId === team.id && (
-                                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-[#7C65F6] rounded-r-full shadow-[0_0_8px_rgba(124,101,246,0.5)]"></div>
+                                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-[#2563eb] rounded-r-full shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
                                     )}
                                     <div className="flex justify-between items-start mb-1 pl-2">
-                                        <h3 className={`font-semibold text-sm transition-colors group-hover:text-[#7C65F6] ${selectedTeamId === team.id ? 'text-[#7C65F6] dark:text-purple-300' : 'text-slate-800 dark:text-gray-200'}`}>
+                                        <h3 className={`font-semibold text-sm transition-colors group-hover:text-[#2563eb] ${selectedTeamId === team.id ? 'text-[#2563eb] dark:text-blue-300' : 'text-slate-800 dark:text-gray-200'}`}>
                                             {team.name}
                                         </h3>
                                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase border ${
                                             team.status === 'Evaluated' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
                                             team.status === 'Reviewing' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
-                                            'bg-purple-500/10 text-[#7C65F6] border-purple-500/20'
+                                            'bg-blue-500/10 text-[#2563eb] dark:text-blue-300 border-blue-500/20'
                                         }`}>
                                             {team.status}
                                         </span>
@@ -353,7 +353,7 @@ const EvaluationPanel = () => {
                                         <span className="text-[10px] text-slate-400 dark:text-gray-500 font-medium">{team.submitted}</span>
                                         {team.score !== null && (
                                             <div className="flex items-center gap-1">
-                                                <span className="text-xs font-bold text-[#7C65F6]">{team.score}</span>
+                                                <span className="text-xs font-bold text-[#2563eb] dark:text-blue-300">{team.score}</span>
                                                 <span className="text-[9px] text-slate-400 dark:text-gray-500 font-bold">PTS</span>
                                             </div>
                                         )}
@@ -363,7 +363,7 @@ const EvaluationPanel = () => {
                         ) : !isLoading && (
                             <div className="text-center py-20 flex flex-col items-center">
                                 <p className="text-slate-400 dark:text-gray-500 text-xs uppercase tracking-widest font-bold">No submissions found</p>
-                                <button onClick={() => { setSearchTerm(''); setActiveTab('pending'); }} className="mt-2 text-[#7C65F6] text-xs font-bold uppercase hover:underline">Reset filters</button>
+                                <button onClick={() => { setSearchTerm(''); setActiveTab('pending'); }} className="mt-2 text-[#2563eb] dark:text-blue-400 text-xs font-bold uppercase hover:underline">Reset filters</button>
                             </div>
                         )}
                     </div>
@@ -386,7 +386,7 @@ const EvaluationPanel = () => {
                                 <div className="flex justify-between items-start relative z-10">
                                     <div>
                                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">{activeTeam.name}</h2>
-                                        <h3 className="text-lg font-medium text-[#7C65F6] dark:text-purple-300 mb-2 truncate max-w-md">{activeTeam.project}</h3>
+                                        <h3 className="text-lg font-medium text-[#2563eb] dark:text-blue-300 mb-2 truncate max-w-md">{activeTeam.project}</h3>
                                         <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-gray-400">
                                             <span>{activeTeam.members?.length > 0 ? activeTeam.members.join(', ') : 'Team submission'}</span>
                                             <span>•</span>
@@ -395,7 +395,7 @@ const EvaluationPanel = () => {
                                     </div>
                                     <div className="text-right">
                                         <div className="text-[10px] font-bold text-slate-400 dark:text-gray-400 mb-1 uppercase tracking-widest">Total Score</div>
-                                        <div className="text-4xl font-black text-[#7C65F6] dark:text-purple-300 tracking-tighter">
+                                        <div className="text-4xl font-black text-[#2563eb] dark:text-blue-300 tracking-tighter">
                                             {totalScore}<span className="text-base text-slate-400 dark:text-gray-500 font-bold ml-1 uppercase">/ {criteria.reduce((a, b) => a + (b.maxScore || 10), 0)}</span>
                                         </div>
                                     </div>
@@ -431,7 +431,7 @@ const EvaluationPanel = () => {
                                 {/* Scorecard */}
                                 <div>
                                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-6 flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-[#7C65F6]"></span>
+                                        <span className="w-2 h-2 rounded-full bg-[#2563eb]"></span>
                                         Evaluation Matrix
                                     </h3>
                                     <div className="space-y-6">
@@ -439,11 +439,11 @@ const EvaluationPanel = () => {
                                             <div key={c.id} className="group/criteria">
                                                 <div className="flex justify-between items-end mb-2">
                                                     <div>
-                                                        <label className="text-sm font-bold text-slate-800 dark:text-white block group-hover/criteria:text-[#7C65F6] transition-colors">{c.label}</label>
+                                                        <label className="text-sm font-bold text-slate-800 dark:text-white block group-hover/criteria:text-[#2563eb] transition-colors">{c.label}</label>
                                                         <span className="text-xs text-slate-500 dark:text-gray-400">{c.description}</span>
                                                     </div>
                                                     <div className="flex items-end gap-1">
-                                                        <span className="text-xl font-bold text-[#7C65F6] leading-none">{scores[c.id] || 0}</span>
+                                                        <span className="text-xl font-bold text-[#2563eb] dark:text-blue-300 leading-none">{scores[c.id] || 0}</span>
                                                         <span className="text-xs text-slate-400 dark:text-gray-500 font-semibold mb-0.5">/ {c.maxScore}</span>
                                                     </div>
                                                 </div>
@@ -455,7 +455,7 @@ const EvaluationPanel = () => {
                                                         step="1"
                                                         value={scores[c.id] || 0}
                                                         onChange={(e) => setScores({ ...scores, [c.id]: parseInt(e.target.value) })}
-                                                        className="w-full h-2 bg-slate-200 dark:bg-navy-950 rounded-lg appearance-none cursor-pointer accent-[#7C65F6] hover:accent-[#6851ec] transition-all z-20"
+                                                        className="w-full h-2 bg-slate-200 dark:bg-navy-950 rounded-lg appearance-none cursor-pointer accent-[#2563eb] hover:accent-[#1d4ed8] transition-all z-20"
                                                     />
                                                 </div>
                                             </div>
@@ -466,7 +466,7 @@ const EvaluationPanel = () => {
                                 {/* Comments */}
                                 <div>
                                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-[#7C65F6]"></span>
+                                        <span className="w-2 h-2 rounded-full bg-[#2563eb]"></span>
                                         Critique & Feedback
                                     </h3>
                                     <div className="relative">
@@ -474,7 +474,7 @@ const EvaluationPanel = () => {
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
                                             placeholder="Enter comprehensive feedback, strengths, and areas for improvement..."
-                                            className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7C65F6]/30 focus:border-[#7C65F6] transition-all resize-none shadow-xs"
+                                            className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-navy-950/50 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563eb] transition-all resize-none shadow-xs"
                                         ></textarea>
                                     </div>
                                 </div>
@@ -503,7 +503,7 @@ const EvaluationPanel = () => {
                                     <button
                                         onClick={handleSubmitScore}
                                         disabled={isSubmitting}
-                                        className="px-6 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-[#7C65F6]/20 active:scale-95 flex items-center gap-2 justify-center disabled:opacity-50"
+                                        className="px-6 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-blue-500/20 active:scale-95 flex items-center gap-2 justify-center disabled:opacity-50"
                                     >
                                         {isSubmitting ? (
                                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

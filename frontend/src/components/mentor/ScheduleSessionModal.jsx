@@ -116,7 +116,7 @@ export default function ScheduleSessionModal() {
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-[#FAFAFD] dark:bg-navy-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-[#5B45D9] dark:text-purple-300 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#2563eb] dark:text-blue-300 flex items-center justify-center">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
@@ -144,7 +144,7 @@ export default function ScheduleSessionModal() {
                 value={formData.teamId}
                 disabled={loadingTeams || teams.length === 0}
                 onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] focus:ring-1 focus:ring-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb]"
                 required
               >
                 {loadingTeams && <option>Loading teams...</option>}
@@ -169,7 +169,7 @@ export default function ScheduleSessionModal() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g. Architecture Review & Cloud Deploy"
-              className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] focus:ring-1 focus:ring-[#5B45D9]"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb]"
               required
               disabled={loadingTeams || teams.length === 0}
             />
@@ -184,7 +184,7 @@ export default function ScheduleSessionModal() {
               <select
                 value={formData.topic}
                 onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
               >
                 <option value="Architecture Review">Architecture Review</option>
                 <option value="AI / ML Model Guidance">AI / ML Model Guidance</option>
@@ -202,7 +202,7 @@ export default function ScheduleSessionModal() {
               <select
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
               >
                 <option value="30">30 Minutes</option>
                 <option value="45">45 Minutes</option>
@@ -222,7 +222,7 @@ export default function ScheduleSessionModal() {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                 required
               />
             </div>
@@ -235,7 +235,7 @@ export default function ScheduleSessionModal() {
                 type="time"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                 required
               />
             </div>
@@ -250,7 +250,7 @@ export default function ScheduleSessionModal() {
               <select
                 value={formData.meetingType}
                 onChange={(e) => setFormData({ ...formData, meetingType: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
               >
                 <option value="Google Meet">Google Meet</option>
                 <option value="Zoom">Zoom Meeting</option>
@@ -269,7 +269,7 @@ export default function ScheduleSessionModal() {
                 value={formData.meetingLink}
                 onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
                 placeholder="https://meet.google.com/..."
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
               />
             </div>
           </div>
@@ -284,7 +284,7 @@ export default function ScheduleSessionModal() {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Outline what you plan to discuss or any prerequisites for the team..."
-              className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] resize-none"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] resize-none"
             />
           </div>
 
@@ -300,7 +300,7 @@ export default function ScheduleSessionModal() {
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2.5 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-sm font-semibold shadow-sm shadow-purple-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
             >
               <CheckCircle2 className="w-4 h-4" />
               {submitting ? 'Scheduling...' : 'Schedule Session'}

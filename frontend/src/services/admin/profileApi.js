@@ -10,7 +10,7 @@ const DEFAULT_PROFILE = {
     role: 'System Administrator',
     department: 'Operations & Security',
     bio: '',
-    avatarGradient: 'from-blue-800 to-indigo-900',
+    avatarGradient: 'from-blue-700 to-blue-900',
     permissions: [],
     stats: {
         approvals: 0,

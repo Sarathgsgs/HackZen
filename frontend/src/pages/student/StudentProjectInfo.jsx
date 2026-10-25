@@ -58,7 +58,7 @@ const StudentProjectInfo = () => {
     if (loadError) return <div role="alert" className="mx-auto max-w-4xl rounded-[18px] border border-red-200 bg-white p-10 text-center text-red-800">{loadError}</div>;
     return (
       <div className="mx-auto max-w-4xl pb-10">
-        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f7f4fb] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
+        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f8fafc] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
           <h2 className="text-2xl font-bold text-[#1d1a2a]">No team found</h2>
           <p className="mt-3 text-[#69707d]">Create or join a team to view your project information.</p>
         </div>
@@ -73,7 +73,7 @@ const StudentProjectInfo = () => {
   if (!project) {
     return (
       <div className="mx-auto max-w-4xl pb-10">
-        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f7f4fb] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
+        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f8fafc] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
           <h2 className="text-2xl font-bold text-[#1d1a2a]">No project information yet</h2>
           <p className="mt-3 text-[#69707d]">Your team has not submitted a project yet. Once a submission exists, the project details will appear here.</p>
           <button onClick={() => navigate(`/student/submission${teamQuery}`)} className="mt-6 rounded-xl bg-gradient-to-r from-[#5a44c9] to-[#6e52d9] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(90,68,201,0.24)]">

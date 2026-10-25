@@ -73,10 +73,10 @@ const StudentFeedback = () => {
   if (!feedback) {
     return (
       <div className="mx-auto max-w-4xl pb-10">
-        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f7f4fb] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
+        <div className="rounded-[18px] border border-dashed border-[#d9d1ef] bg-[#f8fafc] p-12 text-center shadow-[0_8px_26px_rgba(83,63,166,0.03)]">
           <h2 className="text-2xl font-bold text-[#1d1a2a]">No feedback available</h2>
           <p className="mt-3 text-[#69707d]">There are no mentor or judge comments tied to your current submission yet.</p>
-          <button onClick={() => navigate(`/student/teams${teamQuery}`)} className="mt-6 rounded-xl border border-[#c9bde9] bg-[#f4f0ff] px-5 py-3 text-sm font-semibold text-[#5a44c9]">
+          <button onClick={() => navigate(`/student/teams${teamQuery}`)} className="mt-6 rounded-xl border border-[#c9bde9] bg-[#eff6ff] px-5 py-3 text-sm font-semibold text-[#5a44c9]">
             Back to teams
           </button>
         </div>
@@ -92,7 +92,7 @@ const StudentFeedback = () => {
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7d7a88]">Feedback</p>
             <h1 className="mt-2 text-[44px] font-bold leading-none tracking-[-0.05em] text-[#1d1a2a]">Feedback</h1>
           </div>
-          <button onClick={() => navigate(`/student/teams${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#f4f0ff] px-4 py-2.5 text-sm font-semibold text-[#5a44c9]">
+          <button onClick={() => navigate(`/student/teams${teamQuery}`)} className="rounded-[10px] border border-[#c9bde9] bg-[#eff6ff] px-4 py-2.5 text-sm font-semibold text-[#5a44c9]">
             Back to teams
           </button>
         </div>
@@ -109,7 +109,7 @@ const StudentFeedback = () => {
             </div>
           </div>
 
-          <div className="mt-6 rounded-[14px] border border-[#e0d9ee] bg-[#f4f0ff] p-5">
+          <div className="mt-6 rounded-[14px] border border-[#e0d9ee] bg-[#eff6ff] p-5">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#7d7a88]">Feedback</p>
             <p className="mt-4 text-[16px] leading-7 text-[#49475a]">{feedback.feedback || 'No mentor feedback is available for this submission yet.'}</p>
           </div>

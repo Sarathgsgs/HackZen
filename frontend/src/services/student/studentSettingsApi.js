@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS = {
   profileMode: "Public",
   emailNotifications: true,
   pushNotifications: false,
-  theme: "Purple Dark",
+  theme: "Blue Dark",
   accessibilityMode: false,
   contentLanguage: "English (US)",
   twoFactorEnabled: false,

@@ -93,7 +93,7 @@ export default function EditMentorProfile() {
       {/* Back button */}
       <button
         onClick={() => navigate('/mentor/profile')}
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#5B45D9] transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2563eb] transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Profile
       </button>
@@ -113,7 +113,7 @@ export default function EditMentorProfile() {
           <button
             type="button"
             onClick={() => navigate('/mentor/profile')}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -121,7 +121,7 @@ export default function EditMentorProfile() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs shadow-purple-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+            className="px-5 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs shadow-blue-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             {saving ? 'Saving...' : 'Save Changes'}
@@ -145,7 +145,7 @@ export default function EditMentorProfile() {
                 type="text"
                 value={profileData.name}
                 onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                 required
               />
             </div>
@@ -159,7 +159,7 @@ export default function EditMentorProfile() {
                 value={profileData.companyName}
                 onChange={(e) => setProfileData({ ...profileData, companyName: e.target.value })}
                 placeholder="e.g. Stanford AI Lab / Google Research"
-                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
 
@@ -171,7 +171,7 @@ export default function EditMentorProfile() {
                 type="number"
                 value={profileData.experienceYears}
                 onChange={(e) => setProfileData({ ...profileData, experienceYears: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
 
@@ -182,7 +182,7 @@ export default function EditMentorProfile() {
               <select
                 value={profileData.availability}
                 onChange={(e) => setProfileData({ ...profileData, availability: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="Available">Available for New Teams</option>
                 <option value="Busy">Busy (Limited Hours)</option>
@@ -206,7 +206,7 @@ export default function EditMentorProfile() {
               value={profileData.expertise}
               onChange={(e) => setProfileData({ ...profileData, expertise: e.target.value })}
               placeholder="e.g. Artificial Intelligence, Cloud Systems, UI/UX Design, PyTorch"
-              className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+              className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
@@ -219,7 +219,7 @@ export default function EditMentorProfile() {
               value={profileData.bio}
               onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
               placeholder="Describe your technical background and mentoring approach..."
-              className="w-full p-3.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] resize-none"
+              className="w-full p-3.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 resize-none"
             />
           </div>
         </div>
@@ -239,7 +239,7 @@ export default function EditMentorProfile() {
                 value={profileData.linkedinUrl}
                 onChange={(e) => setProfileData({ ...profileData, linkedinUrl: e.target.value })}
                 placeholder="https://linkedin.com/in/username"
-                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
 
@@ -252,7 +252,7 @@ export default function EditMentorProfile() {
                 value={profileData.phoneNumber}
                 onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}
                 placeholder="+1 (555) 000-0000"
-                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                className="w-full px-3.5 py-2.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
           </div>

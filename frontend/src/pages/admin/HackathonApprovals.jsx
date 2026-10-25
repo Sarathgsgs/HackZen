@@ -322,7 +322,7 @@ const HackathonApprovals = () => {
                         ? 'bg-rose-50 border-rose-300/80 text-rose-700'
                         : toastMessage.type === 'warning'
                         ? 'bg-amber-50 border-amber-300/80 text-amber-700'
-                        : 'bg-violet-50 border-violet-300/80 text-violet-700'
+                        : 'bg-blue-50 border-blue-200 text-blue-700'
                 }`}>
                     <span className="text-base">
                         {toastMessage.type === 'error' ? '⚠️' : toastMessage.type === 'warning' ? '⚡' : '✓'}
@@ -362,7 +362,7 @@ const HackathonApprovals = () => {
                         <span className="text-[11px] font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider truncate">
                             Total Proposals
                         </span>
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/20 flex items-center justify-center group-hover:scale-105 transition-transform text-indigo-600 dark:text-indigo-400 shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 flex items-center justify-center group-hover:scale-105 transition-transform text-blue-600 dark:text-blue-400 shrink-0">
                             <RocketIcon className="w-4 h-4" />
                         </div>
                     </div>
@@ -447,12 +447,12 @@ const HackathonApprovals = () => {
                                     onClick={() => setActiveTab(tab)}
                                     className={`py-1.5 px-3 text-[11px] font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                                         isActive 
-                                        ? 'bg-purple-50 dark:bg-purple-500/20 text-[#6D5CE8] dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-xs' 
+                                        ? 'bg-blue-50 dark:bg-blue-500/20 text-[#2563eb] dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 shadow-xs' 
                                         : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
                                     }`}
                                 >
                                     <span>{tab}</span>
-                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-indigo-200/70 dark:bg-indigo-400/20 text-indigo-800 dark:text-indigo-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
+                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-blue-200/70 dark:bg-blue-400/20 text-blue-800 dark:text-blue-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
                                         {count}
                                     </span>
                                 </button>
@@ -469,7 +469,7 @@ const HackathonApprovals = () => {
                                 placeholder="Search by title, track, organizer..." 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#2563eb] transition-colors"
                             />
                         </div>
                     </div>
@@ -493,14 +493,14 @@ const HackathonApprovals = () => {
                                         onClick={() => setSelectedHackathonId(hackathon.id)}
                                         className={`p-3.5 rounded-xl cursor-pointer transition-all border text-left ${
                                             isSelected 
-                                            ? 'bg-indigo-50/80 dark:bg-indigo-500/15 border-indigo-400 dark:border-indigo-500/60 shadow-sm' 
-                                            : 'bg-white dark:bg-navy-800/40 border-slate-200/80 dark:border-white/5 hover:border-indigo-300 dark:hover:border-indigo-500/30'
+                                            ? 'bg-blue-50/80 dark:bg-blue-500/15 border-blue-400 dark:border-blue-500/60 shadow-sm' 
+                                            : 'bg-white dark:bg-navy-800/40 border-slate-200/80 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30'
                                         }`}
                                     >
                                         <div className="flex justify-between items-start gap-2 mb-1.5">
                                             <div className="min-w-0 pr-1">
                                                 <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{hackathon.title}</h4>
-                                                <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium truncate mt-0.5">{hackathon.organizer?.name || 'Platform Organizer'}</p>
+                                                <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate mt-0.5">{hackathon.organizer?.name || 'Platform Organizer'}</p>
                                                 <p className="text-[10px] text-slate-400 dark:text-gray-500 truncate">{hackathon.organizer?.org}</p>
                                             </div>
                                             <span className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
@@ -532,7 +532,7 @@ const HackathonApprovals = () => {
                             {/* Selected Hackathon Top Bar */}
                             <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/30 flex items-center justify-center shrink-0 shadow-sm">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/30 flex items-center justify-center shrink-0 shadow-sm">
                                         <RocketIcon className="w-5 h-5" />
                                     </div>
                                     <div>
@@ -548,7 +548,7 @@ const HackathonApprovals = () => {
                                             </span>
                                         </div>
                                         <p className="text-xs text-slate-500 dark:text-gray-400 font-medium mt-0.5">
-                                            Organized by <span className="text-indigo-600 dark:text-indigo-400 font-bold">{selectedHackathon.organizer?.name}</span> ({selectedHackathon.organizer?.org})
+                                            Organized by <span className="text-blue-600 dark:text-blue-400 font-bold">{selectedHackathon.organizer?.name}</span> ({selectedHackathon.organizer?.org})
                                         </p>
                                     </div>
                                 </div>
@@ -581,7 +581,7 @@ const HackathonApprovals = () => {
                                         }}
                                         className={`pb-3 px-1 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 cursor-pointer ${
                                             activeDetailTab === tab.id
-                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                            ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                                             : 'border-transparent text-slate-400 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'
                                         }`}
                                     >
@@ -620,13 +620,13 @@ const HackathonApprovals = () => {
                                         <div className="p-5 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5">
                                             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-gray-300 mb-3.5 flex items-center justify-between">
                                                 <span>Step 1: Basic Details & Overview</span>
-                                                <span className="text-indigo-600 dark:text-indigo-400 font-mono text-[11px]">Status: {selectedHackathon.status}</span>
+                                                <span className="text-blue-600 dark:text-blue-400 font-mono text-[11px]">Status: {selectedHackathon.status}</span>
                                             </h4>
                                             
                                             <div className="space-y-3.5 text-xs">
                                                 <div>
                                                     <span className="text-slate-400 dark:text-gray-500 font-bold uppercase tracking-wider text-[10px] block mb-1">Tagline / Motto</span>
-                                                    <p className="text-indigo-600 dark:text-indigo-400 font-medium italic">"{selectedHackathon.tagline}"</p>
+                                                    <p className="text-blue-600 dark:text-blue-400 font-medium italic">"{selectedHackathon.tagline}"</p>
                                                 </div>
                                                 <div>
                                                     <span className="text-slate-400 dark:text-gray-500 font-bold uppercase tracking-wider text-[10px] block mb-1">Event Description</span>
@@ -657,7 +657,7 @@ const HackathonApprovals = () => {
                                                 </div>
                                                 <div className="p-3.5 rounded-xl bg-white dark:bg-black/20 border border-slate-200/60 dark:border-white/5 space-y-1">
                                                     <span className="text-[10px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider">Hackathon Execution Window</span>
-                                                    <p className="font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                                                    <p className="font-bold text-blue-600 dark:text-blue-400 font-mono">
                                                         {selectedHackathon.dates?.start} &rarr; {selectedHackathon.dates?.end}
                                                     </p>
                                                 </div>
@@ -668,14 +668,14 @@ const HackathonApprovals = () => {
                                         <div className="p-5 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5">
                                             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-gray-300 mb-3.5 flex items-center justify-between">
                                                 <span>Step 2: Challenge Tracks & Themes</span>
-                                                <span className="font-mono text-indigo-600 dark:text-indigo-400 text-xs font-bold">{selectedHackathon.tracks?.length || 1} Tracks Configured</span>
+                                                <span className="font-mono text-blue-600 dark:text-blue-400 text-xs font-bold">{selectedHackathon.tracks?.length || 1} Tracks Configured</span>
                                             </h4>
                                             
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 {selectedHackathon.tracks?.map((track, i) => (
                                                     <div key={i} className="p-3.5 rounded-xl bg-white dark:bg-black/20 border border-slate-200/60 dark:border-white/5 text-xs">
                                                         <h5 className="font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-1.5">
-                                                            <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+                                                            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
                                                             {track.title}
                                                         </h5>
                                                         <p className="text-slate-500 dark:text-gray-400 leading-relaxed text-[11px]">{track.description}</p>
@@ -702,7 +702,7 @@ const HackathonApprovals = () => {
                                                 </div>
                                                 <div className="p-3 rounded-xl bg-white dark:bg-black/20 border border-slate-200/60 dark:border-white/5 text-center">
                                                     <span className="text-[9px] font-bold uppercase text-slate-400 dark:text-gray-500 block">Visibility</span>
-                                                    <span className="font-bold text-indigo-600 dark:text-indigo-400">{selectedHackathon.isPublic ? 'Public Event' : 'Private Event'}</span>
+                                                    <span className="font-bold text-blue-600 dark:text-blue-400">{selectedHackathon.isPublic ? 'Public Event' : 'Private Event'}</span>
                                                 </div>
                                                 <div className="p-3 rounded-xl bg-white dark:bg-black/20 border border-slate-200/60 dark:border-white/5 text-center">
                                                     <span className="text-[9px] font-bold uppercase text-slate-400 dark:text-gray-500 block">Auto-Approval</span>
@@ -719,7 +719,7 @@ const HackathonApprovals = () => {
                                                 <ul className="space-y-1 text-xs text-slate-700 dark:text-gray-300">
                                                     {Array.isArray(selectedHackathon.rules) ? selectedHackathon.rules.map((rule, idx) => (
                                                         <li key={idx} className="flex items-start gap-2">
-                                                            <span className="font-bold text-indigo-500">{idx + 1}.</span>
+                                                            <span className="font-bold text-blue-500">{idx + 1}.</span>
                                                             <span>{rule}</span>
                                                         </li>
                                                     )) : (
@@ -748,7 +748,7 @@ const HackathonApprovals = () => {
                                                     </div>
                                                     <div className="flex justify-between border-b pb-2 border-slate-200/60 dark:border-white/5">
                                                         <span className="text-slate-500 dark:text-gray-400">Organization</span>
-                                                        <span className="font-bold text-indigo-600 dark:text-indigo-400">{selectedHackathon.organizer?.org}</span>
+                                                        <span className="font-bold text-blue-600 dark:text-blue-400">{selectedHackathon.organizer?.org}</span>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2.5">
@@ -771,7 +771,7 @@ const HackathonApprovals = () => {
                                                 <p className="text-[10px] font-bold uppercase text-slate-400 dark:text-gray-500 mt-1">Registrations</p>
                                             </div>
                                             <div className="p-4 rounded-xl bg-white dark:bg-navy-800/50 border border-slate-200/70 dark:border-white/10 text-center shadow-xs">
-                                                <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{selectedHackathon.stats?.teams || 0}</p>
+                                                <p className="text-2xl font-black text-blue-600 dark:text-blue-400">{selectedHackathon.stats?.teams || 0}</p>
                                                 <p className="text-[10px] font-bold uppercase text-slate-400 dark:text-gray-500 mt-1">Teams Formed</p>
                                             </div>
                                             <div className="p-4 rounded-xl bg-white dark:bg-navy-800/50 border border-slate-200/70 dark:border-white/10 text-center shadow-xs">
@@ -787,14 +787,14 @@ const HackathonApprovals = () => {
                                             </h4>
                                             <div className="space-y-3 text-xs">
                                                 <div className="flex items-start gap-3">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-1 shrink-0"></span>
+                                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 shrink-0"></span>
                                                     <div>
                                                         <p className="font-bold text-slate-900 dark:text-white">Proposal Drafted by Organizer</p>
                                                         <p className="text-[10px] text-slate-400 dark:text-gray-500">{selectedHackathon.createdAt}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-start gap-3">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-1 shrink-0"></span>
+                                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 shrink-0"></span>
                                                     <div>
                                                         <p className="font-bold text-slate-900 dark:text-white">Submitted for Administrative Review</p>
                                                         <p className="text-[10px] text-slate-400 dark:text-gray-500">Current Queue State</p>
@@ -810,7 +810,7 @@ const HackathonApprovals = () => {
                                     <div className="space-y-4 animate-in fade-in duration-200">
                                         
                                         <div className="flex justify-between items-center">
-                                            <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
                                                 <ZapIcon className="w-4 h-4" /> AI Feasibility & Rubric Analysis
                                             </h4>
                                             <button 
@@ -830,11 +830,11 @@ const HackathonApprovals = () => {
                                         ) : currentAiReview ? (
                                             <div className="space-y-4 text-xs">
                                                 {/* Score Overview */}
-                                                <div className="p-5 rounded-2xl border bg-indigo-50/70 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30 flex items-center justify-between">
+                                                <div className="p-5 rounded-2xl border bg-blue-50/70 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30 flex items-center justify-between">
                                                     <div>
-                                                        <span className="font-bold uppercase tracking-wider text-[10px] text-indigo-700 dark:text-indigo-300 block mb-1">Proposal Score</span>
+                                                        <span className="font-bold uppercase tracking-wider text-[10px] text-blue-700 dark:text-blue-300 block mb-1">Proposal Score</span>
                                                         <div className="flex items-baseline gap-2">
-                                                            <span className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight">
+                                                            <span className="text-3xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight">
                                                                 {currentAiReview.overallScore !== undefined ? currentAiReview.overallScore : 75}
                                                             </span>
                                                             <span className="text-xs text-slate-500 font-bold">/ 100</span>
@@ -871,7 +871,7 @@ const HackathonApprovals = () => {
                                                     {currentAiReview.hasPrizePool !== undefined && (
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                                                             currentAiReview.hasPrizePool 
-                                                                ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20' 
+                                                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' 
                                                                 : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
                                                         }`}>
                                                             {currentAiReview.hasPrizePool ? '✓ Prize Incentives' : '○ Prize Pool Missing'}
@@ -880,7 +880,7 @@ const HackathonApprovals = () => {
                                                     {currentAiReview.hasJudgingCriteria !== undefined && (
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                                                             currentAiReview.hasJudgingCriteria 
-                                                                ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' 
+                                                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' 
                                                                 : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                                         }`}>
                                                             {currentAiReview.hasJudgingCriteria ? '✓ Judging Rubric' : '⚠ Rubric Missing'}
@@ -902,13 +902,13 @@ const HackathonApprovals = () => {
                                                     <div className="p-3.5 rounded-xl border bg-slate-50/70 dark:bg-white/[0.02] border-slate-200/70 dark:border-white/5">
                                                         <div className="flex justify-between font-bold mb-1.5 text-slate-700 dark:text-slate-300">
                                                             <span>Clarity & Problem Scope</span>
-                                                            <span className="text-indigo-600 dark:text-indigo-400">
+                                                            <span className="text-blue-600 dark:text-blue-400">
                                                                 {currentAiReview.clarityScore !== undefined ? currentAiReview.clarityScore : 70}%
                                                             </span>
                                                         </div>
                                                         <div className="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
                                                             <div 
-                                                                className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
+                                                                className="h-full bg-blue-500 rounded-full transition-all duration-500" 
                                                                 style={{ width: `${Math.min(100, Math.max(5, currentAiReview.clarityScore !== undefined ? currentAiReview.clarityScore : 70))}%` }}
                                                             ></div>
                                                         </div>
@@ -956,15 +956,15 @@ const HackathonApprovals = () => {
 
                                                 {/* Suggested Feedback Note */}
                                                 {currentAiReview.suggestedFeedback && (
-                                                    <div className="p-4 rounded-xl border bg-indigo-50/70 dark:bg-black/30 border-indigo-200 dark:border-white/5">
-                                                        <span className="font-bold text-[10px] uppercase text-indigo-700 dark:text-indigo-400 block mb-1">Recommended Organizer Guidance</span>
+                                                    <div className="p-4 rounded-xl border bg-blue-50/70 dark:bg-black/30 border-blue-200 dark:border-white/5">
+                                                        <span className="font-bold text-[10px] uppercase text-blue-700 dark:text-blue-400 block mb-1">Recommended Organizer Guidance</span>
                                                         <p className="text-slate-700 dark:text-gray-300 italic mb-2.5 leading-relaxed">{currentAiReview.suggestedFeedback}</p>
                                                         <button 
                                                             onClick={() => {
                                                                 setFeedbackNote(currentAiReview.suggestedFeedback);
                                                                 setIsRequestChangesOpen(true);
                                                             }}
-                                                            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                                                            className="px-4 py-2 bg-blue-50 dark:bg-blue-500/20 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
                                                         >
                                                             Use as Revision Feedback &rarr;
                                                         </button>
@@ -972,9 +972,9 @@ const HackathonApprovals = () => {
                                                 )}
 
                                                 {/* Quick Apply AI Recommendation Banner */}
-                                                <div className="p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/60 dark:bg-indigo-500/10 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                                                <div className="p-4 rounded-2xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/60 dark:bg-blue-500/10 flex flex-wrap items-center justify-between gap-3 shadow-sm">
                                                     <div>
-                                                        <span className="font-bold text-xs uppercase tracking-wider text-indigo-800 dark:text-indigo-300 block mb-0.5">
+                                                        <span className="font-bold text-xs uppercase tracking-wider text-blue-800 dark:text-blue-300 block mb-0.5">
                                                             Quick Apply AI Recommendation: {currentAiReview.recommendation ? currentAiReview.recommendation.replace(/_/g, ' ') : 'APPROVE'}
                                                         </span>
                                                         <p className="text-xs text-slate-600 dark:text-slate-300">
@@ -1024,7 +1024,7 @@ const HackathonApprovals = () => {
                                             </div>
                                         ) : (
                                             <div className="p-8 text-center text-slate-500 text-xs flex flex-col items-center justify-center space-y-3">
-                                                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-100 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/20 border border-blue-100 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                                                     <ZapIcon className="w-6 h-6" />
                                                 </div>
                                                 <div>
@@ -1034,9 +1034,9 @@ const HackathonApprovals = () => {
                                                 <button 
                                                     onClick={() => handleRunAiReview(true)}
                                                     disabled={isAiReviewLoading}
-                                                    className="px-5 py-2.5 bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/30 font-bold rounded-xl text-xs shadow-xs transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+                                                    className="px-5 py-2.5 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 font-bold rounded-xl text-xs shadow-xs transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
                                                 >
-                                                    <ZapIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                                                    <ZapIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                                                     {isAiReviewLoading ? 'Analyzing...' : 'Generate AI Proposal Review'}
                                                 </button>
                                             </div>
@@ -1073,7 +1073,7 @@ const HackathonApprovals = () => {
                                             <button 
                                                 onClick={() => handleApprove(selectedHackathon.id)}
                                                 disabled={actionLoading}
-                                                className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 text-xs font-bold rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                                                className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                                             >
                                                 <CheckIcon className="w-3.5 h-3.5 text-white" />
                                                 Approve & Publish
@@ -1096,7 +1096,7 @@ const HackathonApprovals = () => {
                                             <button 
                                                 onClick={() => handleApprove(selectedHackathon.id)}
                                                 disabled={actionLoading}
-                                                className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 text-xs font-bold rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+                                                className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
                                             >
                                                 <CheckIcon className="w-3.5 h-3.5 text-white" />
                                                 Re-Approve Proposal
@@ -1115,7 +1115,7 @@ const HackathonApprovals = () => {
                         </>
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-gray-500 p-8 text-center">
-                            <RocketIcon className="w-12 h-12 mb-3 opacity-30 text-indigo-500" />
+                            <RocketIcon className="w-12 h-12 mb-3 opacity-30 text-blue-500" />
                             <p className="font-bold text-sm text-slate-700 dark:text-gray-300">Select a hackathon proposal from the left list to review.</p>
                         </div>
                     )}
@@ -1142,7 +1142,7 @@ const HackathonApprovals = () => {
                             <label key={key} className="flex items-center gap-2 text-xs text-slate-700 dark:text-gray-300 cursor-pointer p-2.5 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10">
                                 <input 
                                     type="checkbox" 
-                                    className="rounded text-indigo-600 focus:ring-indigo-500" 
+                                    className="rounded text-blue-600 focus:ring-blue-500" 
                                     checked={changeSections[key]} 
                                     onChange={(e) => setChangeSections({...changeSections, [key]: e.target.checked})} 
                                 /> 
@@ -1159,7 +1159,7 @@ const HackathonApprovals = () => {
                             rows="3" 
                             value={feedbackNote} 
                             onChange={(e) => setFeedbackNote(e.target.value)} 
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-[#2563eb] transition-colors resize-none"
                         ></textarea>
                     </div>
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">

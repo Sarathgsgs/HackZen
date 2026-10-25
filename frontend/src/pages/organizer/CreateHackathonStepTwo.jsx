@@ -121,7 +121,7 @@ const CreateHackathonStepTwo = () => {
                         >
                             <div className="space-y-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="w-5 h-5 rounded-full bg-[#EDE9FE] dark:bg-[#7C65F6]/20 text-[#7C65F6] text-[10px] font-bold flex items-center justify-center shrink-0">
+                                    <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-[#2563eb] text-[10px] font-bold flex items-center justify-center shrink-0">
                                         {idx + 1}
                                     </span>
                                     <h3 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white truncate">
@@ -158,14 +158,14 @@ const CreateHackathonStepTwo = () => {
                             placeholder="Track Title (e.g. FinTech Innovation)"
                             value={newTrackTitle}
                             onChange={(e) => setNewTrackTitle(e.target.value)}
-                            className="sm:col-span-1 px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#7C65F6]"
+                            className="sm:col-span-1 px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                         />
                         <input
                             type="text"
                             placeholder="Track Brief / Challenge Details"
                             value={newTrackDesc}
                             onChange={(e) => setNewTrackDesc(e.target.value)}
-                            className="sm:col-span-2 px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#7C65F6]"
+                            className="sm:col-span-2 px-3.5 py-2.5 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
                     <div className="flex items-center justify-between">
@@ -175,7 +175,7 @@ const CreateHackathonStepTwo = () => {
                         <button
                             type="button"
                             onClick={handleAddTrack}
-                            className="px-4 py-2 rounded-xl bg-purple-50 dark:bg-[#7C65F6]/10 text-[#7C65F6] border border-[#7C65F6]/30 text-xs font-bold hover:bg-[#7C65F6] hover:text-white transition-all cursor-pointer"
+                            className="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-[#2563eb] border border-blue-500/30 text-xs font-bold hover:bg-[#2563eb] hover:text-white transition-all cursor-pointer"
                         >
                             Add Track
                         </button>
@@ -199,7 +199,7 @@ const CreateHackathonStepTwo = () => {
                         onClick={() => setRequirements(r => ({ ...r, requireGithub: !r.requireGithub }))}
                         className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer select-none transition-all ${
                             requirements.requireGithub 
-                                ? 'border-[#7C65F6] bg-purple-50/50 dark:bg-purple-950/20' 
+                                ? 'border-[#2563eb] bg-blue-50/50 dark:bg-blue-950/20' 
                                 : 'border-slate-200 dark:border-white/10 bg-slate-50/40 dark:bg-white/[0.02]'
                         }`}
                     >
@@ -207,7 +207,7 @@ const CreateHackathonStepTwo = () => {
                             type="checkbox"
                             checked={requirements.requireGithub}
                             onChange={() => {}}
-                            className="w-4 h-4 rounded text-[#7C65F6] focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded text-[#2563eb] focus:ring-0 cursor-pointer"
                         />
                         <span className="text-xs font-bold text-slate-800 dark:text-white">GitHub Repo Required</span>
                     </label>
@@ -216,7 +216,7 @@ const CreateHackathonStepTwo = () => {
                         onClick={() => setRequirements(r => ({ ...r, requireDemo: !r.requireDemo }))}
                         className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer select-none transition-all ${
                             requirements.requireDemo 
-                                ? 'border-[#7C65F6] bg-purple-50/50 dark:bg-purple-950/20' 
+                                ? 'border-[#2563eb] bg-blue-50/50 dark:bg-blue-950/20' 
                                 : 'border-slate-200 dark:border-white/10 bg-slate-50/40 dark:bg-white/[0.02]'
                         }`}
                     >
@@ -224,7 +224,7 @@ const CreateHackathonStepTwo = () => {
                             type="checkbox"
                             checked={requirements.requireDemo}
                             onChange={() => {}}
-                            className="w-4 h-4 rounded text-[#7C65F6] focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded text-[#2563eb] focus:ring-0 cursor-pointer"
                         />
                         <span className="text-xs font-bold text-slate-800 dark:text-white">Demo Video URL</span>
                     </label>
@@ -233,7 +233,7 @@ const CreateHackathonStepTwo = () => {
                         onClick={() => setRequirements(r => ({ ...r, requireDocumentation: !r.requireDocumentation }))}
                         className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer select-none transition-all ${
                             requirements.requireDocumentation 
-                                ? 'border-[#7C65F6] bg-purple-50/50 dark:bg-purple-950/20' 
+                                ? 'border-[#2563eb] bg-blue-50/50 dark:bg-blue-950/20' 
                                 : 'border-slate-200 dark:border-white/10 bg-slate-50/40 dark:bg-white/[0.02]'
                         }`}
                     >
@@ -241,7 +241,7 @@ const CreateHackathonStepTwo = () => {
                             type="checkbox"
                             checked={requirements.requireDocumentation}
                             onChange={() => {}}
-                            className="w-4 h-4 rounded text-[#7C65F6] focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded text-[#2563eb] focus:ring-0 cursor-pointer"
                         />
                         <span className="text-xs font-bold text-slate-800 dark:text-white">Documentation / Slides</span>
                     </label>
@@ -256,7 +256,7 @@ const CreateHackathonStepTwo = () => {
                         value={guidelines}
                         onChange={(e) => setGuidelines(e.target.value)}
                         placeholder="Provide any code of conduct, judging criteria hints, or general rules..."
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#7C65F6] transition-all resize-none"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                     />
                 </div>
             </div>
@@ -276,7 +276,7 @@ const CreateHackathonStepTwo = () => {
                         type="button"
                         onClick={handleSaveDraft}
                         disabled={isSaving}
-                        className="px-5 py-2.5 rounded-xl border border-[#7C65F6] text-[#7C65F6] hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                        className="px-5 py-2.5 rounded-xl border border-[#2563eb] text-[#2563eb] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
                     >
                         Save as Draft
                     </button>
@@ -285,7 +285,7 @@ const CreateHackathonStepTwo = () => {
                         type="button"
                         onClick={handleNext}
                         disabled={isSaving}
-                        className="px-6 py-2.5 rounded-xl bg-[#7C65F6] hover:bg-[#6852F6] text-white text-xs font-bold shadow-md shadow-[#7C65F6]/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                        className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                     >
                         <span>Next Step</span>
                         <span>&rarr;</span>

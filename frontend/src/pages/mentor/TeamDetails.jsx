@@ -160,7 +160,7 @@ export default function TeamDetails() {
       {/* Back button */}
       <Link
         to="/mentor/teams"
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#5B45D9] dark:hover:text-purple-300 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2563eb] dark:hover:text-blue-300 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Mentored Teams
       </Link>
@@ -170,7 +170,7 @@ export default function TeamDetails() {
       {/* ================================================== */}
       <div className="p-6 sm:p-7 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-purple-50 dark:bg-purple-900/30 text-[#5B45D9] dark:text-purple-300 font-extrabold text-xl flex items-center justify-center shrink-0 border border-purple-100 dark:border-purple-800/40 shadow-xs">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-[#2563eb] dark:text-blue-400 font-extrabold text-xl flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800/40 shadow-xs">
             {team.name.charAt(0)}
           </div>
           <div>
@@ -178,7 +178,7 @@ export default function TeamDetails() {
               <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
                 {team.name}
               </h1>
-              <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800/50">
+              <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-blue-50 text-[#2563eb] dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">
                 {team.status || 'On Track'}
               </span>
             </div>
@@ -210,16 +210,16 @@ export default function TeamDetails() {
         <div className="flex flex-wrap items-center gap-2.5 self-start md:self-center">
           <button
             onClick={() => openScheduleModal({ teamId: team.id, teamName: team.name })}
-            className="px-4 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs shadow-purple-500/20 transition-all flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs shadow-blue-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Calendar className="w-3.5 h-3.5" />
             Schedule Session
           </button>
           <button
             onClick={() => setActiveTab('Feedback')}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <MessageSquare className="w-3.5 h-3.5 text-[#5B45D9]" />
+            <MessageSquare className="w-3.5 h-3.5 text-[#2563eb]" />
             Send Feedback
           </button>
         </div>
@@ -233,9 +233,9 @@ export default function TeamDetails() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-3 text-xs font-bold transition-all border-b-2 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-bold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
               activeTab === tab
-                ? 'border-[#5B45D9] text-[#5B45D9] dark:text-purple-300 dark:border-purple-400'
+                ? 'border-[#2563eb] text-[#2563eb] dark:text-blue-400 dark:border-blue-500'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-white'
             }`}
           >
@@ -265,11 +265,11 @@ export default function TeamDetails() {
               <div className="pt-3 border-t border-slate-100 dark:border-white/5">
                 <div className="flex items-center justify-between text-xs font-bold mb-1.5">
                   <span className="text-slate-600 dark:text-slate-300">Overall Progress</span>
-                  <span className="text-[#5B45D9] dark:text-purple-300">{team.progress}%</span>
+                  <span className="text-[#2563eb] dark:text-blue-400">{team.progress}%</span>
                 </div>
                 <div className="h-2.5 w-full bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#5B45D9] rounded-full transition-all duration-500"
+                    className="h-full bg-[#2563eb] rounded-full transition-all duration-500"
                     style={{ width: `${team.progress}%` }}
                   />
                 </div>
@@ -282,7 +282,7 @@ export default function TeamDetails() {
                 <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
                   Sprint Goals & Deliverables
                 </h2>
-                <span className="text-xs font-semibold text-[#5B45D9] dark:text-purple-300">
+                <span className="text-xs font-semibold text-[#2563eb] dark:text-blue-400">
                   {team.goals?.filter((g) => g.done).length} of {team.goals?.length} Completed
                 </span>
               </div>
@@ -325,7 +325,7 @@ export default function TeamDetails() {
                 {(team.technologies || []).map((tech, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-100 dark:border-purple-800/40"
+                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-[#2563eb] dark:bg-blue-950/40 dark:text-blue-400 border border-blue-100 dark:border-blue-800/40"
                   >
                     {tech}
                   </span>
@@ -358,7 +358,7 @@ export default function TeamDetails() {
             <div className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
               <div>
                 <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-[#5B45D9]" /> Mentor Feedback
+                  <MessageSquare className="w-4 h-4 text-[#2563eb]" /> Mentor Feedback
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Direct guidance, code suggestions, and review commentary
@@ -370,7 +370,7 @@ export default function TeamDetails() {
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder="Share your feedback with this team..."
-                className="w-full p-3.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#5B45D9] focus:bg-white resize-none"
+                className="w-full p-3.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:bg-white resize-none"
               />
 
               <div className="flex items-center justify-between pt-1">
@@ -392,7 +392,7 @@ export default function TeamDetails() {
                     type="button"
                     onClick={handleSendFeedback}
                     disabled={savingFeedback || !feedbackText.trim()}
-                    className="px-4 py-1.5 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs shadow-purple-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    className="px-4 py-1.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs shadow-blue-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" />
                     Send Feedback
@@ -409,7 +409,7 @@ export default function TeamDetails() {
               <div className="space-y-3 pt-1">
                 {(team.recentActivity || []).map((act, i) => (
                   <div key={i} className="flex items-start gap-2.5 text-xs">
-                    <div className="w-2 h-2 rounded-full bg-[#5B45D9] mt-1.5 shrink-0" />
+                    <div className="w-2 h-2 rounded-full bg-[#2563eb] mt-1.5 shrink-0" />
                     <div>
                       <p className="font-semibold text-slate-800 dark:text-slate-200">
                         {act.text}
@@ -432,7 +432,7 @@ export default function TeamDetails() {
                     href={team.links.github}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200/80 dark:border-white/5 hover:border-[#5B45D9] text-slate-800 dark:text-slate-200 font-semibold transition-colors"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200/80 dark:border-white/5 hover:border-[#2563eb] text-slate-800 dark:text-slate-200 font-semibold transition-colors"
                   >
                     <span className="flex items-center gap-2">
                       <GitHubIcon className="w-4 h-4 text-slate-700 dark:text-slate-300" />
@@ -446,10 +446,10 @@ export default function TeamDetails() {
                     href={team.links.demo}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200/80 dark:border-white/5 hover:border-[#5B45D9] text-slate-800 dark:text-slate-200 font-semibold transition-colors"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200/80 dark:border-white/5 hover:border-[#2563eb] text-slate-800 dark:text-slate-200 font-semibold transition-colors"
                   >
                     <span className="flex items-center gap-2">
-                      <Code2 className="w-4 h-4 text-[#5B45D9]" />
+                      <Code2 className="w-4 h-4 text-[#2563eb]" />
                       Live Demo Prototype
                     </span>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
@@ -476,16 +476,16 @@ export default function TeamDetails() {
                 <img
                   src={m.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${m.name}`}
                   alt={m.name}
-                  className="w-16 h-16 rounded-full object-cover ring-2 ring-purple-100 dark:ring-purple-900/40 mb-3"
+                  className="w-16 h-16 rounded-full object-cover ring-2 ring-blue-100 dark:ring-blue-900/40 mb-3"
                 />
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">{m.name}</h3>
-                <p className="text-xs text-[#5B45D9] dark:text-purple-300 font-medium mt-0.5">
+                <p className="text-xs text-[#2563eb] dark:text-blue-400 font-medium mt-0.5">
                   {m.role}
                 </p>
                 <p className="text-[11px] text-slate-400 mt-1">{m.email}</p>
                 <button
                   onClick={() => navigate('/mentor/messages')}
-                  className="mt-4 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                  className="mt-4 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   Direct Message
                 </button>
@@ -554,9 +554,9 @@ export default function TeamDetails() {
                 { day: 'Today', val: team.progress || 72 },
               ].map((bar, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-                  <span className="text-[10px] font-bold text-[#5B45D9]">{bar.val}%</span>
+                  <span className="text-[10px] font-bold text-[#2563eb]">{bar.val}%</span>
                   <div
-                    className="w-full max-w-[42px] bg-[#5B45D9] hover:bg-[#4E3AC2] rounded-t-lg transition-all"
+                    className="w-full max-w-[42px] bg-[#2563eb] hover:bg-[#1d4ed8] rounded-t-lg transition-all"
                     style={{ height: `${bar.val}%` }}
                   />
                   <span className="text-[10px] text-slate-400 font-medium">{bar.day}</span>
@@ -585,7 +585,7 @@ export default function TeamDetails() {
                     <span className="text-xs font-bold capitalize text-slate-700 dark:text-slate-300">
                       {key}
                     </span>
-                    <span className="text-sm font-extrabold text-[#5B45D9]">{val}/10</span>
+                    <span className="text-sm font-extrabold text-[#2563eb]">{val}/10</span>
                   </div>
                   <input
                     type="range"
@@ -593,7 +593,7 @@ export default function TeamDetails() {
                     max="10"
                     value={val}
                     onChange={(e) => setRubricScores({ ...rubricScores, [key]: Number(e.target.value) })}
-                    className="w-full accent-[#5B45D9] cursor-pointer"
+                    className="w-full accent-[#2563eb] cursor-pointer"
                   />
                 </div>
               ))}
@@ -608,7 +608,7 @@ export default function TeamDetails() {
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder="Share your structured feedback with this team..."
-                className="w-full p-3.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#5B45D9] focus:bg-white resize-none"
+                className="w-full p-3.5 bg-[#FAFAFD] dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:bg-white resize-none"
               />
             </div>
 
@@ -616,14 +616,14 @@ export default function TeamDetails() {
               <button
                 type="button"
                 onClick={handleSaveFeedback}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors"
+                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 Save Feedback
               </button>
               <button
                 type="button"
                 onClick={handleSendFeedback}
-                className="px-5 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5"
+                className="px-5 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 Send Feedback
@@ -647,7 +647,7 @@ export default function TeamDetails() {
             </div>
             <button
               onClick={() => openScheduleModal({ teamId: team.id, teamName: team.name })}
-              className="px-4 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Schedule Session
@@ -661,7 +661,7 @@ export default function TeamDetails() {
                 className="p-4 rounded-xl border border-slate-200/70 dark:border-white/5 bg-[#FAFAFD]/60 dark:bg-navy-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-[#5B45D9] dark:text-purple-300 flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#2563eb] dark:text-blue-400 flex items-center justify-center font-bold">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div>
@@ -677,7 +677,7 @@ export default function TeamDetails() {
                     href={m.meetingLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-4 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 self-end sm:self-center"
+                    className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 self-end sm:self-center cursor-pointer"
                   >
                     <Video className="w-3.5 h-3.5" />
                     Join Call

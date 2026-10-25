@@ -56,7 +56,7 @@ const HackathonRegistrationStepTwo = () => {
                                 value={memberEmails[index] || ''}
                                 onChange={(e) => handleEmailChange(index, e.target.value)}
                                 placeholder={`Member ${index + 2} email`}
-                                className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-purple-500/50"
+                                className="w-full bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                             />
                         ))}
                     </div>
@@ -67,7 +67,7 @@ const HackathonRegistrationStepTwo = () => {
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Add any team context, domain focus, or logistics notes..."
-                            className="w-full h-40 bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-purple-500/50 resize-none"
+                            className="w-full h-40 bg-navy-900/50 border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
                         />
                     </div>
                 </div>
@@ -101,7 +101,7 @@ const HackathonRegistrationStepTwo = () => {
                 <button
                     onClick={handleContinue}
                     disabled={isSaving}
-                    className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl font-bold text-white shadow-lg shadow-purple-600/20 transition-all"
+                    className="w-full md:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-xl font-bold text-white shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
                 >
                     {isSaving ? 'Saving...' : 'Continue to Review'}
                 </button>

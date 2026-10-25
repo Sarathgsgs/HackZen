@@ -145,7 +145,7 @@ const CreateHackathonStepOne = () => {
                     className={`w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border rounded-xl text-sm font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none transition-all ${
                         errors.title 
                             ? 'border-rose-400 ring-2 ring-rose-400/20' 
-                            : 'border-slate-200 dark:border-white/10 focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20'
+                            : 'border-slate-200 dark:border-white/10 focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20'
                     }`}
                 />
                 {errors.title && (
@@ -174,7 +174,7 @@ const CreateHackathonStepOne = () => {
                     className={`w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border rounded-xl text-sm font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none transition-all resize-none ${
                         errors.description 
                             ? 'border-rose-400 ring-2 ring-rose-400/20' 
-                            : 'border-slate-200 dark:border-white/10 focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20'
+                            : 'border-slate-200 dark:border-white/10 focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20'
                     }`}
                 />
                 {errors.description && (
@@ -193,7 +193,7 @@ const CreateHackathonStepOne = () => {
                         <select
                             value={formData.category}
                             onChange={(e) => handleTextChange('category', e.target.value)}
-                            className="w-full appearance-none px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+                            className="w-full appearance-none px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer"
                         >
                             {THEME_OPTIONS.map(opt => (
                                 <option key={opt} value={opt} className="bg-white dark:bg-navy-900 text-slate-900 dark:text-white">
@@ -225,11 +225,11 @@ const CreateHackathonStepOne = () => {
                                 >
                                     <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
                                         isSelected 
-                                            ? 'border-[#7C65F6] bg-purple-50 dark:bg-purple-950/30' 
+                                            ? 'border-[#2563eb] bg-blue-50 dark:bg-blue-950/30' 
                                             : 'border-slate-300 dark:border-white/20 group-hover:border-slate-400'
                                     }`}>
                                         {isSelected && (
-                                            <div className="w-2 h-2 rounded-full bg-[#7C65F6]" />
+                                            <div className="w-2 h-2 rounded-full bg-[#2563eb]" />
                                         )}
                                     </div>
                                     <span className={`text-xs sm:text-sm font-medium ${
@@ -260,7 +260,7 @@ const CreateHackathonStepOne = () => {
                             value={formData.minTeamSize}
                             onChange={(e) => handleTextChange('minTeamSize', e.target.value)}
                             placeholder="min"
-                            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20 text-center"
+                            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 text-center"
                         />
                     </div>
                     <span className="text-slate-400 font-bold">-</span>
@@ -272,7 +272,7 @@ const CreateHackathonStepOne = () => {
                             value={formData.maxTeamSize}
                             onChange={(e) => handleTextChange('maxTeamSize', e.target.value)}
                             placeholder="max"
-                            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#7C65F6] focus:ring-2 focus:ring-purple-500/20 text-center"
+                            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 text-center"
                         />
                     </div>
                 </div>
@@ -292,7 +292,7 @@ const CreateHackathonStepOne = () => {
                             <img src={formData.posterPreview} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                     ) : (
-                        <div className="w-16 h-16 rounded-xl bg-purple-50 dark:bg-purple-950/20 text-[#7C65F6] flex items-center justify-center text-2xl shrink-0">
+                        <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-[#2563eb] flex items-center justify-center text-2xl shrink-0">
                             🖼️
                         </div>
                     )}
@@ -303,7 +303,7 @@ const CreateHackathonStepOne = () => {
                         <p className="text-[11px] text-slate-400 dark:text-gray-500 mt-0.5">
                             Supports PNG, JPG, or WEBP (Max 10MB)
                         </p>
-                        <label className="inline-block mt-2.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:border-[#7C65F6] text-xs font-bold text-slate-700 dark:text-gray-200 cursor-pointer transition-colors">
+                        <label className="inline-block mt-2.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:border-[#2563eb] text-xs font-bold text-slate-700 dark:text-gray-200 cursor-pointer transition-colors">
                             Choose File
                             <input 
                                 type="file" 
@@ -325,7 +325,7 @@ const CreateHackathonStepOne = () => {
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={isSaving}
-                    className="px-5 py-2.5 rounded-xl border border-[#7C65F6] text-[#7C65F6] hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    className="px-5 py-2.5 rounded-xl border border-[#2563eb] text-[#2563eb] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                 >
                     Save as Draft
                 </button>
@@ -334,7 +334,7 @@ const CreateHackathonStepOne = () => {
                     type="button"
                     onClick={handleNext}
                     disabled={isSaving}
-                    className="px-6 py-2.5 rounded-xl bg-[#7C65F6] hover:bg-[#6852F6] text-white text-xs font-bold shadow-md shadow-[#7C65F6]/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                 >
                     <span>Next Step</span>
                     <span>&rarr;</span>

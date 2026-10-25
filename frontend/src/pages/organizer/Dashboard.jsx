@@ -91,8 +91,8 @@ export default function OrganizerDashboard() {
                     title: 'ACTIVE HACKATHONS',
                     value: activeHackathonsCount,
                     icon: Rocket,
-                    color: 'text-[#7C65F6] dark:text-purple-400',
-                    bg: 'bg-purple-50 dark:bg-purple-950/40',
+                    color: 'text-[#2563eb] dark:text-blue-400',
+                    bg: 'bg-blue-50 dark:bg-blue-950/40',
                 },
                 {
                     id: 'total_registrations',
@@ -107,16 +107,16 @@ export default function OrganizerDashboard() {
                     title: 'SUBMISSIONS',
                     value: submissionsCount,
                     icon: FileText,
-                    color: 'text-[#7C65F6] dark:text-purple-400',
-                    bg: 'bg-purple-50 dark:bg-purple-950/40',
+                    color: 'text-[#2563eb] dark:text-blue-400',
+                    bg: 'bg-blue-50 dark:bg-blue-950/40',
                 },
                 {
                     id: 'mentors_judges',
                     title: 'MENTORS & JUDGES',
                     value: mentorsCount,
                     icon: Shield,
-                    color: 'text-[#7C65F6] dark:text-purple-400',
-                    bg: 'bg-purple-50 dark:bg-purple-950/40',
+                    color: 'text-[#2563eb] dark:text-blue-400',
+                    bg: 'bg-blue-50 dark:bg-blue-950/40',
                 }
             ]);
 
@@ -144,7 +144,7 @@ export default function OrganizerDashboard() {
                 ? data.upcomingDeadlines
                 : [
                     { id: 'd1', time: 'Today, 11:59 PM', label: 'Registration Closes', hackathon: 'Global Fintech Hack', color: 'red' },
-                    { id: 'd2', time: 'Tomorrow, 9:00 AM', label: 'Judging Commences', hackathon: 'Global Fintech Hack', color: 'purple' },
+                    { id: 'd2', time: 'Tomorrow, 9:00 AM', label: 'Judging Commences', hackathon: 'Global Fintech Hack', color: 'blue' },
                     { id: 'd3', time: 'Oct 25, 5:00 PM', label: 'Submission Deadline', hackathon: 'Eco-Innovation Challenge', color: 'gray' },
                 ];
             setUpcomingDeadlines(loadedDeadlines);
@@ -214,7 +214,7 @@ export default function OrganizerDashboard() {
         const s = (status || '').toLowerCase();
         if (s.includes('active') || s.includes('live')) {
             return (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-[#5B45D9] dark:bg-purple-950/40 dark:text-purple-300 border border-purple-100 dark:border-purple-800/40">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#2563eb] dark:bg-blue-950/40 dark:text-blue-300 border border-blue-100 dark:border-blue-800/40">
                     Active
                 </span>
             );
@@ -266,7 +266,7 @@ export default function OrganizerDashboard() {
                         title="Download CSV breakdown of events and metrics"
                     >
                         {isExporting ? (
-                            <svg className="w-4 h-4 animate-spin text-[#5B45D9]" fill="none" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 animate-spin text-[#2563eb]" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                             </svg>
@@ -320,7 +320,7 @@ export default function OrganizerDashboard() {
                             </h2>
                             <Link
                                 to="/organizer/my-hackathons"
-                                className="text-xs font-semibold text-[#5B45D9] dark:text-purple-400 hover:underline transition-colors"
+                                className="text-xs font-semibold text-[#2563eb] dark:text-blue-400 hover:underline transition-colors"
                             >
                                 View All
                             </Link>
@@ -356,7 +356,7 @@ export default function OrganizerDashboard() {
                                             <td className="py-4 px-6">
                                                 <div 
                                                     onClick={() => navigate(`/organizer/manage-hackathon/${event.id}`)}
-                                                    className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white hover:text-[#5B45D9] transition-colors cursor-pointer"
+                                                    className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white hover:text-[#2563eb] transition-colors cursor-pointer"
                                                 >
                                                     {event.title}
                                                 </div>
@@ -376,7 +376,7 @@ export default function OrganizerDashboard() {
                                             <td className="py-4 px-6 whitespace-nowrap text-right">
                                                 <button
                                                     onClick={() => navigate(`/organizer/manage-hackathon/${event.id}`)}
-                                                    className="p-1.5 rounded-lg text-[#5B45D9] dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors cursor-pointer inline-flex items-center justify-center"
+                                                    className="p-1.5 rounded-lg text-[#2563eb] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer inline-flex items-center justify-center"
                                                     title="Inspect Event"
                                                     aria-label="Inspect Event"
                                                 >
@@ -403,7 +403,7 @@ export default function OrganizerDashboard() {
                                 <p className="py-6 text-center text-xs text-slate-400">No recent registrations.</p>
                             ) : recentRegistrations.map((reg, idx) => {
                                 const avatarBg = idx === 0 
-                                    ? 'bg-[#EDE9FE] text-[#5B45D9] dark:bg-purple-950/50 dark:text-purple-300' 
+                                    ? 'bg-blue-50 text-[#2563eb] dark:bg-blue-950/50 dark:text-blue-300' 
                                     : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200';
 
                                 return (
@@ -455,14 +455,14 @@ export default function OrganizerDashboard() {
                             ) : upcomingDeadlines.map((dl, idx) => {
                                 const dotColor = dl.color === 'red'
                                     ? 'bg-rose-500'
-                                    : dl.color === 'purple'
-                                    ? 'bg-[#5B45D9]'
+                                    : dl.color === 'blue'
+                                    ? 'bg-[#2563eb]'
                                     : 'bg-slate-300 dark:bg-slate-600';
 
                                 const timeColor = dl.color === 'red'
                                     ? 'text-rose-600 dark:text-rose-400'
-                                    : dl.color === 'purple'
-                                    ? 'text-[#5B45D9] dark:text-purple-300'
+                                    : dl.color === 'blue'
+                                    ? 'text-[#2563eb] dark:text-blue-300'
                                     : 'text-slate-500 dark:text-slate-400';
 
                                 return (
@@ -487,7 +487,7 @@ export default function OrganizerDashboard() {
                         <div className="mt-6 pt-2">
                             <button
                                 onClick={() => navigate('/organizer/edit-timeline')}
-                                className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#5B45D9]/50 hover:bg-slate-50 dark:hover:bg-white/5 text-xs font-semibold text-slate-700 dark:text-gray-300 hover:text-[#5B45D9] transition-all cursor-pointer text-center"
+                                className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#2563eb]/50 hover:bg-slate-50 dark:hover:bg-white/5 text-xs font-semibold text-slate-700 dark:text-gray-300 hover:text-[#2563eb] transition-all cursor-pointer text-center"
                             >
                                 View Full Calendar
                             </button>
@@ -495,7 +495,7 @@ export default function OrganizerDashboard() {
                     </div>
 
                     {/* "Need to announce something?" Broadcast Card matching Figma Screenshot */}
-                    <div className="p-6 rounded-2xl bg-gradient-to-br from-[#5B45D9] to-[#6852F6] text-white shadow-md relative overflow-hidden">
+                    <div className="p-6 rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] text-white shadow-md relative overflow-hidden">
                         {/* Soft subtle background glow circles */}
                         <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
                         <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-black/10 blur-lg pointer-events-none"></div>
@@ -509,7 +509,7 @@ export default function OrganizerDashboard() {
                                 <h3 className="text-base sm:text-lg font-bold tracking-tight">
                                     Need to announce something?
                                 </h3>
-                                <p className="text-xs text-purple-100/90 mt-1.5 leading-relaxed">
+                                <p className="text-xs text-blue-100/90 mt-1.5 leading-relaxed">
                                     Send a broadcast message to all participants of your active hackathons.
                                 </p>
                             </div>
@@ -517,7 +517,7 @@ export default function OrganizerDashboard() {
                             <div>
                                 <button
                                     onClick={() => setIsBroadcastOpen(true)}
-                                    className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-purple-50 text-[#5B45D9] text-xs font-bold shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                                    className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-blue-50 text-[#2563eb] text-xs font-bold shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                                 >
                                     Send Broadcast
                                 </button>
@@ -534,7 +534,7 @@ export default function OrganizerDashboard() {
                     <div className="bg-white dark:bg-[#111625] border border-slate-200 dark:border-white/10 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#5B45D9] flex items-center justify-center text-lg">
+                                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563eb] flex items-center justify-center text-lg">
                                     <Megaphone className="w-5 h-5" />
                                 </div>
                                 <div>
@@ -558,7 +558,7 @@ export default function OrganizerDashboard() {
                                 <select
                                     value={broadcastTarget}
                                     onChange={(e) => setBroadcastTarget(e.target.value)}
-                                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] transition-colors"
+                                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] transition-colors"
                                 >
                                     <option value="all">All Active Hackathons</option>
                                     {activeHackathons.map(h => (
@@ -579,7 +579,7 @@ export default function OrganizerDashboard() {
                                     value={broadcastTitle}
                                     onChange={(e) => setBroadcastTitle(e.target.value)}
                                     placeholder="e.g., Submission Portal Opens Tonight at 11:59 PM"
-                                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] transition-colors"
+                                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] transition-colors"
                                 />
                             </div>
 
@@ -593,7 +593,7 @@ export default function OrganizerDashboard() {
                                     value={broadcastMessageText}
                                     onChange={(e) => setBroadcastMessageText(e.target.value)}
                                     placeholder="Enter your announcement details, submission instructions, or judging updates here..."
-                                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9] transition-colors resize-none"
+                                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb] transition-colors resize-none"
                                 />
                             </div>
 
@@ -603,7 +603,7 @@ export default function OrganizerDashboard() {
                                     <select
                                         value={broadcastUrgency}
                                         onChange={(e) => setBroadcastUrgency(e.target.value)}
-                                        className="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#5B45D9]"
+                                        className="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-[#2563eb]"
                                     >
                                         <option value="normal">Normal</option>
                                         <option value="high">Important (High)</option>
@@ -622,7 +622,7 @@ export default function OrganizerDashboard() {
                                     <button
                                         type="submit"
                                         disabled={isSendingBroadcast}
-                                        className="px-5 py-2 rounded-xl bg-[#5B45D9] hover:bg-[#4E39C4] text-white text-xs font-bold shadow-md transition-all disabled:opacity-60 cursor-pointer flex items-center gap-2"
+                                        className="px-5 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-md transition-all disabled:opacity-60 cursor-pointer flex items-center gap-2"
                                     >
                                         {isSendingBroadcast && (
                                             <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">

@@ -108,7 +108,7 @@ const DiscoverTeams = () => {
                         placeholder="Search teams by name, domain, or skillset..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#5B45D9] transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] transition-all"
                     />
                 </div>
 
@@ -127,7 +127,7 @@ const DiscoverTeams = () => {
                                 <select
                                     value={f.value}
                                     onChange={(e) => setFilters({ ...filters, [f.key]: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl py-2 px-3 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-[#5B45D9] transition-all cursor-pointer appearance-none pr-8"
+                                    className="w-full bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-white/10 rounded-xl py-2 px-3 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-[#2563eb] transition-all cursor-pointer appearance-none pr-8"
                                 >
                                     {f.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                 </select>
@@ -148,11 +148,11 @@ const DiscoverTeams = () => {
                     filteredTeams.map(team => (
                         <div
                             key={team.id}
-                            className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-[#5B45D9]/40 transition-all flex flex-col justify-between group"
+                            className="p-6 bg-white dark:bg-[#111625] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-[#2563eb]/40 transition-all flex flex-col justify-between group"
                         >
                             <div className="space-y-4">
                                 <div className="flex justify-between items-start">
-                                    <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-white/5 border border-purple-100 dark:border-white/5 flex items-center justify-center text-2xl shadow-xs">
+                                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-white/5 border border-blue-100 dark:border-white/5 flex items-center justify-center text-2xl shadow-xs">
                                         {team.icon}
                                     </div>
                                     <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${
@@ -165,12 +165,12 @@ const DiscoverTeams = () => {
                                 </div>
 
                                 <div>
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#5B45D9] transition-colors">
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#2563eb] transition-colors">
                                         {team.name}
                                     </h3>
                                     <div className="flex items-center gap-1.5 mt-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#5B45D9]"></span>
-                                        <p className="text-xs font-semibold text-[#5B45D9] dark:text-purple-400">{team.hackathon}</p>
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
+                                        <p className="text-xs font-semibold text-[#2563eb] dark:text-blue-400">{team.hackathon}</p>
                                     </div>
                                 </div>
 
@@ -196,7 +196,7 @@ const DiscoverTeams = () => {
                                 className={`mt-6 w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 ${
                                     team.requested
                                         ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 cursor-default'
-                                        : 'bg-[#5B45D9] hover:bg-[#4E3AC2] text-white shadow-purple-500/20 active:scale-98'
+                                        : 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-blue-500/20 active:scale-98'
                                 }`}
                             >
                                 {requesting[team.id] ? (

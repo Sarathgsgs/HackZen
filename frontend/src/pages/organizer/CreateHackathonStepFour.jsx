@@ -87,7 +87,7 @@ const CreateHackathonStepFour = () => {
                         <div className="pt-2">
                             <button
                                 onClick={() => navigate('/organizer/dashboard')}
-                                className="w-full py-2.5 px-4 rounded-xl bg-[#7C65F6] hover:bg-[#6852F6] text-white text-xs font-bold shadow-md transition-all cursor-pointer"
+                                className="w-full py-2.5 px-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-md transition-all cursor-pointer"
                             >
                                 Go to Dashboard Overview
                             </button>
@@ -123,7 +123,7 @@ const CreateHackathonStepFour = () => {
                         </span>
                         <button 
                             onClick={() => handleStepChange(1)}
-                            className="text-xs font-bold text-[#7C65F6] hover:underline cursor-pointer"
+                            className="text-xs font-bold text-[#2563eb] hover:underline cursor-pointer"
                         >
                             Edit
                         </button>
@@ -161,7 +161,7 @@ const CreateHackathonStepFour = () => {
                         </span>
                         <button 
                             onClick={() => handleStepChange(2)}
-                            className="text-xs font-bold text-[#7C65F6] hover:underline cursor-pointer"
+                            className="text-xs font-bold text-[#2563eb] hover:underline cursor-pointer"
                         >
                             Edit
                         </button>
@@ -189,7 +189,7 @@ const CreateHackathonStepFour = () => {
                         </span>
                         <button 
                             onClick={() => handleStepChange(3)}
-                            className="text-xs font-bold text-[#7C65F6] hover:underline cursor-pointer"
+                            className="text-xs font-bold text-[#2563eb] hover:underline cursor-pointer"
                         >
                             Edit
                         </button>
@@ -235,7 +235,7 @@ const CreateHackathonStepFour = () => {
                         type="checkbox"
                         checked={acceptedTerms}
                         onChange={() => {}}
-                        className="w-4 h-4 rounded text-[#7C65F6] focus:ring-0 mt-0.5 cursor-pointer"
+                        className="w-4 h-4 rounded text-[#2563eb] focus:ring-0 mt-0.5 cursor-pointer"
                     />
                     <span className="text-xs text-slate-700 dark:text-gray-300 font-medium leading-relaxed">
                         I confirm that all entered details and timeline milestones are accurate and comply with the ProEduvate Platform Code of Conduct and event moderation policies.
@@ -258,7 +258,7 @@ const CreateHackathonStepFour = () => {
                         type="button"
                         onClick={handleSaveDraft}
                         disabled={isSaving}
-                        className="px-5 py-2.5 rounded-xl border border-[#7C65F6] text-[#7C65F6] hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                        className="px-5 py-2.5 rounded-xl border border-[#2563eb] text-[#2563eb] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
                     >
                         Save as Draft
                     </button>
@@ -267,7 +267,7 @@ const CreateHackathonStepFour = () => {
                         type="button"
                         onClick={handlePublish}
                         disabled={isPublishing || !acceptedTerms}
-                        className="px-6 py-2.5 rounded-xl bg-[#7C65F6] hover:bg-[#6852F6] text-white text-xs font-bold shadow-md shadow-[#7C65F6]/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                        className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                     >
                         {isPublishing ? (
                             <>

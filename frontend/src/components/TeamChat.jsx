@@ -629,7 +629,7 @@ export default function TeamChat({
             className="flex items-center justify-between w-full cursor-pointer group"
           >
             <div className="min-w-0 pr-2">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-[#5B45D9] transition-colors">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2563eb] transition-colors">
                 {selectedTeam.name || selectedTeam.teamName || 'Alpha Innovation'}
               </h2>
             </div>
@@ -663,15 +663,15 @@ export default function TeamChat({
                     setSelectedTeam(t);
                     setTeamDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-2 text-xs font-semibold flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors ${
+                  className={`w-full text-left px-3 py-2 text-xs font-semibold flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors ${
                     (selectedTeam.id || selectedTeam._id) === (t.id || t._id)
-                      ? 'text-[#5B45D9] dark:text-purple-300 font-bold'
+                      ? 'text-[#2563eb] dark:text-blue-300 font-bold'
                       : 'text-slate-700 dark:text-slate-200'
                   }`}
                 >
                   <span className="truncate">{t.name || t.teamName}</span>
                   {(selectedTeam.id || selectedTeam._id) === (t.id || t._id) && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#5B45D9]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb]" />
                   )}
                 </button>
               ))}
@@ -695,7 +695,7 @@ export default function TeamChat({
                     onClick={() => handleSelectChannel(chan)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
                       isActive
-                        ? 'bg-[#F2EEFD] text-[#5B45D9] font-bold dark:bg-[#5B45D9]/20 dark:text-purple-300 shadow-2xs'
+                        ? 'bg-[#eff6ff] text-[#2563eb] font-bold dark:bg-[#2563eb]/20 dark:text-blue-300 shadow-2xs'
                         : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
@@ -703,13 +703,13 @@ export default function TeamChat({
                       {chan.isBroadcast ? (
                         <Volume2
                           className={`w-3.5 h-3.5 shrink-0 ${
-                            isActive ? 'text-[#5B45D9] dark:text-purple-300' : 'text-slate-400'
+                            isActive ? 'text-[#2563eb] dark:text-blue-300' : 'text-slate-400'
                           }`}
                         />
                       ) : (
                         <Hash
                           className={`w-3.5 h-3.5 shrink-0 ${
-                            isActive ? 'text-[#5B45D9] dark:text-purple-300' : 'text-slate-400'
+                            isActive ? 'text-[#2563eb] dark:text-blue-300' : 'text-slate-400'
                           }`}
                         />
                       )}
@@ -741,7 +741,7 @@ export default function TeamChat({
                     onClick={() => handleSelectDM(dm)}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                       isActive
-                        ? 'bg-[#F2EEFD] text-[#5B45D9] font-bold dark:bg-[#5B45D9]/20 dark:text-purple-300 shadow-2xs'
+                        ? 'bg-[#eff6ff] text-[#2563eb] font-bold dark:bg-[#2563eb]/20 dark:text-blue-300 shadow-2xs'
                         : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
@@ -822,7 +822,7 @@ export default function TeamChat({
             <button
               type="button"
               onClick={() => mentorContext?.addToast?.('Calling Channel', 'Voice call connecting...', 'info')}
-              className="p-2 text-slate-500 hover:text-[#5B45D9] hover:bg-purple-50 dark:text-slate-400 dark:hover:text-purple-300 dark:hover:bg-white/5 rounded-xl transition-colors"
+              className="p-2 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-300 dark:hover:bg-white/5 rounded-xl transition-colors"
               title="Start voice call"
             >
               <Phone className="w-4 h-4" />
@@ -837,7 +837,7 @@ export default function TeamChat({
                   mentorContext.addToast('Video Call', 'Opening consultation session...', 'info');
                 }
               }}
-              className="p-2 text-slate-500 hover:text-[#5B45D9] hover:bg-purple-50 dark:text-slate-400 dark:hover:text-purple-300 dark:hover:bg-white/5 rounded-xl transition-colors"
+              className="p-2 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-300 dark:hover:bg-white/5 rounded-xl transition-colors"
               title="Start video session"
             >
               <Video className="w-4 h-4" />
@@ -845,7 +845,7 @@ export default function TeamChat({
 
             <button
               type="button"
-              className="p-2 text-slate-500 hover:text-[#5B45D9] hover:bg-purple-50 dark:text-slate-400 dark:hover:text-purple-300 dark:hover:bg-white/5 rounded-xl transition-colors"
+              className="p-2 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-300 dark:hover:bg-white/5 rounded-xl transition-colors"
               title="Channel options"
             >
               <MoreVertical className="w-4 h-4" />
@@ -857,7 +857,7 @@ export default function TeamChat({
               onClick={() => setContextPanelOpen((prev) => !prev)}
               className={`p-2 rounded-xl transition-colors lg:hidden ${
                 contextPanelOpen
-                  ? 'text-[#5B45D9] bg-purple-50 dark:bg-purple-950/40 dark:text-purple-300'
+                  ? 'text-[#2563eb] bg-blue-50 dark:bg-blue-950/40 dark:text-blue-300'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
               }`}
               title="Toggle Team Context"
@@ -924,7 +924,7 @@ export default function TeamChat({
                       className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200 dark:ring-white/10"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-navy-800 text-[#5B45D9] dark:text-purple-300 font-bold text-xs flex items-center justify-center ring-1 ring-slate-200 dark:ring-white/10">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-navy-800 text-[#2563eb] dark:text-blue-300 font-bold text-xs flex items-center justify-center ring-1 ring-slate-200 dark:ring-white/10">
                       {msg.initials || msg.senderName?.[0] || 'U'}
                     </div>
                   )}
@@ -939,7 +939,7 @@ export default function TeamChat({
                     </span>
 
                     {msg.isMentor && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-[#EEEDFC] dark:bg-purple-950/60 text-[#5B45D9] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/40">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-[#eff6ff] dark:bg-blue-950/60 text-[#2563eb] dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40">
                         MENTOR
                       </span>
                     )}
@@ -953,8 +953,8 @@ export default function TeamChat({
                   <div
                     className={`p-3.5 sm:p-4 rounded-2xl text-xs sm:text-[13px] leading-relaxed font-medium transition-colors ${
                       mine
-                        ? 'bg-[#5B45D9] text-white rounded-tr-xs shadow-xs'
-                        : 'bg-[#F2EEFD]/40 dark:bg-navy-900 text-slate-800 dark:text-slate-100 rounded-tl-xs border border-purple-100/60 dark:border-white/10'
+                        ? 'bg-[#2563eb] text-white rounded-tr-xs shadow-xs'
+                        : 'bg-[#eff6ff]/40 dark:bg-navy-900 text-slate-800 dark:text-slate-100 rounded-tl-xs border border-blue-100/60 dark:border-white/10'
                     }`}
                   >
                     <p className="whitespace-pre-wrap break-words">{msg.content}</p>
@@ -997,9 +997,9 @@ export default function TeamChat({
 
         {/* Pending File Attachment bar */}
         {pending && (
-          <div className="mx-4 mb-2 p-3 border border-slate-200 dark:border-white/10 rounded-xl bg-purple-50/50 dark:bg-purple-950/30 flex items-center justify-between gap-3">
+          <div className="mx-4 mb-2 p-3 border border-slate-200 dark:border-white/10 rounded-xl bg-blue-50/50 dark:bg-blue-950/30 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <Paperclip className="w-4 h-4 text-[#5B45D9]" />
+              <Paperclip className="w-4 h-4 text-[#2563eb]" />
               <div className="min-w-0 text-xs">
                 <p className="font-bold text-slate-800 dark:text-white truncate">
                   {pending.file.name}
@@ -1023,7 +1023,7 @@ export default function TeamChat({
         {/* ========================================================= */}
         <div className="p-4 border-t border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#111625] shrink-0">
           <form onSubmit={handleSend} className="space-y-1.5">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-white/10 focus-within:border-[#5B45D9] focus-within:ring-1 focus-within:ring-[#5B45D9]/20 transition-all">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-white/10 focus-within:border-[#2563eb] focus-within:ring-1 focus-within:ring-[#2563eb]/20 transition-all">
               {/* Plus Button for File Chooser */}
               <input
                 ref={fileRef}
@@ -1035,7 +1035,7 @@ export default function TeamChat({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-7 h-7 rounded-full border border-slate-300 dark:border-white/20 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-[#5B45D9] hover:border-[#5B45D9] transition-colors shrink-0"
+                className="w-7 h-7 rounded-full border border-slate-300 dark:border-white/20 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-[#2563eb] hover:border-[#2563eb] transition-colors shrink-0"
                 title="Attach file"
               >
                 <Plus className="w-4 h-4" />
@@ -1074,7 +1074,7 @@ export default function TeamChat({
               <button
                 type="submit"
                 disabled={sending || (!input.trim() && !pending)}
-                className="w-8 h-8 rounded-xl bg-[#5B45D9] hover:bg-[#4E3AC2] text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                className="w-8 h-8 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 title="Send message"
               >
                 <Send className="w-3.5 h-3.5 ml-0.5" />
@@ -1128,7 +1128,7 @@ export default function TeamChat({
                         className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200 dark:ring-white/10"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-navy-800 text-[#5B45D9] dark:text-purple-300 font-bold text-xs flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-navy-800 text-[#2563eb] dark:text-blue-300 font-bold text-xs flex items-center justify-center">
                         {member.initials || member.name?.[0] || 'U'}
                       </div>
                     )}
@@ -1166,9 +1166,9 @@ export default function TeamChat({
                       e.preventDefault();
                       mentorContext?.addToast?.('Resource', `Opening ${res.title}`, 'info');
                     }}
-                    className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-[#5B45D9] dark:hover:text-purple-300 transition-colors group"
+                    className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-[#2563eb] dark:hover:text-blue-300 transition-colors group"
                   >
-                    <Icon className="w-4 h-4 text-slate-400 group-hover:text-[#5B45D9] dark:group-hover:text-purple-300 shrink-0" />
+                    <Icon className="w-4 h-4 text-slate-400 group-hover:text-[#2563eb] dark:group-hover:text-blue-300 shrink-0" />
                     <span className="truncate">{res.title}</span>
                   </a>
                 );
@@ -1205,7 +1205,7 @@ export default function TeamChat({
                   {/* Progress bar */}
                   <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-navy-900 overflow-hidden">
                     <div
-                      className="h-full bg-[#5B45D9] dark:bg-purple-500 rounded-full transition-all"
+                      className="h-full bg-[#2563eb] dark:bg-blue-500 rounded-full transition-all"
                       style={{ width: `${task.progress}%` }}
                     />
                   </div>
@@ -1220,7 +1220,7 @@ export default function TeamChat({
                         className="w-4 h-4 rounded-full object-cover ring-1 ring-slate-200 dark:ring-white/10"
                       />
                     ) : (
-                      <span className="w-4 h-4 rounded-full bg-purple-100 dark:bg-navy-800 text-[#5B45D9] dark:text-purple-300 text-[9px] font-bold flex items-center justify-center">
+                      <span className="w-4 h-4 rounded-full bg-blue-100 dark:bg-navy-800 text-[#2563eb] dark:text-blue-300 text-[9px] font-bold flex items-center justify-center">
                         {task.initials || 'U'}
                       </span>
                     )}

@@ -15,7 +15,7 @@ const DEFAULT_PROFILE = {
     college: 'Not specified',
     registerNumber: '',
     bio: '',
-    avatarGradient: 'from-purple-600 to-blue-600',
+    avatarGradient: 'from-blue-600 to-cyan-600',
     skills: [],
     techStack: {
         frontend: '',

@@ -261,7 +261,7 @@ const OrganizerApprovals = () => {
                         ? 'bg-rose-50 border-rose-300/80 text-rose-700'
                         : toastMessage.type === 'warning'
                         ? 'bg-amber-50 border-amber-300/80 text-amber-700'
-                        : 'bg-violet-50 border-violet-300/80 text-violet-700'
+                        : 'bg-blue-50 border-blue-200 text-blue-700'
                 }`}>
                     <span className="text-base">
                         {toastMessage.type === 'error' ? '⚠️' : toastMessage.type === 'warning' ? '⚡' : '✓'}
@@ -301,7 +301,7 @@ const OrganizerApprovals = () => {
                         <span className="text-[11px] font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider truncate">
                             Total Applicants
                         </span>
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/20 flex items-center justify-center group-hover:scale-105 transition-transform text-indigo-600 dark:text-indigo-400 shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 flex items-center justify-center group-hover:scale-105 transition-transform text-blue-600 dark:text-blue-400 shrink-0">
                             <UsersIcon className="w-4 h-4" />
                         </div>
                     </div>
@@ -386,12 +386,12 @@ const OrganizerApprovals = () => {
                                     onClick={() => setActiveTab(tab)}
                                     className={`py-1.5 px-3 text-[11px] font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                                         isActive 
-                                        ? 'bg-purple-50 dark:bg-purple-500/20 text-[#6D5CE8] dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-xs' 
+                                        ? 'bg-blue-50 dark:bg-blue-500/20 text-[#2563eb] dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 shadow-xs' 
                                         : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
                                     }`}
                                 >
                                     <span>{tab}</span>
-                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-indigo-200/70 dark:bg-indigo-400/20 text-indigo-800 dark:text-indigo-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
+                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-blue-200/70 dark:bg-blue-400/20 text-blue-800 dark:text-blue-200' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-gray-300'}`}>
                                         {count}
                                     </span>
                                 </button>
@@ -408,7 +408,7 @@ const OrganizerApprovals = () => {
                                 placeholder="Search by name, org, email..." 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#2563eb] transition-colors"
                             />
                         </div>
                     </div>
@@ -432,21 +432,21 @@ const OrganizerApprovals = () => {
                                         onClick={() => setSelectedAppId(app.id)}
                                         className={`p-3.5 rounded-xl cursor-pointer transition-all border text-left ${
                                             isSelected 
-                                            ? 'bg-indigo-50/80 dark:bg-indigo-500/15 border-indigo-400 dark:border-indigo-500/60 shadow-sm' 
-                                            : 'bg-white dark:bg-navy-800/40 border-slate-200/80 dark:border-white/5 hover:border-indigo-300 dark:hover:border-indigo-500/30'
+                                            ? 'bg-blue-50/80 dark:bg-blue-500/15 border-blue-400 dark:border-blue-500/60 shadow-sm' 
+                                            : 'bg-white dark:bg-navy-800/40 border-slate-200/80 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30'
                                         }`}
                                     >
                                         <div className="flex justify-between items-start gap-2 mb-1.5">
                                             <div className="min-w-0 pr-1">
                                                 <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{app.applicantName}</h4>
-                                                <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium truncate mt-0.5">{app.organization}</p>
+                                                <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate mt-0.5">{app.organization}</p>
                                                 <p className="text-[10px] text-slate-400 dark:text-gray-500 truncate">{app.email}</p>
                                             </div>
                                             <span className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
                                                 app.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
                                                 app.status === 'Needs Changes' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
                                                 app.status === 'Rejected' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' :
-                                                app.status === 'Suspended' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' :
+                                                app.status === 'Suspended' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' :
                                                 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-gray-300 border-slate-200 dark:border-white/10'
                                             }`}>
                                                 {app.status}
@@ -470,7 +470,7 @@ const OrganizerApprovals = () => {
                             {/* Selected Organizer Profile Top Bar */}
                             <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/30 font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/30 font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
                                         {selectedApp.applicantName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'OR'}
                                     </div>
                                     <div>
@@ -480,14 +480,14 @@ const OrganizerApprovals = () => {
                                                 selectedApp.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
                                                 selectedApp.status === 'Needs Changes' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
                                                 selectedApp.status === 'Rejected' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' :
-                                                selectedApp.status === 'Suspended' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' :
+                                                selectedApp.status === 'Suspended' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' :
                                                 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                             }`}>
                                                 {selectedApp.status}
                                             </span>
                                         </div>
                                         <p className="text-xs text-slate-500 dark:text-gray-400 font-medium mt-0.5">
-                                            {selectedApp.designation} &bull; <span className="text-indigo-600 dark:text-indigo-400 font-bold">{selectedApp.organization}</span>
+                                            {selectedApp.designation} &bull; <span className="text-blue-600 dark:text-blue-400 font-bold">{selectedApp.organization}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -512,7 +512,7 @@ const OrganizerApprovals = () => {
                                         onClick={() => setActiveDetailTab(tab.id)}
                                         className={`pb-2.5 px-1 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 cursor-pointer ${
                                             activeDetailTab === tab.id
-                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                            ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                                             : 'border-transparent text-slate-400 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'
                                         }`}
                                     >
@@ -551,7 +551,7 @@ const OrganizerApprovals = () => {
                                         <div className="p-5 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5">
                                             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-gray-300 mb-3.5 flex items-center justify-between">
                                                 <span>Submitted Applicant Information</span>
-                                                <span className="text-indigo-600 dark:text-indigo-400 font-mono text-[11px]">Role: {selectedApp.role}</span>
+                                                <span className="text-blue-600 dark:text-blue-400 font-mono text-[11px]">Role: {selectedApp.role}</span>
                                             </h4>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                                                 <div className="space-y-2.5">
@@ -582,7 +582,7 @@ const OrganizerApprovals = () => {
                                                     </div>
                                                     <div className="flex justify-between border-b pb-2 border-slate-200/60 dark:border-white/5">
                                                         <span className="text-slate-500 dark:text-gray-400">Domain</span>
-                                                        <span className="font-bold text-indigo-600 dark:text-indigo-400">{selectedApp.domain}</span>
+                                                        <span className="font-bold text-blue-600 dark:text-blue-400">{selectedApp.domain}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -611,7 +611,7 @@ const OrganizerApprovals = () => {
                                                             href={selectedApp.website.startsWith('http') ? selectedApp.website : `https://${selectedApp.website}`} 
                                                             target="_blank" 
                                                             rel="noreferrer" 
-                                                            className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 truncate max-w-[200px]"
+                                                            className="font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 truncate max-w-[200px]"
                                                         >
                                                             {selectedApp.website}
                                                         </a>
@@ -658,9 +658,9 @@ const OrganizerApprovals = () => {
                                         </div>
 
                                         {/* 4. AI Recommendation Box */}
-                                        <div className="p-4 rounded-xl border bg-gradient-to-r from-indigo-500/10 to-indigo-500/10 border-indigo-500/20">
+                                        <div className="p-4 rounded-xl border bg-gradient-to-r from-blue-500/10 to-blue-500/10 border-blue-500/20">
                                             <div className="flex justify-between items-center mb-1.5">
-                                                <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+                                                <h4 className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
                                                     <RocketIcon className="w-3.5 h-3.5" /> AI Recommendation Engine
                                                 </h4>
                                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
@@ -712,7 +712,7 @@ const OrganizerApprovals = () => {
                                             <div className="space-y-3">
                                                 {selectedApp.timeline?.map((item, idx) => (
                                                     <div key={idx} className="flex items-start gap-3 text-xs">
-                                                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-1 shrink-0"></span>
+                                                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 shrink-0"></span>
                                                         <div>
                                                             <p className="font-bold text-slate-900 dark:text-white">{item.event}</p>
                                                             <p className="text-[10px] text-slate-400 dark:text-gray-500">{item.date}</p>
@@ -745,7 +745,7 @@ const OrganizerApprovals = () => {
                                         
                                         {/* Top Header & Re-run Button */}
                                         <div className="flex justify-between items-center">
-                                            <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
                                                 <ZapIcon className="w-4 h-4" /> Live AI Risk & Verification Assessment
                                             </h4>
                                             <button 
@@ -813,11 +813,11 @@ const OrganizerApprovals = () => {
                                                         <div className="p-4 rounded-xl border bg-slate-50/70 dark:bg-white/[0.02] border-slate-200/70 dark:border-white/5 flex items-center justify-between">
                                                             <div>
                                                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Confidence Score</span>
-                                                                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{currentAiReview.confidenceScore || 94}%</span>
+                                                                <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{currentAiReview.confidenceScore || 94}%</span>
                                                             </div>
                                                             <div className="flex gap-1.5 flex-wrap justify-end">
                                                                 {(currentAiReview.verifiedBadges || ["Domain Verified", "Institutional Alignment"]).map((b, i) => (
-                                                                    <span key={i} className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold border border-indigo-200 dark:border-indigo-500/20">
+                                                                    <span key={i} className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 text-[10px] font-bold border border-blue-200 dark:border-blue-500/20">
                                                                         ✓ {b}
                                                                     </span>
                                                                 ))}
@@ -856,9 +856,9 @@ const OrganizerApprovals = () => {
 
                                                 {/* Quick Apply AI Recommendation Banner */}
                                                 {currentAiReview && (
-                                                    <div className="p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/60 dark:bg-indigo-500/10 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                                                    <div className="p-4 rounded-2xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/60 dark:bg-blue-500/10 flex flex-wrap items-center justify-between gap-3 shadow-sm">
                                                         <div>
-                                                            <span className="font-bold text-xs uppercase tracking-wider text-indigo-800 dark:text-indigo-300 block mb-0.5">
+                                                            <span className="font-bold text-xs uppercase tracking-wider text-blue-800 dark:text-blue-300 block mb-0.5">
                                                                 AI Verification Action: {currentAiReview.recommendation || 'APPROVE'}
                                                             </span>
                                                             <p className="text-xs text-slate-600 dark:text-slate-300">
@@ -941,7 +941,7 @@ const OrganizerApprovals = () => {
                                             <button 
                                                 onClick={() => handleApprove(selectedApp.id)}
                                                 disabled={actionLoading}
-                                                className="px-5 py-2.5 bg-[#7C65F6] hover:bg-[#6851ec] !text-white shadow-sm shadow-[#7C65F6]/20 text-xs font-bold rounded-xl shadow-md shadow-[#7C65F6]/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                                                className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                                             >
                                                 <CheckIcon className="w-3.5 h-3.5 text-white" />
                                                 Approve & Activate
@@ -973,7 +973,7 @@ const OrganizerApprovals = () => {
                                             <button 
                                                 onClick={() => handleApprove(selectedApp.id)}
                                                 disabled={actionLoading}
-                                                className="px-5 py-2 bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-500/30 text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
+                                                className="px-5 py-2 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
                                             >
                                                 Re-Approve Organizer
                                             </button>
@@ -991,7 +991,7 @@ const OrganizerApprovals = () => {
                         </>
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-gray-500 p-8 text-center">
-                            <UsersIcon className="w-12 h-12 mb-3 opacity-30 text-indigo-500" />
+                            <UsersIcon className="w-12 h-12 mb-3 opacity-30 text-blue-500" />
                             <p className="font-bold text-sm text-slate-700 dark:text-gray-300">Select an organizer application from the left list to review.</p>
                         </div>
                     )}
@@ -1018,7 +1018,7 @@ const OrganizerApprovals = () => {
                             <label key={key} className="flex items-center gap-2 text-xs text-slate-700 dark:text-gray-300 cursor-pointer p-2.5 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10">
                                 <input 
                                     type="checkbox" 
-                                    className="rounded text-indigo-600 focus:ring-indigo-500" 
+                                    className="rounded text-blue-600 focus:ring-blue-500" 
                                     checked={changeRequests[key]} 
                                     onChange={(e) => setChangeRequests({...changeRequests, [key]: e.target.checked})} 
                                 /> 
@@ -1035,7 +1035,7 @@ const OrganizerApprovals = () => {
                             rows="3" 
                             value={changeMessage} 
                             onChange={(e) => setChangeMessage(e.target.value)} 
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-[#2563eb] transition-colors resize-none"
                         ></textarea>
                     </div>
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
@@ -1138,7 +1138,7 @@ const OrganizerApprovals = () => {
                                     value={reason} 
                                     checked={suspendReason === reason}
                                     onChange={(e) => setSuspendReason(e.target.value)} 
-                                    className="text-purple-600 focus:ring-purple-500" 
+                                    className="text-blue-600 focus:ring-blue-500" 
                                 /> 
                                 <span className="font-bold">{reason}</span>
                             </label>
@@ -1154,7 +1154,7 @@ const OrganizerApprovals = () => {
                         <button 
                             onClick={handleSuspend} 
                             disabled={actionLoading}
-                            className="px-5 py-2 bg-purple-50 dark:bg-purple-500/15 hover:bg-purple-100 dark:hover:bg-purple-500/25 text-purple-700 dark:text-purple-300 border border-purple-300/80 dark:border-purple-500/30 font-bold text-xs rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+                            className="px-5 py-2 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 font-bold text-xs rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
                         >
                             {actionLoading ? 'Suspending...' : 'Confirm Suspension'}
                         </button>

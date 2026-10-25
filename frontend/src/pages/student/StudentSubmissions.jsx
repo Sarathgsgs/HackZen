@@ -12,7 +12,7 @@ const statusClasses = (status) => {
     if (normalized.includes('review') || normalized.includes('pending') || normalized.includes('submit')) {
         return 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400';
     }
-    return 'border-purple-500/20 bg-purple-500/10 text-purple-700 dark:text-purple-400';
+    return 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400';
 };
 
 const StudentSubmissions = () => {
@@ -68,7 +68,7 @@ const StudentSubmissions = () => {
                     </div>
                 ) : submissions.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-white dark:bg-navy-900 p-12 text-center shadow-xs">
-                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#7C65F6] dark:text-purple-400" aria-hidden="true">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400" aria-hidden="true">
                             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2Z" />
                             </svg>
@@ -138,7 +138,7 @@ const StudentSubmissions = () => {
                                         {hasScore ? (
                                             <div className="text-right">
                                                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Score</p>
-                                                <p className="mt-0.5 text-base font-bold text-[#7C65F6] dark:text-purple-400">{submission.score}</p>
+                                                <p className="mt-0.5 text-base font-bold text-blue-600 dark:text-blue-400">{submission.score}</p>
                                             </div>
                                         ) : null}
                                     </div>
