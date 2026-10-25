@@ -1409,7 +1409,7 @@ async def get_performance_metrics(
 @router.get("/reports/student/{student_id}")
 async def generate_student_report(
     student_id: str,
-    report_type: str = Query("weekly", enum=["weekly", "monthly", "final"]),
+    report_type: str = Query("weekly", pattern="^(weekly|monthly|final)$"),
     current_user: dict = Depends(with_auth),
 ):
     """Generate a comprehensive student progress report"""
