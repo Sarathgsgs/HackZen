@@ -125,10 +125,10 @@ const StudentHackathons = () => {
         try {
             const [events, applications] = await Promise.all([
                 fetchAllHackathons(),
-                fetchMyApplications(),
+                fetchMyApplications().catch(() => []),
             ]);
-            setHackathons(events);
-            setRegisteredIds(new Set(applications.map((application) => application.hackathonId)));
+            setHackathons(Array.isArray(events) ? events : []);
+            setRegisteredIds(new Set((Array.isArray(applications) ? applications : []).map((application) => application.hackathonId)));
         } catch (requestError) {
             console.error('Failed to load student hackathons:', requestError);
             setError('We could not load hackathons right now. Please try again.');

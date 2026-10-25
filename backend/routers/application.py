@@ -293,10 +293,37 @@ async def get_my_applications(current_user: dict = Depends(with_auth)):
     cursor = collection.find({"userId": current_user_id}).sort("appliedAt", -1)
     apps = await cursor.to_list(100)
 
+    results = []
     for app in apps:
         app["_id"] = str(app["_id"])
+        if not app.get("appliedAt"):
+            app["appliedAt"] = app.get("createdAt") or datetime.utcnow()
+        status_raw = str(app.get("status", "pending")).lower()
+        if status_raw in ["accepted", "accept"]:
+            app["status"] = "accepted"
+        elif status_raw in ["approved", "approve"]:
+            app["status"] = "approved"
+        elif status_raw in ["rejected", "reject"]:
+            app["status"] = "rejected"
+        else:
+            app["status"] = "pending"
+        try:
+            results.append(ApplicationResponse(**app))
+        except Exception as e:
+            print(f"[ApplicationResponse fallback note]: {e}")
+            results.append(
+                ApplicationResponse(
+                    hackathonId=str(app.get("hackathonId", "")),
+                    userId=current_user_id,
+                    teamId=str(app.get("teamId", "")),
+                    status=app.get("status", "pending"),
+                    teamName=app.get("teamName"),
+                    _id=str(app.get("_id", "")),
+                    appliedAt=app.get("appliedAt", datetime.utcnow())
+                )
+            )
 
-    return [ApplicationResponse(**app) for app in apps]
+    return results
 
 
 @router.get("/hackathon/{hackathon_id}", response_model=List[ApplicationResponse])

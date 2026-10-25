@@ -392,6 +392,9 @@ async def update_user_status(
     query = (
         {"_id": ObjectId(user_id)} if ObjectId.is_valid(user_id) else {"_id": user_id}
     )
+    if data.status.lower() in ["deleted", "delete"]:
+        return await delete_user(user_id=user_id, current_user=current_user)
+
     is_active = data.status == "Active"
 
     result = await db["users"].update_one(

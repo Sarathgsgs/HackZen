@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Any
 from datetime import datetime
 from enum import Enum
 from bson import ObjectId
@@ -8,14 +8,16 @@ from bson import ObjectId
 class ApplicationStatus(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
+    ACCEPTED = "accepted"
     REJECTED = "rejected"
+    CANCELLED = "cancelled"
 
 
 class ApplicationBase(BaseModel):
     hackathonId: str = Field(..., alias="hackathonId")
     userId: Optional[str] = Field(None, alias="userId")
     teamId: Optional[str] = Field(None, alias="teamId")
-    status: ApplicationStatus = ApplicationStatus.PENDING
+    status: Any = Field(default=ApplicationStatus.PENDING)
     teamName: Optional[str] = None
     teamSize: Optional[int] = Field(None, ge=1)
     notes: Optional[str] = None
@@ -35,14 +37,15 @@ class ApplicationCreate(BaseModel):
 
 
 class ApplicationUpdate(BaseModel):
-    status: Optional[ApplicationStatus] = None
+    status: Optional[Any] = None
     teamId: Optional[str] = None
 
 
 class ApplicationResponse(ApplicationBase):
     id: str = Field(..., alias="_id")
     userId: str = Field(..., alias="userId")
-    appliedAt: datetime = Field(..., alias="appliedAt")
+    appliedAt: Optional[datetime] = Field(default_factory=datetime.utcnow, alias="appliedAt")
 
     class Config:
         populate_by_name = True
+        extra = "allow"

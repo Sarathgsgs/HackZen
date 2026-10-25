@@ -379,30 +379,30 @@ const UsersManagement = () => {
     const handleDeleteConfirm = async () => {
         const { user, isBulk } = deleteModalConfig;
         setIsDeleting(true);
+        setDeleteModalConfig({ isOpen: false, user: null, isBulk: false });
         try {
             if (isBulk) {
                 if (selectedUserIds.length === 0) return;
                 const count = selectedUserIds.length;
-                await performBulkUserAction(selectedUserIds, 'delete');
                 setUsers(prev => prev.filter(u => !selectedUserIds.includes(u.id)));
                 if (selectedUser && selectedUserIds.includes(selectedUser.id)) {
                     setSelectedUser(null);
                 }
                 setSelectedUserIds([]);
+                await performBulkUserAction(selectedUserIds, 'delete');
                 showToast(`Permanently deleted ${count} accounts.`);
             } else if (user) {
-                await deleteUser(user.id);
                 setUsers(prev => prev.filter(u => u.id !== user.id));
                 if (selectedUser?.id === user.id) {
                     setSelectedUser(null);
                 }
-                showToast(`User ${user.email} permanently deleted. You can re-register this email for testing.`);
+                const res = await deleteUser(user.id);
+                showToast(res?.message || `User ${user.email} permanently deleted. You can re-register this email for testing.`);
             }
-            setDeleteModalConfig({ isOpen: false, user: null, isBulk: false });
         } catch (err) {
             console.error("Error during deletion:", err);
-            const errorMsg = err?.response?.data?.detail || "Failed to delete user.";
-            showToast(errorMsg, "error");
+            const errorMsg = err?.response?.data?.detail || err?.message || "Failed to delete user.";
+            showToast(`Deletion request: ${errorMsg}`, "error");
         } finally {
             setIsDeleting(false);
         }

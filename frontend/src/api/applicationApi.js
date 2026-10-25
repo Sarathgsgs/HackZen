@@ -6,8 +6,13 @@ export const applyForHackathon = async (hackathonId) => {
 };
 
 export const fetchMyApplications = async () => {
-    const { data } = await apiClient.get('/applications/my');
-    return data || [];
+    try {
+        const { data } = await apiClient.get('/applications/my');
+        return data || [];
+    } catch (error) {
+        console.warn('Could not load user applications, falling back to empty list:', error);
+        return [];
+    }
 };
 
 export const fetchHackathonApplications = async (hackathonId) => {
