@@ -48,24 +48,57 @@ class EmailService:
                     and db_settings.get("smtpPassword") != "••••••••••••"
                 ):
                     return {
-                        "host": db_settings.get("smtpHost"),
-                        "port": int(db_settings.get("smtpPort", 587)),
-                        "user": db_settings.get("smtpUser", ""),
-                        "password": db_settings.get("smtpPassword", ""),
+                        "host": db_settings.get("smtpHost") or getattr(settings, "SMTP_HOST", "smtp.gmail.com") or "smtp.gmail.com",
+                        "port": int(db_settings.get("smtpPort") or getattr(settings, "SMTP_PORT", 587) or 587),
+                        "user": str(db_settings.get("smtpUser") or getattr(settings, "SMTP_USER", "") or "").strip(),
+                        "password": str(db_settings.get("smtpPassword") or getattr(settings, "SMTP_PASSWORD", "") or "").strip().replace(" ", ""),
                         "from_email": db_settings.get("smtpFrom")
-                        or db_settings.get("smtpUser", "")
-                        or "noreply@proeduvate.com",
+                        or db_settings.get("smtpUser")
+                        or getattr(settings, "EMAIL_FROM", "gsgssarath2005@gmail.com")
+                        or "gsgssarath2005@gmail.com",
                         "use_tls": db_settings.get("smtpUseTls", True),
                     }
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[EmailService] Notice checking DB settings: {e}")
+
+        host = (
+            getattr(settings, "SMTP_HOST", None)
+            or os.getenv("SMTP_HOST")
+            or os.getenv("MAIL_SERVER")
+            or "smtp.gmail.com"
+        )
+        port = int(
+            getattr(settings, "SMTP_PORT", None)
+            or os.getenv("SMTP_PORT")
+            or os.getenv("MAIL_PORT")
+            or 587
+        )
+        user = str(
+            getattr(settings, "SMTP_USER", None)
+            or os.getenv("SMTP_USER")
+            or os.getenv("MAIL_USERNAME")
+            or "gsgssarath2005@gmail.com"
+        ).strip()
+        password = str(
+            getattr(settings, "SMTP_PASSWORD", None)
+            or os.getenv("SMTP_PASSWORD")
+            or os.getenv("MAIL_PASSWORD")
+            or "kcgq quui mdpg quvm"
+        ).strip().replace(" ", "")
+        from_email = (
+            getattr(settings, "EMAIL_FROM", None)
+            or os.getenv("EMAIL_FROM")
+            or os.getenv("MAIL_FROM")
+            or user
+            or "gsgssarath2005@gmail.com"
+        )
 
         return {
-            "host": getattr(settings, "SMTP_HOST", "smtp.gmail.com"),
-            "port": int(getattr(settings, "SMTP_PORT", 587)),
-            "user": getattr(settings, "SMTP_USER", ""),
-            "password": getattr(settings, "SMTP_PASSWORD", ""),
-            "from_email": getattr(settings, "EMAIL_FROM", "noreply@proeduvate.com"),
+            "host": host,
+            "port": port,
+            "user": user,
+            "password": password,
+            "from_email": from_email,
             "use_tls": True,
         }
 
@@ -272,6 +305,176 @@ class EmailService:
 
         if last_error:
             raise last_error
+
+    async def send_organizer_approval_notification(
+        self,
+        to_email: str,
+        organizer_name: str,
+        login_url: Optional[str] = None,
+    ) -> dict:
+        """
+        Send official organizer acceptance email notifying the applicant
+        that their request has been accepted and they can now log in.
+        """
+        resolved_name = (organizer_name or "").strip() or (to_email.split("@")[0].capitalize() if to_email else "Organizer")
+        clean_email = (to_email or "").strip().lower()
+        
+        frontend_base = (
+            getattr(settings, "FRONTEND_URL", None)
+            or os.getenv("FRONTEND_URL")
+            or "https://hack-zen-ten.vercel.app"
+        ).rstrip("/")
+        resolved_login_url = login_url or f"{frontend_base}/login"
+
+        subject = "🎉 Your Request Has Been Accepted! Now You Can Log In - HackZen"
+
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Request Accepted</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #334155;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #0f172a; padding: 32px 16px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #4338ca 100%); padding: 36px 32px; text-align: center;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td align="center">
+                                        <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 9999px; padding: 6px 16px; margin-bottom: 16px;">
+                                            <span style="color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;">REQUEST ACCEPTED • ACCOUNT ACTIVE</span>
+                                        </div>
+                                        <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25;">HackZen</h1>
+                                        <p style="color: #bfdbfe; margin: 6px 0 0 0; font-size: 13px; font-weight: 500;">Next-Gen Hackathon Management Platform</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Body Content -->
+                    <tr>
+                        <td style="padding: 36px 32px 24px 32px;">
+                            <!-- Success Banner -->
+                            <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-left: 5px solid #10b981; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+                                <h3 style="color: #065f46; margin: 0 0 4px 0; font-size: 16px; font-weight: 700;">Your Request Has Been Accepted!</h3>
+                                <p style="color: #047857; margin: 0; font-size: 13.5px; font-weight: 500; line-height: 1.5;">Now you can log in to HackZen and start organizing your hackathons.</p>
+                            </div>
+
+                            <p style="font-size: 15px; line-height: 1.6; color: #1e293b; margin: 0 0 16px 0;">Hello <strong>{resolved_name}</strong>,</p>
+                            
+                            <p style="font-size: 14px; line-height: 1.65; color: #475569; margin: 0 0 20px 0;">
+                                We are pleased to inform you that your request to become a platform <strong>Organizer</strong> has been officially approved and activated by the HackZen administrative team.
+                            </p>
+
+                            <!-- Account Details Card -->
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 28px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <p style="margin: 0 0 10px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b;">Verified Account Details</p>
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td style="padding: 4px 0; font-size: 13px; color: #64748b; width: 140px;">Registered Email:</td>
+                                                <td style="padding: 4px 0; font-size: 13px; color: #0f172a; font-weight: 600;">{clean_email}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 4px 0; font-size: 13px; color: #64748b;">Account Role:</td>
+                                                <td style="padding: 4px 0; font-size: 13px; color: #2563eb; font-weight: 700;">ORGANIZER</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 4px 0; font-size: 13px; color: #64748b;">Status:</td>
+                                                <td style="padding: 4px 0;">
+                                                    <span style="display: inline-block; background-color: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">ACTIVE &amp; APPROVED</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- CTA Button -->
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{resolved_login_url}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 36px; border-radius: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35); text-align: center;">
+                                            Log In to Your Account &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- What you can do next -->
+                            <div style="background-color: #eff6ff; border: 1px dashed #93c5fd; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+                                <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">What you can do now:</p>
+                                <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #1e3a8a; line-height: 1.6;">
+                                    <li>Publish and host your own hackathons with customized tracks</li>
+                                    <li>Review participant team applications and manage timelines</li>
+                                    <li>Invite industry mentors and configure evaluation rubrics</li>
+                                    <li>Issue verified digital certificates upon competition completion</li>
+                                </ul>
+                            </div>
+
+                            <p style="font-size: 12px; color: #64748b; line-height: 1.5; margin: 0 0 12px 0;">
+                                If the button above does not work, you can copy and paste this link into your browser:
+                            </p>
+                            <p style="font-size: 11.5px; word-break: break-all; color: #2563eb; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; margin: 0 0 24px 0; font-family: monospace;">
+                                {resolved_login_url}
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 32px; text-align: center;">
+                            <p style="color: #64748b; font-size: 12px; margin: 0 0 4px 0;">HackZen Hackathon Management Platform</p>
+                            <p style="color: #94a3b8; font-size: 11px; margin: 0;">This email was sent automatically because your organizer request was accepted. &copy; 2026 HackZen. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+"""
+
+        text_content = f"""Your Organizer Request Has Been Accepted! Now You Can Log In.
+
+Hello {resolved_name},
+
+Great news! Your request to become an Organizer on HackZen has been accepted and approved by the platform administration.
+
+Your account is now fully active:
+- Email: {clean_email}
+- Role: Organizer
+- Status: ACTIVE & APPROVED
+
+You can now log in to your account here:
+{resolved_login_url}
+
+What you can do now:
+- Publish and host hackathons with customized tracks
+- Review participant applications and manage deadlines
+- Assign mentors and configure evaluation rubrics
+- Issue official digital certificates
+
+We are thrilled to have you on HackZen!
+
+Best regards,
+HackZen Administration Team
+"""
+
+        return await self.send_email(
+            to_email=clean_email,
+            subject=subject,
+            html_content=html_content,
+            text_content=text_content,
+        )
 
     async def send_welcome_email(self, to_email: str, user_name: str, role: str):
         """Send welcome email to new user"""

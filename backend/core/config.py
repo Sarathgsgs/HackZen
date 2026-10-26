@@ -74,11 +74,29 @@ class Settings(BaseSettings):
     )
 
     # Email
-    SMTP_HOST: Optional[str] = os.getenv("SMTP_HOST")
+    SMTP_HOST: Optional[str] = (
+        os.getenv("SMTP_HOST")
+        or os.getenv("MAIL_SERVER")
+        or "smtp.gmail.com"
+    )
     SMTP_PORT: Optional[int] = 587
-    SMTP_USER: Optional[str] = os.getenv("SMTP_USER")
-    SMTP_PASSWORD: Optional[str] = os.getenv("SMTP_PASSWORD")
-    EMAIL_FROM: Optional[str] = os.getenv("EMAIL_FROM")
+    SMTP_USER: Optional[str] = (
+        os.getenv("SMTP_USER")
+        or os.getenv("MAIL_USERNAME")
+        or "gsgssarath2005@gmail.com"
+    )
+    SMTP_PASSWORD: Optional[str] = (
+        os.getenv("SMTP_PASSWORD")
+        or os.getenv("MAIL_PASSWORD")
+        or "kcgq quui mdpg quvm"
+    )
+    EMAIL_FROM: Optional[str] = (
+        os.getenv("EMAIL_FROM")
+        or os.getenv("MAIL_FROM")
+        or os.getenv("SMTP_USER")
+        or os.getenv("MAIL_USERNAME")
+        or "gsgssarath2005@gmail.com"
+    )
 
     @field_validator("SMTP_PORT", mode="before")
     @classmethod

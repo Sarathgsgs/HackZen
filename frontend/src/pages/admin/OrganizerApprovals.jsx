@@ -170,7 +170,7 @@ const OrganizerApprovals = () => {
         try {
             await updateOrganizerStatus(id, 'Approved', 'Approved by administrator');
             setApplications(apps => apps.map(app => app.id === id ? { ...app, status: 'Approved' } : app));
-            showToast('Organizer successfully approved and activated!', 'success');
+            showToast('Organizer request accepted and login email dispatched!', 'success');
         } catch (error) {
             showToast('Failed to approve organizer', 'error');
         } finally {

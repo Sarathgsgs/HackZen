@@ -53,18 +53,54 @@ async def process_organizer_approval(
         else {"_id": user_id_str}
     )
 
+    target_user = await db["users"].find_one(user_query)
+    user_email = (target_user.get("email") if target_user else None) or application.get("email") or application.get("contactEmail")
+    user_name = (target_user.get("name") if target_user else None) or application.get("name") or (user_email.split("@")[0].capitalize() if user_email else "Organizer")
+    email_result = {"success": False, "delivered": False, "error": None}
+
     if data.status == "Approved":
         await db["users"].update_one(
             user_query,
             {
                 "$set": {
-                    "role": "ORGANIZER",
+                    "role": "organizer",
                     "isVerified": True,
+                    "is_active": True,
                     "status": "Active",
                     "updatedAt": datetime.utcnow(),
                 }
             },
         )
+        if user_email or user_id_str:
+            await db["organizers"].update_one(
+                {"$or": [{"userId": user_id_str}, {"contactEmail": user_email}]},
+                {"$set": {"status": "Approved", "isVerified": True, "updatedAt": datetime.utcnow()}},
+                upsert=False
+            )
+
+        if user_email:
+            from core.config import settings
+            import os
+            frontend_url = (
+                getattr(settings, "FRONTEND_URL", None)
+                or os.getenv("FRONTEND_URL")
+                or "https://hack-zen-ten.vercel.app"
+            ).rstrip("/")
+            login_url = f"{frontend_url}/login"
+
+            try:
+                from services.email_service import EmailService
+                email_service = EmailService()
+                print(f"[AdminApprovals] Dispatching acceptance email to {user_email}...")
+                email_result = await email_service.send_organizer_approval_notification(
+                    to_email=user_email,
+                    organizer_name=user_name,
+                    login_url=login_url,
+                )
+                print(f"[AdminApprovals] Acceptance email dispatch result: {email_result}")
+            except Exception as email_err:
+                print(f"[AdminApprovals] Approval email exception for {user_email}: {email_err}")
+                email_result = {"success": False, "delivered": False, "error": str(email_err)}
     elif data.status == "Rejected":
         await db["users"].update_one(
             user_query,
@@ -118,19 +154,24 @@ async def process_organizer_approval(
         }
     )
 
+    email_status_str = f", acceptance email delivered: {email_result.get('delivered', False)}" if data.status == "Approved" else ""
     await db["audit_logs"].insert_one(
         {
             "action": f"Organizer {data.status}",
             "module": "Approvals",
-            "details": f"Processed application {app_id} -> {data.status}.",
+            "details": f"Processed application {app_id} -> {data.status}{email_status_str}.",
             "adminName": current_user.get("name", "Admin"),
+            "emailDelivery": email_result if data.status == "Approved" else None,
             "createdAt": datetime.utcnow(),
         }
     )
 
+    email_delivered = email_result.get("delivered", False) if data.status == "Approved" else None
+    email_note = " Acceptance email sent to organizer." if email_delivered else ""
     return {
         "success": True,
-        "message": f"Organizer application marked as {data.status}.",
+        "message": f"Organizer application marked as {data.status}.{email_note}",
+        "email_delivery": email_result if data.status == "Approved" else None,
     }
 
 
