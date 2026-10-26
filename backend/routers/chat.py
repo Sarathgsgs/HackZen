@@ -10,6 +10,9 @@ from fastapi import (
     Query,
     UploadFile,
     File,
+    Form,
+    Header,
+    Request,
     Response,
 )
 from typing import List, Optional, Dict, Any
@@ -372,6 +375,7 @@ async def get_team_messages(
 async def upload_team_file(
     team_id: str,
     file: UploadFile = File(...),
+    message: Optional[str] = Form(None),
     current_user: dict = Depends(with_auth),
 ):
     db = get_db()
@@ -379,13 +383,18 @@ async def upload_team_file(
     await _can_access_team(db, team_id, uploader_id, current_user.get("role", ""))
 
     allowed_mime_types = {
+        # Images
         ".jpg": {"image/jpeg"},
         ".jpeg": {"image/jpeg"},
         ".png": {"image/png"},
         ".webp": {"image/webp"},
+        ".gif": {"image/gif"},
+        ".svg": {"image/svg+xml"},
+        # Videos
         ".mp4": {"video/mp4"},
         ".mov": {"video/quicktime"},
         ".webm": {"video/webm"},
+        # Documents
         ".pdf": {"application/pdf"},
         ".doc": {"application/msword"},
         ".docx": {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
@@ -393,25 +402,39 @@ async def upload_team_file(
         ".pptx": {"application/vnd.openxmlformats-officedocument.presentationml.presentation"},
         ".xls": {"application/vnd.ms-excel"},
         ".xlsx": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+        ".txt": {"text/plain"},
+        ".md": {"text/markdown", "text/plain"},
+        ".csv": {"text/csv", "application/csv", "text/plain"},
+        # Code & Archives
+        ".zip": {"application/zip", "application/x-zip-compressed", "application/octet-stream"},
+        ".rar": {"application/x-rar-compressed", "application/octet-stream"},
+        ".7z": {"application/x-7z-compressed", "application/octet-stream"},
+        ".tar": {"application/x-tar", "application/octet-stream"},
+        ".gz": {"application/gzip", "application/octet-stream"},
+        ".py": {"text/x-python", "text/plain", "application/octet-stream"},
+        ".js": {"application/javascript", "text/javascript", "text/plain"},
+        ".jsx": {"text/jsx", "text/plain", "application/octet-stream"},
+        ".ts": {"application/typescript", "text/plain", "application/octet-stream"},
+        ".tsx": {"text/tsx", "text/plain", "application/octet-stream"},
+        ".json": {"application/json", "text/plain"},
+        ".html": {"text/html", "text/plain"},
+        ".css": {"text/css", "text/plain"},
+        ".ipynb": {"application/json", "text/plain", "application/octet-stream"},
+        ".sql": {"text/plain", "application/sql", "application/octet-stream"},
     }
 
     extension = os.path.splitext(file.filename or "")[1].lower()
     if extension not in allowed_mime_types:
-        raise HTTPException(status_code=400, detail="Unsupported file type")
-
-    content = await file.read()
-    if len(content) > 20 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Files must be 20 MB or smaller")
-
-    detected_type = file.content_type or "application/octet-stream"
-    if (
-        detected_type != "application/octet-stream"
-        and detected_type not in allowed_mime_types[extension]
-    ):
         raise HTTPException(
             status_code=400,
-            detail="File MIME type does not match its extension",
+            detail=f"Unsupported file type '{extension}'. Please upload common documents, code, images, or archives.",
         )
+
+    content = await file.read()
+    if len(content) > 25 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Files must be 25 MB or smaller")
+
+    detected_type = file.content_type or "application/octet-stream"
 
     target = file_upload_service.base_dir / "team-files" / team_id
     target.mkdir(parents=True, exist_ok=True)
@@ -421,10 +444,16 @@ async def upload_team_file(
 
     safe_name = os.path.basename(file.filename or stored_name).replace("\x00", "")
     attachment_type = (
-        "image" if extension in {".jpg", ".jpeg", ".png", ".webp"}
+        "image" if extension in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
         else "video" if extension in {".mp4", ".mov", ".webm"}
+        else "pdf" if extension == ".pdf"
+        else "code" if extension in {".py", ".js", ".jsx", ".ts", ".tsx", ".json", ".html", ".css", ".ipynb", ".sql"}
+        else "archive" if extension in {".zip", ".rar", ".7z", ".tar", ".gz"}
         else "file"
     )
+
+    custom_caption = sanitize_input(str(message or "")).strip() if message else ""
+    msg_content = custom_caption if custom_caption else f"Shared file: {safe_name}"
 
     record = {
         "teamId": team_id,
@@ -452,7 +481,7 @@ async def upload_team_file(
         "teamId": team_id,
         "senderId": uploader_id,
         "senderName": record["uploadedByName"],
-        "content": f"Shared file: {record['name']}",
+        "content": msg_content,
         "messageType": MessageType.FILE.value,
         "isCheckpoint": False,
         "fileId": record["_id"],
@@ -466,17 +495,23 @@ async def upload_team_file(
     chat_result = await db["chats"].insert_one(chat_message)
     chat_message["_id"] = str(chat_result.inserted_id)
 
+    chat_message_payload = {
+        **chat_message,
+        "id": chat_message["_id"],
+        "createdAt": chat_message["createdAt"].isoformat(),
+    }
+
     await manager.broadcast_to_team(
         {
             "type": "new_message",
-            "message": {
-                **chat_message,
-                "createdAt": chat_message["createdAt"].isoformat(),
-            },
+            "message": chat_message_payload,
         },
         team_id,
         uploader_id,
     )
+
+    record["fileId"] = record["_id"]
+    record["chatMessage"] = chat_message_payload
 
     return TeamFileResponse(**record)
 
@@ -529,14 +564,36 @@ async def get_team_media(
 async def download_team_file(
     team_id: str,
     file_id: str,
-    current_user: dict = Depends(with_auth),
+    request: Request,
+    token: Optional[str] = Query(None),
 ):
-    """Authenticated download for team files."""
+    """Authenticated download for team files supporting both Authorization header and query token."""
     if not ObjectId.is_valid(file_id):
         raise HTTPException(status_code=400, detail="Invalid file ID")
 
+    # Authenticate via header or query token
+    user_payload = None
+    auth_header = request.headers.get("authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        raw_token = auth_header.split(" ", 1)[1].strip()
+        try:
+            user_payload = verify_token(raw_token, "access")
+        except Exception:
+            pass
+    if not user_payload and token:
+        try:
+            user_payload = verify_token(token, "access")
+        except Exception:
+            pass
+
+    if not user_payload:
+        raise HTTPException(status_code=401, detail="Authentication required to download file")
+
+    user_id = str(user_payload.get("sub") or user_payload.get("id") or "")
+    role = str(user_payload.get("role") or "")
+
     db = get_db()
-    await _can_access_team(db, team_id, _user_id(current_user), current_user.get("role", ""))
+    await _can_access_team(db, team_id, user_id, role)
 
     record = await db["teamFiles"].find_one({
         "_id": ObjectId(file_id),
@@ -548,7 +605,12 @@ async def download_team_file(
     base_dir = file_upload_service.base_dir.resolve()
     path = (base_dir / record["path"]).resolve()
     if not path.is_file() or base_dir not in path.parents:
-        raise HTTPException(status_code=404, detail="Stored file not found")
+        # Fallback check
+        fallback_path = file_upload_service.get_shared_file_path(record.get("storageName") or record.get("path"))
+        if fallback_path and fallback_path.is_file():
+            path = fallback_path
+        else:
+            raise HTTPException(status_code=404, detail="Stored file not found")
 
     safe_filename = os.path.basename(record.get("name") or "download")
     return Response(

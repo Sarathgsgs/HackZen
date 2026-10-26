@@ -47,6 +47,8 @@ class TeamFileResponse(BaseModel):
     uploadedBy: str
     uploadedByName: Optional[str] = None
     createdAt: datetime
+    fileId: Optional[str] = None
+    chatMessage: Optional[dict] = None
 
     class Config:
         populate_by_name = True

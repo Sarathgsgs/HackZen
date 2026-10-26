@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Paperclip, Download, FileText, X } from 'lucide-react';
 import apiClient from '../../api/api';
 import { getMyTeams, getTeamById, getTeamMembers } from '../../api/teamApi';
 import { downloadTeamFile, getTeamFiles } from '../../api/teamFilesApi';
@@ -82,6 +83,9 @@ const StudentTeamWorkspace = () => {
   const [workspaceError, setWorkspaceError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
   const [draftMessage, setDraftMessage] = useState('');
+  const [pendingFile, setPendingFile] = useState(null);
+  const [downloadingChatFileId, setDownloadingChatFileId] = useState('');
+  const chatFileInputRef = useRef(null);
 
   const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
   const userId = currentUser._id || currentUser.id || 'guest';
@@ -322,6 +326,11 @@ const StudentTeamWorkspace = () => {
           id: msg._id || msg.id,
           sender: String(msg.senderId) === String(userId) ? 'You' : (msg.senderName || 'Team Member'),
           text: msg.content || '',
+          fileId: msg.fileId || '',
+          attachmentName: msg.attachmentName || '',
+          attachmentUrl: msg.attachmentUrl || '',
+          attachmentType: msg.attachmentType || 'file',
+          attachmentSize: msg.attachmentSize || 0,
           createdAt: msg.createdAt,
           time: formatTime(msg.createdAt),
           mine: String(msg.senderId) === String(userId),
@@ -362,6 +371,11 @@ const StudentTeamWorkspace = () => {
           id: messageId,
           sender: String(message.senderId) === String(userId) ? 'You' : (message.senderName || 'Team Member'),
           text: message.content || '',
+          fileId: message.fileId || '',
+          attachmentName: message.attachmentName || '',
+          attachmentUrl: message.attachmentUrl || '',
+          attachmentType: message.attachmentType || 'file',
+          attachmentSize: message.attachmentSize || 0,
           createdAt: message.createdAt,
           time: formatTime(message.createdAt),
           mine: String(message.senderId) === String(userId),
@@ -373,6 +387,35 @@ const StudentTeamWorkspace = () => {
     return () => socket.close();
   }, [teamId, userId]);
 
+  const handleDownloadChatAttachment = async (fileId, fileName, attachmentUrl) => {
+    const targetFileId = fileId || (attachmentUrl && attachmentUrl.includes('/files/') ? attachmentUrl.split('/files/')[1]?.split('/')[0] : null);
+    if (!targetFileId && !attachmentUrl) return;
+    setDownloadingChatFileId(targetFileId || fileName);
+    try {
+      if (targetFileId && teamId) {
+        const response = await apiClient.get(`/chat/${teamId}/files/${targetFileId}/download`, {
+          responseType: 'blob',
+        });
+        const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.setAttribute('download', fileName || 'attachment');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
+        return;
+      }
+    } catch {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+      const backend = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api\/?$/, '');
+      const directUrl = `${backend}/api/chat/${teamId}/files/${targetFileId}/download${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      window.open(directUrl, '_blank');
+    } finally {
+      setDownloadingChatFileId('');
+    }
+  };
+
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -380,27 +423,53 @@ const StudentTeamWorkspace = () => {
   }, [messages, activeTab]);
 
   const handleSendMessage = async (event) => {
-    event.preventDefault();
+    event?.preventDefault();
     const trimmedMessage = draftMessage.trim();
-    if (!trimmedMessage || !team) return;
+    if ((!trimmedMessage && !pendingFile) || !team) return;
 
     try {
-      const response = await apiClient.post(`/chat/${team.id}/send`, {
-        content: trimmedMessage,
-        type: 'text'
-      });
+      if (pendingFile) {
+        const formData = new FormData();
+        formData.append('file', pendingFile);
+        if (trimmedMessage) formData.append('message', trimmedMessage);
+        const { data } = await apiClient.post(`/chat/${team.id}/files`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const serverMessage = data.chatMessage || {};
+        const messageEntry = {
+          id: serverMessage._id || serverMessage.id || data.id,
+          sender: serverMessage.senderName || userName,
+          text: serverMessage.content || trimmedMessage || `Shared file: ${data.name}`,
+          fileId: data.fileId || data.id,
+          attachmentName: data.name,
+          attachmentUrl: data.url,
+          attachmentType: data.attachmentType || 'file',
+          attachmentSize: data.size,
+          time: formatTime(serverMessage.createdAt || new Date()),
+          mine: true,
+        };
+        setMessages((current) => [...current, messageEntry]);
+        setPendingFile(null);
+        if (chatFileInputRef.current) chatFileInputRef.current.value = '';
+        setDraftMessage('');
+      } else {
+        const response = await apiClient.post(`/chat/${team.id}/send`, {
+          content: trimmedMessage,
+          type: 'text'
+        });
 
-      const serverMessage = response?.data;
-      const messageEntry = {
-        id: serverMessage?._id || Date.now(),
-        sender: serverMessage?.senderName || userName,
-        text: serverMessage?.content || trimmedMessage,
-        time: formatTime(serverMessage?.createdAt),
-        mine: String(serverMessage?.senderId || userId) === String(userId)
-      };
+        const serverMessage = response?.data;
+        const messageEntry = {
+          id: serverMessage?._id || Date.now(),
+          sender: serverMessage?.senderName || userName,
+          text: serverMessage?.content || trimmedMessage,
+          time: formatTime(serverMessage?.createdAt),
+          mine: String(serverMessage?.senderId || userId) === String(userId)
+        };
 
-      setMessages((current) => [...current, messageEntry]);
-      setDraftMessage('');
+        setMessages((current) => [...current, messageEntry]);
+        setDraftMessage('');
+      }
     } catch (error) {
       console.error('Failed to send workspace message:', error);
       const backendDetail = error?.response?.data?.error?.message || error?.response?.data?.detail || error?.message;
@@ -518,31 +587,103 @@ const StudentTeamWorkspace = () => {
         return (
           <div className="flex h-full min-h-[420px] flex-col">
             <div className="flex-1 space-y-5 overflow-y-auto pr-2">
-              {messages.length ? messages.map((entry) => (
-                <div key={entry.id} className={`flex ${entry.mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[78%] rounded-[20px] px-4 py-3 ${entry.mine ? 'bg-[#2563eb] text-white' : 'bg-white text-[#1f1a2d] shadow-[0_8px_18px_rgba(37,99,235,0.06)]'}`}>
-                    <p className="text-sm leading-relaxed">{entry.text}</p>
-                    <div className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${entry.mine ? 'text-blue-100' : 'text-slate-500'}`}>
-                      {entry.sender} • {entry.time}
+              {messages.length ? messages.map((entry) => {
+                const hasAttachment = Boolean(entry.fileId || entry.attachmentName);
+                return (
+                  <div key={entry.id} className={`flex ${entry.mine ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[78%] rounded-[20px] px-4 py-3 ${entry.mine ? 'bg-[#2563eb] text-white' : 'bg-white text-[#1f1a2d] shadow-[0_8px_18px_rgba(37,99,235,0.06)]'}`}>
+                      {entry.text && <p className="text-sm leading-relaxed whitespace-pre-wrap">{entry.text}</p>}
+                      {hasAttachment && (
+                        <div className={`mt-2 flex items-center justify-between gap-3 rounded-xl border p-2.5 ${entry.mine ? 'border-blue-400/50 bg-white/15 text-white' : 'border-slate-200 bg-slate-50 text-slate-800'}`}>
+                          <div className="flex min-w-0 items-center gap-2.5">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-[#2563eb]">
+                              <FileText className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-semibold" title={entry.attachmentName}>
+                                {entry.attachmentName || 'Shared file'}
+                              </p>
+                              <p className="text-[10px] opacity-70">
+                                {readableFileSize(entry.attachmentSize)}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadChatAttachment(entry.fileId, entry.attachmentName, entry.attachmentUrl)}
+                            disabled={downloadingChatFileId === (entry.fileId || entry.attachmentName)}
+                            className={`flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${entry.mine ? 'bg-white text-[#2563eb] hover:bg-blue-50' : 'bg-[#2563eb] text-white hover:bg-[#1d4ed8]'}`}
+                          >
+                            <Download className="h-3 w-3" />
+                            <span>{downloadingChatFileId === (entry.fileId || entry.attachmentName) ? '...' : 'Download'}</span>
+                          </button>
+                        </div>
+                      )}
+                      <div className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${entry.mine ? 'text-blue-100' : 'text-slate-500'}`}>
+                        {entry.sender} • {entry.time}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )) : (
+                );
+              }) : (
                 <div role={messagesError ? 'alert' : undefined} className="rounded-[20px] border border-dashed border-[#dbeafe] bg-white p-8 text-center text-slate-500">{messagesError || 'No messages yet. Start the conversation with your team.'}</div>
               )}
               <div ref={chatEndRef} />
             </div>
 
-            <form onSubmit={handleSendMessage} className="mt-6 flex gap-3">
-              <input
-                value={draftMessage}
-                onChange={(event) => setDraftMessage(event.target.value)}
-                placeholder="Write a message..."
-                className="flex-1 rounded-[16px] border border-[#dbeafe] bg-white px-4 py-3 text-sm text-[#1f1a2d] placeholder:text-slate-400 focus:border-[#2563eb] focus:outline-none"
-              />
-              <button type="submit" className="rounded-[16px] bg-[#2563eb] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1d4ed8]">
-                Send
-              </button>
+            <form onSubmit={handleSendMessage} className="mt-4 flex flex-col gap-2">
+              {pendingFile && (
+                <div className="flex items-center justify-between gap-2 rounded-[14px] border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-[#2563eb]">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Paperclip className="h-4 w-4 shrink-0" />
+                    <span className="truncate font-medium">{pendingFile.name}</span>
+                    <span className="shrink-0 text-slate-500">({readableFileSize(pendingFile.size)})</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPendingFile(null);
+                      if (chatFileInputRef.current) chatFileInputRef.current.value = '';
+                    }}
+                    className="rounded p-1 text-slate-500 hover:bg-blue-100 hover:text-slate-900"
+                    title="Remove file"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <input
+                  ref={chatFileInputRef}
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp,.gif,.svg,.mp4,.mov,.webm,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.7z,.tar,.gz,.txt,.md,.csv,.py,.js,.jsx,.ts,.tsx,.json,.html,.css,.ipynb,.sql"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) setPendingFile(e.target.files[0]);
+                  }}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => chatFileInputRef.current?.click()}
+                  title="Attach file"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] border border-[#dbeafe] bg-white text-slate-500 transition hover:bg-[#eff6ff] hover:text-[#2563eb]"
+                >
+                  <Paperclip className="h-5 w-5" />
+                </button>
+                <input
+                  value={draftMessage}
+                  onChange={(event) => setDraftMessage(event.target.value)}
+                  placeholder={pendingFile ? "Add an optional caption..." : "Write a message..."}
+                  className="flex-1 rounded-[16px] border border-[#dbeafe] bg-white px-4 py-3 text-sm text-[#1f1a2d] placeholder:text-slate-400 focus:border-[#2563eb] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!draftMessage.trim() && !pendingFile}
+                  className="rounded-[16px] bg-[#2563eb] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1d4ed8] disabled:opacity-50"
+                >
+                  Send
+                </button>
+              </div>
             </form>
           </div>
         );

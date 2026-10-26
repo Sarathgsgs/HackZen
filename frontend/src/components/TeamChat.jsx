@@ -31,8 +31,8 @@ import { uploadTeamFile } from '../services/student/teamsApi';
 import { fetchAssignedTeams } from '../services/mentor/assignedTeamsApi';
 import { useMentor } from '../context/MentorContext';
 
-const ACCEPTED = '.jpg,.jpeg,.png,.webp,.mp4,.mov,.webm,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx';
-const MAX_SIZE = 20 * 1024 * 1024;
+const ACCEPTED = '.jpg,.jpeg,.png,.webp,.gif,.svg,.mp4,.mov,.webm,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.7z,.tar,.gz,.txt,.md,.csv,.py,.js,.jsx,.ts,.tsx,.json,.html,.css,.ipynb,.sql';
+const MAX_SIZE = 25 * 1024 * 1024;
 
 const formatSize = (bytes = 0) =>
   bytes < 1024 * 1024
@@ -484,15 +484,17 @@ export default function TeamChat({
       // If connected to a real team on backend, attempt server post
       if (teamId && !teamId.startsWith('team-alpha')) {
         if (pending) {
-          const uploaded = await uploadTeamFile(teamId, pending.file);
+          const uploaded = await uploadTeamFile(teamId, pending.file, newMsgText);
+          const serverChatMsg = uploaded.chatMessage || {};
           sentMessage = {
-            _id: uploaded.id,
-            id: uploaded.id,
+            _id: serverChatMsg.id || serverChatMsg._id || uploaded.id,
+            id: serverChatMsg.id || serverChatMsg._id || uploaded.id,
             senderId: userId,
             senderName: currentUser.name || 'You',
-            content: `Shared file: ${uploaded.name}`,
+            isMentor: currentUser.role === 'mentor',
+            content: newMsgText || `Shared file: ${uploaded.name}`,
             messageType: 'file',
-            fileId: uploaded.id,
+            fileId: uploaded.fileId || uploaded.id,
             attachmentName: uploaded.name,
             attachmentUrl: uploaded.url,
             attachmentType: uploaded.attachmentType || pending.kind,
@@ -573,18 +575,54 @@ export default function TeamChat({
   };
 
   // Download attachment handler
-  const handleDownloadAttachment = async (name, url) => {
+  const handleDownloadAttachment = async (name, url, fileId) => {
+    try {
+      const targetFileId = fileId || (url && url.includes('/files/') ? url.split('/files/')[1]?.split('/')[0] : null);
+      if (targetFileId && teamId && !teamId.startsWith('team-alpha')) {
+        const response = await apiClient.get(`/chat/${teamId}/files/${targetFileId}/download`, {
+          responseType: 'blob',
+        });
+        const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = name || 'attachment';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(blobUrl);
+
+        if (mentorContext?.addToast) {
+          mentorContext.addToast('Download Complete', `Downloaded ${name}`, 'success');
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn('Real download fallback:', err);
+    }
+
     if (url && url.startsWith('http')) {
       window.open(url, '_blank');
       return;
     }
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const targetFileId = fileId || (url && url.includes('/files/') ? url.split('/files/')[1]?.split('/')[0] : null);
+    if (targetFileId && teamId && !teamId.startsWith('team-alpha')) {
+      const backend = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api\/?$/, '');
+      const directUrl = `${backend}/api/chat/${teamId}/files/${targetFileId}/download${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      window.open(directUrl, '_blank');
+      return;
+    }
+
     // Create quick synthetic blob download for demo assets
-    const blob = new Blob([`HackZen Project Resource: ${name}`], { type: 'application/pdf' });
+    const blob = new Blob([`HackZen Project Resource: ${name}`], { type: 'application/octet-stream' });
     const localUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = localUrl;
-    a.download = name;
+    a.download = name || 'resource';
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(localUrl);
 
     if (mentorContext?.addToast) {
@@ -978,7 +1016,7 @@ export default function TeamChat({
 
                         <button
                           type="button"
-                          onClick={() => handleDownloadAttachment(msg.attachmentName, msg.attachmentUrl)}
+                          onClick={() => handleDownloadAttachment(msg.attachmentName, msg.attachmentUrl, msg.fileId)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
                           title="Download attachment"
                         >

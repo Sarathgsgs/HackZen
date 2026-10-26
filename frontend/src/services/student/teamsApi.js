@@ -16,12 +16,13 @@ const toWorkspaceMessage = (message) => ({
 });
 
 const toWorkspaceFile = (file) => ({
-    id: file._id || file.id,
-    name: file.name,
+    id: file._id || file.id || file.fileId,
+    fileId: file._id || file.id || file.fileId,
+    name: file.name || file.fileName,
     size: `${(Number(file.size || 0) / (1024 * 1024)).toFixed(1)} MB`,
-    type: (file.name || '').split('.').pop()?.toUpperCase() || 'FILE',
-    uploader: file.uploadedByName || 'Team member',
-    time: new Date(file.createdAt).toLocaleString(),
+    type: (file.name || file.fileName || '').split('.').pop()?.toUpperCase() || 'FILE',
+    uploader: file.uploadedByName || file.uploadedBy || 'Team member',
+    time: new Date(file.createdAt || Date.now()).toLocaleString(),
     url: file.url,
     attachmentType: file.attachmentType,
     attachmentSize: Number(file.size || 0),
@@ -229,13 +230,19 @@ export const fetchTeamFiles = async (teamId) => {
     return data || [];
 };
 
-export const uploadTeamFile = async (teamId, file) => {
+export const uploadTeamFile = async (teamId, file, message = '') => {
     const form = new FormData();
     form.append('file', file);
+    if (message) {
+        form.append('message', message);
+    }
     const { data } = await apiClient.post(`/chat/${teamId}/files`, form, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return toWorkspaceFile(data);
+    return {
+        ...toWorkspaceFile(data),
+        chatMessage: data.chatMessage,
+    };
 };
 
 export const downloadTeamFile = async (file) => {
@@ -244,9 +251,11 @@ export const downloadTeamFile = async (file) => {
     const href = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = href;
-    link.download = file.name;
+    link.download = file.name || file.fileName || 'file';
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(href);
+    link.remove();
+    window.URL.revokeObjectURL(href);
 };
 
 /**
