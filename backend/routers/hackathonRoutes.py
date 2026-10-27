@@ -17,6 +17,7 @@ from core.security import get_current_user_optional
 from schemas.hackathonSchema import HackathonCreate, HackathonUpdate, HackathonResponse
 from services.hackathonService import HackathonService
 from models.hackathonModel import HackathonStatus, HackathonTheme
+from pydantic import ValidationError
 import json
 from datetime import datetime
 import re
@@ -50,7 +51,8 @@ async def create_hackathon(
 
     # Check authorization (case-insensitive)
     user_role = str(current_user.get("role", "")).lower()
-    if user_role not in ["organizer", "admin", "superadmin"]:
+    requested_role = str(current_user.get("requested_role", "")).lower()
+    if user_role not in ["organizer", "admin", "superadmin"] and requested_role not in ["organizer"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only organizers can create hackathons",
@@ -116,6 +118,15 @@ async def create_hackathon(
 
     except HTTPException:
         raise
+    except ValidationError as val_err:
+        err_msg = val_err.errors()[0]["msg"] if val_err.errors() else str(val_err)
+        err_field = ".".join(str(loc) for loc in val_err.errors()[0].get("loc", [])) if val_err.errors() else ""
+        detail_str = f"Validation failed for {err_field}: {err_msg}" if err_field else f"Validation failed: {err_msg}"
+        print(f"VALIDATION ERROR: {detail_str}")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=detail_str,
+        )
     except Exception as e:
         print(f"ERROR: {str(e)}")
         raise HTTPException(

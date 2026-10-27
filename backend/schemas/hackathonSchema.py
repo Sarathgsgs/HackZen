@@ -6,8 +6,8 @@ import json
 
 
 class HackathonBase(BaseModel):
-    title: str = Field(..., min_length=3, max_length=120)
-    description: str = Field(..., min_length=20, max_length=2000)
+    title: str = Field(..., min_length=1, max_length=150)
+    description: str = Field(..., min_length=1, max_length=5000)
     location: Optional[str] = None
     problemStatement: Optional[str] = Field(None, alias="problemStatement")
     themes: List[Union[HackathonTheme, str]] = Field(

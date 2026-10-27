@@ -6,6 +6,10 @@ from pydantic import BaseModel, Field
 
 class HackathonStatus(str, Enum):
     DRAFT = "Draft"
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+    NEEDS_REVISION = "Needs Revision"
     UPCOMING = "Upcoming"
     REGISTRATION_OPEN = "Registration Open"
     ONGOING = "Ongoing"

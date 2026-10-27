@@ -28,16 +28,9 @@ const CreateHackathonStepFour = () => {
         }
     };
 
-    const handleSaveDraft = async () => {
-        setIsSaving(true);
-        try {
-            await saveHackathonDraft(draft);
-            navigate('/organizer/dashboard');
-        } catch (e) {
-            console.error("Draft save failed:", e);
-        } finally {
-            setIsSaving(false);
-        }
+    const handleSaveDraft = () => {
+        saveHackathonDraft(draft);
+        navigate('/organizer/dashboard');
     };
 
     const handlePublish = async () => {
@@ -59,7 +52,19 @@ const CreateHackathonStepFour = () => {
             setSuccessModal(true);
         } catch (error) {
             console.error("Publishing hackathon failed:", error);
-            const msg = error?.response?.data?.detail || error?.message || 'Failed to submit hackathon. Please try again.';
+            let msg = 'Failed to submit hackathon. Please try again.';
+            const data = error?.response?.data;
+            if (typeof data?.detail === 'string') {
+                msg = data.detail;
+            } else if (Array.isArray(data?.detail)) {
+                msg = data.detail.map(d => `${d.loc ? d.loc.slice(-1)[0] + ': ' : ''}${d.msg}`).join(', ');
+            } else if (typeof data?.message === 'string') {
+                msg = data.message;
+            } else if (typeof data === 'string') {
+                msg = data;
+            } else if (error?.message) {
+                msg = error.message;
+            }
             setErrorMessage(msg);
         } finally {
             setIsPublishing(false);

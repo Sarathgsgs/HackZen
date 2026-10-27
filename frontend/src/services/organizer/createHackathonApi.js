@@ -46,13 +46,18 @@ const toIsoString = (value) => {
 };
 
 /**
- * Saves the current hackathon draft to the backend or local storage.
+ * Saves the current hackathon draft to local storage instantly and syncs to backend in background.
  */
-export const saveHackathonDraft = async (draft) => {
+export const saveHackathonDraft = (draft) => {
     try {
-        const { posterFile, ...serializableDraft } = draft;
+        const { posterFile, ...serializableDraft } = draft || {};
         sessionStorage.setItem('hackathonDraft', JSON.stringify(serializableDraft));
-        await saveUIDataset('organizer-hackathon-draft', serializableDraft);
+
+        // Background sync to remote dataset with lightweight payload (omit heavy base64 poster)
+        const { posterDataUrl, ...lightweightDraft } = serializableDraft;
+        saveUIDataset('organizer-hackathon-draft', lightweightDraft).catch((e) => {
+            console.warn('Background draft sync notice:', e);
+        });
     } catch (e) {
         console.warn('Draft save notice:', e);
     }
@@ -88,21 +93,33 @@ export const publishHackathon = async (draft) => {
     // Map the frontend UI draft data to match the backend HackathonCreate schema
     const themes = draft.tracks && draft.tracks.length > 0
         ? [...new Set(draft.tracks.map(normalizeTheme))].slice(0, 5)
-        : ['Web Dev'];
+        : (draft.themes && draft.themes.length > 0 ? draft.themes.map(normalizeTheme) : ['Web Dev']);
+
+    const regStart = draft.registrationStart || draft.startDate || new Date().toISOString();
+    const regEnd = draft.registrationEnd || draft.hackathonStart || draft.startDate || new Date().toISOString();
+    const evStart = draft.hackathonStart || draft.startDate || new Date().toISOString();
+    const evEnd = draft.hackathonEnd || draft.endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const rules = Array.isArray(draft.guidelines)
+        ? draft.guidelines
+        : (draft.guidelines ? [draft.guidelines] : []);
 
     const payload = {
         title: draft.title?.trim() || "Untitled Hackathon",
         description: draft.description?.trim() || (draft.tagline?.trim() || "A new hackathon"),
-        location: draft.location?.trim() || 'Online',
-        problemStatement: draft.description?.trim() || "Solve the challenges.",
+        location: draft.location?.trim() || draft.mode || 'Online',
+        problemStatement: draft.problemStatement?.trim() || draft.description?.trim() || "Solve the challenges.",
         themes,
-        registrationStart: toIsoString(draft.startDate),
-        registrationEnd: toIsoString(draft.startDate),
-        hackathonStart: toIsoString(draft.startDate),
-        hackathonEnd: toIsoString(draft.endDate),
-        minTeamSize: draft.minTeamSize || 1,
-        maxTeamSize: draft.maxTeamSize || 4,
+        registrationStart: toIsoString(regStart),
+        registrationEnd: toIsoString(regEnd),
+        hackathonStart: toIsoString(evStart),
+        hackathonEnd: toIsoString(evEnd),
+        startDate: toIsoString(evStart),
+        endDate: toIsoString(evEnd),
+        minTeamSize: Number(draft.minTeamSize) || 1,
+        maxTeamSize: Number(draft.maxTeamSize) || 4,
         isPublic: draft.isPublic !== undefined ? draft.isPublic : true,
+        rules,
         status: "Pending" // Route to Admin Approvals review
     };
 
@@ -127,8 +144,9 @@ export const publishHackathon = async (draft) => {
 
         const { data } = response;
         
-        // Clear draft after successful publishing
-        await saveUIDataset('organizer-hackathon-draft', null);
+        // Clear local and remote drafts after successful publishing
+        sessionStorage.removeItem('hackathonDraft');
+        saveUIDataset('organizer-hackathon-draft', null).catch(() => {});
 
         return {
             id: data._id || data.id,
@@ -146,12 +164,18 @@ export const publishHackathon = async (draft) => {
  * Retrieves the current hackathon draft.
  */
 export const getHackathonDraft = async () => {
+    // Check sessionStorage first for fast load and full fidelity (poster preview dataUrl)
+    const saved = sessionStorage.getItem('hackathonDraft');
+    if (saved) {
+        try {
+            return JSON.parse(saved);
+        } catch {}
+    }
     try {
         const remote = await getUIDataset('organizer-hackathon-draft', null);
         if (remote) return remote;
     } catch {
-        // Fallback to local session storage draft if remote draft is unavailable
+        // Fallback
     }
-    const saved = sessionStorage.getItem('hackathonDraft');
-    return saved ? JSON.parse(saved) : null;
+    return null;
 };

@@ -48,48 +48,34 @@ const CreateHackathonStepTwo = () => {
         setTracks(prev => prev.filter(t => t.id !== id));
     };
 
-    const handleSaveDraft = async () => {
-        setIsSaving(true);
-        try {
-            const updated = {
-                ...draft,
-                tracks,
-                guidelines,
-                requirements
-            };
-            await saveHackathonDraft(updated);
-            setDraft(updated);
-            setDraftSavedToast(true);
-            setTimeout(() => setDraftSavedToast(false), 3000);
-        } catch (e) {
-            console.error("Draft save failed:", e);
-        } finally {
-            setIsSaving(false);
-        }
+    const handleSaveDraft = () => {
+        const updated = {
+            ...draft,
+            tracks,
+            guidelines,
+            requirements
+        };
+        saveHackathonDraft(updated);
+        setDraft(updated);
+        setDraftSavedToast(true);
+        setTimeout(() => setDraftSavedToast(false), 3000);
     };
 
-    const handleNext = async () => {
+    const handleNext = () => {
         if (tracks.length === 0) {
             setTrackError('Please add at least one track.');
             return;
         }
 
-        setIsSaving(true);
-        try {
-            const updated = {
-                ...draft,
-                tracks,
-                guidelines,
-                requirements
-            };
-            await saveHackathonDraft(updated);
-            setDraft(updated);
-            handleStepChange(3);
-        } catch (e) {
-            console.error("Failed to proceed:", e);
-        } finally {
-            setIsSaving(false);
-        }
+        const updated = {
+            ...draft,
+            tracks,
+            guidelines,
+            requirements
+        };
+        saveHackathonDraft(updated);
+        setDraft(updated);
+        handleStepChange(3);
     };
 
     return (

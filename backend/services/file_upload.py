@@ -198,7 +198,7 @@ class FileUploadService:
         """Convert file path to full absolute URL"""
         if not file_path:
             return ""
-        base_url = settings.BACKEND_URL.rstrip("/")
+        base_url = (getattr(settings, "BACKEND_URL", None) or os.getenv("BACKEND_URL") or "http://localhost:8000").rstrip("/")
         if not base_url.startswith("http"):
             base_url = f"http://{base_url}"
         return f"{base_url}/uploads/{file_path}"

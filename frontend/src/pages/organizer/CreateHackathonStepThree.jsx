@@ -60,45 +60,31 @@ const CreateHackathonStepThree = () => {
         return Object.keys(nextErrors).length === 0;
     };
 
-    const handleSaveDraft = async () => {
-        setIsSaving(true);
-        try {
-            const updated = {
-                ...draft,
-                ...timeline,
-                startDate: timeline.hackathonStart,
-                endDate: timeline.hackathonEnd
-            };
-            await saveHackathonDraft(updated);
-            setDraft(updated);
-            setDraftSavedToast(true);
-            setTimeout(() => setDraftSavedToast(false), 3000);
-        } catch (e) {
-            console.error("Draft save failed:", e);
-        } finally {
-            setIsSaving(false);
-        }
+    const handleSaveDraft = () => {
+        const updated = {
+            ...draft,
+            ...timeline,
+            startDate: timeline.hackathonStart,
+            endDate: timeline.hackathonEnd
+        };
+        saveHackathonDraft(updated);
+        setDraft(updated);
+        setDraftSavedToast(true);
+        setTimeout(() => setDraftSavedToast(false), 3000);
     };
 
-    const handleNext = async () => {
+    const handleNext = () => {
         if (!validate()) return;
 
-        setIsSaving(true);
-        try {
-            const updated = {
-                ...draft,
-                ...timeline,
-                startDate: timeline.hackathonStart,
-                endDate: timeline.hackathonEnd
-            };
-            await saveHackathonDraft(updated);
-            setDraft(updated);
-            handleStepChange(4);
-        } catch (e) {
-            console.error("Failed to proceed:", e);
-        } finally {
-            setIsSaving(false);
-        }
+        const updated = {
+            ...draft,
+            ...timeline,
+            startDate: timeline.hackathonStart,
+            endDate: timeline.hackathonEnd
+        };
+        saveHackathonDraft(updated);
+        setDraft(updated);
+        handleStepChange(4);
     };
 
     return (
