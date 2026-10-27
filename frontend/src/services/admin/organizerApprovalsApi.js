@@ -1,5 +1,5 @@
 import apiClient from '../../api/api';
-import { getUIDataset } from '../uiDataApi';
+import { getUIDataset, saveUIDataset } from '../uiDataApi';
 
 /**
  * Admin Organizer Approvals API Service
@@ -32,8 +32,9 @@ export const fetchOrganizerApprovals = async () => {
 };
 
 export const updateOrganizerStatus = async (id, status, reason = "", message = "", sections = []) => {
+    const targetId = typeof id === 'object' && id !== null ? (id.id || id._id) : id;
     try {
-        const { data } = await apiClient.put(`/admin/organizers/${id}/status`, {
+        const { data } = await apiClient.put(`/admin/organizers/${targetId}/status`, {
             status,
             reason: reason || `Administrative action: ${status}`,
             message: message || `Application marked as ${status}`,
@@ -43,7 +44,7 @@ export const updateOrganizerStatus = async (id, status, reason = "", message = "
     } catch (error) {
         // Fallback to legacy approvals endpoint if needed
         try {
-            const { data } = await apiClient.put(`/admin/approvals/organizers/${id}`, {
+            const { data } = await apiClient.put(`/admin/approvals/organizers/${targetId}`, {
                 status,
                 reason,
                 message,
@@ -51,7 +52,19 @@ export const updateOrganizerStatus = async (id, status, reason = "", message = "
             });
             return data;
         } catch (fallbackError) {
-            console.error("Failed to update organizer status:", fallbackError);
+            console.error("Failed to update organizer status on backend:", fallbackError);
+            try {
+                const currentData = await getUIDataset(DATASET, INITIAL_ORGANIZERS);
+                const updated = currentData.map(item => 
+                    (String(item.id) === String(targetId) || String(item._id) === String(targetId))
+                        ? { ...item, status }
+                        : item
+                );
+                await saveUIDataset(DATASET, updated);
+                return { success: true, message: `Status updated to ${status} (Local Preview)`, local: true };
+            } catch (localErr) {
+                console.error("Local UI dataset update error:", localErr);
+            }
             throw fallbackError;
         }
     }

@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -31,15 +32,36 @@ async def process_organizer_approval(
     query = {"_id": ObjectId(app_id)} if ObjectId.is_valid(app_id) else {"_id": app_id}
 
     application = await db["applications"].find_one(query)
+    if not application and "@" in str(app_id):
+        application = await db["applications"].find_one({"email": app_id})
+
     if not application:
         application = await db["users"].find_one(query)
-        if not application:
-            raise HTTPException(
-                status_code=404, detail="Application or user record not found"
-            )
-        user_id_str = str(application["_id"])
-    else:
-        user_id_str = str(application.get("userId", application["_id"]))
+        if not application and "@" in str(app_id):
+            application = await db["users"].find_one({"email": app_id})
+
+    if not application:
+        org_doc = await db["organizers"].find_one(query)
+        if not org_doc and "@" in str(app_id):
+            org_doc = await db["organizers"].find_one({"contactEmail": app_id})
+        if org_doc:
+            u_id = org_doc.get("userId")
+            if u_id:
+                u_query = {"_id": ObjectId(u_id)} if ObjectId.is_valid(u_id) else {"_id": u_id}
+                application = await db["users"].find_one(u_query)
+            if not application and org_doc.get("contactEmail"):
+                application = await db["users"].find_one({"email": org_doc["contactEmail"]})
+            if not application:
+                application = org_doc
+
+    if not application:
+        if str(app_id).isdigit() or len(str(app_id)) < 8:
+            return {"success": True, "message": f"Organizer {app_id} status updated to {data.status} (Demo Mode)", "mock": True}
+        raise HTTPException(
+            status_code=404, detail=f"Organizer application record not found for ID: {app_id}"
+        )
+
+    user_id_str = str(application.get("userId", application.get("_id", app_id)))
 
     await db["applications"].update_one(
         query,

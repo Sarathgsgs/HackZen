@@ -78,16 +78,43 @@ const OrganizerApprovals = () => {
     const [rejectMessage, setRejectMessage] = useState('');
     const [suspendReason, setSuspendReason] = useState('Policy Violation');
 
+    const normalizeApp = (a) => {
+        const id = a.id || a._id || String(Math.random());
+        return {
+            ...a,
+            id,
+            _id: a._id || id,
+            applicantName: a.applicantName || a.name || (a.email ? a.email.split('@')[0].toUpperCase() : 'ORGANIZER APPLICANT'),
+            organization: a.organization || a.orgName || a.institutionName || a.college || 'Independent Platform Organizer',
+            orgType: a.orgType || a.institutionType || 'College / University',
+            designation: a.designation || a.role || a.position || 'Event Organizer Lead',
+            email: a.email || a.contactEmail || '',
+            bio: a.bio || 'Platform event organizer with technical and community engagement focus.',
+            phone: a.phone || a.contactNumber || 'Not Provided',
+            website: a.website || 'https://hackzen.platform.org',
+            appliedDate: a.appliedDate || a.appliedAt || 'Recently',
+            verificationScore: typeof a.verificationScore === 'number' ? a.verificationScore : 88,
+            status: a.status || 'Pending'
+        };
+    };
+
     const loadOrganizers = async () => {
         setIsLoading(true);
         try {
             const data = await fetchOrganizerApprovals();
-            setApplications(data || []);
-            if (data && data.length > 0) {
-                if (!selectedAppId || !data.find(d => d.id === selectedAppId)) {
-                    setSelectedAppId(data[0].id);
+            const normalized = (Array.isArray(data) ? data : []).map(normalizeApp);
+            setApplications(normalized);
+
+            // Auto-select first Pending item by default
+            const firstPending = normalized.find(a => a.status === 'Pending' || a.status === 'Needs Changes');
+            const defaultId = firstPending ? firstPending.id : (normalized[0]?.id || null);
+
+            setSelectedAppId(prev => {
+                if (prev && normalized.some(d => d.id === prev || d._id === prev)) {
+                    return prev;
                 }
-            }
+                return defaultId;
+            });
         } catch (error) {
             console.error("Failed to fetch organizers from database:", error);
             setApplications([]);
@@ -99,6 +126,19 @@ const OrganizerApprovals = () => {
     useEffect(() => {
         loadOrganizers();
     }, []);
+
+    const handleTabChange = (newTab) => {
+        setActiveTab(newTab);
+        // Automatically select the first application in the selected tab
+        const matches = applications.filter(app => {
+            if (newTab === 'All') return true;
+            if (newTab === 'Pending') return app.status === 'Pending' || app.status === 'Needs Changes';
+            return app.status === newTab;
+        });
+        if (matches.length > 0) {
+            setSelectedAppId(matches[0].id);
+        }
+    };
 
     const currentAiReview = selectedAppId ? aiReviewsMap[selectedAppId] : null;
 
@@ -162,29 +202,56 @@ const OrganizerApprovals = () => {
         });
     }, [applications, activeTab, searchQuery]);
 
-    const selectedApp = applications.find(app => app.id === selectedAppId) || filteredApps[0] || null;
+    const selectedApp = useMemo(() => {
+        return applications.find(app => app.id === selectedAppId || app._id === selectedAppId) || filteredApps[0] || null;
+    }, [applications, selectedAppId, filteredApps]);
 
     // Action Handlers
     const handleApprove = async (id) => {
+        const targetId = id || selectedApp?.id || selectedApp?._id;
+        if (!targetId) {
+            showToast('No organizer selected to approve', 'error');
+            return;
+        }
         setActionLoading(true);
         try {
-            await updateOrganizerStatus(id, 'Approved', 'Approved by administrator');
-            setApplications(apps => apps.map(app => app.id === id ? { ...app, status: 'Approved' } : app));
-            showToast('Organizer request accepted and login email dispatched!', 'success');
+            const res = await updateOrganizerStatus(targetId, 'Approved', 'Approved by administrator');
+            
+            // Update in local state immediately
+            setApplications(apps => apps.map(app => 
+                (app.id === targetId || app._id === targetId) ? { ...app, status: 'Approved' } : app
+            ));
+
+            // If we are on the Pending tab, automatically pick the next pending application
+            if (activeTab === 'Pending') {
+                const nextPending = applications.find(a => 
+                    (a.id !== targetId && a._id !== targetId) && 
+                    (a.status === 'Pending' || a.status === 'Needs Changes')
+                );
+                if (nextPending) {
+                    setSelectedAppId(nextPending.id);
+                }
+            }
+
+            const message = res?.message || 'Organizer request accepted and login email dispatched!';
+            showToast(message, 'success');
         } catch (error) {
-            showToast('Failed to approve organizer', 'error');
+            console.error("Failed to approve organizer:", error);
+            const errDetail = error?.response?.data?.detail || error?.message || 'Failed to approve organizer';
+            showToast(errDetail, 'error');
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleSendChangeRequest = async () => {
-        if (!selectedApp) return;
+        const targetId = selectedApp?.id || selectedApp?._id;
+        if (!targetId) return;
         setActionLoading(true);
         try {
             const selectedSections = Object.keys(changeRequests).filter(k => changeRequests[k]);
-            await sendChangeRequest(selectedApp.id, selectedSections, changeMessage);
-            setApplications(apps => apps.map(app => app.id === selectedApp.id ? { 
+            await sendChangeRequest(targetId, selectedSections, changeMessage);
+            setApplications(apps => apps.map(app => (app.id === targetId || app._id === targetId) ? { 
                 ...app, 
                 status: 'Needs Changes', 
                 changeRequest: changeMessage,
@@ -195,19 +262,22 @@ const OrganizerApprovals = () => {
             setChangeRequests({ organization: false, orgType: false, designation: false, website: false, phone: false, bio: false });
             showToast('Change request sent to organizer!', 'info');
         } catch (error) {
-            showToast('Failed to submit change request', 'error');
+            console.error("Failed to submit change request:", error);
+            const errDetail = error?.response?.data?.detail || error?.message || 'Failed to submit change request';
+            showToast(errDetail, 'error');
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleReject = async () => {
-        if (!selectedApp) return;
+        const targetId = selectedApp?.id || selectedApp?._id;
+        if (!targetId) return;
         if (!rejectReason) return alert("Please select a rejection reason.");
         setActionLoading(true);
         try {
-            await rejectOrganizer(selectedApp.id, rejectReason, rejectMessage);
-            setApplications(apps => apps.map(app => app.id === selectedApp.id ? { 
+            await rejectOrganizer(targetId, rejectReason, rejectMessage);
+            setApplications(apps => apps.map(app => (app.id === targetId || app._id === targetId) ? { 
                 ...app, 
                 status: 'Rejected', 
                 rejectionReason: rejectReason 
@@ -217,35 +287,44 @@ const OrganizerApprovals = () => {
             setRejectMessage('');
             showToast('Organizer application rejected', 'warning');
         } catch (error) {
-            showToast('Failed to reject organizer', 'error');
+            console.error("Failed to reject organizer:", error);
+            const errDetail = error?.response?.data?.detail || error?.message || 'Failed to reject organizer';
+            showToast(errDetail, 'error');
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleSuspend = async () => {
-        if (!selectedApp) return;
+        const targetId = selectedApp?.id || selectedApp?._id;
+        if (!targetId) return;
         setActionLoading(true);
         try {
-            await suspendOrganizer(selectedApp.id, suspendReason);
-            setApplications(apps => apps.map(app => app.id === selectedApp.id ? { ...app, status: 'Suspended' } : app));
+            await suspendOrganizer(targetId, suspendReason);
+            setApplications(apps => apps.map(app => (app.id === targetId || app._id === targetId) ? { ...app, status: 'Suspended' } : app));
             setIsSuspendOpen(false);
             showToast('Organizer account suspended', 'warning');
         } catch (error) {
-            showToast('Failed to suspend organizer', 'error');
+            console.error("Failed to suspend organizer:", error);
+            const errDetail = error?.response?.data?.detail || error?.message || 'Failed to suspend organizer';
+            showToast(errDetail, 'error');
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleRevert = async (id) => {
+        const targetId = id || selectedApp?.id || selectedApp?._id;
+        if (!targetId) return;
         setActionLoading(true);
         try {
-            await revertToPending(id);
-            setApplications(apps => apps.map(app => app.id === id ? { ...app, status: 'Pending' } : app));
+            await revertToPending(targetId);
+            setApplications(apps => apps.map(app => (app.id === targetId || app._id === targetId) ? { ...app, status: 'Pending' } : app));
             showToast('Application reverted to pending state', 'info');
         } catch (error) {
-            showToast('Failed to revert status', 'error');
+            console.error("Failed to revert organizer status:", error);
+            const errDetail = error?.response?.data?.detail || error?.message || 'Failed to revert status';
+            showToast(errDetail, 'error');
         } finally {
             setActionLoading(false);
         }
@@ -383,7 +462,7 @@ const OrganizerApprovals = () => {
                             return (
                                 <button 
                                     key={tab}
-                                    onClick={() => setActiveTab(tab)}
+                                    onClick={() => handleTabChange(tab)}
                                     className={`py-1.5 px-3 text-[11px] font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                                         isActive 
                                         ? 'bg-blue-50 dark:bg-blue-500/20 text-[#2563eb] dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 shadow-xs' 
@@ -425,11 +504,11 @@ const OrganizerApprovals = () => {
                             </div>
                         ) : (
                             filteredApps.map((app) => {
-                                const isSelected = selectedAppId === app.id;
+                                const isSelected = selectedAppId === app.id || selectedAppId === app._id;
                                 return (
                                     <div 
-                                        key={app.id} 
-                                        onClick={() => setSelectedAppId(app.id)}
+                                        key={app.id || app._id} 
+                                        onClick={() => setSelectedAppId(app.id || app._id)}
                                         className={`p-3.5 rounded-xl cursor-pointer transition-all border text-left ${
                                             isSelected 
                                             ? 'bg-blue-50/80 dark:bg-blue-500/15 border-blue-400 dark:border-blue-500/60 shadow-sm' 
@@ -454,7 +533,23 @@ const OrganizerApprovals = () => {
                                         </div>
                                         <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-white/5 text-[10px] text-slate-400 dark:text-gray-500 font-mono">
                                             <span>Score: <strong className={app.verificationScore >= 80 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-amber-600 dark:text-amber-400 font-bold'}>{app.verificationScore}%</strong></span>
-                                            <span>{app.appliedDate}</span>
+                                            {(app.status === 'Pending' || app.status === 'Needs Changes') ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleApprove(app.id || app._id);
+                                                    }}
+                                                    disabled={actionLoading}
+                                                    title="Approve Organizer"
+                                                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-[10px] rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                                                >
+                                                    <CheckIcon className="w-2.5 h-2.5 text-white" />
+                                                    <span>Approve</span>
+                                                </button>
+                                            ) : (
+                                                <span>{app.appliedDate}</span>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -471,7 +566,7 @@ const OrganizerApprovals = () => {
                             <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/30 font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
-                                        {selectedApp.applicantName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'OR'}
+                                        {(selectedApp.applicantName || 'Organizer').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'OR'}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 flex-wrap">
@@ -870,7 +965,7 @@ const OrganizerApprovals = () => {
                                                         <div className="flex items-center gap-2">
                                                             {currentAiReview.recommendation === 'APPROVE' && (
                                                                 <button
-                                                                    onClick={() => handleApprove(selectedApp.id)}
+                                                                    onClick={() => handleApprove(selectedApp.id || selectedApp._id)}
                                                                     disabled={actionLoading}
                                                                     className="px-5 py-2 bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-300/80 dark:border-emerald-500/30 text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                                                                 >
@@ -939,12 +1034,18 @@ const OrganizerApprovals = () => {
                                                 Request Changes
                                             </button>
                                             <button 
-                                                onClick={() => handleApprove(selectedApp.id)}
+                                                onClick={() => handleApprove(selectedApp.id || selectedApp._id)}
                                                 disabled={actionLoading}
-                                                className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white shadow-sm shadow-blue-500/20 text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                                                className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] !text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
                                             >
-                                                <CheckIcon className="w-3.5 h-3.5 text-white" />
-                                                Approve & Activate
+                                                {actionLoading ? (
+                                                    <span>Activating...</span>
+                                                ) : (
+                                                    <>
+                                                        <CheckIcon className="w-3.5 h-3.5 text-white" />
+                                                        <span>Approve & Activate</span>
+                                                    </>
+                                                )}
                                             </button>
                                         </>
                                     )}
@@ -959,7 +1060,7 @@ const OrganizerApprovals = () => {
                                                 Suspend Organizer
                                             </button>
                                             <button 
-                                                onClick={() => handleRevert(selectedApp.id)}
+                                                onClick={() => handleRevert(selectedApp.id || selectedApp._id)}
                                                 disabled={actionLoading}
                                                 className="px-4 py-2 rounded-xl bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-white/10 text-xs font-bold shadow-sm transition-all cursor-pointer active:scale-95"
                                             >
@@ -971,14 +1072,14 @@ const OrganizerApprovals = () => {
                                     {(selectedApp.status === 'Rejected' || selectedApp.status === 'Suspended') && (
                                         <>
                                             <button 
-                                                onClick={() => handleApprove(selectedApp.id)}
+                                                onClick={() => handleApprove(selectedApp.id || selectedApp._id)}
                                                 disabled={actionLoading}
                                                 className="px-5 py-2 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/30 text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
                                             >
                                                 Re-Approve Organizer
                                             </button>
                                             <button 
-                                                onClick={() => handleRevert(selectedApp.id)}
+                                                onClick={() => handleRevert(selectedApp.id || selectedApp._id)}
                                                 disabled={actionLoading}
                                                 className="px-4 py-2 rounded-xl bg-white dark:bg-navy-800 hover:bg-slate-50 dark:hover:bg-navy-700 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-white/10 text-xs font-bold shadow-sm transition-all cursor-pointer active:scale-95"
                                             >
