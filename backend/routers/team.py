@@ -253,57 +253,150 @@ async def get_my_teams(current_user: dict = Depends(with_auth)):
 
 @router.get("/my-mentor-requests", response_model=List[Dict[str, Any]])
 async def get_my_mentor_requests(current_user: dict = Depends(with_auth)):
-    """Return real mentor assignments for teams the authenticated student belongs to."""
+    """Return real mentor requests and assignments for teams the authenticated student belongs to."""
     db = get_db()
     user_id = _authenticated_user_id(current_user)
     members_collection = get_team_members_collection()
+    teams_collection = get_team_collection()
+
+    # Find teams via memberships
     memberships = await members_collection.find(
         {"$or": [{"userId": user_id}, {"userId": str(user_id)}]}
     ).to_list(100)
 
     team_ids = []
     for membership in memberships:
-        team_id = membership.get("teamId")
-        if not team_id:
+        t_id = membership.get("teamId")
+        if not t_id:
             continue
-        if isinstance(team_id, ObjectId):
-            team_ids.append(team_id)
-            continue
-        if isinstance(team_id, str) and ObjectId.is_valid(team_id):
-            team_ids.append(ObjectId(team_id))
+        if isinstance(t_id, ObjectId):
+            team_ids.append(t_id)
+        elif isinstance(t_id, str):
+            team_ids.append(t_id)
+            if ObjectId.is_valid(t_id):
+                team_ids.append(ObjectId(t_id))
 
-    if not team_ids:
-        return []
+    # Also find teams led or created by this user
+    leader_query = [
+        {"leaderId": user_id},
+        {"createdBy": user_id},
+    ]
+    if ObjectId.is_valid(user_id):
+        leader_query.append({"leaderId": ObjectId(user_id)})
+    if current_user.get("name"):
+        leader_query.append({"createdBy": current_user.get("name")})
+    
+    led_teams = await teams_collection.find({"$or": leader_query}).to_list(100)
+    for lt in led_teams:
+        if lt["_id"] not in team_ids:
+            team_ids.append(lt["_id"])
+        if str(lt["_id"]) not in team_ids:
+            team_ids.append(str(lt["_id"]))
 
-    teams_collection = get_team_collection()
-    teams = await teams_collection.find(
-        {"_id": {"$in": team_ids}, "mentorId": {"$exists": True, "$ne": None}}
-    ).to_list(100)
+    team_id_strs = [str(tid) for tid in team_ids]
 
+    # Query explicit requests from mentorRequests collection
+    req_query = [
+        {"leaderId": user_id},
+        {"leaderId": str(user_id)},
+    ]
+    if team_id_strs:
+        req_query.append({"teamId": {"$in": team_id_strs}})
+        valid_objs = [ObjectId(t) for t in team_id_strs if ObjectId.is_valid(t)]
+        if valid_objs:
+            req_query.append({"teamId": {"$in": valid_objs}})
+
+    cursor_reqs = db["mentorRequests"].find({"$or": req_query}).sort("createdAt", -1)
+    mentor_reqs = await cursor_reqs.to_list(100)
+
+    # Query corresponding teams
+    teams = []
+    if team_id_strs:
+        teams = await teams_collection.find({
+            "$or": [
+                {"_id": {"$in": [ObjectId(t) for t in team_id_strs if ObjectId.is_valid(t)]}},
+                {"_id": {"$in": team_id_strs}}
+            ]
+        }).to_list(100)
+
+    teams_map = {str(t["_id"]): t for t in teams}
     response = []
+    seen_teams = set()
+
+    # 1. Format explicit mentor requests
+    for req in mentor_reqs:
+        t_id = str(req.get("teamId") or "")
+        seen_teams.add(t_id)
+        raw_status = str(req.get("status") or "pending").lower()
+        if raw_status in {"approved", "accepted", "assigned"}:
+            display_status = "Assigned"
+        elif raw_status in {"rejected", "declined"}:
+            display_status = "Declined"
+        else:
+            display_status = "Pending"
+
+        m_name = req.get("mentorName")
+        m_id = str(req.get("mentorId") or "")
+        if not m_name and m_id and ObjectId.is_valid(m_id):
+            u = await db.users.find_one({"_id": ObjectId(m_id)})
+            if u:
+                m_name = u.get("name")
+
+        team_doc = teams_map.get(t_id, {})
+        response.append({
+            "id": str(req.get("_id") or t_id),
+            "teamId": t_id,
+            "teamName": req.get("teamName") or team_doc.get("teamName") or "Team",
+            "mentorId": m_id or None,
+            "mentorName": m_name or "Mentor",
+            "status": display_status,
+            "requestedAt": req.get("createdAt") or req.get("updatedAt"),
+            "focusArea": req.get("focusArea") or team_doc.get("mentorRequest", {}).get("focusArea"),
+            "guidanceRequest": req.get("message") or req.get("description") or team_doc.get("mentorRequest", {}).get("guidanceRequest"),
+            "preferredTimeWindow": req.get("preferredTimeWindow") or team_doc.get("mentorRequest", {}).get("preferredTimeWindow"),
+        })
+
+    # 2. Check teams with assigned mentors or pending status without explicit mentorRequests doc
     for team in teams:
-        team_id = str(team.get("_id"))
-        mentor_id = team.get("mentorId")
-        mentor_name = None
+        t_id = str(team["_id"])
+        if t_id in seen_teams:
+            continue
 
-        if mentor_id and ObjectId.is_valid(str(mentor_id)):
-            mentor_user = await db.users.find_one({"_id": ObjectId(str(mentor_id))})
-            if mentor_user:
-                mentor_name = mentor_user.get("name")
+        assigned_mentor_id = team.get("mentorId")
+        pending_mentor_id = team.get("pendingMentorId")
 
-        response.append(
-            {
-                "teamId": team_id,
+        if assigned_mentor_id:
+            m_name = team.get("mentorName")
+            if not m_name and ObjectId.is_valid(str(assigned_mentor_id)):
+                u = await db.users.find_one({"_id": ObjectId(str(assigned_mentor_id))})
+                if u:
+                    m_name = u.get("name")
+            response.append({
+                "id": t_id,
+                "teamId": t_id,
                 "teamName": team.get("teamName"),
-                "mentorId": mentor_id,
-                "mentorName": mentor_name,
-                "status": "assigned",
-                "requestedAt": team.get("mentorAssignedAt"),
+                "mentorId": str(assigned_mentor_id),
+                "mentorName": m_name or "Mentor",
+                "status": "Assigned",
+                "requestedAt": team.get("mentorAssignedAt") or team.get("updatedAt"),
                 "focusArea": team.get("mentorRequest", {}).get("focusArea"),
                 "guidanceRequest": team.get("mentorRequest", {}).get("guidanceRequest"),
                 "preferredTimeWindow": team.get("mentorRequest", {}).get("preferredTimeWindow"),
-            }
-        )
+            })
+        elif pending_mentor_id or str(team.get("mentorRequestStatus", "")).lower() == "pending":
+            m_name = team.get("pendingMentorName")
+            response.append({
+                "id": t_id,
+                "teamId": t_id,
+                "teamName": team.get("teamName"),
+                "mentorId": str(pending_mentor_id) if pending_mentor_id else None,
+                "mentorName": m_name or "Mentor",
+                "status": "Pending",
+                "requestedAt": team.get("mentorRequestedAt") or team.get("updatedAt"),
+                "focusArea": team.get("mentorRequest", {}).get("focusArea"),
+                "guidanceRequest": team.get("mentorRequest", {}).get("guidanceRequest"),
+                "preferredTimeWindow": team.get("mentorRequest", {}).get("preferredTimeWindow"),
+            })
 
     return response
 
@@ -323,18 +416,6 @@ async def get_mentor_teams(
 
     cursor = teams_collection.find({"$or": id_queries})
     teams = await cursor.to_list(100)
-
-    # If mentor has no explicitly assigned teams, auto-assign first available demo teams
-    if not teams:
-        all_teams = await teams_collection.find({}).limit(3).to_list(3)
-        if all_teams:
-            mentor_name = current_user.get("name") or "Mentor"
-            for t in all_teams:
-                await teams_collection.update_one(
-                    {"_id": t["_id"]},
-                    {"$set": {"mentorId": user_id, "mentorName": mentor_name}}
-                )
-            teams = await teams_collection.find({"$or": id_queries}).to_list(100)
 
     for team in teams:
         team["_id"] = str(team["_id"])
@@ -468,63 +549,71 @@ async def get_mentor_requests(
     db = get_db()
     user_id = _authenticated_user_id(current_user)
 
+    mentor_ids = [user_id, str(user_id)]
+    if ObjectId.is_valid(user_id):
+        mentor_ids.append(ObjectId(user_id))
+
+    # Also resolve mentor profile doc ID if mentor profile is registered
+    mentor_profile = await db["mentors"].find_one({
+        "$or": [
+            {"userId": user_id},
+            {"userId": str(user_id)},
+            {"_id": ObjectId(user_id) if ObjectId.is_valid(user_id) else None}
+        ]
+    })
+    if mentor_profile:
+        if mentor_profile.get("userId") and mentor_profile["userId"] not in mentor_ids:
+            mentor_ids.append(str(mentor_profile["userId"]))
+        if mentor_profile.get("_id") and str(mentor_profile["_id"]) not in mentor_ids:
+            mentor_ids.append(str(mentor_profile["_id"]))
+
     filter_query = {
         "$or": [
-            {"mentorId": user_id},
+            {"mentorId": {"$in": mentor_ids}},
             {"mentorId": None},
             {"mentorId": ""},
             {"mentorId": {"$exists": False}},
         ]
     }
-    if ObjectId.is_valid(user_id):
-        filter_query["$or"].append({"mentorId": ObjectId(user_id)})
 
     if status and status.lower() != "all":
-        filter_query["status"] = {"$regex": f"^{status}$", "$options": "i"}
+        target_status = "approved" if status.lower() in {"accepted", "approved"} else "rejected" if status.lower() in {"rejected", "declined"} else status.lower()
+        filter_query["status"] = {"$regex": f"^{target_status}$", "$options": "i"}
 
     cursor = db["mentorRequests"].find(filter_query).sort("createdAt", -1).limit(limit)
     requests = await cursor.to_list(limit)
-
-    # If no requests exist yet, generate from unassigned/active teams
-    if not requests:
-        teams = await db["teams"].find({"status": "Active"}).limit(4).to_list(4)
-        for t in teams:
-            t_id = str(t["_id"])
-            requests.append({
-                "_id": ObjectId(),
-                "teamId": t_id,
-                "teamName": t.get("teamName", "Team"),
-                "domain": t.get("domain") or t.get("track") or "General",
-                "description": t.get("project") or "Seeking mentor guidance on architecture and system design.",
-                "message": t.get("project") or "We would appreciate your mentorship on our project.",
-                "status": "pending",
-                "memberCount": 3,
-                "requiredSkills": t.get("requiredSkills", ["React", "Python"]),
-                "createdAt": datetime.utcnow() - timedelta(days=1),
-            })
 
     output = []
     for req in requests:
         req_id = str(req.get("_id", ""))
         team_id = str(req.get("teamId", ""))
         team_name = req.get("teamName")
-        if not team_name and team_id and ObjectId.is_valid(team_id):
-            team_doc = await db["teams"].find_one({"_id": ObjectId(team_id)})
-            if team_doc:
-                team_name = team_doc.get("teamName") or team_doc.get("name")
+        team_doc = None
+
+        if team_id:
+            team_doc = await db["teams"].find_one({
+                "$or": [{"_id": ObjectId(team_id)}, {"_id": team_id}]
+            }) if ObjectId.is_valid(team_id) else await db["teams"].find_one({"_id": team_id})
+
+        if team_doc and not team_name:
+            team_name = team_doc.get("teamName") or team_doc.get("name")
+
+        domain = req.get("domain") or (team_doc.get("domain") if team_doc else None) or (team_doc.get("track") if team_doc else None) or "Technology"
+        member_count = req.get("memberCount") or (team_doc.get("teamSize") if team_doc else None) or 3
+        skills = req.get("requiredSkills") or (team_doc.get("requiredSkills") if team_doc else None) or ["React", "AI", "Cloud"]
 
         output.append({
             "_id": req_id,
             "id": req_id,
             "teamId": team_id,
             "teamName": team_name or "Assigned Team",
-            "description": req.get("description") or req.get("message") or "",
-            "message": req.get("message") or req.get("description") or "",
-            "domain": req.get("domain") or "General",
-            "memberCount": req.get("memberCount") or req.get("teamSize") or 3,
-            "teamSize": req.get("memberCount") or req.get("teamSize") or 3,
+            "description": req.get("description") or req.get("message") or (team_doc.get("description") if team_doc else "") or "",
+            "message": req.get("message") or req.get("description") or "Seeking guidance from mentor.",
+            "domain": domain,
+            "memberCount": member_count,
+            "teamSize": member_count,
             "status": req.get("status") or "pending",
-            "requiredSkills": req.get("requiredSkills") or ["React", "AI", "Cloud"],
+            "requiredSkills": skills,
             "createdAt": req.get("createdAt") or datetime.utcnow(),
         })
 
@@ -549,32 +638,95 @@ async def update_mentor_request(
     req = None
     if ObjectId.is_valid(request_id):
         req = await db["mentorRequests"].find_one({"_id": ObjectId(request_id)})
+    if not req:
+        req = await db["mentorRequests"].find_one({"_id": request_id})
+    if not req and ObjectId.is_valid(request_id):
+        req = await db["mentorRequests"].find_one({"teamId": request_id})
+    if not req:
+        req = await db["mentorRequests"].find_one({"teamId": str(request_id)})
+    if not req and ObjectId.is_valid(request_id):
+        team_doc = await db["teams"].find_one({"_id": ObjectId(request_id)})
+        if team_doc:
+            req = {"teamId": str(team_doc["_id"]), "teamName": team_doc.get("teamName"), "leaderId": team_doc.get("leaderId")}
 
     if not req:
-        if ObjectId.is_valid(request_id):
-            team_doc = await db["teams"].find_one({"_id": ObjectId(request_id)})
-            if team_doc:
-                req = {"teamId": str(team_doc["_id"]), "teamName": team_doc.get("teamName")}
+        raise HTTPException(status_code=404, detail="Mentorship request not found")
 
-    if req and ObjectId.is_valid(request_id):
+    req_target_id = req.get("_id")
+    if req_target_id:
         await db["mentorRequests"].update_one(
-            {"_id": ObjectId(request_id)},
-            {"$set": {"status": new_status, "updatedAt": datetime.utcnow()}},
+            {"_id": req_target_id},
+            {"$set": {
+                "status": new_status,
+                "mentorId": user_id,
+                "mentorName": mentor_name,
+                "responseMessage": payload.get("responseMessage", ""),
+                "updatedAt": datetime.utcnow()
+            }},
             upsert=True
         )
 
-    if new_status == "approved" and req and req.get("teamId"):
-        team_id = req["teamId"]
-        if ObjectId.is_valid(team_id):
-            await db["teams"].update_one(
-                {"_id": ObjectId(team_id)},
-                {"$set": {
+    team_id = str(req.get("teamId") or "")
+    leader_id = req.get("leaderId")
+
+    if new_status == "approved" and team_id:
+        team_filter = {"_id": ObjectId(team_id)} if ObjectId.is_valid(team_id) else {"_id": team_id}
+        await db["teams"].update_one(
+            team_filter,
+            {
+                "$set": {
                     "mentorId": user_id,
                     "mentorName": mentor_name,
+                    "mentorAssignedAt": datetime.utcnow(),
+                    "mentorAssignedBy": user_id,
+                    "mentorRequestStatus": "approved",
                     "status": "Active",
                     "updatedAt": datetime.utcnow(),
-                }}
-            )
+                },
+                "$unset": {
+                    "pendingMentorId": "",
+                    "pendingMentorName": "",
+                }
+            }
+        )
+
+        # Notify team leader and team inbox
+        if leader_id:
+            await db["inbox"].insert_one({
+                "userId": str(leader_id),
+                "teamId": team_id,
+                "type": "mentor_request_accepted",
+                "title": "Mentorship Request Accepted!",
+                "message": f"{mentor_name} has accepted your team's mentorship request! You can now collaborate together.",
+                "createdAt": datetime.utcnow(),
+                "read": False,
+            })
+    elif new_status == "rejected" and team_id:
+        team_filter = {"_id": ObjectId(team_id)} if ObjectId.is_valid(team_id) else {"_id": team_id}
+        await db["teams"].update_one(
+            team_filter,
+            {
+                "$set": {
+                    "mentorRequestStatus": "rejected",
+                    "updatedAt": datetime.utcnow(),
+                },
+                "$unset": {
+                    "pendingMentorId": "",
+                    "pendingMentorName": "",
+                }
+            }
+        )
+
+        if leader_id:
+            await db["inbox"].insert_one({
+                "userId": str(leader_id),
+                "teamId": team_id,
+                "type": "mentor_request_rejected",
+                "title": "Mentorship Request Declined",
+                "message": f"{mentor_name} was unable to accept your team's mentorship request at this time. You may request another mentor.",
+                "createdAt": datetime.utcnow(),
+                "read": False,
+            })
 
     return {
         "success": True,
@@ -945,26 +1097,29 @@ async def assign_mentor(
         if isinstance(value, str) and value.strip()
     }
 
-    target_filter = {
-        "_id": ObjectId(team_id) if ObjectId.is_valid(team_id) else team_id,
-        "$or": [{"mentorId": {"$exists": False}}, {"mentorId": None}, {"mentorId": ""}],
-    }
-    update_result = await teams_collection.update_one(
-        target_filter,
-        {"$set": {
-            "mentorId": mentor_user_id,
-            "mentorName": mentor_name or "Mentor",
-            "mentorAssignedAt": assigned_at,
-            "mentorAssignedBy": user_id,
-            "mentorRequest": request_details,
-        }},
+    # Update team with pending request status and unset any direct mentor assignment
+    await teams_collection.update_one(
+        {"_id": ObjectId(team_id) if ObjectId.is_valid(team_id) else team_id},
+        {
+            "$set": {
+                "mentorRequestStatus": "pending",
+                "pendingMentorId": mentor_user_id,
+                "pendingMentorName": mentor_name or "Mentor",
+                "mentorRequestedAt": assigned_at,
+                "mentorRequest": request_details,
+            },
+            "$unset": {
+                "mentorId": "",
+                "mentorName": "",
+                "mentorAssignedAt": "",
+                "mentorAssignedBy": "",
+            }
+        }
     )
-    if not getattr(update_result, "modified_count", 0):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This team already has a mentor assignment.")
 
-    # Record in mentorRequests collection and inbox for mentor dashboard
+    # Record pending request in mentorRequests collection for mentor dashboard review
     try:
-        await db["mentorRequests"].insert_one({
+        req_payload = {
             "teamId": team_id,
             "teamName": team.get("teamName", "Team"),
             "mentorId": mentor_user_id,
@@ -975,10 +1130,19 @@ async def assign_mentor(
             "message": mentor_data.guidanceRequest or "",
             "description": mentor_data.guidanceRequest or "",
             "preferredTimeWindow": mentor_data.preferredTimeWindow or "",
-            "status": "assigned",
+            "domain": team.get("domain") or team.get("track") or "General",
+            "memberCount": team.get("teamSize") or 1,
+            "requiredSkills": team.get("requiredSkills") or ["React", "Python"],
+            "status": "pending",
             "createdAt": assigned_at,
             "updatedAt": assigned_at,
-        })
+        }
+        await db["mentorRequests"].update_one(
+            {"teamId": team_id, "mentorId": mentor_user_id},
+            {"$set": req_payload},
+            upsert=True
+        )
+
         await db["inbox"].insert_one({
             "userId": mentor_user_id,
             "type": "mentor_request",

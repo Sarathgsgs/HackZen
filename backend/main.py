@@ -65,6 +65,167 @@ async def lifespan(app: FastAPI):
             print("[Auto-Seeder] Organizer portal workflow data verified/initialized on startup.")
         except Exception as seeder_err:
             print(f"[Auto-Seeder notice]: {seeder_err}")
+
+        try:
+            from bson import ObjectId
+            from core.security import get_password_hash
+            ananya_id = "6a70c0656425dafef71c73c1"
+
+            # 1. Revert teams where Ananya was auto-assigned without an approved request
+            await MongoDB.db["teams"].update_many(
+                {
+                    "mentorId": {"$in": [ananya_id, ObjectId(ananya_id)]},
+                    "mentorRequestStatus": {"$ne": "approved"}
+                },
+                {
+                    "$unset": {
+                        "mentorId": "",
+                        "mentorName": "",
+                        "mentorAssignedAt": "",
+                        "mentorAssignedBy": ""
+                    },
+                    "$set": {
+                        "mentorRequestStatus": "pending",
+                        "pendingMentorId": ananya_id,
+                        "pendingMentorName": "Ananya Rao"
+                    }
+                }
+            )
+
+            # 2. Find or ensure student user Aadhi
+            aadhi_user = await MongoDB.db["users"].find_one({
+                "$or": [
+                    {"email": {"$regex": "aadhi", "$options": "i"}},
+                    {"name": {"$regex": "^aadhi$", "$options": "i"}}
+                ]
+            })
+            if not aadhi_user:
+                aadhi_doc = {
+                    "name": "Aadhi",
+                    "email": "aadhi@student.edu",
+                    "password": get_password_hash("Password@123"),
+                    "role": "student",
+                    "is_active": True,
+                    "createdAt": datetime.utcnow(),
+                    "updatedAt": datetime.utcnow()
+                }
+                res = await MongoDB.db["users"].insert_one(aadhi_doc)
+                aadhi_user = aadhi_doc
+                aadhi_user["_id"] = res.inserted_id
+
+            aadhi_id_str = str(aadhi_user["_id"])
+
+            # 3. Find or ensure Aadhi's team
+            aadhi_team = await MongoDB.db["teams"].find_one({
+                "$or": [
+                    {"leaderId": aadhi_id_str},
+                    {"leaderId": aadhi_user["_id"]},
+                    {"teamName": {"$regex": "aadhi", "$options": "i"}}
+                ]
+            })
+            if not aadhi_team:
+                team_doc = {
+                    "teamName": "Aadhi Innovators",
+                    "hackathonId": "65e050000000000000000001",
+                    "domain": "AI & Cloud Systems",
+                    "description": "Building high-performance scalable systems with edge microgrid telemetry.",
+                    "leaderId": aadhi_id_str,
+                    "leaderName": aadhi_user.get("name", "Aadhi"),
+                    "status": "Active",
+                    "mentorRequestStatus": "pending",
+                    "pendingMentorId": ananya_id,
+                    "pendingMentorName": "Ananya Rao",
+                    "mentorRequestedAt": datetime.utcnow(),
+                    "teamSize": 3,
+                    "maxSize": 4,
+                    "createdAt": datetime.utcnow(),
+                    "updatedAt": datetime.utcnow(),
+                }
+                t_res = await MongoDB.db["teams"].insert_one(team_doc)
+                aadhi_team = team_doc
+                aadhi_team["_id"] = t_res.inserted_id
+            else:
+                await MongoDB.db["teams"].update_one(
+                    {"_id": aadhi_team["_id"]},
+                    {
+                        "$unset": {
+                            "mentorId": "",
+                            "mentorName": "",
+                            "mentorAssignedAt": "",
+                            "mentorAssignedBy": ""
+                        },
+                        "$set": {
+                            "mentorRequestStatus": "pending",
+                            "pendingMentorId": ananya_id,
+                            "pendingMentorName": "Ananya Rao",
+                            "mentorRequestedAt": datetime.utcnow(),
+                        }
+                    }
+                )
+
+            team_id_str = str(aadhi_team["_id"])
+
+            # Ensure leadership in teamMembers
+            await MongoDB.db["teamMembers"].update_one(
+                {"teamId": team_id_str, "userId": aadhi_id_str},
+                {
+                    "$set": {
+                        "teamId": team_id_str,
+                        "userId": aadhi_id_str,
+                        "role": "leader",
+                        "name": aadhi_user.get("name", "Aadhi"),
+                        "email": aadhi_user.get("email"),
+                        "joinedAt": datetime.utcnow(),
+                    }
+                },
+                upsert=True
+            )
+
+            # 4. Upsert pending mentorRequest for Ananya
+            await MongoDB.db["mentorRequests"].update_one(
+                {"teamId": team_id_str, "mentorId": ananya_id},
+                {
+                    "$set": {
+                        "teamId": team_id_str,
+                        "teamName": aadhi_team.get("teamName", "Aadhi Innovators"),
+                        "mentorId": ananya_id,
+                        "mentorName": "Ananya Rao",
+                        "leaderId": aadhi_id_str,
+                        "leaderName": aadhi_user.get("name", "Aadhi"),
+                        "focusArea": "Full-Stack Architecture & Cloud Deployment",
+                        "message": "Requesting mentorship from Ananya Rao to review our project architecture, cloud pipeline, and code scalability.",
+                        "description": "Building high-performance scalable systems with edge microgrid telemetry.",
+                        "domain": "AI & Cloud Systems",
+                        "memberCount": 3,
+                        "requiredSkills": ["React", "FastAPI", "MongoDB", "Cloud"],
+                        "preferredTimeWindow": "Weekdays (Evenings)",
+                        "status": "pending",
+                        "createdAt": datetime.utcnow(),
+                        "updatedAt": datetime.utcnow(),
+                    }
+                },
+                upsert=True
+            )
+
+            # 5. Add notification to Ananya inbox
+            await MongoDB.db["inbox"].update_one(
+                {"userId": ananya_id, "teamId": team_id_str, "type": "mentor_request"},
+                {
+                    "$set": {
+                        "userId": ananya_id,
+                        "teamId": team_id_str,
+                        "type": "mentor_request",
+                        "title": "New Mentorship Request from Aadhi",
+                        "message": f"Team '{aadhi_team.get('teamName')}' has requested your mentorship. Review and accept in your Mentorship Requests section.",
+                        "createdAt": datetime.utcnow(),
+                        "read": False,
+                    }
+                },
+                upsert=True
+            )
+            print("[Mentor Revert] Aadhi request to Ananya Rao reverted to pending state.")
+        except Exception as mentor_revert_err:
+            print(f"[Mentor Revert notice]: {mentor_revert_err}")
     yield
     if reminder_task:
         reminder_task.cancel()
