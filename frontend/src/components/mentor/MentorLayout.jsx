@@ -133,18 +133,24 @@ export default function MentorLayout() {
       const { data } = await apiClient.get('/inbox/', { params: { limit: 50 } });
       setNotifications((data || []).map((item) => ({
         id: item.id || item._id,
-        title: item.type === 'mentor_request' ? 'New Mentorship Request' : item.type === 'meeting_reminder' ? 'Upcoming Session' : item.type === 'mentor_feedback' ? 'Mentor Feedback' : 'Platform Update',
+        title: item.title || (item.type === 'mentor_request' ? 'New Mentorship Request' : item.type === 'meeting_reminder' ? 'Upcoming Session' : item.type === 'mentor_feedback' ? 'Mentor Feedback' : item.type === 'chat_message' ? 'Team Chat Message' : 'Platform Update'),
         detail: item.message,
         time: item.createdAt ? new Date(item.createdAt).toLocaleString() : '',
         read: Boolean(item.read),
-        link: item.type === 'mentor_request' ? '/mentor/requests' : item.type === 'meeting_reminder' ? '/mentor/sessions' : item.type === 'mentor_feedback' ? '/mentor/feedback' : '/mentor/teams',
+        type: item.type,
+        teamId: item.teamId,
+        link: item.link || item.actionUrl || (item.type === 'mentor_request' ? '/mentor/requests' : item.type === 'meeting_reminder' ? '/mentor/sessions' : item.type === 'mentor_feedback' ? '/mentor/feedback' : item.type === 'chat_message' ? (item.teamId ? `/mentor/messages?teamId=${item.teamId}` : '/mentor/messages') : '/mentor/teams'),
       })));
     } catch (error) {
       console.error('Mentor notifications could not be loaded:', error);
     }
   };
 
-  useEffect(() => { loadNotifications(); }, []);
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -431,14 +437,26 @@ export default function MentorLayout() {
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-bold text-slate-800 dark:text-white">
-                          {notif.title}
-                        </p>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <p className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                            {notif.title}
+                          </p>
+                          {notif.type === 'chat_message' && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 shrink-0">
+                              Chat
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[10px] text-slate-400 shrink-0">{notif.time}</span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
                         {notif.detail}
                       </p>
+                      {notif.type === 'chat_message' && (
+                        <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold mt-1 inline-flex items-center gap-1">
+                          Open in chat →
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

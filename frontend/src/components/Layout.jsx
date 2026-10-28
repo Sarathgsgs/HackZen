@@ -59,8 +59,10 @@ export const formatNotificationTime = (timeVal) => {
 };
 
 // --- Single Message Popup Modal ---
-const MessageModal = ({ message, onClose }) => {
+const MessageModal = ({ message, onClose, onNavigate }) => {
     if (!message) return null;
+    const chatUrl = message.actionUrl || message.link || (message.type === 'chat_message' && message.teamId ? `/student/chat?teamId=${message.teamId}` : null);
+
     return (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
 
@@ -83,15 +85,31 @@ const MessageModal = ({ message, onClose }) => {
                         </svg>
                     </div>
                     <div>
-                        <h2 className="text-lg font-extrabold text-slate-900 dark:text-white leading-tight">{message.title}</h2>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white leading-tight">{message.title}</h2>
+                            {message.type === 'chat_message' && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Chat</span>
+                            )}
+                        </div>
                         <span className="text-[10px] text-slate-500 dark:text-gray-400 font-mono">{formatNotificationTime(message.createdAt || message.time)}</span>
                     </div>
                 </div>
                 <div className="bg-slate-50 dark:bg-black/20 p-4 rounded-xl border border-slate-200 dark:border-white/5">
                     <p className="text-sm text-slate-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{message.message}</p>
                 </div>
-                <div className="mt-6 flex justify-end">
-                    <button onClick={onClose} className="px-6 py-2 bg-sky-50 dark:bg-sky-500/20 hover:bg-sky-100 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-500/40 font-bold text-xs rounded-xl shadow-sm transition-all active:scale-95">Close</button>
+                <div className="mt-6 flex justify-end gap-2.5">
+                    <button onClick={onClose} className="px-5 py-2 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all">Close</button>
+                    {chatUrl && onNavigate && (
+                        <button 
+                            onClick={() => {
+                                onClose();
+                                onNavigate(chatUrl);
+                            }} 
+                            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-1.5"
+                        >
+                            Open Chat →
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
@@ -343,7 +361,6 @@ const DashboardLayout = () => {
     };
 
     const handleOpenMessage = async (notif) => {
-        setSelectedMessage(notif);
         setShowNotifications(false);
         if (notif.id) {
             saveReadId(notif.id);
@@ -360,6 +377,16 @@ const DashboardLayout = () => {
                 console.error("Failed to mark single notification as read", error);
             }
         }
+
+        const isUserMentor = location.pathname.startsWith('/mentor') || storedUser?.role === 'mentor';
+        const targetUrl = notif.actionUrl || notif.link || (notif.type === 'chat_message' && notif.teamId ? (isUserMentor ? `/mentor/messages?teamId=${notif.teamId}` : `/student/chat?teamId=${notif.teamId}`) : null);
+
+        if (targetUrl) {
+            navigate(targetUrl);
+            return;
+        }
+
+        setSelectedMessage(notif);
     };
 
     // Determine Role based on URL path
@@ -1128,12 +1155,22 @@ const DashboardLayout = () => {
                                                 <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${(notif.read || notif.isRead) ? 'bg-transparent' : 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.8)]'}`}></div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex justify-between items-start mb-0.5">
-                                                        <h4 className={`text-xs font-bold ${(notif.read || notif.isRead) ? 'text-slate-600 dark:text-gray-300' : 'text-slate-900 dark:text-white'}`}>{notif.title || 'Announcement'}</h4>
+                                                        <div className="flex items-center gap-1.5 min-w-0">
+                                                            <h4 className={`text-xs font-bold truncate ${(notif.read || notif.isRead) ? 'text-slate-600 dark:text-gray-300' : 'text-slate-900 dark:text-white'}`}>{notif.title || 'Announcement'}</h4>
+                                                            {notif.type === 'chat_message' && (
+                                                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 shrink-0">Chat</span>
+                                                            )}
+                                                        </div>
                                                         <span className="text-[9px] text-slate-400 whitespace-nowrap ml-2">
                                                             {formatNotificationTime(notif.createdAt || notif.time)}
                                                         </span>
                                                     </div>
                                                     <p className="text-[11px] text-slate-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{notif.message}</p>
+                                                    {notif.type === 'chat_message' && (
+                                                        <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold mt-1 inline-flex items-center gap-1">
+                                                            Open in chat →
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))
@@ -1167,15 +1204,23 @@ const DashboardLayout = () => {
                 <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-4 fade-in duration-300 max-w-md w-full px-4 pointer-events-auto">
                     <div className="bg-white/95 dark:bg-navy-950/95 backdrop-blur-xl border border-blue-300/80 dark:border-blue-500/40 text-slate-900 dark:text-white p-4 rounded-2xl shadow-2xl shadow-blue-900/10 dark:shadow-blue-900/30 flex items-start gap-3.5 relative group">
                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m3 11 18-5v12L3 14v-3z"/>
-                                <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
-                            </svg>
+                            {toastPopup.type === 'chat_message' ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="m3 11 18-5v12L3 14v-3z"/>
+                                    <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+                                </svg>
+                            )}
                         </div>
                         <div className="flex-1 min-w-0 pr-6">
 
                             <div className="flex items-center gap-2 mb-0.5">
-                                <span className="text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-500/30">Announcement</span>
+                                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${toastPopup.type === 'chat_message' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30' : 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/30'}`}>
+                                    {toastPopup.type === 'chat_message' ? 'New Message' : 'Announcement'}
+                                </span>
                                 <span className="text-[9.5px] text-slate-500 dark:text-gray-400 font-mono">{formatNotificationTime(toastPopup.createdAt || toastPopup.time)}</span>
                             </div>
                             <h4 className="text-sm font-extrabold text-slate-900 dark:text-white truncate">{toastPopup.title}</h4>
@@ -1183,12 +1228,23 @@ const DashboardLayout = () => {
                             <div className="mt-2.5 flex items-center gap-3">
                                 <button
                                     onClick={() => {
-                                        setSelectedMessage(toastPopup);
+                                        const isUserMentor = location.pathname.startsWith('/mentor') || storedUser?.role === 'mentor';
+                                        const targetUrl = toastPopup.actionUrl || toastPopup.link || (toastPopup.type === 'chat_message' && toastPopup.teamId ? (isUserMentor ? `/mentor/messages?teamId=${toastPopup.teamId}` : `/student/chat?teamId=${toastPopup.teamId}`) : null);
+
+                                        if (toastPopup.id) {
+                                            saveReadId(toastPopup.id);
+                                            markNotificationRead(toastPopup.id).catch(() => {});
+                                        }
                                         setToastPopup(null);
+                                        if (targetUrl) {
+                                            navigate(targetUrl);
+                                        } else {
+                                            setSelectedMessage(toastPopup);
+                                        }
                                     }}
-                                    className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline underline-offset-2 transition-colors"
+                                    className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline underline-offset-2 transition-colors flex items-center gap-1"
                                 >
-                                    View Full Message →
+                                    {toastPopup.type === 'chat_message' ? 'Go Straight to Chat →' : 'View Full Message →'}
                                 </button>
                             </div>
                         </div>
@@ -1207,6 +1263,7 @@ const DashboardLayout = () => {
             <MessageModal 
                 message={selectedMessage} 
                 onClose={() => setSelectedMessage(null)} 
+                onNavigate={(url) => navigate(url)}
             />
         </div>
     );

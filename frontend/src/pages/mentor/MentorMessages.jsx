@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Send,
   Users,
@@ -45,8 +46,10 @@ const getFileIcon = (type = '', name = '') => {
 };
 
 export default function MentorMessages() {
+  const [searchParams] = useSearchParams();
+  const queryTeamId = searchParams.get('teamId');
   const [teams, setTeams] = useState([]);
-  const [teamId, setTeamId] = useState('');
+  const [teamId, setTeamId] = useState(queryTeamId || '');
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [pendingFile, setPendingFile] = useState(null);
@@ -69,14 +72,15 @@ export default function MentorMessages() {
       .then(({ activeTeams }) => {
         if (!active) return;
         setTeams(activeTeams);
-        setTeamId(activeTeams[0]?.id || '');
+        const match = queryTeamId && activeTeams.find((t) => String(t.id || t._id) === String(queryTeamId));
+        setTeamId(match ? (match.id || match._id) : (activeTeams[0]?.id || ''));
       })
       .catch((requestError) => {
         if (active) setError(requestError.response?.data?.detail || 'Could not load assigned teams.');
       })
       .finally(() => { if (active) setLoadingTeams(false); });
     return () => { active = false; };
-  }, []);
+  }, [queryTeamId]);
 
   const loadMessages = useCallback(async () => {
     if (!teamId) { setMessages([]); return; }

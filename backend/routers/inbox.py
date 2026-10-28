@@ -20,6 +20,10 @@ def get_notifications_collection():
     return get_db()["notifications"]
 
 
+def _get_current_user_id(current_user: dict) -> str:
+    return str(current_user.get("sub") or current_user.get("_id") or current_user.get("id") or "")
+
+
 @router.get("/", response_model=List[NotificationResponse])
 async def get_notifications(
     unread_only: bool = Query(False, description="Filter only unread notifications"),
@@ -30,9 +34,10 @@ async def get_notifications(
 ):
     """Get user's notifications"""
     notifications_collection = get_notifications_collection()
+    user_id = _get_current_user_id(current_user)
 
     # Using camelCase as per finalized schema
-    query = {"userId": current_user["sub"]}
+    query = {"userId": user_id}
 
     if unread_only:
         query["read"] = False
@@ -63,8 +68,9 @@ async def get_notification_count(
 ):
     """Get count of notifications"""
     notifications_collection = get_notifications_collection()
+    user_id = _get_current_user_id(current_user)
 
-    query = {"userId": current_user["sub"]}
+    query = {"userId": user_id}
     if unread_only:
         query["read"] = False
 
@@ -79,10 +85,11 @@ async def mark_notification_as_read(
 ):
     """Mark a notification as read"""
     notifications_collection = get_notifications_collection()
+    user_id = _get_current_user_id(current_user)
 
     # Use _id for internal search
     notification = await notifications_collection.find_one(
-        {"_id": ObjectId(notification_id), "userId": current_user["sub"]}
+        {"_id": ObjectId(notification_id), "userId": user_id}
     )
 
     if not notification:
@@ -104,9 +111,10 @@ async def mark_notification_as_read(
 async def mark_all_notifications_as_read(current_user: dict = Depends(with_auth)):
     """Mark all notifications as read"""
     notifications_collection = get_notifications_collection()
+    user_id = _get_current_user_id(current_user)
 
     result = await notifications_collection.update_many(
-        {"userId": current_user["sub"], "read": False}, {"$set": {"read": True}}
+        {"userId": user_id, "read": False}, {"$set": {"read": True}}
     )
 
     return {
@@ -121,9 +129,10 @@ async def delete_notification(
 ):
     """Delete a notification"""
     notifications_collection = get_notifications_collection()
+    user_id = _get_current_user_id(current_user)
 
     notification = await notifications_collection.find_one(
-        {"_id": ObjectId(notification_id), "userId": current_user["sub"]}
+        {"_id": ObjectId(notification_id), "userId": user_id}
     )
 
     if not notification:
@@ -173,6 +182,7 @@ async def send_notification(
 async def get_notification_types():
     """Get all available notification types"""
     return [
+        {"value": "chat_message", "label": "Team Chat Message"},
         {"value": "team_invite", "label": "Team Invitation"},
         {"value": "mentor_assignment", "label": "Mentor Assignment"},
         {"value": "mentor_feedback", "label": "Mentor Feedback"},

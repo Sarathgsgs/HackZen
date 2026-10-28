@@ -18,15 +18,25 @@ class NotificationType(str, Enum):
     MENTOR_REQUEST = "mentor_request"
     MENTOR_REQUEST_DECISION = "mentor_request_decision"
     MEETING_REMINDER = "meeting_reminder"
+    CHAT_MESSAGE = "chat_message"
 
 
 class NotificationBase(BaseModel):
     userId: str = Field(..., alias="userId")
     hackathonId: Optional[str] = Field(None, alias="hackathonId")
     teamId: Optional[str] = Field(None, alias="teamId")
-    type: str  # team_invite | mentor_assignment | milestone_check | etc
+    type: str  # team_invite | mentor_assignment | milestone_check | chat_message | etc
     message: str
     read: bool = False
+    title: Optional[str] = Field(None, alias="title")
+    link: Optional[str] = Field(None, alias="link")
+    actionUrl: Optional[str] = Field(None, alias="actionUrl")
+    senderId: Optional[str] = Field(None, alias="senderId")
+    senderName: Optional[str] = Field(None, alias="senderName")
+
+    class Config:
+        populate_by_name = True
+        extra = "ignore"
 
 
 class NotificationCreate(NotificationBase):
@@ -43,3 +53,4 @@ class NotificationResponse(NotificationBase):
 
     class Config:
         populate_by_name = True
+        extra = "ignore"

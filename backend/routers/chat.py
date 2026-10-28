@@ -116,6 +116,111 @@ def _message_type(value):
         )
 
 
+async def notify_team_chat_message(
+    db,
+    team_id: str,
+    sender_id: str,
+    sender_name: str,
+    message_text: str,
+    attachment_name: Optional[str] = None,
+):
+    """
+    Dispatch in-app notifications and inbox records to all other team members and assigned mentor
+    every time a message is sent in team chat. Includes direct links so recipients can go straight
+    into the team chat workspace.
+    """
+    try:
+        team = None
+        if ObjectId.is_valid(team_id):
+            team = await db["teams"].find_one({"_id": ObjectId(team_id)})
+        if not team:
+            team = await db["teams"].find_one({"_id": team_id})
+        if not team:
+            return
+
+        team_name = team.get("teamName") or team.get("name") or "Team Workspace"
+        mentor_id = str(team.get("mentorId") or "")
+        leader_id = str(team.get("leaderId") or team.get("creatorId") or "")
+        hackathon_id = str(team.get("hackathonId") or "")
+
+        team_id_values = [str(team.get("_id", team_id)), team_id]
+        if ObjectId.is_valid(team_id):
+            team_id_values.append(ObjectId(team_id))
+
+        member_docs = await db["teamMembers"].find({
+            "teamId": {"$in": team_id_values}
+        }).to_list(100)
+
+        recipient_ids = set()
+        for m in member_docs:
+            uid = str(m.get("userId") or "")
+            if uid:
+                recipient_ids.add(uid)
+
+        if leader_id:
+            recipient_ids.add(leader_id)
+        if mentor_id:
+            recipient_ids.add(mentor_id)
+
+        # Never notify the sender of their own chat message
+        sender_id_str = str(sender_id)
+        recipient_ids.discard(sender_id_str)
+        recipient_ids.discard("")
+
+        if not recipient_ids:
+            return
+
+        if attachment_name:
+            preview = f"Shared a file: {attachment_name}"
+            if message_text and message_text.strip():
+                preview = f"{message_text.strip()} ({attachment_name})"
+        else:
+            preview = (message_text or "").strip()
+            if len(preview) > 120:
+                preview = preview[:117] + "..."
+
+        title = f"{sender_name} ({team_name})"
+        now = datetime.utcnow()
+
+        notifications_to_insert = []
+        inbox_to_insert = []
+
+        for uid in recipient_ids:
+            is_mentor = (uid == mentor_id)
+            chat_link = (
+                f"/mentor/messages?teamId={team_id}"
+                if is_mentor
+                else f"/student/chat?teamId={team_id}"
+            )
+
+            notif_doc = {
+                "userId": uid,
+                "teamId": str(team_id),
+                "hackathonId": hackathon_id or None,
+                "type": "chat_message",
+                "title": title,
+                "message": preview,
+                "link": chat_link,
+                "actionUrl": chat_link,
+                "senderId": sender_id_str,
+                "senderName": sender_name,
+                "teamName": team_name,
+                "read": False,
+                "isRead": False,
+                "createdAt": now,
+            }
+            notifications_to_insert.append(notif_doc)
+            inbox_to_insert.append(dict(notif_doc))
+
+        if notifications_to_insert:
+            await db["notifications"].insert_many(notifications_to_insert)
+            await db["inbox"].insert_many(inbox_to_insert)
+
+    except Exception as exc:
+        # Chat message delivery itself should never crash if notification writing fails
+        print(f"[CHAT_NOTIF_ERROR] Failed to dispatch chat notifications: {exc}")
+
+
 @router.post("/{team_id}/send", response_model=ChatMessageResponse)
 async def send_team_message_student(
     team_id: str,
@@ -169,6 +274,15 @@ async def send_team_message_student(
         sender_id,
     )
 
+    # Dispatch notification to other team members and assigned mentor
+    await notify_team_chat_message(
+        db=db,
+        team_id=team_id,
+        sender_id=sender_id,
+        sender_name=sender_name,
+        message_text=content,
+    )
+
     return ChatMessageResponse(**msg_data)
 
 
@@ -219,6 +333,15 @@ async def send_team_message(
         },
         team_id,
         sender_id,
+    )
+
+    # Dispatch notification to other team members and assigned mentor
+    await notify_team_chat_message(
+        db=db,
+        team_id=team_id,
+        sender_id=sender_id,
+        sender_name=message["senderName"],
+        message_text=content,
     )
 
     return ChatMessageResponse(**message)
@@ -321,6 +444,15 @@ async def websocket_chat_endpoint(
                 },
                 team_id,
                 user_id,
+            )
+
+            # Dispatch notification to other team members and assigned mentor
+            await notify_team_chat_message(
+                db=db,
+                team_id=team_id,
+                sender_id=user_id,
+                sender_name=authenticated_sender_name,
+                message_text=content,
             )
 
     except WebSocketDisconnect:
@@ -508,6 +640,16 @@ async def upload_team_file(
         },
         team_id,
         uploader_id,
+    )
+
+    # Dispatch notification to other team members and assigned mentor
+    await notify_team_chat_message(
+        db=db,
+        team_id=team_id,
+        sender_id=uploader_id,
+        sender_name=record["uploadedByName"],
+        message_text=msg_content,
+        attachment_name=safe_name,
     )
 
     record["fileId"] = record["_id"]

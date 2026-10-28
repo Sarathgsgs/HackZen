@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Paperclip, Download, FileText, X } from 'lucide-react';
 import apiClient from '../../api/api';
 import { getMyTeams, getTeamById, getTeamMembers } from '../../api/teamApi';
@@ -55,8 +55,23 @@ const formatDate = (value) => {
 const StudentTeamWorkspace = () => {
   const navigate = useNavigate();
   const { teamId } = useParams();
+  const [searchParams] = useSearchParams();
+  const initialTabParam = searchParams.get('tab');
   const chatEndRef = useRef(null);
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (initialTabParam && workspaceTabs.map((t) => t.toLowerCase()).includes(initialTabParam.toLowerCase())) {
+      return initialTabParam.charAt(0).toUpperCase() + initialTabParam.slice(1).toLowerCase();
+    }
+    return 'Overview';
+  });
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && workspaceTabs.map((t) => t.toLowerCase()).includes(tab.toLowerCase())) {
+      setActiveTab(tab.charAt(0).toUpperCase() + tab.slice(1).toLowerCase());
+    }
+  }, [searchParams]);
+
   const [team, setTeam] = useState(null);
   const [members, setMembers] = useState([]);
   const [membersError, setMembersError] = useState('');

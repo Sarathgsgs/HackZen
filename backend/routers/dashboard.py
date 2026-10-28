@@ -2159,16 +2159,20 @@ async def get_my_notifications(current_user: dict = Depends(with_auth)):
         .to_list(None)
     )
 
-    # In-memory deduplication: Never show identical broadcast messages more than once
-    seen_keys = set()
+    # In-memory deduplication: Only deduplicate broadcast/global messages without a specific userId
+    seen_broadcast_keys = set()
     formatted = []
     for n in raw_notifs:
         title = str(n.get("title", "")).strip()
         message = str(n.get("message", "")).strip()
-        key = (title.lower(), message.lower())
-        if key in seen_keys:
-            continue
-        seen_keys.add(key)
+        notif_type = str(n.get("type", "announcement"))
+        is_broadcast = not n.get("userId") or notif_type in ["global_announcement", "platform_announcement"]
+
+        if is_broadcast:
+            key = (title.lower(), message.lower())
+            if key in seen_broadcast_keys:
+                continue
+            seen_broadcast_keys.add(key)
 
         created = n.get("createdAt") or n.get("created_at")
         if isinstance(created, datetime):
@@ -2187,12 +2191,23 @@ async def get_my_notifications(current_user: dict = Depends(with_auth)):
                 or str(current_user.get("sub", "")) in read_by
             )
 
+        link_val = n.get("link") or n.get("actionUrl")
+        action_url_val = n.get("actionUrl") or n.get("link")
+        team_id_val = str(n.get("teamId")) if n.get("teamId") else None
+
         formatted.append(
             {
                 "id": str(n["_id"]),
-                "title": title or "Platform Announcement",
+                "title": title or "Notification",
                 "message": message,
                 "read": read_status,
+                "isRead": read_status,
+                "type": notif_type,
+                "link": link_val,
+                "actionUrl": action_url_val,
+                "teamId": team_id_val,
+                "senderId": str(n.get("senderId")) if n.get("senderId") else None,
+                "senderName": n.get("senderName"),
                 "createdAt": iso_str,
                 "time": iso_str,
                 "timestamp": iso_str,
