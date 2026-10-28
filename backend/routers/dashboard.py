@@ -85,8 +85,40 @@ def _object_ids(values: List[Optional[str]]) -> List[ObjectId]:
     return [ObjectId(value) for value in values if value and ObjectId.is_valid(value)]
 
 
+def _parse_datetime(value: Any) -> Optional[datetime]:
+    """Safely parse a date/datetime from strings, datetimes, or return None."""
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value.replace(tzinfo=None) if value.tzinfo else value
+    if isinstance(value, str):
+        val_clean = value.strip().replace("Z", "+00:00")
+        try:
+            parsed = datetime.fromisoformat(val_clean)
+            return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+        except Exception:
+            pass
+        for fmt in (
+            "%Y-%m-%dT%H:%M:%S.%f",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d",
+            "%d/%m/%Y",
+            "%m/%d/%Y"
+        ):
+            try:
+                return datetime.strptime(value.strip(), fmt)
+            except Exception:
+                pass
+    return None
+
+
 def _serialize_date(value: Any) -> Optional[str]:
-    return value.isoformat() if isinstance(value, datetime) else value
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return str(value)
 
 
 def _serialize_hackathon(hackathon: Dict[str, Any]) -> Dict[str, Any]:
@@ -109,266 +141,316 @@ def _serialize_hackathon(hackathon: Dict[str, Any]) -> Dict[str, Any]:
 
 async def _team_progress(db, team_id: str) -> Dict[str, Any]:
     """Return a percentage only when stored progress records support one."""
-    progress = await db["progress"].find_one({"teamId": team_id})
-    if not progress:
-        return {"status": "not-started", "percentage": None, "currentStageId": None}
+    try:
+        progress = await db["progress"].find_one({"teamId": team_id})
+        if not progress and ObjectId.is_valid(team_id):
+            progress = await db["progress"].find_one({"teamId": ObjectId(team_id)})
+        if not progress:
+            return {"status": "not-started", "percentage": None, "currentStageId": None}
 
-    progress_status = progress.get("status", "not-started")
-    if progress_status == "completed":
-        percentage = 100
-    else:
-        milestones = await db["milestoneProgress"].find(
-            {"progressId": str(progress["_id"])}
-        ).to_list(1000)
-        percentage = (
-            round(
-                (sum(1 for milestone in milestones if milestone.get("completed")) / len(milestones))
-                * 100
+        progress_status = progress.get("status", "not-started")
+        if progress_status == "completed":
+            percentage = 100
+        else:
+            milestones = await db["milestoneProgress"].find(
+                {"progressId": str(progress["_id"])}
+            ).to_list(1000)
+            percentage = (
+                round(
+                    (sum(1 for milestone in milestones if milestone.get("completed")) / len(milestones))
+                    * 100
+                )
+                if milestones
+                else None
             )
-            if milestones
-            else None
-        )
 
-    return {
-        "status": progress_status,
-        "percentage": percentage,
-        "currentStageId": progress.get("currentStageId"),
-    }
+        return {
+            "status": progress_status,
+            "percentage": percentage,
+            "currentStageId": progress.get("currentStageId"),
+        }
+    except Exception:
+        return {"status": "not-started", "percentage": None, "currentStageId": None}
 
 
 @router.get("/my-hackathons")
 @router.get("/student")
 async def get_my_hackathons_dashboard(current_user: dict = Depends(with_auth)):
     """Get the authenticated student's dashboard using only persisted platform data."""
-    db = get_db()
-    user_id = str(current_user.get("sub") or current_user.get("id") or current_user.get("_id"))
-    user_email = current_user.get("email")
-    now = datetime.utcnow()
+    try:
+        db = get_db()
+        user_id = str(current_user.get("sub") or current_user.get("id") or current_user.get("_id") or "")
+        user_email = current_user.get("email")
+        now = datetime.utcnow()
 
-    user_query = [{"userId": user_id}]
-    if ObjectId.is_valid(user_id):
-        user_query.append({"userId": ObjectId(user_id)})
-    if user_email:
-        user_query.append({"userEmail": user_email})
-        user_query.append({"email": user_email})
+        user_query = []
+        if user_id:
+            user_query.append({"userId": user_id})
+            if ObjectId.is_valid(user_id):
+                user_query.append({"userId": ObjectId(user_id)})
+        if user_email:
+            user_query.append({"userEmail": user_email})
+            user_query.append({"email": user_email})
 
-    applications = await db["applications"].find({"$or": user_query}).sort(
-        "appliedAt", -1
-    ).to_list(100)
-    memberships = await db["teamMembers"].find({"$or": user_query}).to_list(100)
-    raw_team_ids = [str(membership.get("teamId")) for membership in memberships if membership.get("teamId")]
-    valid_obj_ids = _object_ids(raw_team_ids)
-    all_team_ids = list(set(raw_team_ids + valid_obj_ids))
+        applications = []
+        memberships = []
+        if user_query:
+            applications = await db["applications"].find({"$or": user_query}).sort(
+                "appliedAt", -1
+            ).to_list(100)
+            memberships = await db["teamMembers"].find({"$or": user_query}).to_list(100)
 
-    team_conditions = []
-    if all_team_ids:
-        team_conditions.append({"_id": {"$in": all_team_ids}})
-    if user_id:
-        team_conditions.append({"createdBy": user_id})
-        team_conditions.append({"leaderId": user_id})
-        team_conditions.append({"members.userId": user_id})
-    if user_email:
-        team_conditions.append({"members.email": user_email})
+        raw_team_ids = [str(membership.get("teamId")) for membership in memberships if membership.get("teamId")]
+        valid_obj_ids = _object_ids(raw_team_ids)
+        all_team_ids = list(set(raw_team_ids + valid_obj_ids))
 
-    teams = (
-        await db["teams"].find({"$or": team_conditions}).to_list(100)
-        if team_conditions
-        else []
-    )
+        team_conditions = []
+        if all_team_ids:
+            team_conditions.append({"_id": {"$in": all_team_ids}})
+        if user_id:
+            team_conditions.append({"createdBy": user_id})
+            team_conditions.append({"leaderId": user_id})
+            team_conditions.append({"members.userId": user_id})
+            if ObjectId.is_valid(user_id):
+                team_conditions.append({"leaderId": ObjectId(user_id)})
+        if user_email:
+            team_conditions.append({"members.email": user_email})
 
-    registered_ids = {str(application.get("hackathonId")) for application in applications if application.get("hackathonId")}
-    team_hackathon_ids = {str(team.get("hackathonId")) for team in teams if team.get("hackathonId")}
-    referenced_hackathon_ids = _object_ids(list(registered_ids | team_hackathon_ids))
-    referenced_hackathons = (
-        await db["hackathons"].find({"_id": {"$in": referenced_hackathon_ids}}).to_list(200)
-        if referenced_hackathon_ids
-        else []
-    )
-    hackathons_by_id = {
-        str(hackathon["_id"]): hackathon for hackathon in referenced_hackathons
-    }
-    memberships_by_team = {
-        str(membership.get("teamId")): membership for membership in memberships if membership.get("teamId")
-    }
-    progress_by_team = {
-        str(team["_id"]): await _team_progress(db, str(team["_id"])) for team in teams
-    }
-
-    registered_hackathons = []
-    for application in applications:
-        hackathon_id = str(application.get("hackathonId"))
-        hackathon = hackathons_by_id.get(hackathon_id)
-        if not hackathon:
-            continue
-
-        team = next(
-            (item for item in teams if str(item.get("hackathonId")) == hackathon_id), None
-        )
-        team_id = str(team["_id"]) if team else None
-        registered_hackathons.append(
-            {
-                **_serialize_hackathon(hackathon),
-                "applicationStatus": application.get("status", "pending"),
-                "appliedAt": _serialize_date(application.get("appliedAt")),
-                "team": (
-                    {
-                        "id": team_id,
-                        "name": team.get("teamName"),
-                        "role": (
-                            "leader"
-                            if team.get("leaderId") == user_id or team.get("createdBy") == user_id
-                            else memberships_by_team.get(team_id, {}).get("role", "member")
-                        ),
-                        "progress": progress_by_team.get(team_id),
-                    }
-                    if team
-                    else None
-                ),
-            }
+        teams = (
+            await db["teams"].find({"$or": team_conditions}).to_list(100)
+            if team_conditions
+            else []
         )
 
-    # Ensure hackathons from user's teams are also in registered_hackathons if not already present
-    for team in teams:
-        hackathon_id = str(team.get("hackathonId") or "")
-        if hackathon_id and hackathon_id not in registered_ids:
+        registered_ids = {str(application.get("hackathonId")) for application in applications if application.get("hackathonId")}
+        team_hackathon_ids = {str(team.get("hackathonId")) for team in teams if team.get("hackathonId")}
+        all_hackathon_ids = list(registered_ids | team_hackathon_ids)
+
+        hack_queries = []
+        if all_hackathon_ids:
+            hack_queries.append({"_id": {"$in": all_hackathon_ids}})
+            v_objs = _object_ids(all_hackathon_ids)
+            if v_objs:
+                hack_queries.append({"_id": {"$in": v_objs}})
+
+        referenced_hackathons = (
+            await db["hackathons"].find({"$or": hack_queries}).to_list(200)
+            if hack_queries
+            else []
+        )
+        hackathons_by_id = {
+            str(hackathon["_id"]): hackathon for hackathon in referenced_hackathons
+        }
+        memberships_by_team = {
+            str(membership.get("teamId")): membership for membership in memberships if membership.get("teamId")
+        }
+        progress_by_team = {
+            str(team["_id"]): await _team_progress(db, str(team["_id"])) for team in teams
+        }
+
+        registered_hackathons = []
+        for application in applications:
+            hackathon_id = str(application.get("hackathonId"))
             hackathon = hackathons_by_id.get(hackathon_id)
-            if hackathon:
-                registered_ids.add(hackathon_id)
-                team_id = str(team["_id"])
-                registered_hackathons.append(
-                    {
-                        **_serialize_hackathon(hackathon),
-                        "applicationStatus": "accepted",
-                        "appliedAt": _serialize_date(team.get("createdAt")),
-                        "team": {
+            if not hackathon:
+                continue
+
+            team = next(
+                (item for item in teams if str(item.get("hackathonId")) == hackathon_id), None
+            )
+            team_id = str(team["_id"]) if team else None
+            registered_hackathons.append(
+                {
+                    **_serialize_hackathon(hackathon),
+                    "applicationStatus": application.get("status", "pending"),
+                    "appliedAt": _serialize_date(application.get("appliedAt")),
+                    "team": (
+                        {
                             "id": team_id,
                             "name": team.get("teamName"),
-                            "role": memberships_by_team.get(team_id, {}).get("role", "leader" if team.get("leaderId") == user_id else "member"),
+                            "role": (
+                                "leader"
+                                if str(team.get("leaderId") or "") == user_id or str(team.get("createdBy") or "") == user_id
+                                else memberships_by_team.get(team_id, {}).get("role", "member")
+                            ),
                             "progress": progress_by_team.get(team_id),
-                        },
-                    }
-                )
+                        }
+                        if team
+                        else None
+                    ),
+                }
+            )
 
-    active_teams = [
-        team
-        for team in teams
-        if (hackathons_by_id.get(str(team.get("hackathonId")), {}).get("hackathonEnd") or now) >= now
-        and str(hackathons_by_id.get(str(team.get("hackathonId")), {}).get("status", "")).lower()
-        not in {"completed", "results announced"}
-    ]
-    if not active_teams and teams:
-        active_teams = teams
+        # Ensure hackathons from user's teams are also in registered_hackathons if not already present
+        for team in teams:
+            hackathon_id = str(team.get("hackathonId") or "")
+            if hackathon_id and hackathon_id not in registered_ids:
+                hackathon = hackathons_by_id.get(hackathon_id)
+                if hackathon:
+                    registered_ids.add(hackathon_id)
+                    team_id = str(team["_id"])
+                    registered_hackathons.append(
+                        {
+                            **_serialize_hackathon(hackathon),
+                            "applicationStatus": "accepted",
+                            "appliedAt": _serialize_date(team.get("createdAt")),
+                            "team": {
+                                "id": team_id,
+                                "name": team.get("teamName"),
+                                "role": memberships_by_team.get(team_id, {}).get("role", "leader" if str(team.get("leaderId") or "") == user_id else "member"),
+                                "progress": progress_by_team.get(team_id),
+                            },
+                        }
+                    )
 
-    team_id_strings = [str(team["_id"]) for team in teams]
-    sub_conditions = []
-    if team_id_strings:
-        sub_conditions.append({"teamId": {"$in": team_id_strings}})
-    if user_id:
-        sub_conditions.append({"userId": user_id})
-    if user_email:
-        sub_conditions.append({"userEmail": user_email})
+        # Safe active teams determination using _parse_datetime
+        active_teams = []
+        for team in teams:
+            h_id = str(team.get("hackathonId") or "")
+            h_doc = hackathons_by_id.get(h_id, {})
+            h_status = str(h_doc.get("status") or "").lower()
+            if h_status in {"completed", "results announced"}:
+                continue
+            h_end = _parse_datetime(h_doc.get("hackathonEnd"))
+            if h_end is None or h_end >= now:
+                active_teams.append(team)
 
-    submissions_count = (
-        await db["submissions"].count_documents({"$or": sub_conditions})
-        if sub_conditions
-        else 0
-    )
+        if not active_teams and teams:
+            active_teams = teams
 
-    cert_conditions = [{"userId": user_id}]
-    if user_email:
-        cert_conditions.append({"recipientEmail": user_email})
-        cert_conditions.append({"email": user_email})
-    certificates_count = await db["certificates"].count_documents({"$or": cert_conditions})
-
-    # Upcoming means not completed, open/active, or with start date ahead
-    upcoming_docs = await db["hackathons"].find(
-        {
-            "$or": [
-                {"hackathonStart": {"$gte": now}},
-                {"hackathonEnd": {"$gte": now}},
-                {"registrationEnd": {"$gte": now}},
-                {"status": {"$in": ["Registration Open", "Active", "Upcoming", "Approved", "Published", "Pending"]}}
-            ],
-            "isPublic": {"$ne": False}
-        }
-    ).sort("hackathonStart", 1).to_list(100)
-
-    # Fallback if specific dates were missed
-    if not upcoming_docs:
-        upcoming_docs = await db["hackathons"].find({"isPublic": {"$ne": False}}).sort("hackathonStart", 1).to_list(100)
-
-    upcoming_hackathons = [
-        _serialize_hackathon(hackathon)
-        for hackathon in upcoming_docs
-        if str(hackathon["_id"]) not in registered_ids
-        and str(hackathon.get("status", "")).lower()
-        not in {"draft", "completed", "results announced"}
-    ]
-    if not upcoming_hackathons and upcoming_docs:
-        upcoming_hackathons = [_serialize_hackathon(h) for h in upcoming_docs[:3]]
-
-
-    # Aggregate recent activity scoped to this student
-    recent_activity = []
-    try:
-        user_email = current_user.get("email")
-        query_conditions = [{"userId": user_id}]
+        team_id_strings = [str(team["_id"]) for team in teams]
+        sub_conditions = []
+        if team_id_strings:
+            sub_conditions.append({"teamId": {"$in": team_id_strings}})
+        if user_id:
+            sub_conditions.append({"userId": user_id})
         if user_email:
-            query_conditions.append({"email": user_email})
-        audit_cursor = db["audit_logs"].find({"$or": query_conditions}).sort("timestamp", -1).limit(10)
-        user_audit_logs = await audit_cursor.to_list(10)
-        for log in user_audit_logs:
-            recent_activity.append({
-                "id": str(log.get("_id")),
-                "type": str(log.get("category", "activity")).lower(),
-                "title": log.get("action_title") or log.get("action") or "Account Activity",
-                "description": log.get("details", ""),
-                "timestamp": _serialize_date(log.get("timestamp") or log.get("createdAt")),
-            })
-    except Exception:
-        pass
+            sub_conditions.append({"userEmail": user_email})
 
-    for app in applications[:5]:
-        h_id = str(app.get("hackathonId"))
-        h = hackathons_by_id.get(h_id)
-        recent_activity.append({
-            "id": f"app-{str(app.get('_id'))}",
-            "type": "registration",
-            "title": f"Registered for {h.get('title') if h else 'Hackathon'}",
-            "description": f"Registration status: {app.get('status', 'Confirmed')}",
-            "timestamp": _serialize_date(app.get("appliedAt")),
-        })
+        submissions_count = (
+            await db["submissions"].count_documents({"$or": sub_conditions})
+            if sub_conditions
+            else 0
+        )
 
-    if team_id_strings:
+        cert_conditions = []
+        if user_id:
+            cert_conditions.append({"userId": user_id})
+        if user_email:
+            cert_conditions.append({"recipientEmail": user_email})
+            cert_conditions.append({"email": user_email})
+        certificates_count = (
+            await db["certificates"].count_documents({"$or": cert_conditions})
+            if cert_conditions
+            else 0
+        )
+
+        # Safe upcoming hackathons query & filtering
+        all_public_hackathons = await db["hackathons"].find({"isPublic": {"$ne": False}}).to_list(200)
+        upcoming_hackathons = []
+        for h in all_public_hackathons:
+            h_id = str(h["_id"])
+            if h_id in registered_ids:
+                continue
+            status_lower = str(h.get("status", "")).lower()
+            if status_lower in {"draft", "completed", "results announced"}:
+                continue
+
+            h_end = _parse_datetime(h.get("hackathonEnd"))
+            h_start = _parse_datetime(h.get("hackathonStart"))
+            reg_end = _parse_datetime(h.get("registrationEnd"))
+
+            is_upcoming = (
+                status_lower in {"registration open", "active", "upcoming", "approved", "published", "pending", "open", "live"}
+                or (h_end and h_end >= now)
+                or (h_start and h_start >= now)
+                or (reg_end and reg_end >= now)
+                or (h_end is None and h_start is None)
+            )
+            if is_upcoming:
+                upcoming_hackathons.append(_serialize_hackathon(h))
+
+        if not upcoming_hackathons and all_public_hackathons:
+            upcoming_hackathons = [_serialize_hackathon(h) for h in all_public_hackathons[:3]]
+
+        # Aggregate recent activity scoped to this student
+        recent_activity = []
         try:
-            recent_subs = await db["submissions"].find({"teamId": {"$in": team_id_strings}}).sort("createdAt", -1).limit(5).to_list(5)
-            for sub in recent_subs:
-                recent_activity.append({
-                    "id": f"sub-{str(sub.get('_id'))}",
-                    "type": "submission",
-                    "title": f"Project Submitted: {sub.get('projectName', sub.get('title', 'Hackathon Project'))}",
-                    "description": f"Status: {sub.get('status', 'Pending Review')}",
-                    "timestamp": _serialize_date(sub.get("createdAt") or sub.get("submittedAt")),
-                })
+            query_conditions = []
+            if user_id:
+                query_conditions.append({"userId": user_id})
+            if user_email:
+                query_conditions.append({"email": user_email})
+            if query_conditions:
+                audit_cursor = db["audit_logs"].find({"$or": query_conditions}).sort("timestamp", -1).limit(10)
+                user_audit_logs = await audit_cursor.to_list(10)
+                for log in user_audit_logs:
+                    recent_activity.append({
+                        "id": str(log.get("_id")),
+                        "type": str(log.get("category", "activity")).lower(),
+                        "title": log.get("action_title") or log.get("action") or "Account Activity",
+                        "description": log.get("details", ""),
+                        "timestamp": _serialize_date(log.get("timestamp") or log.get("createdAt")),
+                    })
         except Exception:
             pass
 
-    # Sort descending by timestamp and take top 10
-    recent_activity.sort(key=lambda x: str(x.get("timestamp") or ""), reverse=True)
-    recent_activity = recent_activity[:10]
+        for app in applications[:5]:
+            h_id = str(app.get("hackathonId"))
+            h = hackathons_by_id.get(h_id)
+            recent_activity.append({
+                "id": f"app-{str(app.get('_id'))}",
+                "type": "registration",
+                "title": f"Registered for {h.get('title') if h else 'Hackathon'}",
+                "description": f"Registration status: {app.get('status', 'Confirmed')}",
+                "timestamp": _serialize_date(app.get("appliedAt")),
+            })
 
-    return {
-        "student": {"name": current_user.get("name", "Student")},
-        "metrics": {
-            "registeredHackathons": len(applications),
-            "activeTeams": len(active_teams),
-            "submissions": submissions_count,
-            "certificates": certificates_count,
-        },
-        "registeredHackathons": registered_hackathons,
-        "upcomingHackathons": upcoming_hackathons,
-        "recentActivity": recent_activity,
-    }
+        if team_id_strings:
+            try:
+                recent_subs = await db["submissions"].find({"teamId": {"$in": team_id_strings}}).sort("createdAt", -1).limit(5).to_list(5)
+                for sub in recent_subs:
+                    recent_activity.append({
+                        "id": f"sub-{str(sub.get('_id'))}",
+                        "type": "submission",
+                        "title": f"Project Submitted: {sub.get('projectName', sub.get('title', 'Hackathon Project'))}",
+                        "description": f"Status: {sub.get('status', 'Pending Review')}",
+                        "timestamp": _serialize_date(sub.get("createdAt") or sub.get("submittedAt")),
+                    })
+            except Exception:
+                pass
+
+        # Sort descending by timestamp and take top 10
+        recent_activity.sort(key=lambda x: str(x.get("timestamp") or ""), reverse=True)
+        recent_activity = recent_activity[:10]
+
+        return {
+            "student": {"name": current_user.get("name", "Student")},
+            "metrics": {
+                "registeredHackathons": len(registered_hackathons) if registered_hackathons else len(applications),
+                "activeTeams": len(active_teams),
+                "submissions": submissions_count,
+                "certificates": certificates_count,
+            },
+            "registeredHackathons": registered_hackathons,
+            "upcomingHackathons": upcoming_hackathons,
+            "recentActivity": recent_activity,
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {
+            "student": {"name": current_user.get("name", "Student")},
+            "metrics": {
+                "registeredHackathons": 0,
+                "activeTeams": 0,
+                "submissions": 0,
+                "certificates": 0,
+            },
+            "registeredHackathons": [],
+            "upcomingHackathons": [],
+            "recentActivity": [],
+        }
 
 
 def safe_get_month(doc: dict, field: str = "createdAt") -> int:

@@ -170,14 +170,38 @@ const StudentDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const loadDashboard = useCallback(async () => {
+    const loadDashboard = useCallback(async (isRetry = false) => {
         setIsLoading(true);
         setError('');
         try {
-            setDashboard(await fetchDashboardData());
+            const data = await fetchDashboardData();
+            if (data) {
+                setDashboard(data);
+                try {
+                    sessionStorage.setItem('cached_student_dashboard', JSON.stringify(data));
+                } catch {
+                    // Ignore quota exceeded
+                }
+            }
         } catch (requestError) {
             console.error('Unable to load student dashboard:', requestError);
-            setError('We could not load your dashboard. Please try again.');
+            if (!isRetry) {
+                setTimeout(() => {
+                    loadDashboard(true);
+                }, 2500);
+                return;
+            }
+            try {
+                const cached = JSON.parse(sessionStorage.getItem('cached_student_dashboard') || 'null');
+                if (cached) {
+                    setDashboard(cached);
+                    setIsLoading(false);
+                    return;
+                }
+            } catch {
+                // Ignore parse errors
+            }
+            setError('We could not load your dashboard. Please check your connection or try again.');
         } finally {
             setIsLoading(false);
         }
