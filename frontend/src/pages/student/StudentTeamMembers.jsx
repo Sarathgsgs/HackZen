@@ -62,26 +62,32 @@ const StudentTeamMembers = () => {
     return members.filter((member) => `${member.name || ''} ${member.email || ''} ${member.department || ''} ${member.role || ''}`.toLowerCase().includes(query));
   }, [members, search]);
 
+  const currentUser = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+  const currentUserId = currentUser._id || currentUser.id || '';
+  const isLeader = team?.myRole === 'leader' || team?.myRole === 'Team Lead' || team?.roleInTeam === 'Team Lead' || team?.leaderId === currentUserId || (team?.createdBy && (team.createdBy === currentUserId || team.createdBy === currentUser.name));
+
   const shareInviteCode = async () => {
-    if (!team?.teamCode || team.myRole !== 'leader') return;
+    if (!team?.teamCode) return;
     const joinUrl = `${window.location.origin}/student/teams/join?code=${encodeURIComponent(team.teamCode)}`;
-    const shareText = `Join ${team.teamName} on ProEduvate with team code ${team.teamCode}.`;
+    const shareText = `Join our team "${team.teamName}" on ProEduvate with code ${team.teamCode}:`;
     setShareMessage('');
     try {
       if (navigator.share) {
         await navigator.share({ title: `Join ${team.teamName}`, text: shareText, url: joinUrl });
-        setShareMessage('Share sheet opened. The student must still meet the team joining rules.');
+        setShareMessage('Share sheet opened.');
         return;
       }
       await navigator.clipboard.writeText(`${shareText} ${joinUrl}`);
-      setShareMessage('Team invite details copied. Share them with an eligible student.');
+      setShareMessage(`Team invite details copied to clipboard! (Code: ${team.teamCode})`);
+      setTimeout(() => setShareMessage(''), 4000);
     } catch (shareError) {
       if (shareError?.name === 'AbortError') return;
       try {
         await navigator.clipboard.writeText(`${shareText} ${joinUrl}`);
-        setShareMessage('Team invite details copied. Share them with an eligible student.');
+        setShareMessage(`Team invite details copied to clipboard! (Code: ${team.teamCode})`);
+        setTimeout(() => setShareMessage(''), 4000);
       } catch {
-        setShareMessage('Sharing is unavailable in this browser. Copy the team code below and share it directly.');
+        setShareMessage(`Copy this code and share directly: ${team.teamCode}`);
       }
     }
   };
@@ -107,7 +113,6 @@ const StudentTeamMembers = () => {
   }
 
   const maxTeamSize = Number(team.maxTeamSize) || null;
-  const isLeader = team.myRole === 'leader';
 
   return (
     <main className="min-h-screen bg-[#fbf9ff] px-4 py-8 text-[#202432] sm:px-6 lg:px-10">
@@ -125,15 +130,38 @@ const StudentTeamMembers = () => {
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.98rem] text-[#6d7487]">
               <span><strong className="font-semibold text-[#303342]">Team Name:</strong> {team.teamName}</span>
               <span className="hidden text-[#d9deea] sm:inline">•</span>
-              <span><strong className="font-semibold text-[#303342]">Team Code:</strong> {isLeader && team.teamCode ? team.teamCode : 'Ask the team lead to share'}</span>
+              <span>
+                <strong className="font-semibold text-[#303342]">Team Code:</strong>{' '}
+                {team.teamCode ? (
+                  <span className="inline-flex items-center gap-2">
+                    <code className="rounded-md bg-[#f1f4f8] px-2 py-0.5 font-mono font-bold text-[#343b4b]">{team.teamCode}</code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(team.teamCode);
+                          setShareMessage(`Team code ${team.teamCode} copied to clipboard!`);
+                          setTimeout(() => setShareMessage(''), 3000);
+                        }
+                      }}
+                      title="Copy code"
+                      className="cursor-pointer text-xs font-bold text-[#5d4be5] hover:underline"
+                    >
+                      Copy
+                    </button>
+                  </span>
+                ) : (
+                  'Ask the team lead to share'
+                )}
+              </span>
             </div>
           </div>
           <button
             type="button"
             onClick={shareInviteCode}
-            disabled={!isLeader || !team.teamCode}
-            title={isLeader ? (!team.teamCode ? 'This team has no code available.' : 'Share the existing team code') : 'Only the team lead can share the team code.'}
-            className="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-[#5d4be5] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(93,75,229,0.2)] transition hover:bg-[#4f3ed2] disabled:cursor-not-allowed disabled:bg-[#a5a0d7] sm:self-center"
+            disabled={!team.teamCode}
+            title={team.teamCode ? 'Share team invite link and code' : 'Team code unavailable'}
+            className="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-[#5d4be5] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(93,75,229,0.2)] transition hover:bg-[#4f3ed2] disabled:cursor-not-allowed disabled:bg-[#a5a0d7] sm:self-center cursor-pointer"
           >
             <span aria-hidden="true">＋</span> Invite Member
           </button>
@@ -201,10 +229,28 @@ const StudentTeamMembers = () => {
               </div>
               <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#e5e9f1] pt-5 text-sm">
                 <span className="text-[#77849a]">Team Code</span>
-                {isLeader && team.teamCode ? <code className="rounded-md bg-[#f1f4f8] px-2.5 py-1.5 font-semibold text-[#343b4b]">{team.teamCode}</code> : <span className="text-[#77849a]">Ask the team lead</span>}
+                {team.teamCode ? (
+                  <div className="flex items-center gap-2">
+                    <code className="rounded-md bg-[#f1f4f8] px-2.5 py-1.5 font-mono font-bold text-[#343b4b]">{team.teamCode}</code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(team.teamCode);
+                          setShareMessage(`Team code ${team.teamCode} copied to clipboard!`);
+                          setTimeout(() => setShareMessage(''), 3000);
+                        }
+                      }}
+                      className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-[#5d4be5] hover:bg-slate-50 transition cursor-pointer"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-[#77849a]">Generating team code...</span>
+                )}
               </div>
-              {!isLeader && <p className="mt-3 text-xs leading-5 text-[#7b8495]">Only the team lead can share this team’s code. Eligible students can enter it on the Join Team page.</p>}
-              {isLeader && !team.teamCode && <p className="mt-3 text-xs text-amber-700">This team does not currently have a shareable code.</p>}
+              <p className="mt-3 text-xs leading-5 text-[#7b8495]">Share this code with teammates so they can join on the Join Team page.</p>
             </section>
 
             <section className="rounded-2xl border border-[#e0e5ef] bg-white p-5 shadow-[0_2px_5px_rgba(31,41,55,0.04)] sm:p-6">

@@ -45,11 +45,19 @@ async def lifespan(app: FastAPI):
             print(f"[Mentor Worker] Initializer note: {e}")
 
         try:
-            from seed_student_portal_data import seed_student_data_direct
-            await seed_student_data_direct(MongoDB.db)
-            print("[Auto-Seeder] Student portal workflow data verified/initialized on startup.")
-        except Exception as seeder_err:
-            print(f"[Auto-Seeder notice]: {seeder_err}")
+            # Clean up auto-injected mock team memberships so real student accounts only see their own real teams
+            mock_team_ids = [
+                "65e070000000000000000001",
+                "65e070000000000000000002",
+                "65e070000000000000000003",
+            ]
+            del_result = await MongoDB.db["teamMembers"].delete_many({
+                "teamId": {"$in": mock_team_ids}
+            })
+            if del_result.deleted_count > 0:
+                print(f"[Cleanup] Cleared {del_result.deleted_count} mock team memberships so students only see real teams.")
+        except Exception as cleanup_err:
+            print(f"[Cleanup notice]: {cleanup_err}")
 
         try:
             from seed_organizer_portal_data import seed_organizer_data_direct

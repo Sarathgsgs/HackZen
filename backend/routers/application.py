@@ -13,6 +13,7 @@ from schemas.application import (
     ApplicationStatus,
 )
 from models.application import ApplicationInDB
+from core.security import generate_team_invite_code
 
 router = APIRouter()
 
@@ -255,6 +256,8 @@ async def create_application(
             "teamName": clean_team_name,
             "hackathonId": app_data.hackathonId,
             "leaderId": current_user_id,
+            "createdBy": current_user_id,
+            "teamCode": generate_team_invite_code(),
             "teamSize": app_data.teamSize or 2,
             "notes": app_data.notes or "",
             "invitedEmails": app_data.memberEmails or [],
@@ -272,6 +275,25 @@ async def create_application(
                 "joinedAt": datetime.utcnow(),
             }
         )
+
+        # Create initial progress tracking record for the team
+        try:
+            stages_collection = db["stages"]
+            stages = (
+                await stages_collection.find({"hackathonId": app_data.hackathonId})
+                .sort("stageOrder", 1)
+                .to_list(1)
+            )
+            first_stage_id = str(stages[0]["_id"]) if stages else "initial"
+            await db["progress"].insert_one({
+                "hackathonId": app_data.hackathonId,
+                "teamId": created_team_id,
+                "currentStageId": first_stage_id,
+                "status": "not-started",
+                "lastUpdated": datetime.utcnow(),
+            })
+        except Exception as progress_err:
+            print(f"[Application Team Progress Notice]: {progress_err}")
 
     app_dict = app_data.model_dump(by_alias=True)
     app_dict["userId"] = current_user_id

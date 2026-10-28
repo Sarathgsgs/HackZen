@@ -74,6 +74,7 @@ export const fetchMyTeams = async () => {
                 name: team.teamName,
                 hackathon: hackathonName,
                 hackathonId: team.hackathonId,
+                teamCode: team.teamCode || null,
                 status: 'Active',
                 lastMessage: 'Workspace ready',
                 time: 'Active',
@@ -83,7 +84,7 @@ export const fetchMyTeams = async () => {
                 progress,
                 members: memberCount,
                 domain: 'Technology',
-                roleInTeam: team.leaderId === currentUserId() ? 'Team Lead' : 'Member',
+                roleInTeam: (team.myRole === 'leader' || team.leaderId === currentUserId() || team.createdBy === currentUserId()) ? 'Team Lead' : 'Member',
                 activity: []
             };
         }));
@@ -113,13 +114,16 @@ export const fetchStudentTeams = async () => {
             }
         }
 
+        const isLead = team.myRole === 'leader' || team.leaderId === currentUserId() || team.createdBy === currentUserId();
+
         return {
             id: teamId,
             name: team.teamName || null,
             hackathon: team.hackathonName || null,
             members: team.memberCount !== null && team.memberCount !== undefined && Number.isFinite(Number(team.memberCount)) ? Number(team.memberCount) : null,
             progress,
-            roleInTeam: team.myRole || null,
+            roleInTeam: isLead ? 'Team Lead' : (team.myRole || 'Member'),
+            teamCode: team.teamCode || null,
         };
     }));
 };

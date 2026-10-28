@@ -153,12 +153,13 @@ async def get_my_hackathons_dashboard(current_user: dict = Depends(with_auth)):
     applications = await db["applications"].find({"$or": user_query}).sort(
         "appliedAt", -1
     ).to_list(100)
-    memberships = await db["teamMembers"].find({"$or": user_query}).to_list(100)
-    team_ids = _object_ids([membership.get("teamId") for membership in memberships])
+    raw_team_ids = [str(membership.get("teamId")) for membership in memberships if membership.get("teamId")]
+    valid_obj_ids = _object_ids(raw_team_ids)
+    all_team_ids = list(set(raw_team_ids + valid_obj_ids))
 
     team_conditions = []
-    if team_ids:
-        team_conditions.append({"_id": {"$in": team_ids}})
+    if all_team_ids:
+        team_conditions.append({"_id": {"$in": all_team_ids}})
     if user_id:
         team_conditions.append({"createdBy": user_id})
         team_conditions.append({"leaderId": user_id})
@@ -210,7 +211,11 @@ async def get_my_hackathons_dashboard(current_user: dict = Depends(with_auth)):
                     {
                         "id": team_id,
                         "name": team.get("teamName"),
-                        "role": memberships_by_team.get(team_id, {}).get("role", "member"),
+                        "role": (
+                            "leader"
+                            if team.get("leaderId") == user_id or team.get("createdBy") == user_id
+                            else memberships_by_team.get(team_id, {}).get("role", "member")
+                        ),
                         "progress": progress_by_team.get(team_id),
                     }
                     if team

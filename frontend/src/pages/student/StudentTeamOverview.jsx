@@ -156,7 +156,14 @@ const StudentTeamOverview = () => {
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="min-w-0">
                                             <h2 className="text-lg font-bold text-slate-900 dark:text-white truncate">{team.name || 'Untitled Team'}</h2>
-                                            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{team.roleInTeam || 'Member'}</p>
+                                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                                                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{team.roleInTeam || 'Member'}</span>
+                                                {team.teamCode && (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 dark:bg-navy-800 px-2 py-0.5 text-[11px] font-mono font-semibold text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-500/20">
+                                                        Code: {team.teamCode}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() => navigate(`/student/teams/${team.id}/workspace`)}

@@ -125,6 +125,7 @@ async def create_team(
 
     team_dict = team_data.model_dump(by_alias=True)
     team_dict["createdBy"] = user_name
+    team_dict["leaderId"] = user_id
     team_dict["createdAt"] = datetime.utcnow()
 
     # Generate unique team code with retry (in case of collision)
@@ -220,11 +221,21 @@ async def get_my_teams(current_user: dict = Depends(with_auth)):
         team["_id"] = str(team["_id"])
         membership = membership_by_id.get(team["_id"], {})
         role = membership.get("role")
-        if not role:
-            role = TeamMemberRole.LEADER.value if (team.get("leaderId") == user_id or team.get("createdBy") == user_id) else TeamMemberRole.MEMBER.value
-        team["myRole"] = role
-        if role != TeamMemberRole.LEADER.value:
-            team["teamCode"] = None
+        is_leader = (
+            str(role).lower() in ["leader", "team lead"]
+            or str(team.get("leaderId") or "") == user_id
+            or str(team.get("createdBy") or "") == user_id
+            or (current_user.get("name") and str(team.get("createdBy") or "").strip().lower() == str(current_user.get("name")).strip().lower())
+        )
+        team["myRole"] = TeamMemberRole.LEADER.value if is_leader else (role or TeamMemberRole.MEMBER.value)
+
+        # Ensure teamCode is always populated and saved if missing
+        if not team.get("teamCode"):
+            new_code = generate_team_invite_code()
+            oid = ObjectId(team["_id"]) if ObjectId.is_valid(team["_id"]) else team["_id"]
+            await teams_collection.update_one({"_id": oid}, {"$set": {"teamCode": new_code}})
+            team["teamCode"] = new_code
+
         team["memberCount"] = len(team.get("members") or []) or await members_collection.count_documents({"teamId": team["_id"]}) or 1
 
         hackathon = None
@@ -589,7 +600,14 @@ async def get_team(team_id: str, current_user: dict = Depends(with_auth)):
 
     user_id = _authenticated_user_id(current_user)
     team_id = str(team["_id"])
-    membership = await get_team_members_collection().find_one({"teamId": team_id, "userId": user_id})
+    members_coll = get_team_members_collection()
+    membership = await members_coll.find_one({
+        "$or": [
+            {"teamId": team_id, "userId": user_id},
+            {"teamId": ObjectId(team_id), "userId": user_id},
+            {"teamId": team_id, "userId": ObjectId(user_id) if ObjectId.is_valid(user_id) else user_id},
+        ]
+    })
     is_assigned_mentor = str(team.get("mentorId") or "") == user_id
     hackathon = None
     hackathon_id = team.get("hackathonId")
@@ -600,12 +618,22 @@ async def get_team(team_id: str, current_user: dict = Depends(with_auth)):
         and hackathon
         and str(hackathon.get("organizerId")) == user_id
     )
-    if not membership and not is_assigned_mentor and not is_hackathon_organizer and current_user.get("role") != "admin":
+    is_leader = (
+        (membership and str(membership.get("role")).lower() in ["leader", "team lead"])
+        or str(team.get("leaderId") or "") == user_id
+        or str(team.get("createdBy") or "") == user_id
+        or (current_user.get("name") and str(team.get("createdBy") or "").strip().lower() == str(current_user.get("name")).strip().lower())
+    )
+    if not membership and not is_assigned_mentor and not is_hackathon_organizer and not is_leader and current_user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to view this team.")
-    if not membership or membership.get("role") != TeamMemberRole.LEADER.value:
-        team["teamCode"] = None
+
+    if not team.get("teamCode"):
+        new_code = generate_team_invite_code()
+        await collection.update_one({"_id": ObjectId(team_id)}, {"$set": {"teamCode": new_code}})
+        team["teamCode"] = new_code
+
     team["_id"] = team_id
-    team["myRole"] = membership.get("role") if membership else None
+    team["myRole"] = TeamMemberRole.LEADER.value if is_leader else (membership.get("role") if membership else TeamMemberRole.MEMBER.value)
     return TeamResponse(**team)
 
 
@@ -616,7 +644,12 @@ async def lookup_team_by_code(
     """Return the real team and roster so a student can review a code before joining."""
     current_user_id = _require_student(current_user)
     db = get_db()
-    team = await db["teams"].find_one({"teamCode": team_code.strip().upper()})
+    code_raw = team_code.strip()
+    team = await db["teams"].find_one({"teamCode": code_raw.upper()})
+    if not team:
+        team = await db["teams"].find_one({"teamCode": {"$regex": f"^{re.escape(code_raw)}$", "$options": "i"}})
+    if not team and ObjectId.is_valid(code_raw):
+        team = await db["teams"].find_one({"_id": ObjectId(code_raw)})
     if not team:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found with the provided code")
 
@@ -633,7 +666,9 @@ async def lookup_team_by_code(
     hackathon = None
     hackathon_id = team.get("hackathonId")
     if hackathon_id and ObjectId.is_valid(str(hackathon_id)):
-        hackathon = await db["hackathons"].find_one({"_id": ObjectId(str(hackathon_id))}, {"maxTeamSize": 1})
+        hackathon = await db["hackathons"].find_one({"$or": [{"_id": ObjectId(str(hackathon_id))}, {"_id": str(hackathon_id)}]}, {"maxTeamSize": 1})
+    elif hackathon_id:
+        hackathon = await db["hackathons"].find_one({"_id": str(hackathon_id)}, {"maxTeamSize": 1})
     if not hackathon:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This team’s hackathon is no longer available.")
     max_size = _team_size_limit(hackathon)
@@ -724,7 +759,12 @@ async def join_team(team_id_or_code: str, current_user: dict = Depends(RequireRo
     db = get_db()
     teams_collection = db["teams"]
 
-    team = await teams_collection.find_one({"teamCode": team_id_or_code.strip().upper()})
+    code_clean = team_id_or_code.strip()
+    team = await teams_collection.find_one({"teamCode": code_clean.upper()})
+    if not team:
+        team = await teams_collection.find_one({"teamCode": {"$regex": f"^{re.escape(code_clean)}$", "$options": "i"}})
+    if not team and ObjectId.is_valid(code_clean):
+        team = await teams_collection.find_one({"_id": ObjectId(code_clean)})
 
     if not team:
         raise HTTPException(
@@ -776,7 +816,9 @@ async def join_team(team_id_or_code: str, current_user: dict = Depends(RequireRo
 
     hackathon = None
     if ObjectId.is_valid(hackathon_id):
-        hackathon = await db["hackathons"].find_one({"_id": ObjectId(hackathon_id)})
+        hackathon = await db["hackathons"].find_one({"$or": [{"_id": ObjectId(str(hackathon_id))}, {"_id": str(hackathon_id)}]})
+    elif hackathon_id:
+        hackathon = await db["hackathons"].find_one({"_id": str(hackathon_id)})
     if not hackathon:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This team’s hackathon is no longer available.")
 

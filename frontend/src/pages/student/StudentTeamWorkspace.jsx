@@ -740,8 +740,15 @@ const StudentTeamWorkspace = () => {
               </div>
 
               <div className="rounded-[22px] border border-[#dbeafe] bg-white p-6 shadow-[0_10px_30px_rgba(37,99,235,0.06)]">
-                <div className="mb-5 flex items-center justify-between gap-3">
-                  <h2 className="text-[28px] font-bold leading-none text-[#1d1a2a]">Team Members</h2>
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-[28px] font-bold leading-none text-[#1d1a2a]">Team Members</h2>
+                    {team?.teamCode && (
+                      <p className="mt-1 text-xs text-slate-500">
+                        Invite Code: <span className="font-mono font-bold text-[#2563eb]">{team.teamCode}</span>
+                      </p>
+                    )}
+                  </div>
                   <button onClick={() => navigate(`/student/teams/${teamId || currentTeam.id || 'members'}/members`)} className="rounded-xl bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#2563eb] transition hover:bg-[#ece4ff]">
                     Manage Team
                   </button>
