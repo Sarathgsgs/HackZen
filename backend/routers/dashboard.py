@@ -146,6 +146,8 @@ async def get_my_hackathons_dashboard(current_user: dict = Depends(with_auth)):
     now = datetime.utcnow()
 
     user_query = [{"userId": user_id}]
+    if ObjectId.is_valid(user_id):
+        user_query.append({"userId": ObjectId(user_id)})
     if user_email:
         user_query.append({"userEmail": user_email})
         user_query.append({"email": user_email})
@@ -153,6 +155,7 @@ async def get_my_hackathons_dashboard(current_user: dict = Depends(with_auth)):
     applications = await db["applications"].find({"$or": user_query}).sort(
         "appliedAt", -1
     ).to_list(100)
+    memberships = await db["teamMembers"].find({"$or": user_query}).to_list(100)
     raw_team_ids = [str(membership.get("teamId")) for membership in memberships if membership.get("teamId")]
     valid_obj_ids = _object_ids(raw_team_ids)
     all_team_ids = list(set(raw_team_ids + valid_obj_ids))
