@@ -858,7 +858,7 @@ async def assign_mentor(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid team ID format"
         )
 
-    team = await teams_collection.find_one({"_id": ObjectId(team_id)})
+    team = await teams_collection.find_one({"$or": [{"_id": ObjectId(team_id)}, {"_id": team_id}]}) if ObjectId.is_valid(team_id) else await teams_collection.find_one({"_id": team_id})
     if not team:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Team not found"
@@ -871,34 +871,66 @@ async def assign_mentor(
             detail="Team already has a mentor assigned",
         )
 
-    # Check if current user is the team leader
+    # Check if current user is the team leader (supports string and ObjectId IDs)
     members_collection = db["teamMembers"]
-    membership = await members_collection.find_one(
-        {"teamId": team_id, "userId": user_id, "role": TeamMemberRole.LEADER.value}
+    membership = await members_collection.find_one({
+        "$or": [
+            {"teamId": team_id, "userId": user_id},
+            {"teamId": ObjectId(team_id), "userId": user_id},
+            {"teamId": team_id, "userId": ObjectId(user_id) if ObjectId.is_valid(user_id) else user_id},
+            {"teamId": ObjectId(team_id), "userId": ObjectId(user_id) if ObjectId.is_valid(user_id) else user_id},
+        ]
+    })
+    is_leader = (
+        (membership and str(membership.get("role", "")).lower() in ["leader", "team lead"])
+        or str(team.get("leaderId") or "") == user_id
+        or str(team.get("createdBy") or "") == user_id
+        or (current_user.get("name") and str(team.get("createdBy") or "").strip().lower() == str(current_user.get("name")).strip().lower())
+        or current_user.get("role") == "admin"
     )
-    if not membership:
+    if not is_leader:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the team leader can assign a mentor",
         )
 
-    # Verify the mentor exists
-    mentor = await db["mentors"].find_one({"userId": mentor_data.mentorId})
+    # Verify the mentor exists across mentors and users collections
+    mentor_query = [
+        {"userId": mentor_data.mentorId},
+        {"_id": mentor_data.mentorId},
+    ]
+    if ObjectId.is_valid(mentor_data.mentorId):
+        mentor_query.append({"_id": ObjectId(mentor_data.mentorId)})
+        mentor_query.append({"userId": ObjectId(mentor_data.mentorId)})
+
+    mentor = await db["mentors"].find_one({"$or": mentor_query})
+    mentor_name = mentor.get("name") if mentor else None
+
+    if not mentor and ObjectId.is_valid(mentor_data.mentorId):
+        mentor_user = await db["users"].find_one({
+            "$or": [{"_id": ObjectId(mentor_data.mentorId)}, {"_id": mentor_data.mentorId}],
+            "role": {"$regex": "^mentor$", "$options": "i"}
+        })
+        if mentor_user:
+            mentor = {
+                "userId": str(mentor_user["_id"]),
+                "name": mentor_user.get("name"),
+                "availability": "Available"
+            }
+            mentor_name = mentor_user.get("name")
+
     if not mentor:
-        try:
-            mentor = await db["mentors"].find_one(
-                {"_id": ObjectId(mentor_data.mentorId)}
-            )
-        except:
-            pass
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentor not found or is not available",
+        )
 
-        if not mentor:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Mentor not found or is not available",
-            )
+    mentor_user_id = str(mentor.get("userId") or mentor.get("_id"))
+    if not mentor_name and ObjectId.is_valid(mentor_user_id):
+        u = await db["users"].find_one({"_id": ObjectId(mentor_user_id)}, {"name": 1})
+        if u:
+            mentor_name = u.get("name")
 
-    mentor_user_id = str(mentor["userId"])
     if str(mentor.get("availability") or "Available").lower() != "available":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This mentor is not currently available.")
 
@@ -912,15 +944,16 @@ async def assign_mentor(
         }.items()
         if isinstance(value, str) and value.strip()
     }
-    # This endpoint assigns a mentor immediately; keep the submitted request details
-    # with that assignment so the student status page reflects persisted data.
+
+    target_filter = {
+        "_id": ObjectId(team_id) if ObjectId.is_valid(team_id) else team_id,
+        "$or": [{"mentorId": {"$exists": False}}, {"mentorId": None}, {"mentorId": ""}],
+    }
     update_result = await teams_collection.update_one(
-        {
-            "_id": ObjectId(team_id),
-            "$or": [{"mentorId": {"$exists": False}}, {"mentorId": None}],
-        },
+        target_filter,
         {"$set": {
             "mentorId": mentor_user_id,
+            "mentorName": mentor_name or "Mentor",
             "mentorAssignedAt": assigned_at,
             "mentorAssignedBy": user_id,
             "mentorRequest": request_details,
@@ -929,7 +962,36 @@ async def assign_mentor(
     if not getattr(update_result, "modified_count", 0):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This team already has a mentor assignment.")
 
-    updated_team = await teams_collection.find_one({"_id": ObjectId(team_id)})
+    # Record in mentorRequests collection and inbox for mentor dashboard
+    try:
+        await db["mentorRequests"].insert_one({
+            "teamId": team_id,
+            "teamName": team.get("teamName", "Team"),
+            "mentorId": mentor_user_id,
+            "mentorName": mentor_name or "Mentor",
+            "leaderId": user_id,
+            "leaderName": current_user.get("name") or "Team Lead",
+            "focusArea": mentor_data.focusArea or "",
+            "message": mentor_data.guidanceRequest or "",
+            "description": mentor_data.guidanceRequest or "",
+            "preferredTimeWindow": mentor_data.preferredTimeWindow or "",
+            "status": "assigned",
+            "createdAt": assigned_at,
+            "updatedAt": assigned_at,
+        })
+        await db["inbox"].insert_one({
+            "userId": mentor_user_id,
+            "type": "mentor_request",
+            "title": f"New Mentorship Request from {team.get('teamName', 'Team')}",
+            "message": f"Team '{team.get('teamName')}' requested your mentorship: {mentor_data.guidanceRequest or 'Review our project architecture'}",
+            "teamId": team_id,
+            "createdAt": assigned_at,
+            "read": False,
+        })
+    except Exception:
+        pass
+
+    updated_team = await teams_collection.find_one({"_id": ObjectId(team_id)}) if ObjectId.is_valid(team_id) else await teams_collection.find_one({"_id": team_id})
     updated_team["_id"] = str(updated_team["_id"])
     return TeamResponse(**updated_team)
 
