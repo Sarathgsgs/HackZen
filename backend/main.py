@@ -92,6 +92,90 @@ async def lifespan(app: FastAPI):
                 }
             )
 
+            # Clean up any leftover seeded mock applications and memberships for non-demo students
+            try:
+                demo_student_emails = [
+                    "msailesh@gmail.com",
+                    "sailesh.m@vitstudent.ac.in",
+                    "sarath.g@abccollege.edu",
+                    "gsgssarath2005@gmail.com",
+                ]
+                non_demo_students = await MongoDB.db["users"].find({
+                    "role": {"$in": ["student", "Student", "STUDENT"]},
+                    "email": {"$nin": demo_student_emails}
+                }).to_list(300)
+
+                mock_hackathons = [
+                    "65e060000000000000000001",
+                    "65e060000000000000000002",
+                    "65e060000000000000000003",
+                    ObjectId("65e060000000000000000001"),
+                    ObjectId("65e060000000000000000002"),
+                    ObjectId("65e060000000000000000003"),
+                ]
+                mock_team_ids = [
+                    "65e070000000000000000001",
+                    "65e070000000000000000002",
+                    "65e070000000000000000003",
+                    ObjectId("65e070000000000000000001"),
+                    ObjectId("65e070000000000000000002"),
+                    ObjectId("65e070000000000000000003"),
+                ]
+                mock_motivations = [
+                    "Developing secure zero-knowledge transaction validator.",
+                    "Implementing quantized computer vision models for low-power edge medical devices.",
+                    "Building real-time smart grid power monitoring dashboard.",
+                ]
+                mock_teams = ["FinTech Velocity", "HealthAI NeuralCare", "EcoGrid Solvers"]
+
+                for student in non_demo_students:
+                    s_id = str(student["_id"])
+                    s_email = student.get("email")
+                    u_queries = [{"userId": s_id}]
+                    if ObjectId.is_valid(s_id):
+                        u_queries.append({"userId": ObjectId(s_id)})
+                    if s_email:
+                        u_queries.append({"userEmail": s_email})
+                        u_queries.append({"email": s_email})
+
+                    await MongoDB.db["applications"].delete_many({
+                        "$and": [
+                            {"$or": u_queries},
+                            {
+                                "$or": [
+                                    {"motivation": {"$in": mock_motivations}},
+                                    {"teamName": {"$in": mock_teams}},
+                                    {"hackathonId": {"$in": mock_hackathons}},
+                                ]
+                            }
+                        ]
+                    })
+                    await MongoDB.db["teamMembers"].delete_many({
+                        "$and": [
+                            {"$or": u_queries},
+                            {"teamId": {"$in": mock_team_ids}}
+                        ]
+                    })
+                    await MongoDB.db["certificates"].delete_many({
+                        "$and": [
+                            {"$or": [{"userId": s_id}, {"recipientEmail": s_email}, {"email": s_email}]},
+                            {
+                                "$or": [
+                                    {"validationId": {"$regex": "^CERT-PRO-2026-(FT|HC)"}},
+                                    {"eventTitle": {"$in": ["Global AI Pioneer Hackathon 2025", "National Cloud & Microservices Summit"]}}
+                                ]
+                            }
+                        ]
+                    })
+                    await MongoDB.db["submissions"].delete_many({
+                        "$and": [
+                            {"$or": [{"userId": s_id}, {"teamId": {"$in": mock_team_ids}}]},
+                            {"project": {"$in": ["NeuralPay - Real-Time Fraud Shield", "MedVision Edge AI"]}}
+                        ]
+                    })
+            except Exception as startup_clean_err:
+                print(f"[Lifespan Cleanup Notice]: {startup_clean_err}")
+
             # 2. Find or ensure student user Aadhi
             aadhi_user = await MongoDB.db["users"].find_one({
                 "$or": [

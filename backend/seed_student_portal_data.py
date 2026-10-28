@@ -28,15 +28,10 @@ STUDENT_EMAILS = [
 async def seed_student_data_direct(db):
     print(f"[Seeder] Running seed_student_data_direct on database: {db.name}")
 
-    # 1. Fetch student users
+    # 1. Fetch student users (strictly designated demo/seed accounts only)
     students = await db["users"].find({
-        "$or": [
-            {"role": {"$in": ["student", "Student", "STUDENT"]}},
-            {"email": {"$in": STUDENT_EMAILS}},
-            {"email": {"$regex": "sailesh|sarath", "$options": "i"}},
-            {"name": {"$regex": "Sailesh", "$options": "i"}}
-        ]
-    }).to_list(50)
+        "email": {"$in": STUDENT_EMAILS}
+    }).to_list(10)
 
     # Ensure key student accounts exist
     known_seed_users = [

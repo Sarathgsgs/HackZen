@@ -192,6 +192,71 @@ async def get_my_hackathons_dashboard(current_user: dict = Depends(with_auth)):
             user_query.append({"userEmail": user_email})
             user_query.append({"email": user_email})
 
+        # Ensure non-demo students (like Aadhi) do not have mock seed data polluting their account
+        demo_emails = {
+            "msailesh@gmail.com",
+            "sailesh.m@vitstudent.ac.in",
+            "sarath.g@abccollege.edu",
+            "gsgssarath2005@gmail.com",
+        }
+        if user_email and user_email.lower() not in demo_emails and user_query:
+            try:
+                mock_hackathons = [
+                    "65e060000000000000000001",
+                    "65e060000000000000000002",
+                    "65e060000000000000000003",
+                ]
+                mock_hack_ids = mock_hackathons + _object_ids(mock_hackathons)
+                mock_team_ids = [
+                    "65e070000000000000000001",
+                    "65e070000000000000000002",
+                    "65e070000000000000000003",
+                ] + _object_ids(["65e070000000000000000001", "65e070000000000000000002", "65e070000000000000000003"])
+                mock_motivations = [
+                    "Developing secure zero-knowledge transaction validator.",
+                    "Implementing quantized computer vision models for low-power edge medical devices.",
+                    "Building real-time smart grid power monitoring dashboard.",
+                ]
+                mock_teams = ["FinTech Velocity", "HealthAI NeuralCare", "EcoGrid Solvers"]
+
+                await db["applications"].delete_many({
+                    "$and": [
+                        {"$or": user_query},
+                        {
+                            "$or": [
+                                {"motivation": {"$in": mock_motivations}},
+                                {"teamName": {"$in": mock_teams}},
+                                {"hackathonId": {"$in": mock_hack_ids}},
+                            ]
+                        }
+                    ]
+                })
+                await db["teamMembers"].delete_many({
+                    "$and": [
+                        {"$or": user_query},
+                        {"teamId": {"$in": mock_team_ids}}
+                    ]
+                })
+                await db["certificates"].delete_many({
+                    "$and": [
+                        {"$or": user_query + ([{"recipientEmail": user_email}] if user_email else [])},
+                        {
+                            "$or": [
+                                {"validationId": {"$regex": "^CERT-PRO-2026-(FT|HC)"}},
+                                {"eventTitle": {"$in": ["Global AI Pioneer Hackathon 2025", "National Cloud & Microservices Summit"]}}
+                            ]
+                        }
+                    ]
+                })
+                await db["submissions"].delete_many({
+                    "$and": [
+                        {"$or": user_query + [{"teamId": {"$in": mock_team_ids}}]},
+                        {"project": {"$in": ["NeuralPay - Real-Time Fraud Shield", "MedVision Edge AI"]}}
+                    ]
+                })
+            except Exception as cleanup_err:
+                print(f"[Student Dashboard Cleanup Notice]: {cleanup_err}")
+
         applications = []
         memberships = []
         if user_query:
@@ -427,7 +492,7 @@ async def get_my_hackathons_dashboard(current_user: dict = Depends(with_auth)):
         return {
             "student": {"name": current_user.get("name", "Student")},
             "metrics": {
-                "registeredHackathons": len(registered_hackathons) if registered_hackathons else len(applications),
+                "registeredHackathons": len(registered_hackathons),
                 "activeTeams": len(active_teams),
                 "submissions": submissions_count,
                 "certificates": certificates_count,

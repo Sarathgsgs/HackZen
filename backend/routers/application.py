@@ -315,8 +315,34 @@ async def get_my_applications(current_user: dict = Depends(with_auth)):
     cursor = collection.find({"userId": current_user_id}).sort("appliedAt", -1)
     apps = await cursor.to_list(100)
 
+    user_email = (current_user.get("email") or "").lower()
+    demo_emails = {
+        "msailesh@gmail.com",
+        "sailesh.m@vitstudent.ac.in",
+        "sarath.g@abccollege.edu",
+        "gsgssarath2005@gmail.com",
+    }
+    mock_motivations = {
+        "Developing secure zero-knowledge transaction validator.",
+        "Implementing quantized computer vision models for low-power edge medical devices.",
+        "Building real-time smart grid power monitoring dashboard.",
+    }
+    mock_teams = {"FinTech Velocity", "HealthAI NeuralCare", "EcoGrid Solvers"}
+    mock_hackathons = {
+        "65e060000000000000000001",
+        "65e060000000000000000002",
+        "65e060000000000000000003",
+    }
+
     results = []
     for app in apps:
+        if user_email and user_email not in demo_emails:
+            if (
+                app.get("motivation") in mock_motivations
+                or app.get("teamName") in mock_teams
+                or str(app.get("hackathonId")) in mock_hackathons
+            ):
+                continue
         app["_id"] = str(app["_id"])
         if not app.get("appliedAt"):
             app["appliedAt"] = app.get("createdAt") or datetime.utcnow()
